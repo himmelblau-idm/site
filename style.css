@@ -16,6 +16,9 @@ body {
 }
 
 header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
     background: #00457c; /* Azure blue */
     color: #fff;
     text-align: center;
@@ -90,4 +93,17 @@ nav a {
 nav a:hover {
     color: #0080ff; /* Lighter blue on hover for interaction feedback */
     text-decoration: underline; /* Underline on hover for clarity */
+}
+
+.home-icon {
+    margin-right: 20px; /* Adds some space between the icon and the title */
+    width: 50px; /* Set the width of the icon */
+    height: 50px; /* Set the height of the icon */
+    padding: 10px;
+}
+
+.home-icon img {
+    display: block; /* Removes bottom space/margin from image */
+    width: 100%; /* Makes the image fill the container */
+    height: auto; /* Keeps the aspect ratio of the image */
 }

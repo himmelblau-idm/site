@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Himmelblau: Azure Entra ID Authentication on Linux</title>
+    <style>
+        /* Basic reset */
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
+        body, h1, h2, p {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        #video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -100;
+            object-fit: cover;
+            object-position: top;
+        }
+        header {
+            color: #fff;
+            padding: 20px 10%;
+            text-align: center;
+        }
+        nav {
+            background: rgba(51, 51, 51, 0.8); /* Semi-transparent black */
+            text-align: center;
+            padding: 10px 0;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline;
+        }
+        nav ul li a {
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+        }
+        nav ul li a:hover {
+            background-color: #555;
+        }
+        section {
+            padding: 20px 10%;
+            background: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+            margin: 20px 0;
+            border-bottom: 2px solid #eee;
+        }
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background: rgba(51, 51, 51, 0.8); /* Semi-transparent black */
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop id="video-background">
+        <source src="clouds.mp4" type="video/mp4">
+    </video>
+    <header>
+	<img src="tux.png" alt="Himmelblau Logo" style="height: 100px;">
+        <h1>Himmelblau</h1>
+        <p>Integrating Azure Entra ID Authentication Seamlessly with Linux</p>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#documentation">Documentation</a></li>
+            <li><a href="#community">Community</a></li>
+            <li><a href="#blog">Blog</a></li>
+            <li><a href="#about">About</a></li>
+        </ul>
+    </nav>
+    <section id="installation">
+        <h2>Installation Guides</h2>
+	<p>Begin by downloading the latest release of Himmelblau to ensure you have the most updated features and security enhancements.</p>
+    <p><a href="https://github.com/himmelblau-idm/himmelblau/releases/latest" target="_blank">Download the latest release here.</a></p>
+    <p>After downloading, select your Linux distribution below to view the detailed step-by-step installation guide:</p>
+        <ul>
+            <li><a href="deb.html">Debian/Ubuntu</a></li>
+            <li><a href="rocky.html">Red Hat/Rocky Linux/Fedora</a></li>
+            <li><a href="suse.html">SUSE/openSUSE</a></li>
+        </ul>
+    </section>
+    <section id="documentation">
+        <h2>Documentation</h2>
+	<p>Explore detailed documentation on configuring, using, and troubleshooting Himmelblau. Our comprehensive guide covers all aspects necessary to integrate Himmelblau seamlessly with your Linux environment.</p>
+	<p><a href="docs.html">Read the full Himmelblau documentation here.</a></p>
+    </section>
+    <section id="community">
+        <h2>Community</h2>
+	<p>Join the community to contribute to Himmelblau, discuss issues, and share your experiences. Connect with other users and developers on our dedicated Matrix channel.</p>
+	<p><a href="https://app.element.io/#/room/#himmelblau:matrix.org" target="_blank">Join our Matrix channel on Element.io</a></p>
+    </section>
+    <section id="blog">
+        <h2>Latest News</h2>
+        <p>Stay updated with the latest developments, feature releases, and community events.</p>
+    </section>
+    <section id="about">
+        <h2>About Himmelblau</h2>
+        <p>Learn about the origins of Himmelblau and the team behind it.</p>
+	<p><a href="about.html">Read more about Himmelblau</a></p>
+    </section>
+    <footer>
+        <p>&copy; 2025 Himmelblau Project. All rights reserved.</p>
+    </footer>
+</body>
+</html>

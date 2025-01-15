@@ -1,0 +1,79 @@
+/* style.css */
+body, h1, h2, h3, h4, p, ol, ul, li, pre {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    line-height: 1.6;
+    color: #333;
+    padding: 20px;
+    background: #f4f4f4; /* Light grey background */
+    position: absolute;
+    left: 20%;
+    right: 20%;
+}
+
+header {
+    background: #00457c; /* Azure blue */
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    width: 100%;
+}
+
+section {
+    background: white;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+footer {
+    text-align: center;
+    padding: 10px 0;
+    background: #333;
+    color: white;
+}
+
+.document {
+    width: 100%; /* Allows the document to fill the flex container */
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+
+/* Style for the navigation sidebar */
+nav {
+    background: #f0f2f5; /* Lighter grey background for contrast */
+    padding: 20px;
+    width: 120px;
+    height: 100vh; /* Full viewport height */
+    overflow-y: auto; /* Allows scrolling if the content is too long */
+    position: fixed; /* Fixed position */
+    left: 0; /* Align to the left */
+    top: 0; /* Align to the top */
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1); /* Subtle shadow on the right */
+}
+
+nav ul {
+    list-style: none; /* Remove default list styling */
+    padding: 0;
+}
+
+nav li {
+    margin-bottom: 10px; /* Space between items */
+}
+
+nav a {
+    color: #00457c; /* Theme blue for text */
+    text-decoration: none; /* No underlines */
+    font-size: 16px; /* Larger font for readability */
+    transition: color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+nav a:hover {
+    color: #0080ff; /* Lighter blue on hover for interaction feedback */
+    text-decoration: underline; /* Underline on hover for clarity */
+}

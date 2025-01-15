@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Install Himmelblau on SUSE/OpenSUSE</title>
+</head>
+<body>
+    <header>
+        <h1>Install Himmelblau on SUSE/OpenSUSE</h1>
+    </header>
+    <div class="document">
+    <section>
+        <h2>Pre-Installation Requirements</h2>
+        <p>Ensure the system is updated and you have administrative access.</p>
+        <pre>sudo zypper update</pre>
+    </section>
+    <section>
+        <h2>Installation Steps</h2>
+        <ol>
+            <li>Download the Himmelblau RPMs for SUSE from the official repository.</li>
+            <li>Install the packages using <code>zypper</code>:</li>
+            <pre>sudo zypper install ./himmelblau-0.8.2-1.x86_64-sle15sp6.rpm \
+./himmelblau-sshd-config-0.8.2-1.x86_64-sle15sp6.rpm \
+./himmelblau-sso-0.8.2-1.x86_64-sle15sp6.rpm \
+./nss-himmelblau-0.8.2-1.x86_64-sle15sp6.rpm \
+./pam-himmelblau-0.8.2-1.x86_64-sle15sp6.rpm</pre>
+        </ol>
+    </section>
+    <footer>
+        <p>&copy; 2025 Himmelblau Project. All rights reserved.</p>
+    </footer>
+    </div>
+</body>
+</html>

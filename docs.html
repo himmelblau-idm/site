@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Himmelblau Documentation</title>
+</head>
+<body>
+    <header>
+        <h1>Himmelblau Documentation</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#introduction">Introduction</a></li>
+	    <li><a href="#integration">Integration</a></li>
+	    <li><a href="#ecosystem">Ecosystem</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+	    <li><a href="#workflows">Workflows</a></li>
+	    <li><a href="#registration">Registration</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#configuration">Configuration</a></li>
+            <li><a href="#troubleshooting">Troubleshooting</a></li>
+        </ul>
+    </nav>
+    <div class="document">
+        <section id="introduction">
+            <h2>Introduction to Himmelblau</h2>
+<h4 id="toc_0.1.1">What is Himmelblau?</h4>
+
+<p>Himmelblau is an open-source project designed to integrate Azure Entra ID (formerly Azure Active Directory) authentication seamlessly with Linux environments. By enabling features like single sign-on (SSO), multi-factor authentication (MFA), and secure token handling, Himmelblau allows organizations to bridge the gap between Microsoft’s enterprise identity solutions and Linux systems. It serves as a middleware layer, providing tools for authentication, device registration, and identity management across various Linux distributions.</p>
+
+<p>The name &#39;Himmelblau&#39; is derived from German, meaning &#39;Sky blue&#39;, or &#39;Azure blue,&#39; a nod to Microsoft Azure, which the project is designed to integrate with. This name reflects the project&#39;s purpose of bridging Linux systems with Azure Entra ID authentication. Himmelblau originated as an open-source initiative aimed at addressing the gap in identity integration between Linux environments and Microsoft&#39;s enterprise cloud solutions.</p>
+
+<p>Himmelblau leverages protocols such as OAuth2 and Kerberos to deliver secure and efficient authentication mechanisms. The project’s modular and lightweight design ensures it can scale across small deployments or large enterprise environments, making it suitable for diverse use cases.</p>
+
+<h4 id="toc_0.1.2">Why Integrate Azure Entra ID with Linux?</h4>
+
+<p>Modern enterprises often operate in hybrid environments that combine Windows and Linux systems. Azure Entra ID is a cornerstone of Microsoft’s cloud-based identity and access management strategy, providing centralized control over authentication, access policies, and user management. However, native Linux support for Azure Entra ID has historically been limited, creating challenges for organizations aiming to unify their IT infrastructure.</p>
+
+<h5 id="toc_0.1.2.4">Key Benefits of Himmelblau Integration:</h5>
+
+<ol dir="auto">
+<li><strong>Unified Identity Management:</strong> Himmelblau enables Linux systems to use the same credentials as Windows systems, reducing administrative overhead and improving user convenience.</li>
+<li><strong>Enhanced Security:</strong> By supporting Azure Entra ID’s MFA options—such as FIDO2, SMS, and app-based authentication—Himmelblau enhances login security.</li>
+<li><strong>Single Sign-On (SSO):</strong> Himmelblau’s integration with the Siemens linux-entra-sso framework ensures seamless SSO for browser-based applications, boosting productivity.</li>
+<li><strong>Compliance and Auditability:</strong> Centralized identity management simplifies compliance with security policies and audit requirements, making it easier to meet regulatory standards.</li>
+<li><strong>Scalability:</strong> Himmelblau’s modular architecture and compatibility with multiple Linux distributions make it ideal for both small and large-scale deployments.</li>
+</ol>
+
+<h4 id="toc_0.1.3">Himmelblau’s Role in the Open-Source Ecosystem</h4>
+
+<p>Himmelblau stands out as an open-source alternative to proprietary identity integration solutions. By providing transparency and flexibility, it empowers organizations to:</p>
+
+<ul dir="auto">
+<li>Customize authentication workflows to suit their needs.</li>
+<li>Contribute to the project’s development, fostering a collaborative community.</li>
+<li>Avoid vendor lock-in, a common concern with proprietary tools.</li>
+</ul>
+
+<h4 id="toc_0.1.4">Summary</h4>
+
+<p>Himmelblau is a transformative tool that bridges the gap between Azure Entra ID and Linux environments. By supporting secure, scalable, and seamless authentication workflows, it addresses the challenges of integrating diverse systems into a unified identity framework. This chapter introduced Himmelblau’s purpose, its advantages, and its importance in the open-source community. The next chapter will delve into the broader challenges of integrating Azure Entra ID with Linux systems and how Himmelblau mitigates these issues.</p>
+        </section>
+	<section id="integration">
+		<h2>Azure Entra ID and Linux Integration Challenges</h2>
+
+<h4 id="toc_0.2.1">Overview of Authentication Protocols</h4>
+
+<p>Himmelblau uses OAuth2 as the primary protocol for authentication, leveraging Microsoft’s MS-OAPX and OAPXBC extensions. These extensions ensure secure and seamless integration with Azure Entra ID, providing robust support for modern authentication workflows.</p>
+
+<h4 id="toc_0.2.2">Transitioning from On-Premises AD to Azure Entra ID</h4>
+
+<p>For organizations migrating Linux systems from on-premises Active Directory (AD) to Azure Entra ID, the transition can be challenging, particularly with UID and GID mismatches. These discrepancies often arise due to differences in ID mapping between traditional tools like Winbind or SSSD and Himmelblau&#39;s default mapping strategies.</p>
+
+<h5 id="toc_0.2.2.4">UID/GID Mismatch Issues</h5>
+
+<ul dir="auto">
+<li><strong>Cause:</strong> On-prem AD environments typically use either fixed UID/GID values from an Active Directory scheme extension or dynamically generated values using various ID mapping techniques from Winbind and SSSD. Himmelblau, however, generates UID/GID values dynamically based on its internal mapping logic.</li>
+<li><strong>Impact:</strong> File ownerships and permissions may break, leading to potential access issues and administrative overhead.</li>
+</ul>
+
+<h5 id="toc_0.2.2.4">Workaround: SSSD for ID Mapping</h5>
+
+<p>To mitigate UID/GID mismatch issues, organizations can continue using the SSSD NSS module for UID/GID mapping while utilizing Himmelblau solely for authentication. This hybrid approach allows:</p>
+
+<ol dir="auto">
+<li>Consistent UID/GID values by fetching them from the on-prem AD schema.</li>
+<li>Modern OAuth2-based authentication through Himmelblau.</li>
+</ol>
+
+<p><strong>Configuration Example:</strong></p>
+
+<ol dir="auto">
+<li><p>Configure SSSD:</p>
+
+<pre><code class="language-bash">[sssd]
+domains = example.org
+
+[domain/example.org]
+id_provider = ad
+ldap_id_mapping = false
+</code></pre></li>
+<li><p>Configure NSS:</p>
+
+<pre><code class="language-bash">passwd:     files systemd sss
+group:      files systemd sss
+shadow:     files sss
+</code></pre></li>
+<li><p>Use Himmelblau for Authentication:
+Ensure Himmelblau is configured in the PAM stack for <code>auth</code> , <code>account</code>, and <code>session</code> while disabling its NSS module.</p></li>
+</ol>
+
+<h5 id="toc_0.2.2.4">Future Improvements for ID Mapping</h5>
+
+<p>To address these challenges more seamlessly, Himmelblau plans to:</p>
+
+<ul dir="auto">
+<li>Support synchronization of UID/GID attributes directly from Azure Entra ID using synced Active Directory extensions.</li>
+<li>Develop enhanced ID mapping logic to maintain consistency across environments.</li>
+</ul>
+
+<h4 id="toc_0.2.3">Summary</h4>
+
+<p>Integrating Linux systems with Azure Entra ID introduces unique challenges, particularly when transitioning from on-prem AD environments. By using OAuth2 with MS-OAPX/OAPXBC extensions for authentication and adopting workarounds like SSSD for ID mapping, organizations can achieve a smoother transition. Himmelblau’s future enhancements promise to further simplify these processes, ensuring consistent and secure identity management across hybrid infrastructures.</p>
+
+
+	</section>
+	<section id="ecosystem">
+		<h2>The Himmelblau Ecosystem</h2>
+
+<h4 id="toc_0.3.1">Core Features and Benefits</h4>
+
+<p>Himmelblau provides a comprehensive suite of tools designed to integrate Azure Entra ID authentication into Linux environments. By leveraging open standards and implementing advanced features, it bridges the gap between Linux systems and Microsoft’s enterprise identity solutions. Below are the key features and benefits that define the Himmelblau ecosystem.</p>
+
+<h5 id="toc_0.3.1.4">1. <strong>Azure Entra ID Integration</strong></h5>
+
+<p>Himmelblau seamlessly integrates with Azure Entra ID, enabling Linux systems to utilize Azure’s robust identity and access management framework. This includes:</p>
+
+<ul dir="auto">
+<li>Multi-Factor Authentication (MFA) with app-based prompts, FIDO2 keys, and SMS codes.</li>
+<li>Secure token exchange through OAuth2 flows.</li>
+<li>Device registration, with future plans for compliance enforcement.</li>
+</ul>
+
+<h5 id="toc_0.3.1.4">2. <strong>Single Sign-On (SSO)</strong></h5>
+
+<p>By incorporating the Siemens linux-entra-sso framework, Himmelblau ensures a consistent and secure SSO experience for browser-based applications. This functionality simplifies user workflows and boosts productivity by reducing the need for repeated logins.</p>
+
+<h5 id="toc_0.3.1.4">3. <strong>Support for Kerberos Authentication</strong></h5>
+
+<p>Himmelblau extends Azure Entra ID’s Kerberos capabilities to Linux environments. It retrieves and caches cloud-based Ticket Granting Tickets (TGTs) from Azure’s KDC, supporting both cloud and hybrid setups. This functionality ensures compatibility with existing Kerberos-based applications and workflows.</p>
+
+<h5 id="toc_0.3.1.4">4. <strong>Modular Design</strong></h5>
+
+<p>The Himmelblau ecosystem is designed with modularity in mind, allowing administrators to enable or disable features based on organizational needs. This flexibility ensures that Himmelblau can scale from small deployments to large enterprise environments.</p>
+
+<h5 id="toc_0.3.1.4">5. <strong>Enhanced Security</strong></h5>
+
+<p>Himmelblau incorporates features like encrypted token storage, PAM integration, and support for secure device authentication. These measures help organizations meet compliance requirements and protect sensitive data.</p>
+
+<h5 id="toc_0.3.1.4">6. <strong>Open-Source Flexibility</strong></h5>
+
+<p>As an open-source project, Himmelblau empowers organizations to:</p>
+
+<ul dir="auto">
+<li>Customize features to fit their unique requirements.</li>
+<li>Contribute to the codebase and shape the project’s development.</li>
+<li>Avoid vendor lock-in, ensuring long-term flexibility and cost savings.</li>
+</ul>
+
+<h4 id="toc_0.3.2">Supported Linux Distributions</h4>
+
+<p>Himmelblau is compatible with a wide range of Linux distributions, including enterprise-grade and community-supported versions. Current supported distributions include:</p>
+
+<ul dir="auto">
+<li><strong>Enterprise Distributions:</strong> SUSE Linux Enterprise, Red Hat Enterprise Linux, Rocky Linux.</li>
+<li><strong>Community Distributions:</strong> Ubuntu, Debian, Fedora, and openSUSE.</li>
+</ul>
+
+<p>This extensive compatibility ensures that organizations can adopt Himmelblau regardless of their Linux environment.</p>
+
+<h4 id="toc_0.3.3">Interoperability with Microsoft Services</h4>
+
+<p>Himmelblau’s design prioritizes seamless interaction with Microsoft’s ecosystem, enabling Linux clients to access:</p>
+
+<ul dir="auto">
+<li>Microsoft 365 services.</li>
+<li>Azure-based applications and resources.</li>
+<li>On-premises systems configured for Azure AD hybrid setups.</li>
+</ul>
+
+<p>This interoperability allows organizations to maintain consistent identity management across their entire infrastructure, regardless of the underlying operating system.</p>
+
+<h4 id="toc_0.3.4">Summary</h4>
+
+<p>The Himmelblau ecosystem represents a powerful solution for integrating Azure Entra ID with Linux environments. Its robust feature set, extensive distribution support, and open-source foundation make it a versatile tool for organizations of all sizes. The next chapter will explore the technical architecture and components that make Himmelblau such an effective bridge between these two ecosystems.</p>
+
+	</section>
+        <section id="architecture">
+            <h2>Understanding Himmelblau Architecture</h2>
+
+<h4 id="toc_0.4.1">Key Components of Himmelblau</h4>
+
+<p>Himmelblau’s architecture is designed to seamlessly integrate Linux systems with Azure Entra ID, leveraging a modular and scalable framework. This chapter explores its core components and their roles in achieving secure and efficient authentication.</p>
+
+<h5 id="toc_0.4.1.4">1. Authentication Daemon (<code>himmelblaud</code>)</h5>
+
+<p>The <code>himmelblaud</code> daemon is the central component responsible for handling authentication requests and interacting directly with Azure Entra ID. Key functionalities include:</p>
+
+<ul dir="auto">
+<li><p><strong>User Authentication:</strong> Processes login attempts and validates credentials against Azure Entra ID.</p></li>
+<li><p><strong>OAuth2 Flows:</strong> Initiates authentication and token exchanges with Azure Entra ID, passing tokens to the Himmelblau Broker via a secure socket.</p></li>
+<li><p><strong>Token Management:</strong> Manages the secure storage, caching, and renewal of authentication tokens.</p></li>
+<li><p><strong>Integration with PAM and NSS:</strong> Supports Pluggable Authentication Modules (PAM) for system-level authentication and integrates with NSS to provide consistent user and group information across the system.</p></li>
+</ul>
+
+<h5 id="toc_0.4.1.4">2. <strong>Himmelblau Broker</strong></h5>
+
+<p>The Himmelblau Broker serves as a middleware layer, facilitating communication between Linux applications and Azure Entra ID. Key functions include:</p>
+
+<ul dir="auto">
+<li><p><strong>DBus Integration for SSO:</strong> Exposes a DBus interface for seamless interaction with browser and application plugins.</p></li>
+<li><p><strong>Socket-Based Communication:</strong> Receives OAuth2 tokens and other data from the <code>himmelblaud</code> daemon via a secure socket for further processing.</p></li>
+</ul>
+
+<h5 id="toc_0.4.1.4">3. <strong>Configuration Management</strong></h5>
+
+<p>Himmelblau’s configuration is managed through the <code>/etc/himmelblau/himmelblau.conf</code> file. Key elements include:</p>
+
+<ul dir="auto">
+<li>Domain and tenant configuration.</li>
+<li>Debugging and logging options.</li>
+<li>User and group mapping settings.</li>
+</ul>
+
+<p>Example configuration:</p>
+
+<pre><code class="language-ini">[global]
+domains = example.com
+pam_allow_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd1
+</code></pre>
+
+<h5 id="toc_0.4.1.4">4. <strong>Kerberos Integration</strong></h5>
+
+<p>Himmelblau extends Kerberos functionality to Azure Entra ID by acting as a Kerberos client. It retrieves and caches Ticket Granting Tickets (TGTs) from Azure Entra ID’s cloud-based KDC, enabling:</p>
+
+<ul dir="auto">
+<li>Secure, token-based access to resources.</li>
+<li>Support for hybrid scenarios involving on-premises Active Directory.</li>
+</ul>
+
+<p>Example Kerberos configuration:</p>
+
+<pre><code class="language-ini">[realms]
+KERBEROS.MICROSOFTONLINE.COM = {
+    kdc = https://login.microsoftonline.com/common/kerberos
+}
+
+[libdefaults]
+default_ccache_name = DIR:/tmp/krb5cc_%{uid}
+</code></pre>
+
+<h5 id="toc_0.4.1.4">5. Support Services (<code>himmelblaud-tasks</code>)</h5>
+
+<p>The <code>himmelblaud-tasks</code> service handles essential background operations, including:</p>
+
+<ul dir="auto">
+<li><strong>Kerberos Flows:</strong> Manages Kerberos ticket retrieval, caching, and renewal.</li>
+<li><strong>Startup Script Execution:</strong> Executes scripts required during system initialization.</li>
+<li><strong>Home Directory Creation:</strong> Ensures authenticated users have properly initialized home directories.</li>
+</ul>
+
+<h4 id="toc_0.4.2">Scalability and Modularity</h4>
+
+<p>Himmelblau’s modular architecture ensures it can adapt to various organizational needs. Administrators can enable or disable components depending on the deployment scenario, ensuring optimal resource usage.</p>
+
+<h5 id="toc_0.4.2.4">Deployment Scenarios</h5>
+
+<ul dir="auto">
+<li><strong>Small Deployments:</strong> Lightweight installations with minimal configurations.</li>
+<li><strong>Enterprise Deployments:</strong> Scalable setups with Kerberos integration, hybrid configurations, and extensive logging for compliance.</li>
+</ul>
+
+<h4 id="toc_0.4.3">Summary</h4>
+
+<p>Himmelblau’s architecture is built to bridge the gap between Azure Entra ID and Linux systems. By combining modular components, robust token management, and seamless Kerberos integration, Himmelblau provides a scalable and secure authentication framework. The next chapter will explore how these components interact in real-world deployment scenarios.</p>
+
+        </section>
+	<section id="workflows">
+		<h2>Authentication Workflows</h2>
+
+<h4 id="toc_0.5.1">Overview</h4>
+
+<p>Himmelblau provides seamless authentication workflows that bridge the gap between Linux systems and Azure Entra ID. By leveraging protocols like OAuth2 and Kerberos, it ensures secure and efficient user authentication, supports single sign-on (SSO), and integrates with multi-factor authentication (MFA) mechanisms. This chapter outlines the main authentication workflows in Himmelblau, highlighting the steps involved and the components responsible for each.</p>
+
+<h4 id="toc_0.5.2">OAuth2 Authentication Workflow</h4>
+
+<p>Himmelblau’s OAuth2-based authentication enables Linux systems to interact securely with Azure Entra ID. The workflow involves the following steps:</p>
+
+<ol dir="auto">
+<li><strong>User Login Initiation:</strong>
+
+<ul dir="auto">
+<li>A user initiates a login process, typically through PAM.</li>
+</ul></li>
+<li><strong>Token Request:</strong>
+
+<ul dir="auto">
+<li>The <code>himmelblaud</code> daemon sends an OAuth2 token request to Azure Entra ID, including the user’s credentials or device code if applicable.</li>
+</ul></li>
+<li><strong>Primary Refresh Token (PRT) Issuance:</strong>
+
+<ul dir="auto">
+<li>Azure Entra ID validates the credentials and issues a Primary Refresh Token (PRT). The PRT serves as a long-lived token that can be used to request access and ID tokens without re-entering credentials.</li>
+</ul></li>
+<li><strong>SSO Token Request:</strong>
+
+<ul dir="auto">
+<li>When an application or service requires authentication, the PRT is used to request Single Sign-On (SSO) tokens from Azure Entra ID. These tokens are specific to the requested application or resource.</li>
+</ul></li>
+<li><strong>Token Handling:</strong>
+
+<ul dir="auto">
+<li>The access token and SSO tokens are passed securely to the Himmelblau Broker via a socket for further use by applications or services.</li>
+</ul></li>
+<li><strong>Session Initialization:</strong>
+
+<ul dir="auto">
+<li>The user’s session is authenticated, and any necessary initialization tasks, such as home directory creation, are handled by <code>himmelblaud-tasks</code>.</li>
+</ul></li>
+</ol>
+
+<h4 id="toc_0.5.3">Kerberos Authentication Workflow</h4>
+
+<p>Himmelblau integrates Azure Entra ID’s Kerberos capabilities to support existing Kerberos-dependent applications. The following steps outline the process:</p>
+
+<ol dir="auto">
+<li><strong>TGT Retrieval:</strong>
+
+<ul dir="auto">
+<li>Upon user login, <code>himmelblaud-tasks</code> retrieves a Ticket Granting Ticket (TGT) as part of the Primary Refresh Token (PRT) request from Azure Entra ID. The TGT is essential for Kerberos workflows and is obtained directly from the cloud-based KDC.</li>
+</ul></li>
+<li><strong>TGT Caching:</strong>
+
+<ul dir="auto">
+<li>The TGT is securely cached in the location specified by the Kerberos configuration (<code>/tmp/krb5cc_%{uid}</code>).</li>
+</ul></li>
+<li><strong>Service Ticket Requests:</strong>
+
+<ul dir="auto">
+<li>When a service requiring Kerberos authentication is accessed, the TGT is used to request a service ticket from the KDC.</li>
+</ul></li>
+<li><strong>Authentication Completion:</strong>
+
+<ul dir="auto">
+<li>The service ticket is presented to the target application or service, completing the authentication process.</li>
+</ul></li>
+</ol>
+
+<h4 id="toc_0.5.4">Multi-Factor Authentication (MFA) Integration</h4>
+
+<p>Himmelblau supports Azure Entra ID’s MFA capabilities, providing an additional layer of security. Common MFA methods include:</p>
+
+<ul dir="auto">
+<li><strong>App-Based Notifications:</strong> Users approve login attempts via the Microsoft Authenticator app. Himmelblau also supports passwordless authentication with Microsoft Authenticator, as well as other authenticator apps like Google Authenticator, where users receive a push notification and are prompted to enter an entropy code. This prompt is seamlessly integrated into the login process through PAM.</li>
+<li><strong>FIDO2 Keys:</strong> Physical keys provide multi-factor authentication (MFA) by requiring both the key and the user’s password.</li>
+<li><strong>SMS Codes:</strong> A one-time code sent to the user’s mobile device.</li>
+</ul>
+
+<p>These methods are seamlessly integrated into the OAuth2 and Kerberos workflows, ensuring robust security without complicating the user experience.</p>
+
+<h4 id="toc_0.5.5">Single Sign-On (SSO) Workflow</h4>
+
+<p>SSO is a critical feature for enterprise environments, allowing users to authenticate once and access multiple services. Himmelblau’s SSO implementation involves:</p>
+
+<ol dir="auto">
+<li><strong>Token Sharing via DBus:</strong>
+
+<ul dir="auto">
+<li>The Himmelblau Broker exposes tokens through a DBus interface, enabling applications and browser plugins to authenticate seamlessly.</li>
+</ul></li>
+<li><strong>Session Persistence:</strong>
+
+<ul dir="auto">
+<li>Tokens are securely stored and refreshed as needed, ensuring uninterrupted access to services.</li>
+</ul></li>
+</ol>
+
+<h4 id="toc_0.5.6">Advanced Features</h4>
+
+<h5 id="toc_0.5.6.4">Hybrid Authentication</h5>
+
+<p>Himmelblau supports hybrid setups where both cloud and on-premises resources are accessible. In such environments:</p>
+
+<ul dir="auto">
+<li>Cloud TGTs from Azure Entra ID’s KDC can be exchanged for on-premises TGTs.</li>
+<li>This flexibility allows organizations to transition gradually to cloud-first architectures.</li>
+</ul>
+
+<h5 id="toc_0.5.6.4">Token Management and Renewal</h5>
+
+<ul dir="auto">
+<li>Himmelblau’s components manage token lifecycles, ensuring timely renewal to prevent session interruptions.</li>
+<li>Expired tokens are replaced automatically by <code>himmelblaud</code>, reducing administrative overhead.</li>
+</ul>
+
+<h4 id="toc_0.5.7">Summary</h4>
+
+<p>Himmelblau’s authentication workflows provide a robust framework for integrating Azure Entra ID with Linux systems. By supporting OAuth2, Kerberos, MFA, and SSO, it ensures secure and seamless user experiences. The next chapter will delve into deployment best practices, covering setup strategies for different organizational needs.</p>
+
+	</section>
+	<section id="registration">
+		<h2>Device Registration with Azure Entra ID</h2>
+
+<h4 id="toc_0.6.1">Overview</h4>
+
+<p>Device registration is a cornerstone of Azure Entra ID’s security framework, enabling organizations to enforce compliance policies, manage access, and enhance security for connected devices. Himmelblau leverages the Device Registration Service (DRS) protocol, as outlined in the MS-DRS specification, to seamlessly register Linux devices with Azure Entra ID. This chapter provides a detailed explanation of the device registration process.</p>
+
+<h4 id="toc_0.6.2">Purpose of Device Registration</h4>
+
+<p>Device registration establishes a device identity in Azure Entra ID, enabling administrators to:</p>
+
+<ul dir="auto">
+<li>Apply conditional access policies.</li>
+<li>Track device compliance.</li>
+<li>Enable secure access to enterprise resources.</li>
+</ul>
+
+<p>For Linux environments, Himmelblau facilitates device registration, bridging a gap previously filled by proprietary tools on other platforms.</p>
+
+<h4 id="toc_0.6.3">Workflow for Device Registration</h4>
+
+<p>Himmelblau’s device registration process adheres to the MS-DRS protocol. Below is a detailed step-by-step breakdown:</p>
+
+<ol dir="auto">
+<li><p><strong>Initiating the Registration Process:</strong></p>
+
+<ul dir="auto">
+<li>At authentication time, when the first user logs in, Himmelblau triggers the device registration process in <code>himmelblaud</code>.</li>
+<li>The daemon initiates an OAuth2 flow with Azure Entra ID to authenticate the user or service account performing the registration.</li>
+</ul></li>
+<li><p><strong>Retrieving Enrollment Information:</strong></p>
+
+<ul dir="auto">
+<li>Himmelblau queries Azure Entra ID’s Device Registration Discovery Service to retrieve the appropriate enrollment endpoints.</li>
+<li>The discovery service provides URLs for submitting registration requests and obtaining required metadata.</li>
+</ul></li>
+<li><p><strong>Generating the Device Certificate Request:</strong></p>
+
+<ul dir="auto">
+<li>Himmelblau generates a Certificate Signing Request (CSR) using software-based keys and stores them securely.</li>
+<li>The CSR includes the following details:
+
+<ul dir="auto">
+<li><strong>Public Key</strong>: A transport key generated by Himmelblau.</li>
+<li><strong>Device Attributes</strong>: Information such as the operating system version and device type.</li>
+<li><strong>Nonce</strong>: Obtained from the discovery service to ensure request integrity.</li>
+</ul></li>
+</ul></li>
+<li><p><strong>Submitting the Registration Request:</strong></p>
+
+<ul dir="auto">
+<li>The CSR and associated metadata are submitted to Azure Entra ID via the JoinEndpoint URL.</li>
+<li>Himmelblau includes additional attributes such as device display name and join type (e.g., Azure AD join or hybrid join).</li>
+</ul></li>
+<li><p><strong>Receiving the Device Certificate:</strong></p>
+
+<ul dir="auto">
+<li>Azure Entra ID validates the registration request and issues an X.509 device certificate.</li>
+<li>The certificate is signed by Azure Entra ID’s Certificate Authority and contains the Device Id (A unique identifier for the registered device).</li>
+</ul></li>
+<li><p><strong>Storing the Device Certificate:</strong></p>
+
+<ul dir="auto">
+<li>Himmelblau securely stores the device certificate and associated keys in a local secure storage mechanism, such as Soft HSM.</li>
+<li>This ensures the certificate is accessible for future authentication requests.</li>
+</ul></li>
+<li><p><strong>Completing the Registration:</strong></p>
+
+<ul dir="auto">
+<li>Once the certificate is stored, Himmelblau updates the device’s status in Azure Entra ID.</li>
+<li>The device is now visible in the Azure portal, and administrators can monitor activity.</li>
+</ul></li>
+</ol>
+
+<h4 id="toc_0.6.4">Summary</h4>
+
+<p>Himmelblau’s implementation of the MS-DRS protocol ensures seamless device registration with Azure Entra ID, establishing a secure and compliant foundation for managing Linux devices. By automating key steps and leveraging robust cryptographic mechanisms, Himmelblau simplifies a traditionally complex process. In the next chapter, we will explore best practices for optimizing Himmelblau deployments in enterprise environments.</p>
+
+	</section>
+        <section id="installation">
+            <h2>Installing Himmelblau</h2>
+
+<h4 id="toc_0.7.1">Overview</h4>
+
+<p>Installing Himmelblau is the first step toward integrating Azure Entra ID with Linux systems. This chapter provides a detailed guide for setting up Himmelblau on various supported Linux distributions. By the end of this chapter, you will have a functioning Himmelblau installation configured for your environment.</p>
+
+<h4 id="toc_0.7.2">Supported Distributions</h4>
+
+<p>Himmelblau supports a wide range of Linux distributions, including:</p>
+
+<ul dir="auto">
+<li><strong>Enterprise Distributions:</strong> SUSE Linux Enterprise, Red Hat Enterprise Linux, Rocky Linux.</li>
+<li><strong>Community Distributions:</strong> Ubuntu, Debian, Fedora, and openSUSE.</li>
+</ul>
+
+<p>This diversity ensures that organizations can adopt Himmelblau regardless of their preferred Linux environment.</p>
+
+<h4 id="toc_0.7.3">Pre-Installation Requirements</h4>
+
+<p>Before installing Himmelblau, ensure that the following prerequisites are met:</p>
+
+<ol dir="auto">
+<li><p><strong>System Updates:</strong></p>
+
+<ul dir="auto">
+<li>Update the system packages to their latest versions.
+<code class="language-bash">
+sudo apt update &amp;&amp; sudo apt upgrade  # For Debian-based systems
+sudo dnf update                     # For Red Hat-based systems
+sudo zypper update                  # For SUSE-based systems
+</code></li>
+</ul></li>
+<li><p><strong>Azure Entra ID Preparation:</strong></p>
+
+<ul dir="auto">
+<li>Verify that the Azure Entra ID tenant is configured for device registration and authentication.</li>
+<li>Ensure you have appropriate permissions to add devices to the tenant.</li>
+</ul></li>
+</ol>
+
+<h4 id="toc_0.7.4">Installation Instructions</h4>
+
+<p>Follow these steps to install Himmelblau:</p>
+
+<h5 id="toc_0.7.4.4">Debian/Ubuntu</h5>
+
+<ol dir="auto">
+<li><p><strong>Download the Packages:</strong></p>
+
+<ul dir="auto">
+<li>Obtain the latest Himmelblau .deb packages from the official repository.</li>
+</ul></li>
+<li><p><strong>Install the Packages:</strong></p>
+
+<ul dir="auto">
+<li>Use <code>dpkg</code> to install Himmelblau and its components.</li>
+</ul>
+
+<pre><code class="language-bash">sudo dpkg -i himmelblau_0.8.2-debian12_amd64.deb \
+            himmelblau-sshd-config_0.8.2-debian12_amd64.deb \
+            himmelblau-sso_0.8.2-debian12_amd64.deb \
+            nss-himmelblau_0.8.2-debian12_amd64.deb \
+            pam-himmelblau_0.8.2-debian12_amd64.deb
+</code></pre></li>
+<li><p><strong>Resolve Dependencies:</strong></p>
+
+<ul dir="auto">
+<li>Run the following command to install missing dependencies.</li>
+</ul>
+
+<pre><code class="language-bash">sudo apt --fix-broken install
+</code></pre></li>
+</ol>
+
+<h5 id="toc_0.7.4.4">Red Hat/Rocky Linux/Fedora</h5>
+
+<ol dir="auto">
+<li><p><strong>Download the RPM Packages:</strong></p>
+
+<ul dir="auto">
+<li>Obtain the latest Himmelblau RPMs from the official repository.</li>
+</ul></li>
+<li><p><strong>Install the Packages:</strong></p>
+
+<ul dir="auto">
+<li>Use <code>dnf</code> to install Himmelblau.</li>
+</ul>
+
+<pre><code class="language-bash">sudo dnf install ./himmelblau-0.8.2-1.x86_64-rocky8.rpm \
+                ./himmelblau-sshd-config-0.8.2-1.x86_64-rocky8.rpm \
+                ./himmelblau-sso-0.8.2-1.x86_64-rocky8.rpm \
+                ./nss-himmelblau-0.8.2-1.x86_64-rocky8.rpm \
+                ./pam-himmelblau-0.8.2-1.x86_64-rocky8.rpm
+</code></pre></li>
+</ol>
+
+<h5 id="toc_0.7.4.4">SUSE/OpenSUSE</h5>
+
+<ol dir="auto">
+<li><p><strong>Download the RPM Packages:</strong></p>
+
+<ul dir="auto">
+<li>Obtain the Himmelblau RPMs for SUSE from the official repository.</li>
+</ul></li>
+<li><p><strong>Install the Packages:</strong></p>
+
+<ul dir="auto">
+<li>Use <code>zypper</code> to install Himmelblau.</li>
+</ul>
+
+<pre><code class="language-bash">sudo zypper install ./himmelblau-0.8.2-1.x86_64-sle15sp6.rpm \
+                   ./himmelblau-sshd-config-0.8.2-1.x86_64-sle15sp6.rpm \
+                   ./himmelblau-sso-0.8.2-1.x86_64-sle15sp6.rpm \
+                   ./nss-himmelblau-0.8.2-1.x86_64-sle15sp6.rpm \
+                   ./pam-himmelblau-0.8.2-1.x86_64-sle15sp6.rpm
+</code></pre></li>
+</ol>
+
+<h4 id="toc_0.7.5">Post-Installation Steps</h4>
+
+<ol dir="auto">
+<li><p><strong>Configuration:</strong></p>
+
+<ul dir="auto">
+<li>Himmelblau services should not be started until after configuration is complete, which will be covered in the next chapter.</li>
+</ul></li>
+<li><p><strong>Disable Name Service Caching (Optional):</strong></p>
+
+<ul dir="auto">
+<li><p>Disable <code>nscd</code> to ensure up-to-date user and group information.</p>
+
+<pre><code class="language-bash">sudo systemctl disable nscd
+sudo systemctl stop nscd
+</code></pre></li>
+</ul></li>
+</ol>
+
+<h4 id="toc_0.7.6">Chapter Summary</h4>
+
+<p>This chapter covered the steps required to install Himmelblau on various Linux distributions, ensuring compatibility and optimal setup. The next chapter will focus on configuring Himmelblau to meet organizational requirements.</p>
+
+        </section>
+        <section id="configuration">
+            <h2>Configuring Himmelblau</h2>
+
+<h4 id="toc_0.8.1">Overview</h4>
+
+<p>After installing Himmelblau, the next step is configuring it to integrate seamlessly with your Azure Entra ID environment. This chapter provides a detailed guide to configuring Himmelblau, including editing its configuration file, setting up domain and user options, and preparing it for production use. Once configuration is complete, the required daemons can be started to activate Himmelblau.</p>
+
+<h4 id="toc_0.8.2">Configuration File</h4>
+
+<p>The main configuration file for Himmelblau is located at:</p>
+
+<pre><code class="language-bash">/etc/himmelblau/himmelblau.conf
+</code></pre>
+
+<p>This file controls essential settings, including domains, user authentication policies, and logging.</p>
+
+<h5 id="toc_0.8.2.4">Sample Configuration</h5>
+
+<p>Below is an example configuration file:</p>
+
+<pre><code class="language-ini">[global]
+domains = contoso.onmicrosoft.com
+pam_allow_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12
+id_attr_map = name
+home_attr = CN
+home_alias = CN
+use_etc_skel = true
+</code></pre>
+
+<h4 id="toc_0.8.3">Key Configuration Options</h4>
+
+<ol dir="auto">
+<li><p><strong>Domains:</strong></p>
+
+<ul dir="auto">
+<li>Specifies the Azure Entra ID domains allowed to authenticate.</li>
+<li><p>Example:</p>
+
+<pre><code class="language-ini">domains = contoso.onmicrosoft.com
+</code></pre></li>
+</ul></li>
+<li><p><strong>Group Filtering:</strong></p>
+
+<ul dir="auto">
+<li>Use <code>pam_allow_groups</code> to restrict authentication to specific Azure Entra ID groups.</li>
+<li><p>Example:</p>
+
+<pre><code class="language-ini">pam_allow_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12
+</code></pre></li>
+</ul></li>
+<li><p><strong>Home Directory Options:</strong></p>
+
+<ul dir="auto">
+<li>Configure attributes for home directory creation.</li>
+<li><p>Example:</p>
+
+<pre><code class="language-ini">home_attr = CN
+home_alias = CN
+use_etc_skel = true
+</code></pre></li>
+</ul></li>
+<li><p><strong>Logging:</strong></p>
+
+<ul dir="auto">
+<li>Adjust logging levels for debugging.</li>
+<li><p>Example:</p>
+
+<pre><code class="language-ini">debug = true
+</code></pre></li>
+</ul></li>
+</ol>
+
+<h4 id="toc_0.8.4">Configuring NSS and PAM</h4>
+
+<p>Himmelblau integrates with NSS and PAM for user and group management. Ensure the following configurations are applied:</p>
+
+<h5 id="toc_0.8.4.4">NSS Configuration</h5>
+
+<p>Edit <code>/etc/nsswitch.conf</code> to include Himmelblau:</p>
+
+<pre><code class="language-bash">passwd:    files systemd himmelblau
+shadow:    files himmelblau
+group:     files systemd himmelblau
+</code></pre>
+
+<h5 id="toc_0.8.4.4">PAM Configuration</h5>
+
+<p>Himmelblau&#39;s PAM module can be configured automatically or manually:</p>
+
+<ol dir="auto">
+<li><p><strong>Automatic Configuration:</strong></p>
+
+<ul dir="auto">
+<li><p>On Debian/Ubuntu, use the <code>pam-auth-update</code> utility:</p>
+
+<pre><code class="language-bash">sudo pam-auth-update
+</code></pre></li>
+<li><p>On SUSE Linux Enterprise or openSUSE, use the <code>pam-config</code> utility:</p>
+
+<pre><code class="language-bash">sudo pam-config --add --himmelblau
+</code></pre></li>
+</ul></li>
+<li><p><strong>Manual Configuration:</strong></p>
+
+<ul dir="auto">
+<li>For manual setup, Himmelblau must be configured for the following PAM modules:
+
+<ul dir="auto">
+<li><strong>auth</strong>: Handles authentication.</li>
+<li><strong>account</strong>: Manages account-level access.</li>
+<li><strong>session</strong>: Establishes session-specific settings.</li>
+</ul></li>
+<li><p>Example configuration for <code>/etc/pam.d/common-auth</code> (or equivalent):</p>
+
+<pre><code class="language-bash">auth    required    pam_himmelblau.so
+account required    pam_himmelblau.so
+session required    pam_himmelblau.so
+</code></pre></li>
+</ul></li>
+</ol>
+
+<h4 id="toc_0.8.5">Starting Himmelblau Services</h4>
+
+<p>Once the configuration is complete, enable and start the Himmelblau daemons to activate the service:</p>
+
+<pre><code class="language-bash">sudo systemctl enable himmelblaud himmelblaud-tasks
+sudo systemctl start himmelblaud himmelblaud-tasks
+</code></pre>
+
+<h4 id="toc_0.8.6">Verification</h4>
+
+<ol dir="auto">
+<li><p><strong>Service Status:</strong></p>
+
+<ul dir="auto">
+<li>Verify that the Himmelblau daemons are running:
+<code class="language-bash">
+systemctl status himmelblaud
+systemctl status himmelblaud-tasks
+</code></li>
+</ul></li>
+<li><p><strong>NSS User Resolution:</strong></p>
+
+<ul dir="auto">
+<li>Check that NSS resolves Azure Entra ID users correctly:
+<code class="language-bash">
+getent passwd user@domain.onmicrosoft.com
+</code></li>
+</ul></li>
+<li><p><strong>Test Authentication:</strong></p>
+
+<ul dir="auto">
+<li>Attempt to log in with a user account from Azure Entra ID:
+<code class="language-bash">
+su -l user@domain.onmicrosoft.com
+</code></li>
+</ul></li>
+<li><p><strong>Check Logs:</strong></p>
+
+<ul dir="auto">
+<li><p>Inspect the logs for any errors:</p>
+
+<pre><code class="language-bash">sudo journalctl -u himmelblaud -u himmelblaud-tasks
+</code></pre></li>
+<li><p>Verify that the Himmelblau daemons are running:</p>
+
+<pre><code class="language-bash">systemctl status himmelblaud
+systemctl status himmelblaud-tasks
+</code></pre></li>
+</ul></li>
+</ol>
+
+<h4 id="toc_0.8.7">Summary</h4>
+
+<p>This chapter covered configuring Himmelblau to integrate with Azure Entra ID, setting up NSS and PAM, and starting the necessary services. By following these steps, you’ll ensure a secure and functional deployment. The next chapter will address advanced configurations and optimization techniques.</p>
+
+        </section>
+        <section id="troubleshooting">
+            <h2>Troubleshooting Common Issues</h2>
+
+<h4 id="toc_0.9.1">Overview</h4>
+
+<p>While Himmelblau is designed for seamless integration, issues may arise during deployment or operation. This chapter covers common problems and their resolutions, focusing on MFA-related SSH authentication issues and techniques for debugging authentication traffic.</p>
+
+<h4 id="toc_0.9.2">Resolving MFA Problems with SSH</h4>
+
+<p>SSH authentication involving Azure Entra ID MFA can present challenges, especially when using interactive prompts. Below are some common issues and solutions:</p>
+
+<h5 id="toc_0.9.2.4">Problem: MFA Prompt Not Displayed in SSH Sessions</h5>
+
+<p><strong>Symptoms:</strong> Users attempting to authenticate via SSH do not see the MFA prompt or entropy code. Authentication eventually times out or fails.</p>
+
+<p><strong>Solution:</strong></p>
+
+<ol dir="auto">
+<li><p><strong>Enable Keyboard-Interactive Authentication:</strong></p>
+
+<ul dir="auto">
+<li>Verify that <code>AuthenticationMethods</code> in the SSH daemon configuration includes <code>keyboard-interactive:pam</code>.</li>
+<li>Edit <code>/etc/ssh/sshd_config</code>:
+<code class="language-bash">
+AuthenticationMethods keyboard-interactive:pam
+KbdInteractiveAuthentication yes
+UsePAM yes
+</code></li>
+<li>Restart the SSH service:
+<code class="language-bash">
+sudo systemctl restart sshd
+</code></li>
+</ul></li>
+<li><p><strong>Verify PAM Configuration:</strong></p>
+
+<ul dir="auto">
+<li>Ensure that <code>pam_himmelblau.so</code> is configured in the PAM stack for <code>auth</code> and <code>account</code>.</li>
+<li>Example for <code>/etc/pam.d/sshd</code>:
+<code class="language-bash">
+auth    required    pam_himmelblau.so
+account required    pam_himmelblau.so
+</code></li>
+</ul></li>
+<li><p><strong>Test Locally:</strong></p>
+
+<ul dir="auto">
+<li>Log in locally to confirm that MFA prompts function correctly. This can help isolate SSH-specific issues:
+<code class="language-bash">
+su -l user@domain.onmicrosoft.com
+</code></li>
+</ul></li>
+<li><p><strong>Check Logs:</strong></p>
+
+<ul dir="auto">
+<li>Inspect the SSH and Himmelblau logs for errors:
+<code class="language-bash">
+sudo journalctl -u sshd -u himmelblaud
+</code></li>
+</ul></li>
+</ol>
+
+<h5 id="toc_0.9.2.4">Problem: SSH Hangs After Entering Password</h5>
+
+<p><strong>Symptoms:</strong> Users successfully enter their password, but the session hangs instead of displaying the MFA prompt.</p>
+
+<p><strong>Solution:</strong></p>
+
+<ul dir="auto">
+<li>This issue is linked to OpenSSH Bug 2876, which affects how SSH handles interactive MFA prompts. Use the <code>mfa_poll_prompt</code> option to resolve this issue:
+
+<ol dir="auto">
+<li>Edit the PAM configuration for Himmelblau (e.g., <code>/etc/pam.d/sshd</code>) to include:
+<pre><code class="language-bash">
+auth    required    pam_himmelblau.so mfa_poll_prompt
+account required    pam_himmelblau.so
+</code></pre></li>
+<li>Restart the SSH service to apply changes:
+<code class="language-bash">
+sudo systemctl restart sshd
+</code></li>
+<li>Test SSH authentication again to confirm the issue is resolved.</li>
+</ol></li>
+</ul>
+
+<h4 id="toc_0.9.3">Debugging Authentication Traffic</h4>
+
+<p>Effective debugging is essential for resolving complex authentication issues. Himmelblau supports various methods for capturing and analyzing authentication traffic.</p>
+
+<h5 id="toc_0.9.3.4">Using <code>msal_example</code></h5>
+
+<p>The <code>msal_example</code> tool is a command-line utility available at <a href="https://github.com/himmelblau-idm/msal_example">https://github.com/himmelblau-idm/msal_example</a> for testing Azure Entra ID authentication flows.</p>
+
+<p><strong>Steps:</strong></p>
+
+<ol dir="auto">
+<li><p><strong>Run <code>msal_example</code> to Test OAuth2 Flows:</strong></p>
+
+<ul dir="auto">
+<li>Execute the <code>msal_example</code> tool. It automatically determines the required parameters such as authority URL and client ID by sending a federation provider request. No manual input is required.
+<code class="language-bash">
+msal_example
+</code></li>
+</ul></li>
+<li><p><strong>Check Output:</strong></p>
+
+<ul dir="auto">
+<li>Look for successful token acquisition or error messages that indicate misconfigurations.</li>
+</ul></li>
+</ol>
+
+<h5 id="toc_0.9.3.4">Capturing Network Traffic</h5>
+
+<p>Use a proxy tool like <code>mitmproxy</code> to inspect HTTPS traffic and identify potential issues with OAuth2 or Kerberos exchanges.</p>
+
+<p><strong>Steps:</strong></p>
+
+<ol dir="auto">
+<li><p><strong>Set Up a Proxy:</strong></p>
+
+<ul dir="auto">
+<li>Install <code>mitmproxy</code> on your testing machine:
+<code class="language-bash">
+sudo apt install mitmproxy  # Debian/Ubuntu
+sudo dnf install mitmproxy  # Fedora/RHEL
+</code></li>
+</ul></li>
+<li><p><strong>Configure Himmelblau to Use the Proxy:</strong></p>
+
+<ul dir="auto">
+<li>Export the proxy URL as an environment variable:
+<code class="language-bash">
+export HTTPS_PROXY=http://127.0.0.1:8080
+</code></li>
+</ul></li>
+<li><p><strong>Start <code>mitmproxy</code>:</strong>
+<code class="language-bash">
+mitmproxy --mode transparent
+</code></p></li>
+<li><p><strong>Analyze Traffic:</strong></p>
+
+<ul dir="auto">
+<li>Examine the captured traffic for authentication requests and responses.</li>
+</ul></li>
+</ol>
+
+<h4 id="toc_0.9.4">Summary</h4>
+
+<p>This chapter provided guidance on resolving MFA-related SSH issues and debugging authentication traffic using tools like <code>msal_example</code> and <code>mitmproxy</code>. These troubleshooting techniques ensure that Himmelblau operates smoothly and securely in your environment. The next chapter will explore future directions and enhancements for Himmelblau.</p>
+
+        </section>
+    <footer>
+        <p>&copy; 2025 Himmelblau Project. All rights reserved.</p>
+    </footer>
+    </div>
+</body>
+</html>

@@ -18,7 +18,6 @@ body {
 header {
     background: #00457c; /* Azure blue */
     color: #fff;
-    padding: 20px;
     text-align: center;
     width: 100%;
 }
@@ -55,6 +54,21 @@ nav {
     left: 0; /* Align to the left */
     top: 0; /* Align to the top */
     box-shadow: 2px 0 5px rgba(0,0,0,0.1); /* Subtle shadow on the right */
+}
+
+@media (max-width: 768px) {
+    nav {
+        display: none;
+    }
+
+    body {
+        left: 0%;
+        right: 0%;
+    }
+
+    .document {
+        padding: 0px;
+    }
 }
 
 nav ul {

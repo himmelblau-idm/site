@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Download Himmelblau for Linux</title>
+</head>
+<body>
+    <div class="document">
+    <header>
+        <a href="index.html" class="home-icon">
+            <img src="home.png" alt="Home">
+        </a>
+        <h1>Download Himmelblau for Linux</h1>
+    </header>
+
+    <section>
+    <p>Please select your Linux distribution:</p>
+    <select id="linux-distro">
+        <option value="">Select a distribution</option>
+	<option value="fedora41">Fedora 41</option>
+	<option value="rawhide">Fedora Rawhide</option>
+	<option value="rocky8">Rocky Linux 8</option>
+	<option value="rocky9">Rocky Linux 9</option>
+	<option value="sle15sp6">SUSE Linux Enterprise 16 SP6 / openSUSE 15.6</option>
+	<option value="tumbleweed">openSUSE Tumbleweed</option>
+	<option value="debian12">Debian 12</option>
+	<option value="ubuntu22.04">Ubuntu 22.04</option>
+	<option value="ubuntu24.04">Ubuntu 24.04</option>
+    </select>
+    <div id="download-links" style="margin-top: 20px;"></div>
+
+    <script>
+document.getElementById('linux-distro').addEventListener('change', function() {
+    provideLinks(); // Call the function directly when the selection changes
+});
+
+async function fetchLatestVersion() {
+    const apiUrl = 'https://api.github.com/repos/himmelblau-idm/himmelblau/releases/latest';
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error('Failed to fetch the latest release info');
+        }
+        const data = await response.json();
+        return data.tag_name; // Assuming the tag name is the version number
+    } catch (error) {
+        console.error('Error fetching release data:', error);
+        return null; // Handle the error appropriately in your production environment
+    }
+}
+
+async function provideLinks() {
+    const version = await fetchLatestVersion(); // Get the latest version number
+    if (!version) {
+        document.getElementById('download-links').innerHTML = 'Failed to retrieve the latest version.';
+        return;
+    }
+
+    const distro = document.getElementById('linux-distro').value;
+    const linksContainer = document.getElementById('download-links');
+    linksContainer.innerHTML = ''; // Clear previous links
+
+    if (!distro) {
+        linksContainer.innerHTML = 'Please select a valid distribution.';
+        return;
+    }
+
+    const baseUrl = 'https://github.com/himmelblau-idm/himmelblau/releases/latest/download/';
+    const packages = ['himmelblau', 'himmelblau-sshd-config', 'himmelblau-sso', 'nss-himmelblau', 'pam-himmelblau'];
+
+    const list = document.createElement('ul');
+    packages.forEach(pkg => {
+        const filename = (distro === 'debian12' || distro.startsWith('ubuntu')) ? `${pkg}_${version}-${distro}_amd64.deb` : `${pkg}-${version}-1.x86_64-${distro}.rpm`;
+        const link = document.createElement('a');
+        link.href = baseUrl + filename;
+        link.textContent = filename;
+        link.target = '_blank';
+
+        const listItem = document.createElement('li');
+        listItem.appendChild(link);
+        list.appendChild(listItem);
+    });
+
+    linksContainer.appendChild(list);
+}
+    </script>
+
+    </section>
+    <footer>
+        <p>&copy; 2025 Himmelblau Project. All rights reserved.</p>
+    </footer>
+
+    </div>
+</body>
+</html>

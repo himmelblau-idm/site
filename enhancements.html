@@ -17,7 +17,7 @@
 
     <section>
     <h3>Below is a list of enhancements that need funding for implementation.</h3>
-    <h3>Support the project by funding these improvements!</h3>
+    <h3>Support the project by making donations to fund these improvements!</h3>
     </section>
     <div id="issues-list"></div>
 
@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            let issueDisplayed = false;
             data.forEach(issue => {
                 if (issue.number in costTable) {
                     const { funded, goal } = costTable[issue.number];
@@ -72,8 +73,14 @@ fundButton.href = `mailto:dmulder@himmelblau-idm.org?subject=${mailSubject}&body
                     }
 
                     issuesContainer.appendChild(issueElement);
+                    issueDisplayed = true;
                 }
             });
+
+
+            if (!issueDisplayed) {
+		    issuesContainer.innerHTML = '<div><p>There are no active funding campaigns at this time.</p></div>';
+            }
         })
         .catch(error => {
             console.error('Error fetching issues:', error);

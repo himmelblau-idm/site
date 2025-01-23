@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Download Himmelblau for Linux</title>
+</head>
+<body>
+    <div class="document">
+    <header>
+        <a href="index.html" class="home-icon">
+            <img src="home.png" alt="Home">
+        </a>
+        <h1>Enhancements</h1>
+    </header>
+
+    <section>
+    <h3>Below is a list of enhancements that need funding for implementation.</h3>
+    <h3>Support the project by funding these improvements!</h3>
+    </section>
+    <div id="issues-list"></div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const apiUrl = 'https://api.github.com/repos/himmelblau-idm/himmelblau/issues?labels=enhancement';
+    const costTable = {
+        //341: { funded: 0, goal: 0},
+        //257: { funded: 0, goal: 0},
+    };
+
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`GitHub API error: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const issuesContainer = document.getElementById('issues-list');
+            if (data.length === 0) {
+                issuesContainer.innerHTML = '<p>No enhancement issues found.</p>';
+                return;
+            }
+
+            data.forEach(issue => {
+                if (issue.number in costTable) {
+                    const { funded, goal } = costTable[issue.number];
+                    const fundingRemaining = goal - funded;
+                    const fullyFunded = fundingRemaining <= 0;
+
+                    // Create issue element
+                    const issueElement = document.createElement('div');
+                    issueElement.innerHTML = `
+			<h3>${issue.title} <a href="${issue.html_url}" target="_blank">#${issue.number}</a></h3>
+			<a href="${issue.html_url}" target="_blank">View Details</a>
+                        <p>Estimated cost: $${goal}</p>
+			<p>Funded: $${funded} (${fullyFunded ? 'Fully Funded' : `$${fundingRemaining} remaining`})</p>
+                    `;
+
+                    // Add funding button if not fully funded
+                    if (!fullyFunded) {
+                        const fundButton = document.createElement('a');
+                        fundButton.textContent = 'Fund This Enhancement';
+                        // Rework this for foundation donations when available.
+                        const mailSubject = encodeURIComponent(`Funding for Himmelblau Enhancement #${issue.number}`);
+                        const mailBody = encodeURIComponent(`Hi, I am interested in funding the '${issue.title}' enhancement which currently needs $${fundingRemaining} more to reach its goal of $${goal}. Please let me know the next steps.`);
+fundButton.href = `mailto:dmulder@himmelblau-idm.org?subject=${mailSubject}&body=${mailBody}`;
+                        fundButton.style = "display: inline-block; padding: 10px 20px; margin-top: 10px; background-color: #4CAF50; color: white; border-radius: 5px; text-decoration: none;";
+                        fundButton.target = "_blank";
+                        issueElement.appendChild(fundButton);
+                    }
+
+                    issuesContainer.appendChild(issueElement);
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching issues:', error);
+            document.getElementById('issues-list').innerHTML = '<p>Failed to load issues. Please try again later.</p>';
+        });
+});
+    </script>
+
+    <footer>
+        <p>&copy; 2025 Himmelblau Project. All rights reserved.</p>
+    </footer>
+
+    </div>
+</body>
+</html>

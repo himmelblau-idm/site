@@ -84,6 +84,7 @@ async function provideLinks() {
     const packages = ['himmelblau', 'himmelblau-sshd-config', 'himmelblau-sso', 'nss-himmelblau', 'pam-himmelblau'];
 
     const list = document.createElement('ul');
+    list.classList.add('download-list');
     packages.forEach(pkg => {
         const filename = (distro === 'debian12' || distro.startsWith('ubuntu')) ? `${pkg}_${version}-${distro}_amd64.deb` : `${pkg}-${version}-1.x86_64-${distro}.rpm`;
         const link = document.createElement('a');

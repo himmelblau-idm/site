@@ -149,3 +149,25 @@ button:hover {
 .undefined-cost {
     color: #FF5733;
 }
+
+pre {
+  background-color: #2d2d2d; /* Dark background for better readability */
+  color: #f8f8f2; /* Light text color */
+  padding: 16px; /* Add some spacing inside the block */
+  border-radius: 8px; /* Rounded corners */
+  font-family: 'Courier New', Courier, monospace; /* Monospaced font for code */
+  font-size: 14px; /* Adjust font size for readability */
+  overflow-x: auto; /* Horizontal scrolling for long lines */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  margin: 16px 0; /* Add some space above and below */
+  border: 1px solid #444; /* Border to define the block */
+}
+
+code {
+  background-color: #444; /* Slightly darker background for inline code */
+  color: #f8f8f2; /* Light text color */
+  padding: 2px 4px; /* Small padding for inline code */
+  border-radius: 4px; /* Slight rounding */
+  font-family: 'Courier New', Courier, monospace; /* Consistent monospaced font */
+  font-size: 90%; /* Slightly smaller font for inline code */
+}

@@ -110,19 +110,19 @@
 <ol dir="auto">
 <li><p>Configure SSSD:</p>
 
-<pre><code class="language-bash">[sssd]
+<pre>[sssd]
 domains = example.org
 
 [domain/example.org]
 id_provider = ad
 ldap_id_mapping = false
-</code></pre></li>
+</pre></li>
 <li><p>Configure NSS:</p>
 
-<pre><code class="language-bash">passwd:     files systemd sss
+<pre>passwd:     files systemd sss
 group:      files systemd sss
 shadow:     files sss
-</code></pre></li>
+</pre></li>
 <li><p>Use Himmelblau for Authentication:
 Ensure Himmelblau is configured in the PAM stack for <code>auth</code> , <code>account</code>, and <code>session</code> while disabling its NSS module.</p></li>
 </ol>
@@ -252,10 +252,10 @@ Ensure Himmelblau is configured in the PAM stack for <code>auth</code> , <code>a
 
 <p>Example configuration:</p>
 
-<pre><code class="language-ini">[global]
+<pre>[global]
 domains = example.com
 pam_allow_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd1
-</code></pre>
+</pre>
 
 <h5 id="toc_0.4.1.4">4. <strong>Kerberos Integration</strong></h5>
 
@@ -268,14 +268,14 @@ pam_allow_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd1
 
 <p>Example Kerberos configuration:</p>
 
-<pre><code class="language-ini">[realms]
+<pre>[realms]
 KERBEROS.MICROSOFTONLINE.COM = {
     kdc = https://login.microsoftonline.com/common/kerberos
 }
 
 [libdefaults]
 default_ccache_name = DIR:/tmp/krb5cc_%{uid}
-</code></pre>
+</pre>
 
 <h5 id="toc_0.4.1.4">5. Support Services (<code>himmelblaud-tasks</code>)</h5>
 
@@ -532,11 +532,11 @@ default_ccache_name = DIR:/tmp/krb5cc_%{uid}
 
 <ul dir="auto">
 <li>Update the system packages to their latest versions.
-<code class="language-bash">
+<pre>
 sudo apt update &amp;&amp; sudo apt upgrade  # For Debian-based systems
 sudo dnf update                     # For Red Hat-based systems
 sudo zypper update                  # For SUSE-based systems
-</code></li>
+</pre></li>
 </ul></li>
 <li><p><strong>Azure Entra ID Preparation:</strong></p>
 
@@ -564,20 +564,20 @@ sudo zypper update                  # For SUSE-based systems
 <li>Use <code>dpkg</code> to install Himmelblau and its components.</li>
 </ul>
 
-<pre><code class="language-bash">sudo dpkg -i himmelblau_0.8.2-debian12_amd64.deb \
+<pre>sudo dpkg -i himmelblau_0.8.2-debian12_amd64.deb \
             himmelblau-sshd-config_0.8.2-debian12_amd64.deb \
             himmelblau-sso_0.8.2-debian12_amd64.deb \
             nss-himmelblau_0.8.2-debian12_amd64.deb \
             pam-himmelblau_0.8.2-debian12_amd64.deb
-</code></pre></li>
+</pre></li>
 <li><p><strong>Resolve Dependencies:</strong></p>
 
 <ul dir="auto">
 <li>Run the following command to install missing dependencies.</li>
 </ul>
 
-<pre><code class="language-bash">sudo apt --fix-broken install
-</code></pre></li>
+<pre>sudo apt --fix-broken install
+</pre></li>
 </ol>
 
 <h5 id="toc_0.7.4.4">Red Hat/Rocky Linux/Fedora</h5>
@@ -594,12 +594,12 @@ sudo zypper update                  # For SUSE-based systems
 <li>Use <code>dnf</code> to install Himmelblau.</li>
 </ul>
 
-<pre><code class="language-bash">sudo dnf install ./himmelblau-0.8.2-1.x86_64-rocky8.rpm \
+<pre>sudo dnf install ./himmelblau-0.8.2-1.x86_64-rocky8.rpm \
                 ./himmelblau-sshd-config-0.8.2-1.x86_64-rocky8.rpm \
                 ./himmelblau-sso-0.8.2-1.x86_64-rocky8.rpm \
                 ./nss-himmelblau-0.8.2-1.x86_64-rocky8.rpm \
                 ./pam-himmelblau-0.8.2-1.x86_64-rocky8.rpm
-</code></pre></li>
+</pre></li>
 </ol>
 
 <h5 id="toc_0.7.4.4">SUSE/OpenSUSE</h5>
@@ -616,12 +616,12 @@ sudo zypper update                  # For SUSE-based systems
 <li>Use <code>zypper</code> to install Himmelblau.</li>
 </ul>
 
-<pre><code class="language-bash">sudo zypper install ./himmelblau-0.8.2-1.x86_64-sle15sp6.rpm \
+<pre>sudo zypper install ./himmelblau-0.8.2-1.x86_64-sle15sp6.rpm \
                    ./himmelblau-sshd-config-0.8.2-1.x86_64-sle15sp6.rpm \
                    ./himmelblau-sso-0.8.2-1.x86_64-sle15sp6.rpm \
                    ./nss-himmelblau-0.8.2-1.x86_64-sle15sp6.rpm \
                    ./pam-himmelblau-0.8.2-1.x86_64-sle15sp6.rpm
-</code></pre></li>
+</pre></li>
 </ol>
 
 <h4 id="toc_0.7.5">Post-Installation Steps</h4>
@@ -637,9 +637,9 @@ sudo zypper update                  # For SUSE-based systems
 <ul dir="auto">
 <li><p>Disable <code>nscd</code> to ensure up-to-date user and group information.</p>
 
-<pre><code class="language-bash">sudo systemctl disable nscd
+<pre>sudo systemctl disable nscd
 sudo systemctl stop nscd
-</code></pre></li>
+</pre></li>
 </ul></li>
 </ol>
 
@@ -659,8 +659,8 @@ sudo systemctl stop nscd
 
 <p>The main configuration file for Himmelblau is located at:</p>
 
-<pre><code class="language-bash">/etc/himmelblau/himmelblau.conf
-</code></pre>
+<pre>/etc/himmelblau/himmelblau.conf
+</pre>
 
 <p>This file controls essential settings, including domains, user authentication policies, and logging.</p>
 
@@ -668,14 +668,14 @@ sudo systemctl stop nscd
 
 <p>Below is an example configuration file:</p>
 
-<pre><code class="language-ini">[global]
+<pre>[global]
 domains = contoso.onmicrosoft.com
 pam_allow_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12
 id_attr_map = name
 home_attr = CN
 home_alias = CN
 use_etc_skel = true
-</code></pre>
+</pre>
 
 <h4 id="toc_0.8.3">Key Configuration Options</h4>
 
@@ -686,8 +686,8 @@ use_etc_skel = true
 <li>Specifies the Azure Entra ID domains allowed to authenticate.</li>
 <li><p>Example:</p>
 
-<pre><code class="language-ini">domains = contoso.onmicrosoft.com
-</code></pre></li>
+<pre>domains = contoso.onmicrosoft.com
+</pre></li>
 </ul></li>
 <li><p><strong>Group Filtering:</strong></p>
 
@@ -695,8 +695,8 @@ use_etc_skel = true
 <li>Use <code>pam_allow_groups</code> to restrict authentication to specific Azure Entra ID groups.</li>
 <li><p>Example:</p>
 
-<pre><code class="language-ini">pam_allow_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12
-</code></pre></li>
+<pre>pam_allow_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12
+</pre></li>
 </ul></li>
 <li><p><strong>Home Directory Options:</strong></p>
 
@@ -704,10 +704,10 @@ use_etc_skel = true
 <li>Configure attributes for home directory creation.</li>
 <li><p>Example:</p>
 
-<pre><code class="language-ini">home_attr = CN
+<pre>home_attr = CN
 home_alias = CN
 use_etc_skel = true
-</code></pre></li>
+</pre></li>
 </ul></li>
 <li><p><strong>Logging:</strong></p>
 
@@ -715,8 +715,8 @@ use_etc_skel = true
 <li>Adjust logging levels for debugging.</li>
 <li><p>Example:</p>
 
-<pre><code class="language-ini">debug = true
-</code></pre></li>
+<pre>debug = true
+</pre></li>
 </ul></li>
 </ol>
 
@@ -728,10 +728,10 @@ use_etc_skel = true
 
 <p>Edit <code>/etc/nsswitch.conf</code> to include Himmelblau:</p>
 
-<pre><code class="language-bash">passwd:    files systemd himmelblau
+<pre>passwd:    files systemd himmelblau
 shadow:    files himmelblau
 group:     files systemd himmelblau
-</code></pre>
+</pre>
 
 <h5 id="toc_0.8.4.4">PAM Configuration</h5>
 
@@ -743,12 +743,12 @@ group:     files systemd himmelblau
 <ul dir="auto">
 <li><p>On Debian/Ubuntu, use the <code>pam-auth-update</code> utility:</p>
 
-<pre><code class="language-bash">sudo pam-auth-update
-</code></pre></li>
+<pre>sudo pam-auth-update
+</pre></li>
 <li><p>On SUSE Linux Enterprise or openSUSE, use the <code>pam-config</code> utility:</p>
 
-<pre><code class="language-bash">sudo pam-config --add --himmelblau
-</code></pre></li>
+<pre>sudo pam-config --add --himmelblau
+</pre></li>
 </ul></li>
 <li><p><strong>Manual Configuration:</strong></p>
 
@@ -762,10 +762,10 @@ group:     files systemd himmelblau
 </ul></li>
 <li><p>Example configuration for <code>/etc/pam.d/common-auth</code> (or equivalent):</p>
 
-<pre><code class="language-bash">auth    required    pam_himmelblau.so
+<pre>auth    required    pam_himmelblau.so
 account required    pam_himmelblau.so
 session required    pam_himmelblau.so
-</code></pre></li>
+</pre></li>
 </ul></li>
 </ol>
 
@@ -773,9 +773,9 @@ session required    pam_himmelblau.so
 
 <p>Once the configuration is complete, enable and start the Himmelblau daemons to activate the service:</p>
 
-<pre><code class="language-bash">sudo systemctl enable himmelblaud himmelblaud-tasks
+<pre>sudo systemctl enable himmelblaud himmelblaud-tasks
 sudo systemctl start himmelblaud himmelblaud-tasks
-</code></pre>
+</pre>
 
 <h4 id="toc_0.8.6">Verification</h4>
 
@@ -784,39 +784,39 @@ sudo systemctl start himmelblaud himmelblaud-tasks
 
 <ul dir="auto">
 <li>Verify that the Himmelblau daemons are running:
-<code class="language-bash">
+<pre>
 systemctl status himmelblaud
 systemctl status himmelblaud-tasks
-</code></li>
+</pre></li>
 </ul></li>
 <li><p><strong>NSS User Resolution:</strong></p>
 
 <ul dir="auto">
 <li>Check that NSS resolves Azure Entra ID users correctly:
-<code class="language-bash">
+<pre>
 getent passwd user@domain.onmicrosoft.com
-</code></li>
+</pre></li>
 </ul></li>
 <li><p><strong>Test Authentication:</strong></p>
 
 <ul dir="auto">
 <li>Attempt to log in with a user account from Azure Entra ID:
-<code class="language-bash">
+<pre>
 su -l user@domain.onmicrosoft.com
-</code></li>
+</pre></li>
 </ul></li>
 <li><p><strong>Check Logs:</strong></p>
 
 <ul dir="auto">
 <li><p>Inspect the logs for any errors:</p>
 
-<pre><code class="language-bash">sudo journalctl -u himmelblaud -u himmelblaud-tasks
-</code></pre></li>
+<pre>sudo journalctl -u himmelblaud -u himmelblaud-tasks
+</pre></li>
 <li><p>Verify that the Himmelblau daemons are running:</p>
 
-<pre><code class="language-bash">systemctl status himmelblaud
+<pre>systemctl status himmelblaud
 systemctl status himmelblaud-tasks
-</code></pre></li>
+</pre></li>
 </ul></li>
 </ol>
 
@@ -848,41 +848,41 @@ systemctl status himmelblaud-tasks
 <ul dir="auto">
 <li>Verify that <code>AuthenticationMethods</code> in the SSH daemon configuration includes <code>keyboard-interactive:pam</code>.</li>
 <li>Edit <code>/etc/ssh/sshd_config</code>:
-<code class="language-bash">
+<pre>
 AuthenticationMethods keyboard-interactive:pam
 KbdInteractiveAuthentication yes
 UsePAM yes
-</code></li>
+</pre></li>
 <li>Restart the SSH service:
-<code class="language-bash">
+<pre>
 sudo systemctl restart sshd
-</code></li>
+</pre></li>
 </ul></li>
 <li><p><strong>Verify PAM Configuration:</strong></p>
 
 <ul dir="auto">
 <li>Ensure that <code>pam_himmelblau.so</code> is configured in the PAM stack for <code>auth</code> and <code>account</code>.</li>
 <li>Example for <code>/etc/pam.d/sshd</code>:
-<code class="language-bash">
+<pre>
 auth    required    pam_himmelblau.so
 account required    pam_himmelblau.so
-</code></li>
+</pre></li>
 </ul></li>
 <li><p><strong>Test Locally:</strong></p>
 
 <ul dir="auto">
 <li>Log in locally to confirm that MFA prompts function correctly. This can help isolate SSH-specific issues:
-<code class="language-bash">
+<pre>
 su -l user@domain.onmicrosoft.com
-</code></li>
+</pre></li>
 </ul></li>
 <li><p><strong>Check Logs:</strong></p>
 
 <ul dir="auto">
 <li>Inspect the SSH and Himmelblau logs for errors:
-<code class="language-bash">
+<pre>
 sudo journalctl -u sshd -u himmelblaud
-</code></li>
+</pre></li>
 </ul></li>
 </ol>
 
@@ -897,14 +897,14 @@ sudo journalctl -u sshd -u himmelblaud
 
 <ol dir="auto">
 <li>Edit the PAM configuration for Himmelblau (e.g., <code>/etc/pam.d/sshd</code>) to include:
-<pre><code class="language-bash">
+<pre>
 auth    required    pam_himmelblau.so mfa_poll_prompt
 account required    pam_himmelblau.so
-</code></pre></li>
+</pre></li>
 <li>Restart the SSH service to apply changes:
-<code class="language-bash">
+<pre>
 sudo systemctl restart sshd
-</code></li>
+</pre></li>
 <li>Test SSH authentication again to confirm the issue is resolved.</li>
 </ol></li>
 </ul>
@@ -924,9 +924,9 @@ sudo systemctl restart sshd
 
 <ul dir="auto">
 <li>Execute the <code>msal_example</code> tool. It automatically determines the required parameters such as authority URL and client ID by sending a federation provider request. No manual input is required.
-<code class="language-bash">
+<pre>
 msal_example
-</code></li>
+</pre></li>
 </ul></li>
 <li><p><strong>Check Output:</strong></p>
 
@@ -946,23 +946,23 @@ msal_example
 
 <ul dir="auto">
 <li>Install <code>mitmproxy</code> on your testing machine:
-<code class="language-bash">
+<pre>
 sudo apt install mitmproxy  # Debian/Ubuntu
 sudo dnf install mitmproxy  # Fedora/RHEL
-</code></li>
+</pre></li>
 </ul></li>
 <li><p><strong>Configure Himmelblau to Use the Proxy:</strong></p>
 
 <ul dir="auto">
 <li>Export the proxy URL as an environment variable:
-<code class="language-bash">
+<pre>
 export HTTPS_PROXY=http://127.0.0.1:8080
-</code></li>
+</pre></li>
 </ul></li>
 <li><p><strong>Start <code>mitmproxy</code>:</strong>
-<code class="language-bash">
+<pre>
 mitmproxy --mode transparent
-</code></p></li>
+</pre></p></li>
 <li><p><strong>Analyze Traffic:</strong></p>
 
 <ul dir="auto">

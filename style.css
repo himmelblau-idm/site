@@ -112,7 +112,7 @@ footer {
 }
 
 /* Style for the navigation sidebar */
-nav {
+.page-nav nav {
     background: #f0f2f5; /* Lighter grey background for contrast */
     padding: 20px;
     width: 120px;
@@ -235,4 +235,82 @@ code {
   border-radius: 4px; /* Slight rounding */
   font-family: 'Courier New', Courier, monospace; /* Consistent monospaced font */
   font-size: 90%; /* Slightly smaller font for inline code */
+}
+
+a.button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin-top: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 5px;
+  text-decoration: none;
+  margin-right: 10px;
+}
+a.button.secondary {
+  background-color: #008CBA;
+}
+a.button:hover {
+  opacity: 0.9;
+}
+
+#issue-search {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px;
+  font-size: 1em;
+  margin: 10px 0;
+}
+
+/* Header Navigation */
+.header-nav {
+    background: #00457c; /* or another brand color */
+    color: #fff;
+    padding: 10px 0;
+}
+
+.header-nav .nav-container {
+    max-width: 1200px; /* Adjust as needed */
+    margin: 0 auto;    /* Center the container */
+    display: flex;
+    flex-direction: column; /* Stack title and nav */
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;   /* Horizontal padding */
+}
+
+.header-nav nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex; /* Horizontal layout */
+}
+
+.header-nav nav ul li {
+    margin-left: 20px; /* Spacing between nav items */
+}
+
+.header-nav nav ul li:first-child {
+    margin-left: 0; /* Remove left margin for first item */
+}
+
+.header-nav nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1em;
+    padding: 6px 8px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.header-nav nav ul li a:hover {
+    background-color: #005792; /* Slightly darker shade for hover effect */
+}
+
+/* Optional: If you want the nav to remain fixed at the top */
+.header-nav.fixed-top {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 999;
 }

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JGTS57FHD3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-JGTS57FHD3');
+</script>
+
+<script type="text/javascript" data-cmp-ab="1" src="https://cdn.consentmanager.net/delivery/autoblocking/8bffa521a2c48.js" data-cmp-host="c.delivery.consentmanager.net" data-cmp-cdn="cdn.consentmanager.net" data-cmp-codesrc="16"></script>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3883501504990181"
+     crossorigin="anonymous"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Himmelblau - Azure Entra ID Authentication for Linux</title>
+
+</head>
+<body>
+<div class="document">
+<header class="header-nav">
+    <div class="nav-container">
+        <h1>Himmelblau - Seamless Azure Entra ID Authentication for Linux</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="downloads.html">Installation</a></li>
+                <li><a href="backers.html">Donations</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="index.html#community">Community</a></li>
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+    <section id="about">
+        <h2>Why Himmelblau?</h2>
+<ul>
+    <li>✅ <strong>Seamless Azure Entra ID authentication on Linux</strong></li>
+    <li>✅ <strong>Supports Native Multi-Factor Authentication (MFA)</strong></li>
+    <li>✅ <strong>Single Sign-On (SSO) for Firefox and Chrome</strong></li>
+    <li>✅ <strong>Integrates with Kerberos for hybrid environments</strong></li>
+    <li>✅ <strong>Secure & open-source</strong></li>
+</ul>
+    </section>
+
+    <section id="get-started">
+        <h2>Getting Started</h2>
+        <p>Select your Linux distribution to get the latest packages and installation instructions:</p>
+        <select id="linux-distro">
+            <option value="">Select a distribution</option>
+            <option value="fedora41">Fedora 41</option>
+            <option value="rawhide">Fedora Rawhide</option>
+            <option value="rocky8">Rocky Linux 8</option>
+            <option value="rocky9">Rocky Linux 9</option>
+            <option value="sle15sp6">SUSE Linux Enterprise 16 SP6 / openSUSE 15.6</option>
+            <option value="tumbleweed">openSUSE Tumbleweed</option>
+            <option value="debian12">Debian 12</option>
+            <option value="ubuntu22.04">Ubuntu 22.04</option>
+            <option value="ubuntu24.04">Ubuntu 24.04</option>
+        </select>
+        <div id="download-links" style="margin-top: 20px;"></div>
+    </section>
+
+        <section id="configuration" style="display: none;">
+            <h2>Configuring Himmelblau</h2>
+
+<h4 id="toc_0.8.1">Overview</h4>
+
+<p>After installing Himmelblau, the next step is configuring it to integrate seamlessly with your Azure Entra ID environment. This section provides a detailed guide to configuring Himmelblau, including editing its configuration file, setting up domain and user options, and preparing it for production use. Once configuration is complete, the required daemons can be started to activate Himmelblau.</p>
+
+<h4 id="toc_0.8.2">Configuration File</h4>
+
+<p>The main configuration file for Himmelblau is located at:</p>
+
+<pre>/etc/himmelblau/himmelblau.conf
+</pre>
+
+<p>This file controls essential settings, including domains, user authentication policies, and logging.</p>
+
+<h5 id="toc_0.8.2.4">Sample Configuration</h5>
+
+<p>The only mandatory configuration for himmelblau is to set the authenticating domains:</p>
+
+<pre>[global]
+domains = contoso.onmicrosoft.com
+</pre>
+
+<p>Refer to the <a href="https://manpages.opensuse.org/Tumbleweed/himmelblau/himmelblau.conf.5.en.html">himmelblau.conf man page</a>, or <a href="docs.html">the documentation</a> for advanced configuration options.</p>
+
+<h4 id="toc_0.8.4">Configuring NSS and PAM</h4>
+
+<p>Himmelblau integrates with NSS and PAM for user and group management. Ensure the following configurations are applied:</p>
+
+<h5 id="toc_0.8.4.4">NSS Configuration</h5>
+
+<p>Edit <code>/etc/nsswitch.conf</code> and append <code>himmelblau</code> to the <code>passwd</code>, <code>shadow</code>, and <code>group</code> lines:</p>
+
+<pre>passwd:    files systemd himmelblau
+shadow:    files himmelblau
+group:     files systemd himmelblau
+</pre>
+
+<h5 id="toc_0.8.4.4">PAM Configuration</h5>
+
+<p>PAM enables flexible authentication mechanisms by allowing administrators to define authentication policies through modular components. Configuring PAM for Azure Entra ID allows users to authenticate using their Azure Entra ID credentials. By configuring PAM to include the Himmelblau module, authentication requests are directed to Azure Entra ID.</p>
+
+<ol dir="auto">
+<li><p><strong>Automatic Configuration:</strong></p>
+<ul dir="auto">
+<li><p>On openSUSE Tumbleweed, use the <code>pam-config</code> utility:</p>
+<pre>pam-config --add --himmelblau</pre></li>
+<li><p>On Ubuntu/Debian distros, use the <code>pam-auth-update</code> utility:</p>
+<pre>sudo pam-auth-update</pre></li>
+</ul>
+<p>Ensure the <code>Azure authentication</code> checkbox is set and verify the PAM files afterward to ensure the configuration was successful.</p>
+</li>
+
+<li><p><strong>Manual Configuration:</strong></p>
+<ul dir="auto">
+	<li><p>In <code>/etc/pam.d/common-auth</code>, ensure that the <code>pam_himmelblau.so</code> module is placed at the top of the authentication stack (before <code>pam_unix.so</code>, for example). This placement ensures that authentication requests are handled by Himmelblau first, which is particularly important for Hello or Passwordless authentication. Include the <code>ignore_unknown_user</code> option for Himmelblau. Ensure <code>pam_deny.so</code> is placed after all modules, so that unknown users are not implicitly allowed.</p>
+<pre>auth        required      pam_env.so
+auth        sufficient    pam_himmelblau.so ignore_unknown_user
+auth        [default=1 ignore=ignore success=ok] pam_localuser.so
+auth        sufficient    pam_unix.so nullok try_first_pass
+auth        required      pam_deny.so</pre>
+</li>
+<li><p>Configure <code>/etc/pam.d/common-account</code> in a similar manner:</p>
+<pre>account    sufficient    pam_himmelblau.so ignore_unknown_user
+account    [default=1 ignore=ignore success=ok] pam_localuser.so
+account    sufficient    pam_unix.so
+account    required      pam_deny.so</pre>
+</li>
+<li><p>In <code>/etc/pam.d/common-session</code>, set <code>pam_himmelblau.so</code> as an optional module:</p>
+<pre>session optional    pam_himmelblau.so
+session optional    pam_systemd.so
+session required    pam_limits.so
+session optional    pam_unix.so try_first_pass
+session optional    pam_umask.so
+session optional    pam_env.so</pre>
+</li>
+</ul>
+</li>
+</ol>
+
+<h4><strong>Note:</strong></h4>
+<p>For optimal compatibility with Hello and Passwordless authentication, <code>pam_himmelblau.so</code> should always be placed first in the PAM <code>auth</code> stack. This ensures that authentication requests are processed by Himmelblau before other authentication methods, preventing unnecessary password prompts.</p>
+
+<h4 id="toc_0.8.5">Starting Himmelblau Services</h4>
+
+<p>Once the configuration is complete, enable and start the Himmelblau daemons to activate the service:</p>
+
+<pre>sudo systemctl enable himmelblaud himmelblaud-tasks
+sudo systemctl start himmelblaud himmelblaud-tasks
+</pre>
+
+<h4 id="toc_0.8.6">Verification</h4>
+
+<ol dir="auto">
+<li><p><strong>Service Status:</strong></p>
+
+<ul dir="auto">
+<li>Verify that the Himmelblau daemons are running:
+<pre>
+systemctl status himmelblaud
+systemctl status himmelblaud-tasks
+</pre></li>
+</ul></li>
+<li><p><strong>NSS User Resolution:</strong></p>
+
+<ul dir="auto">
+<li>Check that NSS resolves Azure Entra ID users correctly:
+<pre>
+getent passwd user@domain.onmicrosoft.com
+</pre></li>
+</ul></li>
+<li><p><strong>Test Authentication:</strong></p>
+
+<ul dir="auto">
+<li>Attempt to log in with a user account from Azure Entra ID:
+<pre>
+su -l user@domain.onmicrosoft.com
+</pre></li>
+</ul></li>
+<li><p><strong>Check Logs:</strong></p>
+
+<ul dir="auto">
+<li><p>Inspect the logs for any errors:</p>
+
+<pre>sudo journalctl -u himmelblaud -u himmelblaud-tasks
+</pre></li>
+</ul></li>
+</ol>
+</section>
+
+<section id="donate">
+    <h2>Support the Project</h2>
+    <p>Himmelblau is a fully open-source GPLv3+ project, built by the community, for the community. Your support helps us continue developing new features, improving security, and maintaining compatibility with the latest Linux distributions.</p>
+    <p>By donating, you are directly contributing to:</p>
+    <ul>
+        <li>✅ Continued development and feature enhancements</li>
+        <li>✅ Security updates and bug fixes</li>
+        <li>✅ Expanded distribution support</li>
+        <li>✅ Keeping Himmelblau free and open for everyone</li>
+    </ul>
+    <p>Whether you’re an individual user or an enterprise relying on Himmelblau, your contributions make a difference. Every donation helps ensure the longevity and success of the project.</p>
+    <a class="button" href="https://opencollective.com/himmelblau" target="_blank" class="donate-button">Donate Now</a>
+</section>
+
+    <section><div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/wCibnqVQ_bs?feature=shared" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div></section>
+
+    <script>
+document.getElementById('linux-distro').addEventListener('change', function() {
+    provideLinks(); // Call the function directly when the selection changes
+});
+
+async function fetchLatestVersion() {
+    const apiUrl = 'https://api.github.com/repos/himmelblau-idm/himmelblau/releases/latest';
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error('Failed to fetch the latest release info');
+        }
+        const data = await response.json();
+        return data.tag_name; // Assuming the tag name is the version number
+    } catch (error) {
+        console.error('Error fetching release data:', error);
+        return null; // Handle the error appropriately in your production environment
+    }
+}
+
+async function provideLinks() {
+    const version = await fetchLatestVersion(); // Get the latest version number
+    if (!version) {
+        document.getElementById('download-links').innerHTML = 'Failed to retrieve the latest version.';
+        return;
+    }
+
+    const distro = document.getElementById('linux-distro').value;
+    const linksContainer = document.getElementById('download-links');
+    linksContainer.innerHTML = ''; // Clear previous links
+
+    const configSection = document.getElementById('configuration');
+    if (!distro) {
+        configSection.style.display = 'none';
+        linksContainer.innerHTML = 'Please select a valid distribution.';
+        return;
+    }
+
+    configSection.style.display = 'block';
+
+    const baseUrl = 'https://github.com/himmelblau-idm/himmelblau/releases/latest/download/';
+    const packages = ['himmelblau', 'himmelblau-sshd-config', 'himmelblau-sso', 'nss-himmelblau', 'pam-himmelblau'];
+
+    const list = document.createElement('ul');
+    list.classList.add('download-list');
+    packages.forEach(pkg => {
+        const filename = (distro === 'debian12' || distro.startsWith('ubuntu')) ? `${pkg}_${version}-${distro}_amd64.deb` : `${pkg}-${version}-1.x86_64-${distro}.rpm`;
+        const link = document.createElement('a');
+        link.href = baseUrl + filename;
+        link.textContent = filename;
+        link.target = '_blank';
+
+        const listItem = document.createElement('li');
+        listItem.appendChild(link);
+        list.appendChild(listItem);
+    });
+
+    linksContainer.appendChild(list);
+
+	const title = document.createElement('h2');
+	title.textContent = 'Installing Himmelblau';
+	linksContainer.appendChild(title);
+
+	const item1 = document.createElement('p');
+	item1.textContent = 'Ensure the system is updated and you have administrative access:';
+	linksContainer.appendChild(item1);
+
+	if (distro.startsWith('sle') || distro === 'tumbleweed') {
+		const cmd1 = document.createElement('pre');
+		cmd1.textContent = 'sudo zypper update';
+		linksContainer.appendChild(cmd1);
+	} else if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
+		const cmd1 = document.createElement('pre');
+                cmd1.textContent = 'sudo apt update && sudo apt upgrade';
+                linksContainer.appendChild(cmd1);
+	} else if (distro.startsWith('rocky') || distro === 'rawhide' || distro.startsWith('fedora')) {
+		const cmd1 = document.createElement('pre');
+                cmd1.textContent = 'sudo dnf update';
+                linksContainer.appendChild(cmd1);
+        }
+
+	const item2 = document.createElement('p');
+	item2.textContent = 'Download the packages from the links above and install the packages:';
+	linksContainer.appendChild(item2);
+
+	if (distro.startsWith('sle') || distro === 'tumbleweed') {
+                const cmd1 = document.createElement('pre');
+                cmd1.textContent = 'sudo zypper install ';
+		packages.forEach(pkg => {
+			const filename = `${pkg}-${version}-1.x86_64-${distro}.rpm`;
+			cmd1.textContent += './' + filename + ' ';
+		});
+                linksContainer.appendChild(cmd1);
+        } else if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
+		const cmd1 = document.createElement('pre');
+                cmd1.textContent = 'sudo apt install -y ';
+		packages.forEach(pkg => {
+                        const filename = `${pkg}_${version}-${distro}_amd64.deb`;
+			cmd1.textContent += './' + filename + ' ';
+                });
+                linksContainer.appendChild(cmd1);
+	} else if (distro.startsWith('rocky') || distro === 'rawhide' || distro.startsWith('fedora')) {
+		const cmd1 = document.createElement('pre');
+                cmd1.textContent = 'sudo dnf install ';
+                packages.forEach(pkg => {
+                        const filename = `${pkg}-${version}-1.x86_64-${distro}.rpm`;
+                        cmd1.textContent += './' + filename + ' ';
+                });
+                linksContainer.appendChild(cmd1);
+	}
+
+	const opt_title = document.createElement('h3');
+	opt_title.textContent = 'Optional Packages';
+	linksContainer.appendChild(opt_title);
+
+	const sshd_pkg = 'himmelblau-sshd-config';
+	const sshd_filename = (distro === 'debian12' || distro.startsWith('ubuntu')) ? `${sshd_pkg}_${version}-${distro}_amd64.deb` : `${sshd_pkg}-${version}-1.x86_64-${distro}.rpm`;
+	const sso_pkg = 'himmelblau-sso';
+	const sso_filename = (distro === 'debian12' || distro.startsWith('ubuntu')) ? `${sso_pkg}_${version}-${distro}_amd64.deb` : `${sso_pkg}-${version}-1.x86_64-${distro}.rpm`;
+	const item3 = document.createElement('p');
+	item3.textContent = `You need only install the package ${sshd_filename} if the host will require ssh access, and need only install the ${sso_filename} package if you require Firefox and Chrome Single-Sign-On.`;
+	linksContainer.appendChild(item3);
+
+	if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
+		const krb5_title = document.createElement('h3');
+		krb5_title.textContent = 'krb5.conf Configuration';
+		linksContainer.appendChild(krb5_title);
+
+		const item = document.createElement('p');
+	        item.textContent = 'If you\'re prompted to configure your krb5.conf with a realm during installation, set this to your on-prem synced local Active Directory realm. If you do not have an on-prem synced Active Directory, you may leave this realm field empty. After installation, you must ensure that your krb5.conf contains an `includedir  /etc/krb5.conf.d` entry. Himmelblau will automatically configure your cloud realm in the /etc/krb5.conf.d directory.';
+		linksContainer.appendChild(item);
+	}
+}
+    </script>
+
+    <footer>
+        <p>&copy; 2025 Himmelblau Project. All rights reserved.</p>
+    </footer>
+
+</div>
+</body>
+</html>

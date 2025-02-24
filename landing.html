@@ -23,6 +23,12 @@
   gtag('config', 'AW-970745524');
 </script>
 
+<script>
+  function gtag_report_conversion(url) {
+    var callback = function () { if (typeof(url) != 'undefined') { window.location = url; } }; gtag('event', 'conversion', { 'send_to': 'AW-970745524/haXpCK3x9aAaELTN8c4D', 'value': 1.0, 'currency': 'USD', 'event_callback': callback }); return false;
+  }
+</script>
+
 <script type="text/javascript" data-cmp-ab="1" src="https://cdn.consentmanager.net/delivery/autoblocking/8bffa521a2c48.js" data-cmp-host="c.delivery.consentmanager.net" data-cmp-cdn="cdn.consentmanager.net" data-cmp-codesrc="16"></script>
 
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3883501504990181"
@@ -225,7 +231,7 @@ su -l user@domain.onmicrosoft.com
         <li>✅ Keeping Himmelblau free and open for everyone</li>
     </ul>
     <p>Whether you’re an individual user or an enterprise relying on Himmelblau, your contributions make a difference. Every donation helps ensure the longevity and success of the project.</p>
-    <a class="button" href="https://opencollective.com/himmelblau/contribute/sponsors-84876/checkout" target="_blank" class="donate-button">Donate Now</a>
+    <a class="button" href="https://opencollective.com/himmelblau/contribute/sponsors-84876/checkout" target="_blank" class="donate-button" onclick="return gtag_report_conversion(this.href);">Donate Now</a>
 </section>
 
     <section>
@@ -292,6 +298,13 @@ async function provideLinks() {
         link.href = baseUrl + filename;
         link.textContent = filename;
         link.target = '_blank';
+
+        // Attach conversion tracking only for the "himmelblau" package
+        if (pkg === 'himmelblau') {
+             link.onclick = function() {
+                 return gtag_report_conversion(link.href);
+             }
+        }
 
         const listItem = document.createElement('li');
         listItem.appendChild(link);

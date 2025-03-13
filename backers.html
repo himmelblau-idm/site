@@ -21,8 +21,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Download Himmelblau for Linux</title>
+    <link rel="stylesheet" href="announcements.css">
 </head>
 <body>
+    <div id="announcement-banner" style="display: none;">
+        <span id="close-banner">&times;</span>
+        <div id="announcement-content"></div>
+    </div>
     <div class="document">
 
 <header class="header-nav">
@@ -250,5 +255,47 @@
             <p>&copy; 2025 Himmelblau Project. All rights reserved.</p>
         </footer>
     </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const banner = document.getElementById("announcement-banner");
+    const closeButton = document.getElementById("close-banner");
+    const content = document.getElementById("announcement-content");
+
+    // Function to generate a simple hash from a string
+    function generateHash(text) {
+        let hash = 0;
+        for (let i = 0; i < text.length; i++) {
+            hash = (hash << 5) - hash + text.charCodeAt(i);
+            hash |= 0; // Convert to 32-bit integer
+        }
+        return hash.toString();
+    }
+
+    // Fetch the announcement text
+    fetch("announcements.txt")
+        .then(response => response.text())
+        .then(html => {
+            const newHash = generateHash(html.trim()); // Generate hash from announcement text
+            const dismissedHash = localStorage.getItem("dismissedAnnouncementHash");
+
+            // Show the banner if the announcement is different from the last dismissed one
+            if (newHash !== dismissedHash) {
+                content.innerHTML = html;
+                banner.style.display = "flex";
+
+                // Store the current announcement's hash (but don't mark it dismissed)
+                localStorage.setItem("announcementHash", newHash);
+            }
+        })
+        .catch(error => console.error("Failed to load announcement:", error));
+
+    // Close the banner and remember dismissal only for the current announcement
+    closeButton.addEventListener("click", function () {
+        banner.style.display = "none";
+        const currentHash = localStorage.getItem("announcementHash");
+        localStorage.setItem("dismissedAnnouncementHash", currentHash); // Store only the dismissed announcement
+    });
+});
+</script>
 </body>
 </html>

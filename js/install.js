@@ -35,6 +35,15 @@ async function provideLinks() {
 		return;
 	}
 
+	const configSection = document.getElementById('configuration');
+	if (!distro) {
+		configSection.style.display = 'none';
+		linksContainer.innerHTML = 'Please select a valid distribution.';
+		return;
+	}
+
+	configSection.style.display = 'block';
+
 	const baseUrl =
 		'https://github.com/himmelblau-idm/himmelblau/releases/latest/download/';
 	const packages = [

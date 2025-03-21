@@ -112,11 +112,12 @@ async function provideLinks() {
 		});
 		linksContainer.appendChild(cmd1);
 	} else if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
+		// DEB packages don't have signing available yet
 		// GPG key install for APT
-		const keyCmd = document.createElement('pre');
-		keyCmd.textContent =
-			'curl -fsSL https://himmelblau-idm.org/himmelblau.asc | gpg --dearmor | sudo tee /usr/share/keyrings/himmelblau.gpg > /dev/null';
-		linksContainer.appendChild(keyCmd);
+		//const keyCmd = document.createElement('pre');
+		//keyCmd.textContent =
+		//	'curl -fsSL https://himmelblau-idm.org/himmelblau.asc | gpg --dearmor | sudo tee /usr/share/keyrings/himmelblau.gpg > /dev/null';
+		//linksContainer.appendChild(keyCmd);
 
 		const cmd1 = document.createElement('pre');
 		cmd1.textContent = 'sudo apt install -y ';

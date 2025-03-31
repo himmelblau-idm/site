@@ -2,9 +2,7 @@ document.getElementById('linux-distro').addEventListener('change', function () {
 	provideLinks(); // Call the function directly when the selection changes
 });
 
-async function fetchLatestVersion() {
-	const apiUrl =
-		'https://api.github.com/repos/himmelblau-idm/himmelblau/releases/latest';
+async function fetchLatestVersion(apiUrl) {
 	try {
 		const response = await fetch(apiUrl);
 		if (!response.ok) {
@@ -19,10 +17,20 @@ async function fetchLatestVersion() {
 }
 
 async function provideLinks() {
-	const version = await fetchLatestVersion(); // Get the latest version number
+	const version = await fetchLatestVersion(
+		'https://api.github.com/repos/himmelblau-idm/himmelblau/releases/latest',
+	); // Get the latest version number
 	if (!version) {
 		document.getElementById('download-links').innerHTML =
 			'Failed to retrieve the latest version.';
+		return;
+	}
+	const cirrus_scope_version = await fetchLatestVersion(
+		'https://api.github.com/repos/himmelblau-idm/cirrus-scope/releases/latest',
+	);
+	if (!cirrus_scope_version) {
+		document.getElementById('download-links').innerHTML =
+			'Failed to retrieve the latest cirrus-scope version.';
 		return;
 	}
 
@@ -54,6 +62,8 @@ async function provideLinks() {
 		'pam-himmelblau',
 		'himmelblau-qr-greeter',
 	];
+	const cirrus_scope_base_url =
+		'https://github.com/himmelblau-idm/cirrus-scope/releases/latest/download/';
 
 	const list = document.createElement('ul');
 	list.classList.add('download-list');
@@ -71,6 +81,18 @@ async function provideLinks() {
 		listItem.appendChild(link);
 		list.appendChild(listItem);
 	});
+	const cirrus_scope_filename =
+		distro === 'debian12' || distro.startsWith('ubuntu')
+			? `cirrus-scope_${cirrus_scope_version}-${distro}_amd64.deb`
+			: `cirrus-scope-${cirrus_scope_version}-1.x86_64-${distro}.rpm`;
+	const link = document.createElement('a');
+	link.href = cirrus_scope_base_url + cirrus_scope_filename;
+	link.textContent = cirrus_scope_filename;
+	link.target = '_blank';
+
+	const listItem = document.createElement('li');
+	listItem.appendChild(link);
+	list.appendChild(listItem);
 
 	linksContainer.appendChild(list);
 
@@ -183,4 +205,12 @@ async function provideLinks() {
 			"If you're prompted to configure your krb5.conf with a realm during installation, set this to your on-prem synced local Active Directory realm. If you do not have an on-prem synced Active Directory, you may leave this realm field empty. After installation, you must ensure that your krb5.conf contains an `includedir  /etc/krb5.conf.d` entry. Himmelblau will automatically configure your cloud realm in the /etc/krb5.conf.d directory.";
 		linksContainer.appendChild(item);
 	}
+
+	const debug_title = document.createElement('h3');
+	debug_title.textContent = 'Debugging Himmelblau';
+	linksContainer.appendChild(debug_title);
+
+	const item4 = document.createElement('p');
+	item4.textContent = `The purpose of the package ${cirrus_scope_filename} is for debugging authentication scenarios in Entra Id via libhimmelblau. A developer may request that you install this package for collecting network packet captures. See the cirrus-scope man page for instructions.`;
+	linksContainer.appendChild(item4);
 }

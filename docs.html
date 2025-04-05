@@ -755,38 +755,105 @@ group:     files systemd himmelblau
 
 <h5 id="toc_0.8.4.4">PAM Configuration</h5>
 
-<p>Himmelblau&#39;s PAM module can be configured automatically or manually:</p>
+<p>Himmelblau’s PAM module can be configured automatically using distribution-specific tools, through the <code>aad-tool</code> utility (v1.0.0+), or manually for advanced customization. This configuration enables systems to authenticate users using their Azure Entra ID credentials through PAM.</p>
 
-<ol dir="auto">
-<li><p><strong>Automatic Configuration:</strong></p>
+<ol>
+  <li>
+    <p><strong>Automatic Configuration:</strong></p>
+    <ul>
+      <li>
+        <p>On <strong>Ubuntu/Debian</strong>, use the <code>pam-auth-update</code> utility:</p>
+        <pre>sudo pam-auth-update</pre>
+        <p>Ensure the <strong>Azure authentication</strong> checkbox is enabled. After saving, verify that PAM files were updated correctly.</p>
+      </li>
+      <li>
+        <p>On <strong>openSUSE Tumbleweed</strong> or <strong>SUSE Linux Enterprise</strong>, use:</p>
+        <pre>pam-config --add --himmelblau</pre>
+      </li>
+    </ul>
+  </li>
 
-<ul dir="auto">
-<li><p>On Debian/Ubuntu, use the <code>pam-auth-update</code> utility:</p>
+  <li>
+    <p><strong>Configuration Using <code>aad-tool</code> (Himmelblau 1.0.0 and above):</strong></p>
+    <p>The <code>aad-tool configure-pam</code> command helps inject recommended PAM directives into the appropriate configuration files.</p>
 
-<pre>sudo pam-auth-update
-</pre></li>
-<li><p>On SUSE Linux Enterprise or openSUSE, use the <code>pam-config</code> utility:</p>
+    <p>By default, it performs a <strong>dry run</strong> — showing the changes it would make without modifying any files:</p>
+    <pre>sudo aad-tool configure-pam</pre>
 
-<pre>sudo pam-config --add --himmelblau
-</pre></li>
-</ul></li>
-<li><p><strong>Manual Configuration:</strong></p>
+    <p>To apply the changes, use the <code>--really</code> flag:</p>
+    <pre>sudo aad-tool configure-pam --really</pre>
 
-<ul dir="auto">
-<li>For manual setup, Himmelblau must be configured for the following PAM modules:
+    <p>To view verbose output, add <code>--debug</code>:</p>
+    <pre>sudo aad-tool configure-pam --really --debug</pre>
 
-<ul dir="auto">
-<li><strong>auth</strong>: Handles authentication.</li>
-<li><strong>account</strong>: Manages account-level access.</li>
-<li><strong>session</strong>: Establishes session-specific settings.</li>
-</ul></li>
-<li><p>Example configuration for <code>/etc/pam.d/common-auth</code> (or equivalent):</p>
+    <p>You can optionally specify custom target files instead of using the default files in <code>/etc/pam.d</code>:</p>
+    <ul>
+      <li><code>--auth-file &lt;PATH&gt;</code> – Target file for the <code>auth</code> stack (e.g., <code>common-auth</code>)</li>
+      <li><code>--account-file &lt;PATH&gt;</code> – Target file for the <code>account</code> stack</li>
+      <li><code>--session-file &lt;PATH&gt;</code> – Target file for the <code>session</code> stack</li>
+      <li><code>--password-file &lt;PATH&gt;</code> – Target file for the <code>password</code> stack</li>
+    </ul>
 
-<pre>auth    required    pam_himmelblau.so
-account required    pam_himmelblau.so
-session required    pam_himmelblau.so
-</pre></li>
-</ul></li>
+    <p>This is especially useful for testing or containerized environments where you don’t want to touch live PAM files:</p>
+
+    <pre>
+sudo aad-tool configure-pam \
+  --auth-file ./test_pam/common-auth \
+  --account-file ./test_pam/common-account \
+  --session-file ./test_pam/common-session \
+  --password-file ./test_pam/common-password
+    </pre>
+  </li>
+
+  <li>
+    <p><strong>Manual Configuration:</strong></p>
+    <p>For full control, you may manually configure the PAM stack. Ensure that <code>pam_himmelblau.so</code> is placed <strong>before</strong> <code>pam_unix.so</code> in <code>common-auth</code>, and always <strong>after</strong> modules like <code>pam_localuser.so</code>. This is important for Hello for Business and passwordless logins. Use the <code>ignore_unknown_user</code> option to prevent errors for local-only accounts.</p>
+
+    <ul>
+      <li>
+        <p><strong><code>/etc/pam.d/common-auth</code>:</strong></p>
+        <pre>
+auth        required      pam_env.so
+auth        [default=1 ignore=ignore success=ok] pam_localuser.so
+auth        sufficient    pam_himmelblau.so ignore_unknown_user
+auth        sufficient    pam_unix.so nullok try_first_pass
+auth        required      pam_deny.so
+        </pre>
+      </li>
+
+      <li>
+        <p><strong><code>/etc/pam.d/common-account</code>:</strong></p>
+        <pre>
+account    [default=1 ignore=ignore success=ok] pam_localuser.so
+account    sufficient    pam_himmelblau.so ignore_unknown_user
+account    sufficient    pam_unix.so
+account    required      pam_deny.so
+        </pre>
+      </li>
+
+      <li>
+        <p><strong><code>/etc/pam.d/common-session</code>:</strong></p>
+        <pre>
+session optional    pam_systemd.so
+session required    pam_limits.so
+session optional    pam_unix.so try_first_pass
+session optional    pam_umask.so
+session optional    pam_himmelblau.so
+session optional    pam_env.so
+        </pre>
+      </li>
+
+      <li>
+        <p><strong><code>/etc/pam.d/common-password</code>:</strong></p>
+        <pre>
+password    sufficient    pam_himmelblau.so ignore_unknown_user
+password    optional      pam_gnome_keyring.so use_authtok
+password    sufficient    pam_unix.so use_authtok nullok shadow try_first_pass
+password    required      pam_deny.so
+        </pre>
+      </li>
+    </ul>
+  </li>
 </ol>
 
 <h4 id="toc_0.8.5">Starting Himmelblau Services</h4>
@@ -933,66 +1000,109 @@ sudo systemctl restart sshd
 
 <p>Effective debugging is essential for resolving complex authentication issues. Himmelblau supports various methods for capturing and analyzing authentication traffic.</p>
 
-<h5 id="toc_0.9.3.4">Using <code>msal_example</code></h5>
+<h5 id="toc_0.9.3.1">Using <code>cirrus-scope</code> with <code>mitmproxy</code></h5>
 
-<p>The <code>msal_example</code> tool is a command-line utility available at <a href="https://github.com/himmelblau-idm/msal_example">https://github.com/himmelblau-idm/msal_example</a> for testing Azure Entra ID authentication flows.</p>
-
-<p><strong>Steps:</strong></p>
-
-<ol dir="auto">
-<li><p><strong>Run <code>msal_example</code> to Test OAuth2 Flows:</strong></p>
-
-<ul dir="auto">
-<li>Execute the <code>msal_example</code> tool. It automatically determines the required parameters such as authority URL and client ID by sending a federation provider request. No manual input is required.
-<pre>
-msal_example
-</pre></li>
-</ul></li>
-<li><p><strong>Check Output:</strong></p>
-
-<ul dir="auto">
-<li>Look for successful token acquisition or error messages that indicate misconfigurations.</li>
-</ul></li>
-</ol>
-
-<h5 id="toc_0.9.3.4">Capturing Network Traffic</h5>
-
-<p>Use a proxy tool like <code>mitmproxy</code> to inspect HTTPS traffic and identify potential issues with OAuth2 or Kerberos exchanges.</p>
+<p>The <code>cirrus-scope</code> tool, in conjunction with <code>mitmproxy</code>, allows for comprehensive testing and debugging of Azure Entra ID authentication flows.</p>
 
 <p><strong>Steps:</strong></p>
 
-<ol dir="auto">
-<li><p><strong>Set Up a Proxy:</strong></p>
-
-<ul dir="auto">
-<li>Install <code>mitmproxy</code> on your testing machine:
-<pre>
-sudo apt install mitmproxy  # Debian/Ubuntu
-sudo dnf install mitmproxy  # Fedora/RHEL
-</pre></li>
-</ul></li>
-<li><p><strong>Configure Himmelblau to Use the Proxy:</strong></p>
-
-<ul dir="auto">
-<li>Export the proxy URL as an environment variable:
-<pre>
-export HTTPS_PROXY=http://127.0.0.1:8080
-</pre></li>
-</ul></li>
-<li><p><strong>Start <code>mitmproxy</code>:</strong>
-<pre>
-mitmproxy --mode transparent
-</pre></p></li>
-<li><p><strong>Analyze Traffic:</strong></p>
-
-<ul dir="auto">
-<li>Examine the captured traffic for authentication requests and responses.</li>
-</ul></li>
+<ol>
+  <li>
+    <p><strong>Download and Install <code>cirrus-scope</code>:</strong></p>
+    <ul>
+      <li>Visit the Himmelblau downloads page: <a href="https://himmelblau-idm.org/downloads.html">https://himmelblau-idm.org/downloads.html</a></li>
+      <li>Select your Linux distribution from the list provided. If your distribution isn't listed, you can file an <a href="https://github.com/himmelblau-idm/himmelblau/issues">enhancement request</a>.</li>
+      <li>Follow the on-screen instructions to download and install the appropriate package for your system.</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Download and Extract <code>mitmproxy</code>:</strong></p>
+    <ul>
+      <li>Download <code>mitmproxy</code> from their official website and extract the binaries:
+        <pre>
+tar -xf mitmproxy-11.0.0-linux-x86_64.tar.gz
+        </pre>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Start <code>mitmweb</code>:</strong></p>
+    <ul>
+      <li>Run the following command to start <code>mitmweb</code>:
+        <pre>
+./mitmweb
+        </pre>
+        This starts <code>mitmweb</code> and opens a web interface for monitoring HTTP and HTTPS traffic.
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Install the <code>mitmproxy</code> CA Certificate:</strong></p>
+    <ul>
+      <li>On Ubuntu:
+        <pre>
+sudo cp $HOME/.mitmproxy/mitmproxy-ca-cert.pem /usr/local/share/ca-certificates/mitmproxy.crt
+sudo update-ca-certificates
+        </pre>
+      </li>
+      <li>On Fedora:
+        <pre>
+sudo cp $HOME/.mitmproxy/mitmproxy-ca-cert.pem /etc/pki/ca-trust/source/anchors/
+sudo update-ca-trust
+        </pre>
+      </li>
+      <li>On openSUSE Leap:
+        <pre>
+sudo cp $HOME/.mitmproxy/mitmproxy-ca-cert.pem /usr/share/pki/trust/anchors/mitmproxy.crt
+sudo update-ca-certificates
+        </pre>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Access the Web Interface:</strong></p>
+    <ul>
+      <li>Open your web browser and navigate to:
+        <pre>
+http://127.0.0.1:8081/
+        </pre>
+        You should see the <code>mitmweb</code> dashboard for viewing captured traffic.
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Run <code>cirrus-scope</code> with Proxy Enabled:</strong></p>
+    <ul>
+      <li>Execute the desired test command from <code>cirrus-scope</code>, routing its traffic through <code>mitmproxy</code> by setting the <code>HTTPS_PROXY</code> environment variable. For example:
+        <pre>
+HTTPS_PROXY=http://127.0.0.1:8080 cirrus-scope auth-test --name your_user@example.com
+        </pre>
+        You will be prompted to enter credentials interactively. For detailed logs, add the <code>--debug</code> flag:
+        <pre>
+HTTPS_PROXY=http://127.0.0.1:8080 cirrus-scope auth-test --name your_user@example.com --debug
+        </pre>
+        Other available test commands include:
+        <ul>
+          <li><code>enrollment-test</code>: Simulates device enrollment</li>
+          <li><code>refresh-token-acquire</code>: Acquires new access tokens using a refresh token</li>
+          <li><code>provision-hello-key-test</code>: Tests Hello for Business key provisioning</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Capture and Save the HAR File:</strong></p>
+    <ul>
+      <li>In the <code>mitmweb</code> dashboard, click on the "File" drop-down menu, then select "Save". Your browser will download a file called 'flows'.</li>
+      <li><strong>Important:</strong> Search the contents of the file for your password, as it will be present. Remove this password before sharing the file.</li>
+      <li>If the authentication was successful, there will also be a valid access token and refresh token present. These should also be removed or obfuscated. Search the file for JSON keys such as 'refresh_token' and 'access_token'.</li>
+    </ul>
+  </li>
 </ol>
 
 <h4 id="toc_0.9.4">Summary</h4>
 
-<p>This chapter provided guidance on resolving MFA-related SSH issues and debugging authentication traffic using tools like <code>msal_example</code> and <code>mitmproxy</code>. These troubleshooting techniques ensure that Himmelblau operates smoothly and securely in your environment. The next chapter will explore future directions and enhancements for Himmelblau.</p>
+<p>This section provided guidance on debugging authentication traffic using tools like <code>cirrus-scope</code> and <code>mitmproxy</code>. These troubleshooting techniques ensure that Himmelblau operates smoothly and securely in your environment. The next section will explore future directions and enhancements for Himmelblau.</p>
 
         </section>
     <footer>

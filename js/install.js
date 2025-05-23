@@ -77,6 +77,14 @@ async function provideLinks() {
 		link.textContent = filename;
 		link.target = '_blank';
 
+		if (pkg === 'himmelblau') {
+			link.addEventListener('click', () => {
+				if (typeof uet_report_conversion === 'function') {
+					uet_report_conversion();
+				}
+			});
+		}
+
 		const listItem = document.createElement('li');
 		listItem.appendChild(link);
 		list.appendChild(listItem);

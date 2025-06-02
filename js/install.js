@@ -79,8 +79,8 @@ async function provideLinks() {
 
 		if (pkg === 'himmelblau') {
 			link.addEventListener('click', () => {
-				if (typeof uet_report_conversion === 'function') {
-					uet_report_conversion();
+				if (typeof report_conversion === 'function') {
+					report_conversion(window.location.href);
 				}
 			});
 		}

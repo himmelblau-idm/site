@@ -333,9 +333,9 @@ default_ccache_name = DIR:/tmp/krb5cc_%{uid}
 
 <p>Himmelblau provides seamless authentication workflows that bridge the gap between Linux systems and Azure Entra ID. By leveraging protocols like OAuth2 and Kerberos, it ensures secure and efficient user authentication, supports single sign-on (SSO), and integrates with multi-factor authentication (MFA) mechanisms. This chapter outlines the main authentication workflows in Himmelblau, highlighting the steps involved and the components responsible for each.</p>
 
-<h4 id="toc_0.5.2">OAuth2 Authentication Workflow</h4>
+<h4 id="toc_0.5.2">Authentication Workflow</h4>
 
-<p>Himmelblau’s OAuth2-based authentication enables Linux systems to interact securely with Azure Entra ID. The workflow involves the following steps:</p>
+<p>Himmelblau enables Linux systems to interact securely with Azure Entra ID. The workflow involves the following steps:</p>
 
 <ol dir="auto">
 <li><strong>User Login Initiation:</strong>
@@ -370,6 +370,10 @@ default_ccache_name = DIR:/tmp/krb5cc_%{uid}
 </ul></li>
 </ol>
 
+<strong>About the Primary Refresh Token</strong>
+
+<p>Himmelblau requests a Primary Refresh Token (PRT) as part of the login process. This token allows the system to request further access tokens without repeatedly prompting the user for credentials. Microsoft documents this behavior loosely under MS-OAPXBC, but Himmelblau's implementation often reflects undocumented or corrected behavior discovered through packet traces from Windows.</p>
+
 <h4 id="toc_0.5.3">Kerberos Authentication Workflow</h4>
 
 <p>Himmelblau integrates Azure Entra ID’s Kerberos capabilities to support existing Kerberos-dependent applications. The following steps outline the process:</p>
@@ -399,7 +403,11 @@ default_ccache_name = DIR:/tmp/krb5cc_%{uid}
 
 <h4 id="toc_0.5.4">Multi-Factor Authentication (MFA) Integration</h4>
 
-<p>Himmelblau supports Azure Entra ID’s MFA capabilities, providing an additional layer of security. Common MFA methods include:</p>
+<p>Himmelblau supports Azure Entra ID’s MFA capabilities, providing an additional layer of security.</p>
+
+<p>Himmelblau emulates Azure Entra ID’s browser-based MFA flow using direct HTTP requests. This is necessary because native browser-based authentication is often not feasible on Linux login screens (e.g., GDM) or during SSH sessions. For compatibility, Himmelblau reproduces the web-based flow using GET and POST requests.</p>
+
+<p>Common MFA methods include:</p>
 
 <ul dir="auto">
 <li><strong>App-Based Notifications:</strong> Users approve login attempts via the Microsoft Authenticator app. Himmelblau also supports passwordless authentication with Microsoft Authenticator, as well as other authenticator apps like Google Authenticator, where users receive a push notification and are prompted to enter an entropy code. This prompt is seamlessly integrated into the login process through PAM.</li>
@@ -444,7 +452,19 @@ default_ccache_name = DIR:/tmp/krb5cc_%{uid}
 <li>Expired tokens are replaced automatically by <code>himmelblaud</code>, reducing administrative overhead.</li>
 </ul>
 
-<h4 id="toc_0.5.7">Summary</h4>
+<h4 id="toc_0.5.7">Linux Hello Authentication</h4>
+
+<p>Himmelblau supports a passwordless authentication feature called Linux Hello, modeled after Windows Hello for Business. This mechanism allows users to authenticate using a PIN, and in the future, biometric devices such as fingerprint readers or facial recognition.</p>
+
+<ul>
+  <li><strong>Enrollment:</strong> Users can enroll a Hello credential (e.g., PIN) only after completing an MFA-based login.</li>
+  <li><strong>Authentication:</strong> Future logins can use the Hello credential to prove possession of the secure key.</li>
+  <li><strong>Protocol Enforcement:</strong> Microsoft requires MFA for Hello enrollment. Password-only or device authorization grant (DAG) flows are insufficient.</li>
+</ul>
+
+<p>This enables fast, secure login without passwords—ideal for desktop environments. The use of Linux Hello is discouraged for remote sessions (e.g. ssh).</p>
+
+<h4 id="toc_0.5.8">Summary</h4>
 
 <p>Himmelblau’s authentication workflows provide a robust framework for integrating Azure Entra ID with Linux systems. By supporting OAuth2, Kerberos, MFA, and SSO, it ensures secure and seamless user experiences. The next chapter will delve into deployment best practices, covering setup strategies for different organizational needs.</p>
 
@@ -470,7 +490,11 @@ default_ccache_name = DIR:/tmp/krb5cc_%{uid}
 
 <h4 id="toc_0.6.3">Workflow for Device Registration</h4>
 
-<p>Himmelblau’s device registration process adheres to the MS-DRS protocol. Below is a detailed step-by-step breakdown:</p>
+<p>Himmelblau’s device registration process adheres to the <a href="https://github.com/himmelblau-idm/aad-join-spec/blob/main/aad-join-spec.md#ms-drs-device-registration-service">MS-DRS</a> protocol.</p>
+
+<p>Unlike Active Directory, which typically requires a manual device join by an administrator, Himmelblau automatically joins a Linux system to Azure Entra ID during the first user login. This process is transparent to the end user and uses the authenticated session to initiate the join.</p>
+
+<p>Below is a detailed step-by-step breakdown:</p>
 
 <ol dir="auto">
 <li><p><strong>Initiating the Registration Process:</strong></p>

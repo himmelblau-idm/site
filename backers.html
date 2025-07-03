@@ -52,24 +52,29 @@
 
 <section>
     <h2>Support Himmelblau – Become a Sponsor</h2>
-    <p>
-        Himmelblau is an open-source project dedicated to bringing seamless Azure Entra ID authentication to Linux. 
-        By becoming a Sponsor, you help sustain development, improve features, and keep Himmelblau independent and community-driven.
-    </p>
+<p>
+    Himmelblau is an open-source project dedicated to bringing seamless Azure Entra ID authentication to Linux. 
+    Your donation helps sustain development, improve features, and keep Himmelblau independent and community-driven.
+    Donations to Himmelblau are processed by <a href="https://www.spi-inc.org/">Software in the Public Interest (SPI)</a>,
+    a 501(c)(3) non-profit. This means your contributions are tax-deductible in the United States.
+</p>
     <h3>Why sponsor?</h3>
     <ul>
         <li>Ensure Himmelblau stays actively maintained and evolving.</li>
         <li>Support open-source authentication for Linux.</li>
         <li>Help keep Himmelblau free and independent for everyone.</li>
     </ul>
-    <p>
-        Starting at just $20/month, your support makes a real difference!
-    </p>
-    <p>
-        <strong>
-            👉 <a href="https://opencollective.com/himmelblau/contribute/sponsors-84876/checkout" target="_blank">Become a Sponsor</a>
-        </strong>
-    </p>
+<p>
+    <strong>
+        👉 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8GYKFLX9UNCH2" target="_blank">Become a Sponsor</a>
+    </strong>
+</p>
+<p style="font-size: 0.8em; color: #666;">
+    You can make your donation monthly by checking the “Make this a monthly donation” box on PayPal’s checkout page.
+</p>
+<p style="font-size: 0.8em; color: #666;">
+    Your donation is tax-deductible through SPI, a registered 501(c)(3) non-profit organization.
+</p>
 </section>
 
 <section id="backers-bounty">
@@ -88,14 +93,6 @@
     <p>
         <em>You’re not just donating—you’re actively driving Himmelblau’s evolution!</em>
     </p>
-    <p style="font-size: 0.7em; color: #666;">
-        Himmelblau utilizes the 'name' field in your Open Collective contribution to track the issue number. 
-        Please leave the issue number intact in this field. You may append your display name to this field if desired. 
-        Please <strong>sign out</strong> of Open Collective before making a Backer's Bounty contribution, otherwise your 
-        contribution will lose the issue tag. This is an unfortunate limitation of Open Collective contributions. 
-        If you have a problem, <a href="mailto:dmulder@himmelblau-idm.org">contact us</a> and we can manually assign 
-        your contribution to the intended issue number.
-    </p>
     <input type="text" id="issue-search" placeholder="Search by issue number or title...">
 </section>
 
@@ -105,9 +102,12 @@
 
         <script>
             let allIssues = []; // Will store all fetched issues
-            let contributionTotals = {}; // Summed contributions per issue
+            let contributionTotals = {
+		// Issue number: total,
+		// "60": 200,
+	    };
 
-            // 1. Fetch issues from GitHub
+            // Fetch issues from GitHub
             async function fetchIssues() {
                 const apiUrl = 'https://api.github.com/repos/himmelblau-idm/himmelblau/issues';
                 const response = await fetch(apiUrl);
@@ -119,71 +119,22 @@
                 return data.filter(item => !item.pull_request);
             }
 
-            // 2. Fetch contributions from Open Collective's GraphQL API
-            async function fetchContributions() {
-                const graphqlUrl = 'https://api.opencollective.com/graphql/v2';
-                const query = `
-                  query account($slug: String) {
-                    account(slug: $slug) {
-                      transactions(limit: 100, type: CREDIT) {
-                        nodes {
-                          amount {
-                            value
-                          }
-                          fromAccount {
-                            name
-                          }
-                          createdAt
-                        }
-                      }
-                    }
-                  }
-                `;
-                const variables = { slug: "himmelblau" };
-                const response = await fetch(graphqlUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query, variables })
-                });
-                const json = await response.json();
-                return json.data.account.transactions.nodes;
-            }
+function handleDonate(issueNumber, issueTitle) {
+    // 1. Open PayPal donation link in a new tab
+    const paypalUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8GYKFLX9UNCH2";
+    window.open(paypalUrl, "_blank");
 
-            // 3. Parse contributions with fallback mapping from createdAt timestamp
-            function parseContributions(contributions) {
-                const totals = {};
-                const manualMapping = {
-                    "2025-02-18T18:31:54.631Z": "60",
-                    "2025-04-23T10:19:19.914Z": "60",
-                    "2025-04-23T10:18:01.038Z": "60",
-                    // Add additional mappings as needed.
-                };
+    // 2. Build mailto link with subject + body
+    const subject = encodeURIComponent(`Donation for Himmelblau Issue #${issueNumber}: ${issueTitle}`);
+    const body = encodeURIComponent(`I've just contributed to Himmelblau, and I want my donation attributed to issue number ${issueNumber}.`);
 
-                contributions.forEach(tx => {
-                    let issueNum;
-                    const nameField = tx.fromAccount?.name || '';
-                    const match = nameField.match(/Contribution for Issue:\s*#(\d+)/);
-                    if (match) {
-                        issueNum = match[1];
-                    } else {
-                        const createdAt = tx.createdAt;
-                        if (manualMapping[createdAt]) {
-                            issueNum = manualMapping[createdAt];
-                        } else {
-                            console.log(`No mapping found for contribution at ${createdAt} with value $${tx.amount.value}`);
-                        }
-                    }
-                    if (issueNum) {
-                        const amount = parseFloat(tx.amount.value);
-                        if (!isNaN(amount)) {
-                            totals[issueNum] = (totals[issueNum] || 0) + amount;
-                        }
-                    }
-                });
-                return totals;
-            }
+    const mailto = `mailto:dmulder@himmelblau-idm.org?subject=${subject}&body=${body}`;
 
-            // 4. Render issues based on the current search filter
+    // 3. Open mailto link (usually opens default email client)
+    window.location.href = mailto;
+}
+
+            // Render issues based on the current search filter
             function renderIssues(issuesToRender) {
                 const issuesContainer = document.getElementById('issues-list');
                 issuesContainer.innerHTML = '';
@@ -201,8 +152,8 @@
                     const issueElement = document.createElement('div');
                     issueElement.innerHTML = `
                         <h3>${issue.title} <a href="${issue.html_url}" target="_blank">#${issueNumber}</a></h3>
-                        <p>Contributed: $${totalFunded.toFixed(2)}</p>
-                        <a class="button" href="https://opencollective.com/himmelblau/contribute/backers-bench-84925/checkout?name=Contribution%20for%20Issue:%20%23${issueNumber}%20-%20%3Cname%3E" target="_blank">Contribute</a>
+			<p>Contributed: $${totalFunded.toFixed(2)}</p>
+			<a class="button" onclick="handleDonate(${issueNumber}, '${issue.title}')">Donate</a>
                         <a class="button secondary" href="${issue.html_url}" target="_blank">View Details</a>
                     `;
                     issuesContainer.appendChild(issueElement);
@@ -214,7 +165,7 @@
                 }
             }
 
-            // 5. Filter issues by user input
+            // Filter issues by user input
             function filterIssues(searchTerm) {
                 const lowerTerm = searchTerm.toLowerCase();
                 const filtered = allIssues.filter(issue => {
@@ -225,11 +176,10 @@
                 renderIssues(filtered);
             }
 
-            // 6. Main logic: fetch data, parse, sort, then initial render + attach event listener
+            // Main logic: fetch data, parse, sort, then initial render + attach event listener
             document.addEventListener('DOMContentLoaded', async function() {
                 try {
-                    const [issues, contributions] = await Promise.all([fetchIssues(), fetchContributions()]);
-                    contributionTotals = parseContributions(contributions);
+                    const issues = await fetchIssues();
 
                     // Filter out pull requests by checking if item.pull_request is defined
                     allIssues = issues.filter(item => !item.pull_request);

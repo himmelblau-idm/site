@@ -246,8 +246,10 @@ a.button {
   border-radius: 5px;
   text-decoration: none;
   margin-right: 10px;
+  cursor: pointer;
 }
 a.button.secondary {
+  cursor: pointer;
   background-color: #008CBA;
 }
 a.button:hover {

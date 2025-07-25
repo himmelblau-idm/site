@@ -1,0 +1,12 @@
+site_name: Himmelblau Documentation
+theme:
+  name: readthedocs
+extra_javascript:
+  - js/distro_list.js
+plugins:
+  - search
+  - awesome-pages
+repo_url: https://github.com/himmelblau-idm/site.git
+repo_name: Himmelblau Documentation
+edit_uri: edit/main/mkdocs/docs
+site_url: https://himmelblau-idm.org/docs

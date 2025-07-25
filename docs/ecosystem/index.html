@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/ecosystem/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Ecosystem - Himmelblau Documentation</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Ecosystem";
+        var mkdocs_page_input_path = "ecosystem.md";
+        var mkdocs_page_url = "/docs/ecosystem/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Himmelblau Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../registration/">Device Registration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../integration/">Integration</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Ecosystem</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#core-features-and-benefits">Core Features and Benefits</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#azure-entra-id-integration">Azure Entra ID Integration</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#secure-token-storage-and-device-registration">Secure Token Storage and Device Registration</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#kerberos-support">Kerberos Support</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#single-sign-on-sso">Single Sign-On (SSO)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#supported-linux-distributions">Supported Linux Distributions</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#interoperability-with-microsoft-services">Interoperability with Microsoft Services</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Himmelblau Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Ecosystem</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/himmelblau-idm/site.git/edit/main/mkdocs/docs/ecosystem.md">Edit on Himmelblau Documentation</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="the-himmelblau-ecosystem">The Himmelblau Ecosystem</h1>
+<h2 id="overview">Overview</h2>
+<p>Himmelblau is more than just a login module — it’s a full ecosystem for managing identity integration between Azure Entra ID and Linux systems.</p>
+<hr />
+<h2 id="core-features-and-benefits">Core Features and Benefits</h2>
+<h3 id="azure-entra-id-integration">Azure Entra ID Integration</h3>
+<p>Himmelblau supports modern Azure Entra ID authentication flows:</p>
+<ul>
+<li>OAuth2 authorization with MS-OAPX and OAPXBC extensions</li>
+<li>Primary Refresh Token (PRT) issuance and renewal</li>
+<li>Support for multi-factor authentication (MFA), including:<ul>
+<li>Microsoft Authenticator</li>
+<li>FIDO2 hardware keys</li>
+<li>One-time passwords via SMS</li>
+<li>Temporary Access Pass</li>
+</ul>
+</li>
+</ul>
+<h3 id="secure-token-storage-and-device-registration">Secure Token Storage and Device Registration</h3>
+<ul>
+<li>All credentials and issued tokens are stored in encrypted, machine-bound storage</li>
+<li>SoftHSM and TPM backends are supported</li>
+<li>Seamless device registration with Azure Entra ID during first login</li>
+</ul>
+<h3 id="kerberos-support">Kerberos Support</h3>
+<p>Himmelblau retrieves and caches Ticket Granting Tickets (TGTs) from Azure’s cloud KDC, enabling:</p>
+<ul>
+<li>Secure SSO access to Kerberos-based applications</li>
+<li>Hybrid workflows that combine cloud and on-prem AD Kerberos services</li>
+</ul>
+<h3 id="single-sign-on-sso">Single Sign-On (SSO)</h3>
+<p>Via integration with Siemens' <code>linux-entra-sso</code>, Himmelblau enables:</p>
+<ul>
+<li>Firefox/Chrome Browser SSO for Microsoft 365 and Entra ID–protected apps</li>
+<li>Secure, refreshable token storage for long-lived sessions</li>
+</ul>
+<hr />
+<h2 id="supported-linux-distributions">Supported Linux Distributions</h2>
+<p>Himmelblau supports a broad range of Linux distributions, including:</p>
+<p><strong>Enterprise-focused:</strong></p>
+<ul>
+<li>SUSE Linux Enterprise (SLE)</li>
+<li>Red Hat Enterprise Linux (RHEL)</li>
+<li>Rocky Linux</li>
+</ul>
+<p><strong>Community-driven:</strong></p>
+<ul>
+<li>Ubuntu</li>
+<li>Debian</li>
+<li>Fedora</li>
+<li>openSUSE</li>
+<li>NixOS</li>
+</ul>
+<hr />
+<h2 id="interoperability-with-microsoft-services">Interoperability with Microsoft Services</h2>
+<p>By emulating Windows authentication flows and integrating directly with Microsoft APIs, Himmelblau enables Linux clients to:</p>
+<ul>
+<li>Authenticate to Microsoft 365 services (Exchange, SharePoint, Teams)</li>
+<li>Access Azure-based applications protected by Entra ID Conditional Access</li>
+<li>Report device state and compliance to Microsoft Intune (optional)</li>
+<li>Function in hybrid environments with both on-prem and cloud resources</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../integration/" class="btn btn-neutral float-left" title="Integration"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../architecture/" class="btn btn-neutral float-right" title="Architecture">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
+        </span>
+    
+    
+      <span><a href="../integration/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../architecture/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../js/distro_list.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

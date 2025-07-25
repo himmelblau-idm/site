@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Removing all Hello PINs & cached PRTs on a Himmelblau host - Himmelblau Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Removing all Hello PINs \u0026 cached PRTs on a Himmelblau host";
+        var mkdocs_page_input_path = "troubleshooting/Removing-all-Hello-PINs-\u0026-cached-PRTs-on-a-Himmelblau-host.md";
+        var mkdocs_page_url = "/docs/troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Himmelblau Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../registration/">Device Registration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../integration/">Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../ecosystem/">Ecosystem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Himmelblau Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Troubleshooting</li>
+      <li class="breadcrumb-item active">Removing all Hello PINs & cached PRTs on a Himmelblau host</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/himmelblau-idm/site.git/edit/main/mkdocs/docs/troubleshooting/Removing-all-Hello-PINs-&-cached-PRTs-on-a-Himmelblau-host.md">Edit on Himmelblau Documentation</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="overview">Overview</h2>
+<p>Hello PINs (and associated keys) for Himmelblau are stored in the SQLite database:</p>
+<pre><code>/var/cache/himmelblaud/himmelblau.cache.db
+</code></pre>
+<p>They are stored and encrypted as entries in the <code>hsm_data_t</code> table with keys like:</p>
+<ul>
+<li><code>&lt;user&gt;/hello</code></li>
+<li><code>&lt;user&gt;/hello_decoupled</code></li>
+<li><code>&lt;user&gt;/hello_prt</code></li>
+</ul>
+<p>Where <code>&lt;user&gt;</code> is the full UPN (e.g. <code>alice@domain.com</code>).</p>
+<p>This guide provides a script to remove <strong>all</strong> Hello PINs (regular &amp; decoupled) and cached PRTs, regardless of the user.</p>
+<hr />
+<h2 id="what-exactly-gets-deleted">What exactly gets deleted?</h2>
+<table>
+<thead>
+<tr>
+<th>Key pattern</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>%/hello</code></td>
+<td>Hello PIN (normal, linked to Entra Id)</td>
+</tr>
+<tr>
+<td><code>%/hello_decoupled</code></td>
+<td>Hello PIN (offline / decoupled, for DAG MFA)</td>
+</tr>
+<tr>
+<td><code>%/hello_prt</code></td>
+<td>Cached PRT for offline login with SSO</td>
+</tr>
+</tbody>
+</table>
+<p>This ensures the host no longer has stored Hello PINs or cached tokens, forcing fresh authentication.</p>
+<hr />
+<h2 id="the-cleanup-script">The cleanup script</h2>
+<p>Below is a simple shell script that will safely delete these keys using <code>sqlite3</code>.
+It requires root privileges because <code>/var/cache/himmelblaud/himmelblau.cache.db</code> is owned by the <code>himmelblaud</code> user.</p>
+<blockquote>
+<p>💡 <strong>Make sure the Himmelblau daemon is stopped while running this, to avoid database locking issues.</strong></p>
+<p><code>sudo systemctl stop himmelblaud</code></p>
+</blockquote>
+<pre><code>#!/usr/bin/env bash
+set -euo pipefail
+
+DB_PATH=&quot;/var/cache/himmelblaud/himmelblau.cache.db&quot;
+
+if [[ ! -f &quot;$DB_PATH&quot; ]]; then
+     echo &quot;Error: Database not found at $DB_PATH&quot;
+     exit 1
+fi
+
+echo &quot;Removing all Hello PINs and cached PRTs from $DB_PATH ...&quot;
+
+sqlite3 &quot;$DB_PATH&quot; &lt;&lt;EOF
+DELETE FROM hsm_data_t WHERE key LIKE '%/hello';
+DELETE FROM hsm_data_t WHERE key LIKE '%/hello_decoupled';
+DELETE FROM hsm_data_t WHERE key LIKE '%/hello_prt';
+EOF
+
+echo &quot;Cleanup completed.&quot;
+</code></pre>
+<hr />
+<h2 id="how-to-use">How to use</h2>
+<ol>
+<li><strong>Save the script</strong> to a file, e.g. <code>remove_himmelblau_hello_pins.sh</code></li>
+<li>
+<p><strong>Make it executable:</strong></p>
+<p><code>chmod +x remove_himmelblau_hello_pins.sh</code></p>
+</li>
+<li>
+<p><strong>Stop Himmelblau daemon:</strong></p>
+<p><code>sudo systemctl stop himmelblaud</code></p>
+</li>
+<li>
+<p><strong>Run the script:</strong></p>
+<p><code>sudo ./remove_himmelblau_hello_pins.sh</code></p>
+</li>
+<li>
+<p><strong>Restart Himmelblau daemon:</strong></p>
+<p><code>sudo systemctl start himmelblaud</code></p>
+</li>
+</ol>
+<hr />
+<h2 id="notes-for-himmelblau-versions">Notes for Himmelblau versions</h2>
+<table>
+<thead>
+<tr>
+<th>Himmelblau Version</th>
+<th>Key types present</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.9.x</td>
+<td>Only <code>%/hello</code> (regular PINs)</td>
+</tr>
+<tr>
+<td>&gt;=1.0.x</td>
+<td><code>%/hello</code>, <code>%/hello_decoupled</code>, <code>%/hello_prt</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>Done!</strong>
+The host is now wiped of all Hello PINs and cached PRTs.
+New PIN enrollments or sign-ins will need to occur on next use.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/" class="btn btn-neutral float-left" title="OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../Testing-Himmelblau-Developer-Builds-with-Packet-Capture/" class="btn btn-neutral float-right" title="Testing Himmelblau Developer Builds with Packet Capture">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
+        </span>
+    
+    
+      <span><a href="../OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../Testing-Himmelblau-Developer-Builds-with-Packet-Capture/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/distro_list.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="None" /><link rel="canonical" href="https://himmelblau-idm.org/docs/" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>Himmelblau Documentation</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Quickstart";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = "/docs/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> Himmelblau Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Quickstart</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#get-started">Get Started</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#supported-linux-distributions">Supported Linux Distributions</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#installing-himmelblau">Installing Himmelblau</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#fedora-and-rocky-linux">Fedora and Rocky Linux:</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#opensusesuse-linux-enterprise">openSUSE/SUSE Linux Enterprise:</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#debianubuntu">Debian/Ubuntu:</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#configuring-himmelblau">Configuring Himmelblau</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#run-the-daemon">Run the daemon</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#disable-nscd">Disable nscd</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#setup-nss">Setup NSS</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#setup-pam">Setup PAM</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#enrolling-the-device-and-hello-pin">Enrolling the Device and Hello PIN</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="registration/">Device Registration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="integration/">Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="ecosystem/">Ecosystem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="advanced/Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="advanced/Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="troubleshooting/MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">Himmelblau Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Quickstart</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/himmelblau-idm/site.git/edit/main/mkdocs/docs/index.md">Edit on Himmelblau Documentation</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="quickstart">Quickstart</h1>
+<p><strong>Himmelblau</strong> is an open-source authentication framework that brings Microsoft Entra ID login, policy enforcement, and Hello PIN support to Linux systems. This documentation will guide you through installation, configuration, and best practices for integrating Himmelblau into your environment.</p>
+<h2 id="get-started">Get Started</h2>
+<ul>
+<li>📥 <a href="#installing-himmelblau">Installation Guide</a></li>
+<li>⚙️ <a href="#configuring-himmelblau">Configuration Reference</a></li>
+<li>🔐 <a href="#setup-nss">NSS and PAM Setup</a></li>
+<li>🧠 <a href="#enrolling-the-device-and-hello-pin">Understanding Hello PIN and Enrollment</a></li>
+</ul>
+<h2 id="supported-linux-distributions">Supported Linux Distributions</h2>
+<div id="supported-distros">
+  Loading supported distributions...
+</div>
+
+<p>The following distributions have packages upstream:</p>
+<table>
+<thead>
+<tr>
+<th>Distribution</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>openSUSE</td>
+<td>Tumbleweed</td>
+</tr>
+<tr>
+<td>SUSE Linux Enterprise</td>
+<td>15 SP7</td>
+</tr>
+</tbody>
+</table>
+<h2 id="installing-himmelblau">Installing Himmelblau</h2>
+<p>Himmelblau provides the necessary tools and utilities to enable authentication with Azure Entra ID.</p>
+<p><a href="https://himmelblau-idm.org/downloads.html">Download the packages for your distribution</a>, and install them using your flavor of package manager:</p>
+<hr />
+<h3 id="fedora-and-rocky-linux">Fedora and Rocky Linux:</h3>
+<pre><code class="language-bash">sudo dnf install ./himmelblau-0.8.0-1.x86_64-fedora41.rpm \
+                 ./himmelblau-sshd-config-0.8.0-1.x86_64-fedora41.rpm \
+                 ./himmelblau-sso-0.8.0-1.x86_64-fedora41.rpm \
+                 ./nss-himmelblau-0.8.0-1.x86_64-fedora41.rpm \
+                 ./pam-himmelblau-0.8.0-1.x86_64-fedora41.rpm
+</code></pre>
+<hr />
+<h3 id="opensusesuse-linux-enterprise">openSUSE/SUSE Linux Enterprise:</h3>
+<pre><code class="language-bash">sudo zypper install ./himmelblau-0.8.0-1.x86_64-sle15sp6.rpm \
+                    ./himmelblau-sshd-config-0.8.0-1.x86_64-sle15sp6.rpm \
+                    ./himmelblau-sso-0.8.0-1.x86_64-sle15sp6.rpm \
+                    ./nss-himmelblau-0.8.0-1.x86_64-sle15sp6.rpm \
+                    ./pam-himmelblau-0.8.0-1.x86_64-sle15sp6.rpm
+</code></pre>
+<hr />
+<h3 id="debianubuntu">Debian/Ubuntu:</h3>
+<pre><code class="language-bash">sudo apt install ./himmelblau_0.8.0-debian12_amd64.deb \
+                 ./himmelblau-sshd-config_0.8.0-debian12_amd64.deb \
+                 ./himmelblau-sso_0.8.0-debian12_amd64.deb \
+                 ./nss-himmelblau_0.8.0-debian12_amd64.deb \
+                 ./pam-himmelblau_0.8.0-debian12_amd64.deb
+</code></pre>
+<hr />
+<h2 id="configuring-himmelblau">Configuring Himmelblau</h2>
+<p>To enable authentication, you must configure the <code>domains</code> option in the <code>/etc/himmelblau/himmelblau.conf</code> file. This setting determines which domains are permitted to authenticate to the host. You MUST only specify the primary domain from each tenant.
+All other configuration options are optional.</p>
+<pre><code class="language-ini">[global]
+domains = contoso.onmicrosoft.com
+</code></pre>
+<p><strong>Note:</strong> Leaving the <code>pam_allow_groups</code> option unset in the <code>/etc/himmelblau/himmelblau.conf</code> file <em>permits all users to authenticate</em>.</p>
+<p><strong>Note:</strong> On Ubuntu, you should additionally set <code>use_etc_skel</code> to <code>true</code> and configure <code>home_attr</code> and <code>home_alias</code> to match (I recommend using the <code>CN</code> attribute). These parameters are necessary, otherwise Ubuntu's snaps will fail to execute. These settings are set by default using the Himmelblau project Debian/Ubuntu packages.</p>
+<pre><code class="language-ini">[global]
+home_attr = CN
+home_alias = CN
+use_etc_skel = true
+</code></pre>
+<h3 id="run-the-daemon">Run the daemon</h3>
+<p>Enable and start the <code>himmelblaud</code> and <code>himmelblaud-tasks</code> daemons. The <code>himmelblaud</code> daemon communicates with Entra ID and facilitates device, Hello PIN enrollment, and authentication. The <code>himmelblaud-tasks</code> daemon is responsible for authenticated tasks, such as creating the users home directory.</p>
+<pre><code class="language-bash">systemctl enable himmelblaud himmelblaud-tasks
+systemctl start himmelblaud himmelblaud-tasks
+</code></pre>
+<h3 id="disable-nscd">Disable nscd</h3>
+<p>It is recommended that the Name Service Cache daemon (<code>nscd</code>) be disabled.</p>
+<p>The nscd daemon caches name service lookups, including user and group information obtained from sources like <code>/etc/passwd</code> and <code>/etc/group</code>. When integrating with Azure Entra ID, it's important to ensure that the most up-to-date user and group information is consistently retrieved from the directory. Disabling nscd helps avoid potential inconsistencies that may arise from cached data not reflecting changes made in Azure Entra ID.</p>
+<pre><code class="language-bash">systemctl stop nscd
+systemctl disable nscd
+systemctl mask nscd
+</code></pre>
+<h3 id="setup-nss">Setup NSS</h3>
+<p>Configuring NSS (Name Service Switch) is essential in integrating Linux hosts with Azure Entra ID using Himmelblau. By configuring NSS to include <code>himmelblau</code> alongside sources such as <code>compat</code>, <code>systemd</code>, etc., the system knows to query Azure Entra ID for user and group information.</p>
+<p>The NSS configuration file is found at <code>/etc/nsswitch.conf</code>. The <code>himmelblau</code> NSS module name should be appended to the <code>passwd</code>, <code>group</code> and <code>shadow</code> entries.</p>
+<pre><code class="language-conf">passwd:     compat systemd himmelblau
+group:      compat systemd himmelblau
+shadow:     compat systemd himmelblau
+</code></pre>
+<h3 id="setup-pam">Setup PAM</h3>
+<p>PAM enables flexible authentication mechanisms by allowing administrators to define authentication policies through modular components. Configuring PAM for Azure Entra ID that users can authenticate using their Azure Entra ID credentials. By configuring PAM to include the Himmelblau module, authentication requests are directed to Azure Entra ID.</p>
+<p>To configure Himmelblau for PAM on openSUSE Tumbleweed, simply use pam-config:</p>
+<pre><code class="language-bash">pam-config --add --himmelblau
+</code></pre>
+<p>To configure Himmelblau for PAM on Ubuntu/Debian distros:</p>
+<pre><code class="language-bash">sudo pam-auth-update
+</code></pre>
+<p>Then ensure the <code>Azure authentication</code> checkbox is set.</p>
+<p>Check the pam files afterward to ensure the configuration was successful.</p>
+<p>Otherwise configure pam manually:</p>
+<p>In <code>/etc/pam.d/common-auth</code>, ensure that the <code>pam_himmelblau.so</code> module is placed after other authentication methods (such as <code>pam_unix.so</code>). Ensure that other authentication modules are not set to <code>required</code>, as this could cause authentication to fail prior to PAM communicating with Entra ID. Include the <code>ignore_unknown_user</code> option for Himmelblau. Ensure <code>pam_deny.so</code> is placed after all modules, so that unknown users are not implicitly allowed.</p>
+<p><strong>Note:</strong> If you intend to use Hello or Passwordless authentication, it's recommended that <code>pam_himmelblau.so</code> be placed before <code>pam_unix.so</code> in the pam <code>auth</code> stack (but always after <code>pam_localuser.so</code>), otherwise <code>pam_unix</code> will unnecessarily prompt for a password.</p>
+<pre><code class="language-pam">auth        required      pam_env.so
+auth        [default=1 ignore=ignore success=ok] pam_localuser.so
+auth        sufficient    pam_unix.so nullok try_first_pass
+auth        sufficient    pam_himmelblau.so ignore_unknown_user
+auth        required      pam_deny.so
+</code></pre>
+<p>Configure <code>/etc/pam.d/common-account</code> in a similar manner.</p>
+<pre><code class="language-pam">account    [default=1 ignore=ignore success=ok] pam_localuser.so
+account    sufficient    pam_unix.so
+account    sufficient    pam_himmelblau.so ignore_unknown_user
+account    required      pam_deny.so
+</code></pre>
+<p>In <code>/etc/pam.d/common-session</code>, set <code>pam_himmelblau.so</code> as an optional module.</p>
+<pre><code class="language-pam">session optional    pam_systemd.so
+session required    pam_limits.so
+session optional    pam_unix.so try_first_pass
+session optional    pam_umask.so
+session optional    pam_himmelblau.so
+session optional    pam_env.so
+</code></pre>
+<p>In <code>/etc/pam.d/common-password</code>, set <code>pam_himmelblau.so</code> as sufficient.</p>
+<pre><code class="language-pam">password    sufficient  pam_himmelblau.so ignore_unknown_user
+password        optional        pam_gnome_keyring.so    use_authtok
+password    sufficient  pam_unix.so use_authtok nullok shadow try_first_pass 
+password    required    pam_deny.so
+</code></pre>
+<h2 id="enrolling-the-device-and-hello-pin">Enrolling the Device and Hello PIN</h2>
+<p>A Windows Hello PIN offers a secure and convenient authentication method by leveraging strong encryption, local authentication capabilities, and integration with Entra ID. By setting a PIN on a soft TPM object and unlocking it securely, users can authenticate to their devices and Azure services with confidence in the security of their credentials.</p>
+<p>If you're coming from using Active Directory, you're familiar with a device join. In Azure Entra ID, enrollment (device join) is performed by individual users who can enroll a <a href="https://learn.microsoft.com/en-us/mem/intune/enrollment/device-limit-intune-azure#microsoft-entra-device-limit">maximum of 50 devices each (by default)</a>. Instead of being performed as an administrative action, enrollment happens at authentication time, and the first user to authenticate to a device becomes the owner of the device in Entra ID. Subsequent users who are authorized may authenticate to the device, but will not <em>own</em> the device. In a workplace setting, administrators would be responsible for configuring the himmelblau.conf file, as well as pam and nss, but enrollment would be performed by the user when they receive the device.</p>
+<pre><code>opensuse-himmelblau login: tux@contoso.onmicrosoft.com
+Password: 
+Please type in the code displayed on your authenticator app from your device:
+Code: 
+Set up a PIN
+ A Hello PIN is a fast, secure way to signin to your device, apps, and services.
+New PIN: 
+Confirm PIN: 
+Have a lot of fun...
+tux@contoso.onmicrosoft.com@opensuse-himmelblau:~&gt;
+</code></pre>
+<p>To enroll your device in Entra ID:</p>
+<ol>
+<li>Login:<ul>
+<li>At the login prompt, enter your username in the format tux@contoso.onmicrosoft.com.</li>
+<li>Enter your password when prompted.</li>
+</ul>
+</li>
+<li>MFA:<ul>
+<li>You'll be prompted to provide multi-factor authentication, using your prefered method.</li>
+<li>Your device is now enrolled in Entra ID.</li>
+</ul>
+</li>
+<li>Set up a PIN:<ul>
+<li>You'll be prompted to set up a PIN for Windows Hello. This PIN serves as a fast and secure way to sign in to your device, apps, and services.</li>
+<li>Your PIN must be between 6 and 32 characters in length.</li>
+<li>Enter a new PIN of your choice when prompted.</li>
+<li>Confirm the new PIN by entering it again.</li>
+</ul>
+</li>
+<li>Completion:<ul>
+<li>You are now enrolled in Windows Hello PIN authentication.</li>
+</ul>
+</li>
+</ol>
+<p>Ensure that you choose a strong and memorable PIN to maintain the security of your device. Additionally, keep your PIN confidential and do not share it with others to prevent unauthorized access to your device and associated services. Your PIN is unique to this host, and will not effect authentication to other hosts and Azure services.</p>
+<p>You can now use your newly set up PIN to authenticate and access your device.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="installation/" class="btn btn-neutral float-right" title="Installation">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
+        </span>
+    
+    
+    
+      <span><a href="installation/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="js/distro_list.js"></script>
+      <script src="search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2025-07-25 21:14:14.948251+00:00
+-->

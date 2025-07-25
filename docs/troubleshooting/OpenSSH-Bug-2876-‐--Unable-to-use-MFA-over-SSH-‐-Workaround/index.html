@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround - Himmelblau Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "OpenSSH Bug 2876 \u2010  Unable to use MFA over SSH \u2010 Workaround";
+        var mkdocs_page_input_path = "troubleshooting/OpenSSH-Bug-2876-\u2010--Unable-to-use-MFA-over-SSH-\u2010-Workaround.md";
+        var mkdocs_page_url = "/docs/troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Himmelblau Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../registration/">Device Registration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../integration/">Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../ecosystem/">Ecosystem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#problem-behavior">Problem Behavior</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#local-login-working-as-expected">Local Login (Working as Expected)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#remote-ssh-login-delayed-mfa-prompt">Remote SSH Login (Delayed MFA Prompt)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#upstream-status">Upstream Status</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#downstream-fixes">Downstream Fixes</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Himmelblau Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Troubleshooting</li>
+      <li class="breadcrumb-item active">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/himmelblau-idm/site.git/edit/main/mkdocs/docs/troubleshooting/OpenSSH-Bug-2876-‐--Unable-to-use-MFA-over-SSH-‐-Workaround.md">Edit on Himmelblau Documentation</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="summary-of-bug-2876">Summary of Bug 2876</h2>
+<p><strong>Bug 2876</strong> in OpenSSH pertains to an issue with PAM info messages not being flushed to the console until further interaction is required. This leads to problems in scenarios where multiple authentication prompts are expected, such as with Microsoft Authenticator's Push MFA.</p>
+<h3 id="problem-behavior">Problem Behavior</h3>
+<p>When attempting to authenticate via SSH with an account that requires <strong>Microsoft Authenticator (Push) MFA</strong>, the prompt displaying the number to enter into the app is delayed or not shown until after the initial authentication fails. This leads to confusion, as the user receives the MFA push notification on their device but cannot complete the authentication due to the missing prompt.</p>
+<h4 id="local-login-working-as-expected">Local Login (Working as Expected)</h4>
+<p>When logging in locally (e.g., via <code>su -l</code>), the password prompt and the MFA number prompt are displayed as expected, and the user is able to complete the login process:</p>
+<pre><code>admin@dev01:~$ su -l user@domain.onmicrosoft.com
+Password:
+Open your Authenticator app, and enter the number '73' to sign in.
+user@domain.onmicrosoft.com@dev01:~$ whoami
+user@domain.onmicrosoft.com
+</code></pre>
+<h4 id="remote-ssh-login-delayed-mfa-prompt">Remote SSH Login (Delayed MFA Prompt)</h4>
+<p>When logging in remotely via SSH, only the password prompt is shown initially, and the MFA number prompt is delayed until the authentication fails:</p>
+<pre><code>localuser@workstation:~$ ssh user@domain.onmicrosoft.com@dev01
+(user@domain.onmicrosoft.com@dev01) Password:
+## Note: The MFA push notification is received, but no number is shown to complete the authentication.
+(user@domain.onmicrosoft.com@dev01) Open your Authenticator app, and enter the number '59' to sign in.
+Password: ^C
+</code></pre>
+<p>This behavior disrupts the MFA flow, as the number needed to complete the login is not shown to the user until the session has already failed.</p>
+<h3 id="upstream-status">Upstream Status</h3>
+<p>The fix for this issue has been proposed in <a href="https://github.com/openssh/openssh-portable/pull/452">Pull Request 452 on GitHub</a>, but the upstream OpenSSH community has been slow to review and merge the patch. This means that users on most systems will continue to face this issue unless they apply the fix downstream.</p>
+<h3 id="downstream-fixes">Downstream Fixes</h3>
+<p><strong>openSUSE</strong> and <strong>Ubuntu</strong> have both applied the patch in their respective distributions. Users running OpenSSH on these systems should be free of this bug on recent versions of the distributions.</p>
+<h2 id="working-around-bug-2876-in-himmelblau-introduced-in-himmelblau-060">Working Around Bug 2876 in Himmelblau (introduced in Himmelblau 0.6.0)</h2>
+<p>This bug can cause significant disruption to SSH-based logins. If you're using a system affected by Bug 2876 and the patch has not been applied upstream, you can work around the issue by configuring the <code>pam_himmelblau.so</code> module with the <code>mfa_poll_prompt</code> option. This forces the prompt to be shown to the user at the appropriate time.</p>
+<h3 id="step-by-step-instructions">Step-by-Step Instructions</h3>
+<ol>
+<li>
+<p><strong>Locate the PAM Configuration</strong>:
+    See the <a href="https://github.com/himmelblau-idm/himmelblau/wiki#setup-pam">Himmelblau instructions for configuring PAM</a>. You could apply a targeted work around by modifying the file <code>/etc/pam.d/sshd</code>.</p>
+</li>
+<li>
+<p><strong>Add the <code>mfa_poll_prompt</code> Option</strong>:
+    To avoid the prompt delay caused by Bug 2876, modify the PAM configuration for Himmelblau by adding the <code>mfa_poll_prompt</code> option to the <code>pam_himmelblau.so</code> module.</p>
+<p>Example PAM configuration:</p>
+<p><code>auth     required    pam_himmelblau.so   ignore_unknown_user mfa_poll_prompt</code></p>
+</li>
+<li>
+<p><strong>Test the Setup</strong>:
+    Attempt an SSH login using an account with Microsoft Authenticator Push MFA enabled and ensure that the MFA number prompt is displayed as expected.</p>
+</li>
+</ol>
+<p>The <code>mfa_poll_prompt</code> option in the workaround introduces a "Press enter to continue" prompt during the MFA flow, which forces user interaction. This interaction triggers OpenSSH to flush its buffered output, causing the previously delayed MFA number prompt to be displayed. As a result, the user can view the MFA prompt and complete the authentication process without waiting for a failed login attempt.</p>
+<p>Here’s an example of what the login process will look like to the user with the workaround in place:</p>
+<pre><code>localuser@workstation:~$ ssh user@domain.onmicrosoft.com@dev01
+(user@domain.onmicrosoft.com@dev01) Password:
+Open your Authenticator app, and enter the number '59' to sign in.
+Press enter to continue
+## Note: The user must now press enter to continue the MFA authentication.
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../MS-specs-which-Himmelblau-uses/" class="btn btn-neutral float-left" title="MS specs which Himmelblau uses"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/" class="btn btn-neutral float-right" title="Removing all Hello PINs & cached PRTs on a Himmelblau host">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
+        </span>
+    
+    
+      <span><a href="../MS-specs-which-Himmelblau-uses/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/distro_list.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync - Himmelblau Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync";
+        var mkdocs_page_input_path = "advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync.md";
+        var mkdocs_page_url = "/docs/advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Himmelblau Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../registration/">Device Registration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../integration/">Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../ecosystem/">Ecosystem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Himmelblau Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Advanced Topics</li>
+      <li class="breadcrumb-item active">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/himmelblau-idm/site.git/edit/main/mkdocs/docs/advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync.md">Edit on Himmelblau Documentation</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="overview"><strong>Overview</strong></h2>
+<p>This guide explains how to configure Microsoft Entra Connect Sync to synchronize Unix attributes (<code>uidNumber</code>, <code>gidNumber</code>, <code>loginShell</code>, <code>unixHomeDirectory</code>, etc.) from an on-premises Active Directory to an existing <strong>Azure Entra ID</strong> instance. This is essential for Linux authentication solutions like Himmelblau that rely on Unix attributes stored in AD.
+This guide assumes that Microsoft Entra Connect is already installed and configured. If not, <a href="https://github.com/himmelblau-idm/himmelblau/wiki/Syncing-Active-Directory-with-Azure-Entra-ID">follow the instructions in this wiki</a> to configure Microsoft Entra Connect.</p>
+<hr />
+<h2 id="prerequisites"><strong>Prerequisites</strong></h2>
+<ul>
+<li>A <strong>Windows Server</strong> with <strong>Active Directory Domain Services (AD DS)</strong> installed and configured.</li>
+<li>A configured <strong>Active Directory domain</strong> with Unix attributes (<code>uidNumber</code>, <code>gidNumber</code>, <code>unixHomeDirectory</code>, <code>loginShell</code>, etc.) assigned to users and groups.</li>
+<li>An <strong>Azure Entra ID</strong> tenant.</li>
+<li><strong><a href="https://www.microsoft.com/en-us/download/details.aspx?id=47594">Microsoft Entra Connect Sync</a></strong> installed on a domain-joined Windows Server.</li>
+</ul>
+<hr />
+<h2 id="step-by-step-configuration"><strong>Step-by-Step Configuration</strong></h2>
+<h3 id="1-open-microsoft-entra-connect-sync"><strong>1. Open Microsoft Entra Connect Sync</strong></h3>
+<ol>
+<li>Launch <strong>Microsoft Entra Connect Sync</strong> from the <strong>Start Menu</strong>.</li>
+<li>Click <strong>"Configure"</strong> to begin.</li>
+</ol>
+<p><img alt="Microsoft Entra Connect Sync Welcome" src="../ad-sync1.png" /></p>
+<hr />
+<h3 id="2-customize-synchronization-options"><strong>2. Customize Synchronization Options</strong></h3>
+<ol>
+<li>Select <strong>"Customize synchronization options"</strong> and click <strong>Next</strong>.</li>
+</ol>
+<p><img alt="Customize Synchronization Options" src="../ad-sync2.png" /></p>
+<hr />
+<h3 id="3-connect-to-microsoft-entra-id"><strong>3. Connect to Microsoft Entra ID</strong></h3>
+<ol>
+<li>Enter your <strong>Azure Entra ID administrator credentials</strong> (Global Admin or Hybrid Identity Admin).</li>
+</ol>
+<p><img alt="Connect to Microsoft Entra ID" src="../ad-sync3.png" /></p>
+<ol>
+<li>Sign in when prompted.</li>
+</ol>
+<p><img alt="Sign in to Entra ID" src="../ad-sync4.png" /></p>
+<hr />
+<h3 id="4-connect-to-active-directory"><strong>4. Connect to Active Directory</strong></h3>
+<ol>
+<li>Verify that the on-premises <strong>Active Directory domain (forest)</strong> is connected.</li>
+<li>Click <strong>Next</strong>.</li>
+</ol>
+<p><img alt="Connect Active Directory" src="../ad-sync5.png" /></p>
+<hr />
+<h3 id="5-configure-domain-and-ou-filtering"><strong>5. Configure Domain and OU Filtering</strong></h3>
+<ol>
+<li>Choose whether to sync <strong>all domains and OUs</strong> or only specific OUs.</li>
+<li>Click <strong>Next</strong>.</li>
+</ol>
+<p><img alt="Domain and OU Filtering" src="../ad-sync6.png" /></p>
+<hr />
+<h3 id="6-enable-directory-extension-attribute-sync"><strong>6. Enable Directory Extension Attribute Sync</strong></h3>
+<ol>
+<li>Ensure <strong>"Directory extension attribute sync"</strong> is <strong>checked</strong>.</li>
+<li>Click <strong>Next</strong>.</li>
+</ol>
+<p><img alt="Enable Directory Extension Attribute Sync" src="../ad-sync7.png" /></p>
+<hr />
+<h3 id="7-select-unix-attributes-for-synchronization"><strong>7. Select Unix Attributes for Synchronization</strong></h3>
+<ol>
+<li>In the <strong>Directory Extensions</strong> step, select the following attributes:</li>
+<li><strong><code>uidNumber</code> (user)</strong></li>
+<li><strong><code>gidNumber</code> (user)</strong> (the user's primary group attribute)</li>
+<li><strong><code>gidNumber</code> (group)</strong></li>
+<li><strong><code>loginShell</code> (user)</strong></li>
+<li><strong><code>unixHomeDirectory</code> (user)</strong></li>
+<li><strong><code>gecos</code> (user)</strong> (optional, for additional Unix user details)</li>
+<li>Click <strong>Next</strong>.</li>
+</ol>
+<p><img alt="Unix Attributes Selection" src="../ad-sync8.png" /></p>
+<hr />
+<h3 id="8-configure-and-apply-settings"><strong>8. Configure and Apply Settings</strong></h3>
+<ol>
+<li>Click <strong>Next</strong> to save and apply the synchronization settings.</li>
+<li>Wait for the configuration to complete.</li>
+</ol>
+<p><img alt="Configuration Progress" src="../ad-sync9.png" /></p>
+<hr />
+<h3 id="9-verify-configuration-completion"><strong>9. Verify Configuration Completion</strong></h3>
+<ol>
+<li>Once the setup is completed, you’ll see a confirmation message.</li>
+<li>Click <strong>Exit</strong>.</li>
+</ol>
+<p><img alt="Configuration Complete" src="../ad-sync10.png" /></p>
+<hr />
+<h2 id="10-validate-synchronization"><strong>10. Validate Synchronization</strong></h2>
+<p>After the setup:</p>
+<ol>
+<li>Open the <a href="https://entra.microsoft.com"><strong>Microsoft Entra Admin Center</strong></a>.</li>
+<li>Go to <strong>Hybrid Management</strong> → <strong>Microsoft Entra Connect</strong>.</li>
+<li>Check the sync status and ensure that users have their <strong>Unix attributes</strong> synchronized.</li>
+</ol>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../Cloud-Kerberos-Trust-for-Linux/" class="btn btn-neutral float-left" title="Cloud Kerberos Trust for Linux"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/" class="btn btn-neutral float-right" title="Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
+        </span>
+    
+    
+      <span><a href="../Cloud-Kerberos-Trust-for-Linux/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/distro_list.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Capturing authentication traffic using cirrus‐scope - Himmelblau Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Capturing authentication traffic using cirrus\u2010scope";
+        var mkdocs_page_input_path = "troubleshooting/Capturing-authentication-traffic-using-cirrus\u2010scope.md";
+        var mkdocs_page_url = "/docs/troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Himmelblau Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../registration/">Device Registration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../integration/">Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../ecosystem/">Ecosystem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Capturing authentication traffic using cirrus‐scope</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#important">Important:</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Himmelblau Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Troubleshooting</li>
+      <li class="breadcrumb-item active">Capturing authentication traffic using cirrus‐scope</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/himmelblau-idm/site.git/edit/main/mkdocs/docs/troubleshooting/Capturing-authentication-traffic-using-cirrus‐scope.md">Edit on Himmelblau Documentation</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <p>Capturing OAuth2 traffic when authenticating to Azure Entra ID is essential for debugging and resolving issues in the <code>libhimmelblau</code> library. By inspecting the detailed HTTP requests and responses exchanged during the authentication process, developers can identify discrepancies, such as malformed requests, unexpected status codes, or incorrect parameters. This comprehensive view helps pinpoint where errors occur, enabling targeted fixes and enhancements to improve the reliability and functionality of Himmelblau, ultimately leading to smoother integrations and user experiences.</p>
+<blockquote>
+<p>This guide walks you through how to capture and inspect authentication traffic using the <code>cirrus-scope</code> diagnostic tool along with <code>mitmproxy</code>.</p>
+<p><strong>New:</strong> <code>cirrus-scope</code> now includes an <code>obfuscate</code> command to help automatically mask sensitive data from these captures before sharing them.</p>
+</blockquote>
+<h3 id="step-by-step-instructions">Step-by-Step Instructions</h3>
+<p>You’ll learn how to capture traffic, then obfuscate sensitive details using <code>cirrus-scope obfuscate</code>.</p>
+<ol>
+<li>
+<p><strong>Download <code>cirrus-scope</code></strong>:</p>
+<p>Prebuilt binaries are available from the official Himmelblau downloads page:</p>
+<p>👉 <a href="https://himmelblau-idm.org/downloads.html">https://himmelblau-idm.org/downloads.html</a></p>
+</li>
+<li>
+<p><strong>Download <code>mitmproxy</code></strong>:</p>
+<p>Download <code>mitmproxy</code> from <a href="https://mitmproxy.org/">their website</a>, and extract the binaries.</p>
+<p><code>tar -xf mitmproxy-11.0.0-linux-x86_64.tar.gz</code></p>
+</li>
+<li>
+<p><strong>Start <code>mitmweb</code></strong>:</p>
+<p>Run the following command to start <code>mitmweb</code>:</p>
+<p><code>./mitmweb</code></p>
+<p>This starts <code>mitmweb</code> and opens a web interface for monitoring HTTP and HTTPS traffic.</p>
+</li>
+<li>
+<p><strong>Install the mitmproxy CA Certificate</strong>:</p>
+<p>On Ubuntu,</p>
+<p><code>sudo cp $HOME/.mitmproxy/mitmproxy-ca-cert.pem /usr/local/share/ca-certificates/mitmproxy.crt
+sudo update-ca-certificates</code></p>
+<p>Or on Fedora,</p>
+<p><code>sudo cp $HOME/.mitmproxy/mitmproxy-ca-cert.pem /etc/pki/ca-trust/source/anchors/
+sudo update-ca-trust</code></p>
+<p>Or on openSUSE Leap,</p>
+<p><code>sudo cp $HOME/.mitmproxy/mitmproxy-ca-cert.pem /usr/share/pki/trust/anchors/mitmproxy.crt
+sudo update-ca-certificates</code></p>
+</li>
+<li>
+<p><strong>Access the Web Interface</strong>:</p>
+<p>Open your web browser and go to:</p>
+<p><code>http://127.0.0.1:8081/</code></p>
+<p>You should see the <code>mitmweb</code> dashboard for viewing captured traffic.</p>
+</li>
+<li>
+<p><strong>Run <code>cirrus-scope</code> with Proxy Enabled</strong>:</p>
+<p>Run the desired test command from <code>cirrus-scope</code>, routing its traffic through <code>mitmproxy</code> by setting the <code>HTTPS_PROXY</code> environment variable.</p>
+<p>Example:</p>
+<p><code>HTTPS_PROXY=http://127.0.0.1:8080 cirrus-scope auth-test --name your_user@example.com</code></p>
+<p>You will be prompted to enter credentials interactively. You can add <code>--debug</code> for detailed logs:</p>
+<p><code>HTTPS_PROXY=http://127.0.0.1:8080 cirrus-scope auth-test --name your_user@example.com --debug</code></p>
+<p>Other available test commands include:</p>
+<ul>
+<li><code>enrollment-test</code>: Simulates device enrollment</li>
+<li><code>refresh-token-acquire</code>: Acquires new access tokens using a refresh token</li>
+<li><code>provision-hello-key-test</code>: Tests Hello for Business key provisioning</li>
+</ul>
+</li>
+<li>
+<p><strong>Capture and Save the HAR File</strong>:</p>
+<ul>
+<li>Go to the <code>mitmweb</code> dashboard in your web browser.</li>
+<li>Click on the "File" drop down menu, then "Save".</li>
+<li>Your browser will download a file called 'flows'</li>
+</ul>
+</li>
+<li>
+<p><strong>Obfuscate the capture using <code>cirrus-scope</code></strong>:</p>
+<p>To help protect sensitive information, run the built-in obfuscator on your captured flows file. This will automatically replace known tokens (like JWTs, Kerberos tickets, flow tokens, request blobs, and your tenant ID) with equal-length asterisk sequences so that the file remains structurally valid.</p>
+<p>Example:
+<code>bash
+cirrus-scope obfuscate -i flows -o flows.obfuscated</code></p>
+</li>
+</ol>
+<p>You can also specify explicit secrets to obfuscate using the <code>--custom</code> option, for example:</p>
+<pre><code> ```bash
+ cirrus-scope obfuscate -i flows -o flows.obfuscated \
+      --custom "your_user@example.com" \
+      --custom "SuperSecretPassword"
+ ```
+</code></pre>
+<p>This ensures additional sensitive data like emails or passwords are masked. The resulting file <code>flows.obfuscated</code> will be safe to share for debugging, while still maintaining the exact format required for tools like mitmproxy.</p>
+<p>That's it! You have now captured, obfuscated, and saved HTTP(S) traffic as a HAR file.</p>
+<h4 id="important"><strong>Important:</strong></h4>
+<p>Always use <code>cirrus-scope obfuscate</code> to sanitize your capture. Manually editing the file to remove secrets can corrupt the format, making it unreadable by mitmproxy or other tools. This tool replaces sensitive data with exact-length values to keep the file structurally valid.</p>
+<p>It remains your responsibility to review the file to ensure no secrets remain. Passwords and plaintext credentials are <strong>not detected automatically</strong> — always provide them explicitly via <code>--custom</code> if needed.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/" class="btn btn-neutral float-left" title="Syncing Active Directory with Azure Entra ID"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../MS-specs-which-Himmelblau-uses/" class="btn btn-neutral float-right" title="MS specs which Himmelblau uses">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
+        </span>
+    
+    
+      <span><a href="../../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../MS-specs-which-Himmelblau-uses/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/distro_list.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

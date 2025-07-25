@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/installation/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Installation - Himmelblau Documentation</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Installation";
+        var mkdocs_page_input_path = "installation.md";
+        var mkdocs_page_url = "/docs/installation/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Himmelblau Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Quickstart</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Installation</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#supported-distributions">Supported Distributions</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#installation-from-prebuilt-packages">Installation from Prebuilt Packages</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#debian-ubuntu">Debian &amp; Ubuntu</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#rhel-rocky-fedora">RHEL, Rocky, Fedora</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#suse-linux-enterprise-sle-opensuse">SUSE Linux Enterprise (SLE) / openSUSE</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#from-source">From Source</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#steps">Steps:</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../registration/">Device Registration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../integration/">Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../ecosystem/">Ecosystem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Himmelblau Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/himmelblau-idm/site.git/edit/main/mkdocs/docs/installation.md">Edit on Himmelblau Documentation</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="installing-himmelblau">Installing Himmelblau</h1>
+<h2 id="overview">Overview</h2>
+<p>Himmelblau is packaged for a wide range of Linux distributions and supports multiple installation methods, including <code>.deb</code> and <code>.rpm</code> packages, container builds, and manual source compilation.</p>
+<p>This page covers how to install Himmelblau on Ubuntu, Debian, RHEL, Rocky, SUSE, and other distributions.</p>
+<hr />
+<h2 id="supported-distributions">Supported Distributions</h2>
+<div id="supported-distros">
+  Loading supported distributions...
+</div>
+
+<hr />
+<h2 id="installation-from-prebuilt-packages">Installation from Prebuilt Packages</h2>
+<h3 id="debian-ubuntu">Debian &amp; Ubuntu</h3>
+<ol>
+<li>
+<p><a href="https://himmelblau-idm.org/downloads.html">Download</a> the <code>.deb</code> packages.</p>
+</li>
+<li>
+<p>Install:</p>
+</li>
+</ol>
+<pre><code class="language-bash">sudo apt install -y ./himmelblau_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./himmelblau-sshd-config_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./himmelblau-sso_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./nss-himmelblau_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./pam-himmelblau_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./himmelblau-qr-greeter_&lt;version&gt;-&lt;distro&gt;_amd64.deb 
+</code></pre>
+<h3 id="rhel-rocky-fedora">RHEL, Rocky, Fedora</h3>
+<ol>
+<li>
+<p><a href="https://himmelblau-idm.org/downloads.html">Download</a> the <code>.rpm</code> packages.</p>
+</li>
+<li>
+<p>Install:</p>
+</li>
+</ol>
+<pre><code class="language-bash">sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
+sudo dnf install ./himmelblau-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./himmelblau-sshd-config-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./himmelblau-sso-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./nss-himmelblau-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./pam-himmelblau-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./himmelblau-qr-greeter-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm
+</code></pre>
+<h3 id="suse-linux-enterprise-sle-opensuse">SUSE Linux Enterprise (SLE) / openSUSE</h3>
+<ol>
+<li>
+<p><a href="https://himmelblau-idm.org/downloads.html">Download</a> the <code>.rpm</code> packages.</p>
+</li>
+<li>
+<p>Install:</p>
+</li>
+</ol>
+<pre><code class="language-bash">sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
+sudo zypper install ./himmelblau-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./himmelblau-sshd-config-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./himmelblau-sso-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./nss-himmelblau-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./pam-himmelblau-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./himmelblau-qr-greeter-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm 
+</code></pre>
+<hr />
+<h3 id="from-source">From Source</h3>
+<p>If you prefer to build Himmelblau from source, you can use the provided <code>Makefile</code> to produce native packages for your target distribution.</p>
+<h3 id="steps">Steps:</h3>
+<ol>
+<li>Clone the repository:</li>
+</ol>
+<pre><code class="language-bash">git clone https://github.com/himmelblau-idm/himmelblau
+cd himmelblau
+</code></pre>
+<ol>
+<li>Build packages for your distro:</li>
+</ol>
+<pre><code class="language-bash">make ubuntu24.04         # Replace with your target distro
+</code></pre>
+<p>Available distro targets:</p>
+<pre><code>ubuntu22.04  ubuntu24.04  debian12
+rocky8       rocky9       rocky10
+sle15sp6     sle15sp7     tumbleweed
+fedora41     fedora42     rawhide
+</code></pre>
+<ol>
+<li>Find the resulting <code>.deb</code> or <code>.rpm</code> packages in:</li>
+</ol>
+<pre><code>./packages/
+</code></pre>
+<p>You can then install the generated package as normal using your system's package manager (e.g., <code>dpkg</code>, <code>dnf</code>, or <code>zypper</code>).</p>
+<blockquote>
+<p>💡 This method ensures proper packaging with dependencies and systemd service files — ideal for testing or contributing to Himmelblau.</p>
+</blockquote>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Quickstart"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../configuration/" class="btn btn-neutral float-right" title="Configuration">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
+        </span>
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../configuration/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../js/distro_list.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

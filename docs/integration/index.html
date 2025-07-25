@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/integration/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Integration - Himmelblau Documentation</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Integration";
+        var mkdocs_page_input_path = "integration.md";
+        var mkdocs_page_url = "/docs/integration/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Himmelblau Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../registration/">Device Registration</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Integration</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#migration-paths-for-uidgid-preservation">Migration Paths for UID/GID Preservation</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-sync-posix-attributes-to-entra-id-recommended">1. Sync POSIX Attributes to Entra ID (Recommended)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#using-confidential-client-credentials">Using Confidential Client Credentials</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#pre-caching-posix-attributes-optional">Pre-Caching POSIX Attributes (Optional)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-use-static-id-mapping-host-specific">2. Use Static ID Mapping (Host-Specific)</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../ecosystem/">Ecosystem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Himmelblau Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Integration</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/himmelblau-idm/site.git/edit/main/mkdocs/docs/integration.md">Edit on Himmelblau Documentation</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="transitioning-from-on-prem-ad-to-azure-entra-id">Transitioning from On-Prem AD to Azure Entra ID</h1>
+<p>When migrating from traditional Active Directory (AD) to Azure Entra ID, preserving existing UID and GID values is crucial for Linux systems. Himmelblau 1.0 and newer provides support for POSIX attribute migration and identity mapping via the <code>aad-tool</code> utility.</p>
+<h2 id="migration-paths-for-uidgid-preservation">Migration Paths for UID/GID Preservation</h2>
+<p>Himmelblau offers two strategies for UID/GID migration, depending on whether you want globally consistent attributes or host-specific mappings.</p>
+<h3 id="1-sync-posix-attributes-to-entra-id-recommended">1. Sync POSIX Attributes to Entra ID (Recommended)</h3>
+<p>Use <code>aad-tool user set-posix-attrs</code> and <code>aad-tool group set-posix-attrs</code> to store UID/GID values directly on Entra ID objects via directory schema extensions. These values are then consistently available across all Entra ID–joined Linux systems.</p>
+<p>You have two options for getting POSIX attributes into Entra ID:</p>
+<ul>
+<li><strong>Option A:</strong> If your users already have <code>uidNumber</code>, <code>gidNumber</code>, or <code>unixHomeDirectory</code> values in on-prem Active Directory, you can <a href="../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">sync them to Entra ID using Entra Connect Sync</a>.</li>
+<li><strong>Option B:</strong> Manually register schema extensions and assign POSIX attributes using <code>aad-tool</code>.</li>
+</ul>
+<p>To manually register and assign:</p>
+<ol>
+<li>Add the schema extensions:</li>
+</ol>
+<pre><code class="language-bash">   aad-tool application add-schema-extensions \
+     --client-id &lt;SCHEMA_CLIENT_ID&gt; \
+     --schema-app-object-id &lt;APPLICATION_OBJECT_ID&gt;
+</code></pre>
+<ol>
+<li>Set attributes on users or groups:</li>
+</ol>
+<pre><code class="language-bash">   aad-tool user set-posix-attrs \
+     --schema-client-id &lt;SCHEMA_CLIENT_ID&gt; \
+     --user-id &lt;USER_OBJECT_ID&gt; \
+     --uid &lt;UID&gt; \
+     --gid &lt;GID&gt; \
+     --home /home/example \
+     --shell /bin/bash
+</code></pre>
+<blockquote>
+<p>💡 POSIX attributes stored in Entra ID can be retrieved at login time, even before authentication completes — if Himmelblau is configured with Confidential Client Credentials.</p>
+</blockquote>
+<h3 id="using-confidential-client-credentials">Using Confidential Client Credentials</h3>
+<p>To enable early attribute lookup (e.g., <code>uidNumber</code>, <code>gidNumber</code>) before login:</p>
+<ul>
+<li>Use <code>aad-tool cred secret</code> or <code>aad-tool cred cert</code> to configure confidential client authentication:</li>
+</ul>
+<pre><code class="language-bash">  # Using a client secret
+  aad-tool cred secret \
+    --client-id &lt;APP_ID&gt; \
+    --domain &lt;YOUR_DOMAIN&gt; \
+    --secret &lt;SECRET_VALUE&gt;
+
+  # Or using a self-signed client certificate
+  aad-tool cred cert \
+    --client-id &lt;APP_ID&gt; \
+    --domain &lt;YOUR_DOMAIN&gt; \
+    --valid-days 365 \
+    --cert-out /tmp/my-cert.pem
+</code></pre>
+<p>These credentials allow Himmelblau to authenticate securely and perform Graph API lookups before any user logs in.</p>
+<h3 id="pre-caching-posix-attributes-optional">Pre-Caching POSIX Attributes (Optional)</h3>
+<p>If you haven’t configured confidential client credentials, UID/GID attributes won’t be available until after login.</p>
+<p>To avoid this, you can pre-cache attribute mappings using:</p>
+<pre><code class="language-bash">aad-tool enumerate
+</code></pre>
+<p>This command fetches all users and groups with POSIX attributes from Entra ID and stores them locally for use during authentication.</p>
+<blockquote>
+<p>⚠️ <code>aad-tool enumerate</code> only works on devices that are already Entra ID–joined, and where the calling user has delegated Graph API access.</p>
+</blockquote>
+<h3 id="2-use-static-id-mapping-host-specific">2. Use Static ID Mapping (Host-Specific)</h3>
+<p>If UID/GID mappings vary by system or cannot be stored in Entra ID, use the static ID map cache instead:</p>
+<pre><code class="language-bash">aad-tool idmap user-add --name user@domain --uid 10001 --gid 100
+aad-tool idmap group-add --name group@domain --gid 100
+</code></pre>
+<p>These mappings are stored locally and applied consistently on the host during lookup.</p>
+<blockquote>
+<p>⚠️ This approach is best used when global consistency is not feasible.</p>
+</blockquote>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../registration/" class="btn btn-neutral float-left" title="Device Registration"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../ecosystem/" class="btn btn-neutral float-right" title="Ecosystem">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
+        </span>
+    
+    
+      <span><a href="../registration/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../ecosystem/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../js/distro_list.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

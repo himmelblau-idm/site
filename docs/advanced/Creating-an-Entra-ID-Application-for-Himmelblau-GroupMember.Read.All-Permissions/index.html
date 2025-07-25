@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions - Himmelblau Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions";
+        var mkdocs_page_input_path = "advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions.md";
+        var mkdocs_page_url = "/docs/advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Himmelblau Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../registration/">Device Registration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../integration/">Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../ecosystem/">Ecosystem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Himmelblau Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Advanced Topics</li>
+      <li class="breadcrumb-item active">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/himmelblau-idm/site.git/edit/main/mkdocs/docs/advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions.md">Edit on Himmelblau Documentation</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="overview">Overview</h2>
+<p>Himmelblau requires additional API permissions to read group names and extended attributes such as a groups' <code>gidNumber</code> (which is essential for RFC2307 attribute ID mapping). The following instructions guide you through registering an Azure Entra ID application, assigning it permissions, and configuring Himmelblau to use either <em>delegated</em> or <em>confidential client</em> authentication.</p>
+<p>With the default configuration, Himmelblau will attempt to resolve group memberships by masquerading as the Edge browser with <strong>delegated access</strong>, but this doesn't work in every tenant, and has the limitation of only resolving group memberships <em>after</em> each user has authenticated.</p>
+<blockquote>
+<p><strong>Note:</strong><br />
+- If you set up <strong>confidential client credentials</strong> (client secret or certificate) using <code>aad-tool cred</code>, you do <strong>not</strong> need to specify an <code>app_id</code> in <code>himmelblau.conf</code>.<br />
+- If you choose <strong>delegated access</strong>, you must set an <code>app_id</code> in your configuration.</p>
+</blockquote>
+<h2 id="1-register-a-new-application-in-azure-entra-id">1. Register a New Application in Azure Entra ID</h2>
+<ol>
+<li>Navigate to the <a href="https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/Overview">Azure Entra ID portal</a>.</li>
+<li>In the left-hand menu, select <strong>App registrations</strong>.</li>
+<li>Click <strong>New registration</strong>.</li>
+<li>Enter a <strong>Name</strong> for the application (e.g., <code>Himmelblau</code>).</li>
+<li>Under <strong>Supported account types</strong>, choose <strong>Accounts in this organizational directory only</strong>.</li>
+<li>Under <strong>Redirect URI</strong>, choose <strong>Public client/native (mobile &amp; desktop)</strong> for the <strong>platform</strong> and enter <code>himmelblau://Himmelblau.EntraId.BrokerPlugin</code> for the URI.</li>
+<li>Click <strong>Register</strong>.</li>
+</ol>
+<p><img alt="Register a New Application in Azure Entra ID" src="../app-reg1.png" /></p>
+<h2 id="2-assign-api-permissions">2. Assign API Permissions</h2>
+<ol>
+<li>In the newly created application, navigate to <strong>API permissions</strong>.</li>
+<li>Click <strong>Add a permission</strong>.</li>
+<li>Select <strong>Microsoft Graph</strong>.</li>
+<li>If utilizing Confidential Client Credentials (Option A below) choose <strong>Application permissions</strong>, otherwise choose <strong>Delegated permissions</strong> (Option B).</li>
+<li>Search for <code>GroupMember.Read.All</code> and select it.</li>
+<li>Click <strong>Add permissions</strong>.</li>
+</ol>
+<p><img alt="Assign API Permissions" src="../app-reg2.png" /></p>
+<ol>
+<li>Click <strong>Grant admin consent</strong> to approve these permissions for your tenant.</li>
+</ol>
+<p><img alt="Grant Admin Consent" src="../app-reg3.png" /></p>
+<h3 id="3-obtain-the-application-id">3. Obtain the Application ID</h3>
+<ol>
+<li>Go to <strong>Overview</strong> in the application’s page.</li>
+<li>Copy the <strong>Application (client) ID</strong>. This value will be used in Himmelblau’s configuration.</li>
+</ol>
+<h2 id="4-configure-authentication-in-himmelblau">4. Configure Authentication in Himmelblau</h2>
+<p>You have two main options for enumerating users and group memberships:</p>
+<hr />
+<h3 id="option-a-using-confidential-client-credentials-recommended">Option A: Using Confidential Client Credentials (Recommended)</h3>
+<p>This method stores a <strong>client secret</strong> or <strong>client certificate</strong> securely in Himmelblau’s encrypted cache and removes the need to specify an <code>app_id</code> in <code>himmelblau.conf</code>.</p>
+<h4 id="store-a-client-secret">Store a client secret</h4>
+<pre><code class="language-bash">aad-tool cred secret --client-id &lt;CLIENT_ID&gt; --domain &lt;DOMAIN&gt; --secret &lt;SECRET_VALUE&gt;
+</code></pre>
+<ol>
+<li>In the Entra ID portal, under <strong>Certificates &amp; secrets</strong>, create a new <strong>Client secret</strong>.</li>
+<li>Copy the <strong>Value</strong> immediately (you won’t see it again) and use it with the above command.</li>
+</ol>
+<h4 id="or-set-up-a-client-certificate">Or set up a client certificate</h4>
+<pre><code class="language-bash">aad-tool cred cert --client-id &lt;CLIENT_ID&gt; --domain &lt;DOMAIN&gt; --valid-days 365 --cert-out /tmp/my-cert.crt
+</code></pre>
+<ol>
+<li>Upload <code>/tmp/my-cert.crt</code> in the Entra ID portal under <strong>Certificates &amp; secrets &gt; Certificates</strong>.</li>
+</ol>
+<p>The private key never leaves your TPM or software HSM.</p>
+<blockquote>
+<p><strong>Note:</strong> 
+These credentials expire, and you'll need to repeat these steps <em>each</em> time the credentials expire.</p>
+</blockquote>
+<hr />
+<h3 id="option-b-using-delegated-authentication">Option B: Using Delegated Authentication</h3>
+<p>If you do <strong>not</strong> configure confidential client credentials, add your application ID to <code>himmelblau.conf</code> for delegated authentication.</p>
+<pre><code class="language-ini">[example.com]
+app_id = 98fa618b-e5d2-4697-b0fd-fe3ec5eecdd3
+</code></pre>
+<p>Replace with your actual <strong>Application (client) ID</strong> found in the app’s <strong>Overview</strong> page.</p>
+<blockquote>
+<p><strong>Note:</strong> 
+This method prevents the enumeration of rfc2307 attributes and group memberships until <em>after</em> each user authenticates. Utilizing the <code>aad-tool enumerate</code> command can improve attribute resolution, but will need to be performed each time a new user is added to the directory (or whenever their posix attributes are added/modified).</p>
+</blockquote>
+<hr />
+<h3 id="5-restart-himmelblau-services">5. Restart Himmelblau Services</h3>
+<p>To apply changes, restart Himmelblau:</p>
+<pre><code class="language-bash">sudo systemctl restart himmelblaud
+sudo systemctl restart himmelblaud-tasks
+</code></pre>
+<h2 id="6-optional-pre-cache-uidgid-mappings">6. (Optional) Pre-cache UID/GID Mappings</h2>
+<p>You can optionally pre-fetch all users and groups with RFC2307 attributes:</p>
+<pre><code class="language-bash">aad-tool enumerate
+</code></pre>
+<p>This avoids lookups being triggered on first login.</p>
+<h2 id="7-managing-credentials">7. Managing Credentials</h2>
+<ul>
+<li>List stored credentials:</li>
+</ul>
+<pre><code class="language-bash">aad-tool cred list --domain &lt;DOMAIN&gt;
+</code></pre>
+<ul>
+<li>Remove credentials if needed:</li>
+</ul>
+<pre><code class="language-bash">aad-tool cred delete --domain &lt;DOMAIN&gt;
+</code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>By following these steps, Himmelblau will be able to retrieve group information necessary for accurate ID mapping using Entra ID. Ensure that the application has the necessary permissions and is correctly configured in <code>himmelblau.conf</code> for seamless integration.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/" class="btn btn-neutral float-left" title="Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/" class="btn btn-neutral float-right" title="Enabling the Himmelblau QR Greeter gnome‐shell Extension">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
+        </span>
+    
+    
+      <span><a href="../Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/distro_list.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

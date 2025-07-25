@@ -6,7 +6,7 @@ extra_javascript:
 plugins:
   - search
   - awesome-pages
-repo_url: https://github.com/himmelblau-idm/site
+repo_url: https://github.com/himmelblau-idm/site.git
 repo_name: Himmelblau Documentation
-edit_uri: edit/main/mkdocs/docs
+edit_uri: https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs
 site_url: https://himmelblau-idm.org/docs

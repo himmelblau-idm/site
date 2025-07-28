@@ -132,8 +132,13 @@ async function provideLinks() {
 	}
 
 	const item2 = document.createElement('p');
-	item2.textContent =
-		'Download the packages from the links above, import the package signing key, and install the packages:';
+	if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
+		item2.textContent =
+			'Import the repo signing key, add the Himmelblau repo, and install the packages:';
+	} else {
+		item2.textContent =
+			'Download the packages from the links above, import the package signing key, and install the packages:';
+	};
 	linksContainer.appendChild(item2);
 
 	if (distro.startsWith('sle') || distro === 'tumbleweed') {
@@ -151,18 +156,21 @@ async function provideLinks() {
 		});
 		linksContainer.appendChild(cmd1);
 	} else if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
-		// DEB packages don't have signing available yet
 		// GPG key install for APT
-		//const keyCmd = document.createElement('pre');
-		//keyCmd.textContent =
-		//	'curl -fsSL https://himmelblau-idm.org/himmelblau.asc | gpg --dearmor | sudo tee /usr/share/keyrings/himmelblau.gpg > /dev/null';
-		//linksContainer.appendChild(keyCmd);
+		const keyCmd = document.createElement('pre');
+		keyCmd.textContent =
+			'curl -fsSL https://himmelblau-idm.org/himmelblau.asc | gpg --dearmor | sudo tee /usr/share/keyrings/himmelblau.gpg > /dev/null';
+		linksContainer.appendChild(keyCmd);
+
+		const repoAdd = document.createElement('pre');
+		repoAdd.textContent =
+			`echo "deb [signed-by=/usr/share/keyrings/himmelblau.gpg] https://himmelblau-idm.org/deb ${distro} main" | sudo tee /etc/apt/sources.list.d/himmelblau.list`;
+		linksContainer.appendChild(repoAdd);
 
 		const cmd1 = document.createElement('pre');
 		cmd1.textContent = 'sudo apt install -y ';
 		packages.forEach((pkg) => {
-			const filename = `${pkg}_${version}-${distro}_amd64.deb`;
-			cmd1.textContent += './' + filename + ' ';
+			cmd1.textContent += `${pkg} `;
 		});
 		linksContainer.appendChild(cmd1);
 	} else if (

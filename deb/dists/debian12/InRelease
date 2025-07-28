@@ -1,0 +1,34 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Origin: Himmelblau
+Label: Himmelblau
+Suite: debian12
+Codename: debian12
+Architectures: amd64
+Components: main
+Date: Mon, 28 Jul 2025 21:15:13 +0000
+Date: Mon, 28 Jul 2025 21:15:13 +0000
+MD5Sum:
+ 2e2dd31f24620519f8750ba919709b89              186 Release
+ 5b3fda10b76599a5540029b51cf1dc50             4219 main/binary-amd64/Packages
+ 1574df544fd1de4a2594324154e38670             1366 main/binary-amd64/Packages.gz
+SHA1:
+ 1cc4eaa9d147cc7a79d9e7c03752007b12d1ffcc              186 Release
+ 3c0495287260ba4bc3b59ba2ffb524ac9140d014             4219 main/binary-amd64/Packages
+ 76fe53b45a4477e96871c50a793a83e2ec473bee             1366 main/binary-amd64/Packages.gz
+SHA256:
+ f5a9f8972b05532c34304dc72cc32433eab797a2859ae9ea544633542f19c47f              186 Release
+ 8a707072de3fbb8980def3b84273f2f6b046c0ac2c4c6c94ce2a3f9bdb0f6b69             4219 main/binary-amd64/Packages
+ 470cd515debcc60ab5f81f7890aa36b26df181c39fdbba0b3695b55d805d0b0d             1366 main/binary-amd64/Packages.gz
+SHA512:
+ eb9169cb48f80b608a24e3ee4a1f9233ea990cef3112bfc47f597154cb1a00beca72caf2fa758ecc65606c3b1bde51e132adbd002d4ec10eeb1fc284826f7dca              186 Release
+ 5fbfb94f5391b3c5b8a4736a978260bebaca0d9e6cab8a97f7e6eafc659049df971781c300f0b7f2dafde362f979a8c8643fca21596bf58201f75eedd58f2b58             4219 main/binary-amd64/Packages
+ 7b0ac5d9e0c7c2db24a71fdd36979319778f962d15cc6767b2e157bce5e6be5244c92b517151d34f02bcf41e669f15844dd518b3adf9b041f4dd5277d6156f9b             1366 main/binary-amd64/Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iHUEARYKAB0WIQQ9RsiBaLL/jXXQsXhsykjyORb8AwUCaIfoYQAKCRBsykjyORb8
+A9cdAQDIaW3yjC/YGBBmL3lt7e5OkJ5ZQco43Pz4x4fJyzYiFwEAt2eDT6Lac566
+wvuBtjTcBBe254b/IihdVkG6nrBeoAI=
+=d43p
+-----END PGP SIGNATURE-----

@@ -1,0 +1,34 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Origin: Himmelblau
+Label: Himmelblau
+Suite: ubuntu22.04
+Codename: ubuntu22.04
+Architectures: amd64
+Components: main
+Date: Mon, 28 Jul 2025 21:14:57 +0000
+Date: Mon, 28 Jul 2025 21:14:57 +0000
+MD5Sum:
+ cad4905a6f09e96ccc3eac39ae0bfec5              192 Release
+ 7ee855cb3e1cdffb4dc8602d7d626d56             4287 main/binary-amd64/Packages
+ ad569b12e2b7469d798f862b13bc7cbd             1378 main/binary-amd64/Packages.gz
+SHA1:
+ 5ef3837d022a3edfa5afe9ae6b2b61ad83a907c8              192 Release
+ 8dbd26442c0b5b70c501749b175ea1a43382ac96             4287 main/binary-amd64/Packages
+ f23b6735b3e02b713af8f809a3d6981271f0a894             1378 main/binary-amd64/Packages.gz
+SHA256:
+ fd86781f8d1eec1beac3dddec3e550ad1fdeb7d0b09253b40b4a48b8b64ca370              192 Release
+ e9c2991bb6913b666448ed87e51c0d1576b8d968f1425e5b528a718ce336a385             4287 main/binary-amd64/Packages
+ a21ab0955ebbfbeba0e57df2db581242fdf334eb9356b999bd7f5e33dcbd19e0             1378 main/binary-amd64/Packages.gz
+SHA512:
+ ef43bd7a8a2d71b86834a2eb930abac4d05d06c146114f7158eeb788f7d2110cf8dff4172e4786831e9867939c7d8bb89d39a6db59fde4ec90f185090f4c3f48              192 Release
+ 8d84aa850d41e5bb5efa3c82e5b3858804fa3aeb827103d434a5bd63ecfc48730207ee03f84accb3bdc23d1c2539adb9fa60d494a9688c49c53951ed9bc5242a             4287 main/binary-amd64/Packages
+ 165c5394cf187fee2766694b7cbde81b41a3336dea41219c6184e7de8598fceed68bf294f40dd7bb83fc858e56369d41c093d614f0b6438117aaafd45d35faf6             1378 main/binary-amd64/Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iHUEARYKAB0WIQQ9RsiBaLL/jXXQsXhsykjyORb8AwUCaIfoYQAKCRBsykjyORb8
+AxuEAQDfSI+B27Txh903CG/b1ZQjgvqpVM9PTNHZuHaefMxjpgD/X3R6Tjc/BTdV
+qJAK6wRq1VnBYLtvqXhbShcj1UaJ/gs=
+=2nTo
+-----END PGP SIGNATURE-----

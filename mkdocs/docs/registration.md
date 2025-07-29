@@ -40,7 +40,6 @@ This typically happens during the first successful login for each Entra ID–ena
 
     - Himmelblau contacts the Entra Id `/device` endpoint
     - Uses device credentials (TPM-backed or SoftHSM-backed key)
-    - Associates the device with the Azure tenant and generates a device object in Microsoft Graph
 
     For more details, view the [enrollment documentation](https://github.com/himmelblau-idm/aad-join-spec/blob/main/aad-join-spec.md#33-device-join-service).
 

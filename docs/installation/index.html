@@ -53,6 +53,10 @@
     <li class="toctree-l2"><a class="reference internal" href="#installation-from-prebuilt-packages">Installation from Prebuilt Packages</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#debian-ubuntu">Debian &amp; Ubuntu</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#optional-debian-repositories">Optional Debian repositories</a>
+    </li>
+        </ul>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#rhel-rocky-fedora">RHEL, Rocky, Fedora</a>
     </li>
@@ -76,7 +80,7 @@
                 </li>
               </ul>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../integration/">Integration</a>
+                <li class="toctree-l1"><a class="reference internal" href="../integration/">Migration from On-Prem</a>
                 </li>
               </ul>
               <ul>
@@ -170,6 +174,7 @@
 
 <hr />
 <h2 id="installation-from-prebuilt-packages">Installation from Prebuilt Packages</h2>
+<p><a href="https://himmelblau-idm.org/downloads.html">Download the packages for your distribution</a>, and install them using your flavor of package manager:</p>
 <h3 id="debian-ubuntu">Debian &amp; Ubuntu</h3>
 <ol>
 <li>
@@ -181,6 +186,8 @@
 </ol>
 <pre><code class="language-bash">sudo apt install -y ./himmelblau_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./himmelblau-sshd-config_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./himmelblau-sso_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./nss-himmelblau_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./pam-himmelblau_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./himmelblau-qr-greeter_&lt;version&gt;-&lt;distro&gt;_amd64.deb 
 </code></pre>
+<h4 id="optional-debian-repositories">Optional Debian repositories</h4>
+<p>You can optionally install the latest package from the Himmelblau debian repositories, as described on the downloads page.</p>
 <h3 id="rhel-rocky-fedora">RHEL, Rocky, Fedora</h3>
 <ol>
 <li>

@@ -21,7 +21,6 @@ man: $(MAN2MD) $(MAN_DIR)/man5/himmelblau.conf.5 $(MAN_DIR)/man1/aad-tool.1
 	$(MAN2MD) $(MAN_DIR)/man1/aad-tool.1 | sed -E -f tools/clean-manpage.sed > $(MAN_OUT_DIR)/aad-tool.md
 	$(MAN2MD) $(MAN_DIR)/man8/himmelblaud.8 | sed -E -f tools/clean-manpage.sed > $(MAN_OUT_DIR)/himmelblaud.md
 	$(MAN2MD) $(MAN_DIR)/man8/himmelblaud_tasks.8 | sed -E -f tools/clean-manpage.sed > $(MAN_OUT_DIR)/himmelblaud_tasks.md
-	$(MAN2MD) $(MAN_DIR)/man8/pam_himmelblau.8 | tail -n50
 	$(MAN2MD) $(MAN_DIR)/man8/pam_himmelblau.8 | sed -E -f tools/clean-manpage.sed > $(MAN_OUT_DIR)/pam_himmelblau.md
 
 .PHONY: all man

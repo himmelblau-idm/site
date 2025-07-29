@@ -44,31 +44,7 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#get-started">Get Started</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#supported-linux-distributions">Supported Linux Distributions</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#installing-himmelblau">Installing Himmelblau</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#fedora-and-rocky-linux">Fedora and Rocky Linux:</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#opensusesuse-linux-enterprise">openSUSE/SUSE Linux Enterprise:</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#debianubuntu">Debian/Ubuntu:</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#configuring-himmelblau">Configuring Himmelblau</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#run-the-daemon">Run the daemon</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#disable-nscd">Disable nscd</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#setup-nss">Setup NSS</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#setup-pam">Setup PAM</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#enrolling-the-device-and-hello-pin">Enrolling the Device and Hello PIN</a>
+    <li class="toctree-l2"><a class="reference internal" href="#tldr">TL;DR</a>
     </li>
     </ul>
                 </li>
@@ -86,7 +62,7 @@
                 </li>
               </ul>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="integration/">Integration</a>
+                <li class="toctree-l1"><a class="reference internal" href="integration/">Migration from On-Prem</a>
                 </li>
               </ul>
               <ul>
@@ -172,174 +148,42 @@
 <p><strong>Himmelblau</strong> is an open-source authentication framework that brings Microsoft Entra ID login, policy enforcement, and Hello PIN support to Linux systems. This documentation will guide you through installation, configuration, and best practices for integrating Himmelblau into your environment.</p>
 <h2 id="get-started">Get Started</h2>
 <ul>
-<li>📥 <a href="#installing-himmelblau">Installation Guide</a></li>
-<li>⚙️ <a href="#configuring-himmelblau">Configuration Reference</a></li>
-<li>🔐 <a href="#setup-nss">NSS and PAM Setup</a></li>
-<li>🧠 <a href="#enrolling-the-device-and-hello-pin">Understanding Hello PIN and Enrollment</a></li>
+<li>📥 <a href="installation/">Installation Guide</a></li>
+<li>⚙️ <a href="configuration/">Configuration Reference</a></li>
+<li>🔐 <a href="configuration/#pam-configuration">NSS and PAM Setup</a></li>
+<li>🧠 <a href="registration/">Understanding Enrollment</a></li>
 </ul>
-<h2 id="supported-linux-distributions">Supported Linux Distributions</h2>
-<div id="supported-distros">
-  Loading supported distributions...
-</div>
-
-<p>The following distributions have packages upstream:</p>
-<table>
-<thead>
-<tr>
-<th>Distribution</th>
-<th>Version</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>openSUSE</td>
-<td>Tumbleweed</td>
-</tr>
-<tr>
-<td>SUSE Linux Enterprise</td>
-<td>15 SP7</td>
-</tr>
-</tbody>
-</table>
-<h2 id="installing-himmelblau">Installing Himmelblau</h2>
-<p>Himmelblau provides the necessary tools and utilities to enable authentication with Azure Entra ID.</p>
-<p><a href="https://himmelblau-idm.org/downloads.html">Download the packages for your distribution</a>, and install them using your flavor of package manager:</p>
-<hr />
-<h3 id="fedora-and-rocky-linux">Fedora and Rocky Linux:</h3>
-<pre><code class="language-bash">sudo dnf install ./himmelblau-0.8.0-1.x86_64-fedora41.rpm \
-                 ./himmelblau-sshd-config-0.8.0-1.x86_64-fedora41.rpm \
-                 ./himmelblau-sso-0.8.0-1.x86_64-fedora41.rpm \
-                 ./nss-himmelblau-0.8.0-1.x86_64-fedora41.rpm \
-                 ./pam-himmelblau-0.8.0-1.x86_64-fedora41.rpm
-</code></pre>
-<hr />
-<h3 id="opensusesuse-linux-enterprise">openSUSE/SUSE Linux Enterprise:</h3>
-<pre><code class="language-bash">sudo zypper install ./himmelblau-0.8.0-1.x86_64-sle15sp6.rpm \
-                    ./himmelblau-sshd-config-0.8.0-1.x86_64-sle15sp6.rpm \
-                    ./himmelblau-sso-0.8.0-1.x86_64-sle15sp6.rpm \
-                    ./nss-himmelblau-0.8.0-1.x86_64-sle15sp6.rpm \
-                    ./pam-himmelblau-0.8.0-1.x86_64-sle15sp6.rpm
-</code></pre>
-<hr />
-<h3 id="debianubuntu">Debian/Ubuntu:</h3>
-<pre><code class="language-bash">sudo apt install ./himmelblau_0.8.0-debian12_amd64.deb \
-                 ./himmelblau-sshd-config_0.8.0-debian12_amd64.deb \
-                 ./himmelblau-sso_0.8.0-debian12_amd64.deb \
-                 ./nss-himmelblau_0.8.0-debian12_amd64.deb \
-                 ./pam-himmelblau_0.8.0-debian12_amd64.deb
-</code></pre>
-<hr />
-<h2 id="configuring-himmelblau">Configuring Himmelblau</h2>
-<p>To enable authentication, you must configure the <code>domains</code> option in the <code>/etc/himmelblau/himmelblau.conf</code> file. This setting determines which domains are permitted to authenticate to the host. You MUST only specify the primary domain from each tenant.
-All other configuration options are optional.</p>
-<pre><code class="language-ini">[global]
-domains = contoso.onmicrosoft.com
-</code></pre>
-<p><strong>Note:</strong> Leaving the <code>pam_allow_groups</code> option unset in the <code>/etc/himmelblau/himmelblau.conf</code> file <em>permits all users to authenticate</em>.</p>
-<p><strong>Note:</strong> On Ubuntu, you should additionally set <code>use_etc_skel</code> to <code>true</code> and configure <code>home_attr</code> and <code>home_alias</code> to match (I recommend using the <code>CN</code> attribute). These parameters are necessary, otherwise Ubuntu's snaps will fail to execute. These settings are set by default using the Himmelblau project Debian/Ubuntu packages.</p>
-<pre><code class="language-ini">[global]
-home_attr = CN
-home_alias = CN
-use_etc_skel = true
-</code></pre>
-<h3 id="run-the-daemon">Run the daemon</h3>
-<p>Enable and start the <code>himmelblaud</code> and <code>himmelblaud-tasks</code> daemons. The <code>himmelblaud</code> daemon communicates with Entra ID and facilitates device, Hello PIN enrollment, and authentication. The <code>himmelblaud-tasks</code> daemon is responsible for authenticated tasks, such as creating the users home directory.</p>
-<pre><code class="language-bash">systemctl enable himmelblaud himmelblaud-tasks
-systemctl start himmelblaud himmelblaud-tasks
-</code></pre>
-<h3 id="disable-nscd">Disable nscd</h3>
-<p>It is recommended that the Name Service Cache daemon (<code>nscd</code>) be disabled.</p>
-<p>The nscd daemon caches name service lookups, including user and group information obtained from sources like <code>/etc/passwd</code> and <code>/etc/group</code>. When integrating with Azure Entra ID, it's important to ensure that the most up-to-date user and group information is consistently retrieved from the directory. Disabling nscd helps avoid potential inconsistencies that may arise from cached data not reflecting changes made in Azure Entra ID.</p>
-<pre><code class="language-bash">systemctl stop nscd
-systemctl disable nscd
-systemctl mask nscd
-</code></pre>
-<h3 id="setup-nss">Setup NSS</h3>
-<p>Configuring NSS (Name Service Switch) is essential in integrating Linux hosts with Azure Entra ID using Himmelblau. By configuring NSS to include <code>himmelblau</code> alongside sources such as <code>compat</code>, <code>systemd</code>, etc., the system knows to query Azure Entra ID for user and group information.</p>
-<p>The NSS configuration file is found at <code>/etc/nsswitch.conf</code>. The <code>himmelblau</code> NSS module name should be appended to the <code>passwd</code>, <code>group</code> and <code>shadow</code> entries.</p>
-<pre><code class="language-conf">passwd:     compat systemd himmelblau
-group:      compat systemd himmelblau
-shadow:     compat systemd himmelblau
-</code></pre>
-<h3 id="setup-pam">Setup PAM</h3>
-<p>PAM enables flexible authentication mechanisms by allowing administrators to define authentication policies through modular components. Configuring PAM for Azure Entra ID that users can authenticate using their Azure Entra ID credentials. By configuring PAM to include the Himmelblau module, authentication requests are directed to Azure Entra ID.</p>
-<p>To configure Himmelblau for PAM on openSUSE Tumbleweed, simply use pam-config:</p>
-<pre><code class="language-bash">pam-config --add --himmelblau
-</code></pre>
-<p>To configure Himmelblau for PAM on Ubuntu/Debian distros:</p>
-<pre><code class="language-bash">sudo pam-auth-update
-</code></pre>
-<p>Then ensure the <code>Azure authentication</code> checkbox is set.</p>
-<p>Check the pam files afterward to ensure the configuration was successful.</p>
-<p>Otherwise configure pam manually:</p>
-<p>In <code>/etc/pam.d/common-auth</code>, ensure that the <code>pam_himmelblau.so</code> module is placed after other authentication methods (such as <code>pam_unix.so</code>). Ensure that other authentication modules are not set to <code>required</code>, as this could cause authentication to fail prior to PAM communicating with Entra ID. Include the <code>ignore_unknown_user</code> option for Himmelblau. Ensure <code>pam_deny.so</code> is placed after all modules, so that unknown users are not implicitly allowed.</p>
-<p><strong>Note:</strong> If you intend to use Hello or Passwordless authentication, it's recommended that <code>pam_himmelblau.so</code> be placed before <code>pam_unix.so</code> in the pam <code>auth</code> stack (but always after <code>pam_localuser.so</code>), otherwise <code>pam_unix</code> will unnecessarily prompt for a password.</p>
-<pre><code class="language-pam">auth        required      pam_env.so
-auth        [default=1 ignore=ignore success=ok] pam_localuser.so
-auth        sufficient    pam_unix.so nullok try_first_pass
-auth        sufficient    pam_himmelblau.so ignore_unknown_user
-auth        required      pam_deny.so
-</code></pre>
-<p>Configure <code>/etc/pam.d/common-account</code> in a similar manner.</p>
-<pre><code class="language-pam">account    [default=1 ignore=ignore success=ok] pam_localuser.so
-account    sufficient    pam_unix.so
-account    sufficient    pam_himmelblau.so ignore_unknown_user
-account    required      pam_deny.so
-</code></pre>
-<p>In <code>/etc/pam.d/common-session</code>, set <code>pam_himmelblau.so</code> as an optional module.</p>
-<pre><code class="language-pam">session optional    pam_systemd.so
-session required    pam_limits.so
-session optional    pam_unix.so try_first_pass
-session optional    pam_umask.so
-session optional    pam_himmelblau.so
-session optional    pam_env.so
-</code></pre>
-<p>In <code>/etc/pam.d/common-password</code>, set <code>pam_himmelblau.so</code> as sufficient.</p>
-<pre><code class="language-pam">password    sufficient  pam_himmelblau.so ignore_unknown_user
-password        optional        pam_gnome_keyring.so    use_authtok
-password    sufficient  pam_unix.so use_authtok nullok shadow try_first_pass 
-password    required    pam_deny.so
-</code></pre>
-<h2 id="enrolling-the-device-and-hello-pin">Enrolling the Device and Hello PIN</h2>
-<p>A Windows Hello PIN offers a secure and convenient authentication method by leveraging strong encryption, local authentication capabilities, and integration with Entra ID. By setting a PIN on a soft TPM object and unlocking it securely, users can authenticate to their devices and Azure services with confidence in the security of their credentials.</p>
-<p>If you're coming from using Active Directory, you're familiar with a device join. In Azure Entra ID, enrollment (device join) is performed by individual users who can enroll a <a href="https://learn.microsoft.com/en-us/mem/intune/enrollment/device-limit-intune-azure#microsoft-entra-device-limit">maximum of 50 devices each (by default)</a>. Instead of being performed as an administrative action, enrollment happens at authentication time, and the first user to authenticate to a device becomes the owner of the device in Entra ID. Subsequent users who are authorized may authenticate to the device, but will not <em>own</em> the device. In a workplace setting, administrators would be responsible for configuring the himmelblau.conf file, as well as pam and nss, but enrollment would be performed by the user when they receive the device.</p>
-<pre><code>opensuse-himmelblau login: tux@contoso.onmicrosoft.com
-Password: 
-Please type in the code displayed on your authenticator app from your device:
-Code: 
-Set up a PIN
- A Hello PIN is a fast, secure way to signin to your device, apps, and services.
-New PIN: 
-Confirm PIN: 
-Have a lot of fun...
-tux@contoso.onmicrosoft.com@opensuse-himmelblau:~&gt;
-</code></pre>
-<p>To enroll your device in Entra ID:</p>
+<h2 id="tldr">TL;DR</h2>
+<p>Himmelblau is designed with sensible defaults to make initial setup fast and simple. If you're eager to get started without reading all the details, follow these basic steps:</p>
 <ol>
-<li>Login:<ul>
-<li>At the login prompt, enter your username in the format tux@contoso.onmicrosoft.com.</li>
-<li>Enter your password when prompted.</li>
-</ul>
-</li>
-<li>MFA:<ul>
-<li>You'll be prompted to provide multi-factor authentication, using your prefered method.</li>
-<li>Your device is now enrolled in Entra ID.</li>
-</ul>
-</li>
-<li>Set up a PIN:<ul>
-<li>You'll be prompted to set up a PIN for Windows Hello. This PIN serves as a fast and secure way to sign in to your device, apps, and services.</li>
-<li>Your PIN must be between 6 and 32 characters in length.</li>
-<li>Enter a new PIN of your choice when prompted.</li>
-<li>Confirm the new PIN by entering it again.</li>
-</ul>
-</li>
-<li>Completion:<ul>
-<li>You are now enrolled in Windows Hello PIN authentication.</li>
-</ul>
-</li>
+<li>📦 <strong><a href="https://himmelblau-idm.org/downloads.html">Download and install the packages</a></strong></li>
 </ol>
-<p>Ensure that you choose a strong and memorable PIN to maintain the security of your device. Additionally, keep your PIN confidential and do not share it with others to prevent unauthorized access to your device and associated services. Your PIN is unique to this host, and will not effect authentication to other hosts and Azure services.</p>
-<p>You can now use your newly set up PIN to authenticate and access your device.</p>
+<p>(Choose the appropriate DEB or RPM for your system and install them.)</p>
+<ol>
+<li>✏️ <strong>Edit your config:</strong>  </li>
+</ol>
+<p>Set the primary domain of your Entra ID tenant in <code>/etc/himmelblau/himmelblau.conf</code>:</p>
+<pre><code class="language-conf">[global]
+domains = example.onmicrosoft.com
+</code></pre>
+<ol>
+<li>🔐 <strong><a href="configuration/#pam-configuration">Configure PAM</a></strong></li>
+</ol>
+<p>Add <code>pam_himmelblau.so</code> to your system’s authentication stack.</p>
+<ol>
+<li>👥 <strong><a href="configuration/#nss-configuration">Configure NSS</a></strong></li>
+</ol>
+<p>Add <code>himmelblau</code> to your <code>/etc/nsswitch.conf</code> to resolve Entra ID users and groups.</p>
+<pre><code class="language-conf">passwd:     files himmelblau
+group:      files himmelblau
+</code></pre>
+<ol>
+<li>🚀 <strong>Start the daemons:</strong></li>
+</ol>
+<pre><code>sudo systemctl enable himmelblaud himmelblaud-tasks
+sudo systemctl restart himmelblaud himmelblaud-tasks
+</code></pre>
+<p>You’re now ready to log in with your Entra ID credentials!</p>
               
             </div>
           </div><footer>
@@ -393,5 +237,5 @@ tux@contoso.onmicrosoft.com@opensuse-himmelblau:~&gt;
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2025-07-29 20:25:29.747143+00:00
+Build Date UTC : 2025-07-29 21:48:34.544011+00:00
 -->

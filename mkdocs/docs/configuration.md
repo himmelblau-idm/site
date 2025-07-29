@@ -2,13 +2,16 @@
 
 ## Overview
 
-Himmelblau is configured primarily through a single file: `/etc/himmelblau/himmelblau.conf`. This file controls authentication behavior, domain bindings, environment setup, policy enforcement, and more.
+Himmelblau is configured primarily through a single file: [`/etc/himmelblau/himmelblau.conf`](reference/himmelblau-conf.md). This file controls authentication behavior, domain bindings, environment setup, policy enforcement, and more.
 
 This page also describes required system integration steps, including PAM and NSS configuration.
 
 ---
 
-## Config File: `/etc/himmelblau/himmelblau.conf`
+## Config File: [`/etc/himmelblau/himmelblau.conf`](reference/himmelblau-conf.md)
+
+To enable authentication, you must configure the `domains` option in the [`/etc/himmelblau/himmelblau.conf`](reference/himmelblau-conf.md) file. This setting determines which domains are permitted to authenticate to the host. You MUST only specify the primary domain from each tenant.
+All other configuration options are optional.
 
 ### Format
 
@@ -28,10 +31,20 @@ app_id = 00000000-1111-2222-3333-444444444444
 | --------------------- | ------------------------------------------------------------- |
 | `domains`		        | Comma-separated list of allowed Entra ID domains				|
 | `pam_allow_groups`    | Group object IDs and user UPNs allowed to authenticate        |
-| `apply_policy`        | Enables Intune policy enforcement                             |
 | `enable_hello`        | Enables Linux Hello PIN support                               |
 
-Refer to the `himmelblau.conf` man page for a full list of options.
+**Note:** Leaving the `pam_allow_groups` option unset in the `/etc/himmelblau/himmelblau.conf` file _permits all users to authenticate_.
+
+**Note:** On Ubuntu, you should additionally set `use_etc_skel` to `true` and configure `home_attr` and `home_alias` to match (I recommend using the `CN` or `SPN` attributes). These parameters are necessary, otherwise Ubuntu's snaps will fail to execute. These settings are set by default using the Himmelblau project Debian/Ubuntu packages.
+
+```ini
+[global]
+home_attr = CN
+home_alias = CN
+use_etc_skel = true
+```
+
+Refer to the [himmelblau.conf](reference/himmelblau-conf.md) man page for a full list of options.
 
 ---
 

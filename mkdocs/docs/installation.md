@@ -18,6 +18,8 @@ This page covers how to install Himmelblau on Ubuntu, Debian, RHEL, Rocky, SUSE,
 
 ## Installation from Prebuilt Packages
 
+[Download the packages for your distribution](https://himmelblau-idm.org/downloads.html), and install them using your flavor of package manager:
+
 ### Debian & Ubuntu
 
 1. [Download](https://himmelblau-idm.org/downloads.html) the `.deb` packages.
@@ -27,6 +29,10 @@ This page covers how to install Himmelblau on Ubuntu, Debian, RHEL, Rocky, SUSE,
 ```bash
 sudo apt install -y ./himmelblau_<version>-<distro>_amd64.deb ./himmelblau-sshd-config_<version>-<distro>_amd64.deb ./himmelblau-sso_<version>-<distro>_amd64.deb ./nss-himmelblau_<version>-<distro>_amd64.deb ./pam-himmelblau_<version>-<distro>_amd64.deb ./himmelblau-qr-greeter_<version>-<distro>_amd64.deb 
 ```
+
+#### Optional Debian repositories
+
+You can optionally install the latest package from the Himmelblau debian repositories, as described on the downloads page.
 
 ### RHEL, Rocky, Fedora
 

@@ -3,7 +3,7 @@ nav:
   - Installation: installation.md
   - Configuration: configuration.md
   - Device Registration: registration.md
-  - Integration: integration.md
+  - Migration from On-Prem: integration.md
   - Ecosystem: ecosystem.md
   - Architecture: architecture.md
   - About: about.md

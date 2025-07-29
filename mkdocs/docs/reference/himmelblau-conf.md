@@ -185,18 +185,11 @@ else
 fi
 ```
 
-* **enable_experimental_policy_application** 
+* **apply_policy** 
 
-  A boolean option that enables the experimental application and enforcement of Intune policies for the authenticated user. By default, this option is disabled. 
+  A boolean option that enables the application and enforcement of Intune policies to the authenticated user. By default, this option is disabled. 
 ##### EXAMPLES
-enable_experimental_policy_application = false 
-
-
-#### enable_experimental_intune_custom_compliance 
-
-  A boolean option that enables support for Linux Intune Custom Compliance policies. This feature is experimental and not yet fully functional. While policy settings should be applied locally, the compliance status is not reliably reported to Intune, and failed policies do not currently block authentication. By default, this option is disabled. This option requires `enable_experimental_policy_application = true`. 
-##### EXAMPLES
-enable_experimental_intune_custom_compliance = true 
+apply_policy = false 
 
 
 #### authority_host 

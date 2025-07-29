@@ -28,7 +28,19 @@ domains = example.onmicrosoft.com
 
 3. 🔐 **[Configure PAM](configuration.md#pam-configuration)**
 
-   Add `pam_himmelblau.so` to your system’s authentication stack.
+   On Debian based distros, pam configuration happened automatically when you installed Himmelblau.
+
+   On openSUSE or SUSE Linux Enterprise:
+
+```
+sudo pam-config --add --himmelblau
+```
+
+   On all other distros, you can run the manual config utility bundled with Himmelblau:
+
+```
+sudo aad-tool configure-pam
+```
 
 4. 👥 **[Configure NSS](configuration.md#nss-configuration)**
 

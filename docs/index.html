@@ -169,7 +169,13 @@ domains = example.onmicrosoft.com
 <ol>
 <li>🔐 <strong><a href="configuration/#pam-configuration">Configure PAM</a></strong></li>
 </ol>
-<p>Add <code>pam_himmelblau.so</code> to your system’s authentication stack.</p>
+<p>On Debian based distros, pam configuration happened automatically when you installed Himmelblau.</p>
+<p>On openSUSE or SUSE Linux Enterprise:</p>
+<pre><code>sudo pam-config --add --himmelblau
+</code></pre>
+<p>On all other distros, you can run the manual config utility bundled with Himmelblau:</p>
+<pre><code>sudo aad-tool configure-pam
+</code></pre>
 <ol>
 <li>👥 <strong><a href="configuration/#nss-configuration">Configure NSS</a></strong></li>
 </ol>
@@ -237,5 +243,5 @@ sudo systemctl restart himmelblaud himmelblaud-tasks
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2025-07-29 21:48:34.544011+00:00
+Build Date UTC : 2025-07-29 21:56:11.548941+00:00
 -->

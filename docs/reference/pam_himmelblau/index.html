@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/reference/pam_himmelblau/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Pam himmelblau - Himmelblau Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Pam himmelblau";
+        var mkdocs_page_input_path = "reference/pam_himmelblau.md";
+        var mkdocs_page_url = "/docs/reference/pam_himmelblau/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Himmelblau Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../registration/">Device Registration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../integration/">Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../ecosystem/">Ecosystem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../aad-tool/">Aad tool</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../himmelblau-conf/">Himmelblau conf</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../himmelblaud/">Himmelblaud</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../himmelblaud_tasks/">Himmelblaud tasks</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Pam himmelblau</a>
+    <ul class="current">
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Himmelblau Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Reference</li>
+      <li class="breadcrumb-item active">Pam himmelblau</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/reference/pam_himmelblau.md">Edit on Himmelblau Documentation</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="name">NAME</h2>
+<p><strong>pam_himmelblau</strong> [em] enable Azure Entra ID authentication via Himmelblau </p>
+<h2 id="synopsis">SYNOPSIS</h2>
+<p><strong>pam_himmelblau.so</strong> [debug] [use_first_pass] [ignore_unknown_user] [mfa_poll_prompt] [no_hello_pin] </p>
+<h2 id="description">DESCRIPTION</h2>
+<p><strong>pam_himmelblau</strong> is a PAM module that authenticates users against Microsoft Azure Entra ID using the Himmelblau daemon (<code>himmelblaud</code>). </p>
+<h2 id="options">OPTIONS</h2>
+<p><strong>debug</strong> </p>
+<p>Enables verbose logging to stdout. </p>
+<p><strong>use_first_pass</strong> </p>
+<p>Uses a password already provided by a previous PAM module as either a Linux Hello PIN or an Entra Id password, instead of prompting again. </p>
+<p><strong>ignore_unknown_user</strong> </p>
+<p>Returns CR]PAM_IGNORER] for users not in Entra ID, allowing fallback to local authentication via subsequent PAM modules. </p>
+<p><strong>mfa_poll_prompt</strong> </p>
+<p>Workaround for OpenSSH Bug 2876, which prevents PAM messages from being flushed to stdout until after sending a prompt for input. This workaround causes pam to prompt the user to `press enter to continue' when polling on another device for MFA. </p>
+<p><strong>no_hello_pin</strong> </p>
+<p>Disables Linux Hello PIN login for this service (e.g., for <code>sudo</code> or <code>ssh</code>), even if Hello is configured globally. </p>
+<h2 id="pam-configuration">PAM CONFIGURATION</h2>
+<p>Configuring PAM ensures authentication requests go through Entra ID when appropriate. </p>
+<h3 id="automatic-setup">Automatic setup</h3>
+<p>On Ubuntu/Debian: </p>
+<pre><code>sudo pam-auth-update
+</code></pre>
+<p>Enable [lq]Azure authentication[rq] and verify PAM files. </p>
+<p>On openSUSE Tumbleweed or SLE: </p>
+<pre><code>pam-config --add --himmelblau
+</code></pre>
+<p>The <code>aad-tool configure-pam</code> command also inserts recommended directives (dry-run unless <code>--really</code> is used). </p>
+<h3 id="manual-configuration">Manual configuration</h3>
+<p>In <code>/etc/pam.d/common-auth</code>, ensure that the <code>pam_himmelblau.so</code> module is placed after other authentication methods (such as <code>pam_unix.so</code>). Ensure that other authentication modules are not set to <code>required</code>, as this could cause authentication to fail prior to PAM communicating with Entra ID. Include the <code>ignore_unknown_user</code> option for Himmelblau. Ensure <code>pam_deny.so</code> is placed after all modules, so that unknown users are not implicitly allowed. </p>
+<h3 id="note-if-you-intend-to-use-hello-or-passwordless-authentication-itcqs-recommended-that-pam_himmelblauso-be-placed-before-pam_unixso-in-the-pam-auth-stack-but-always-after-pam_localuserso-otherwise-pam_unix-will-unnecessarily-prompt-for-a-password"><strong>Note:</strong> If you intend to use Hello or Passwordless authentication, it[cq]s recommended that <code>pam_himmelblau.so</code> be placed before <code>pam_unix.so</code> in the pam <code>auth</code> stack (but always after <code>pam_localuser.so</code>), otherwise <code>pam_unix</code> will unnecessarily prompt for a password.</h3>
+<pre><code>auth        required      pam_env.so
+auth        [default=1 ignore=ignore success=ok] pam_localuser.so
+auth        sufficient    pam_unix.so nullok try_first_pass
+auth        sufficient    pam_himmelblau.so ignore_unknown_user
+auth        required      pam_deny.so
+</code></pre>
+<p>Configure <code>/etc/pam.d/common-account</code> in a similar manner. </p>
+<pre><code>account    [default=1 ignore=ignore success=ok] pam_localuser.so
+account    sufficient    pam_unix.so
+account    sufficient    pam_himmelblau.so ignore_unknown_user
+account    required      pam_deny.so
+</code></pre>
+<p>In <code>/etc/pam.d/common-session</code>, set <code>pam_himmelblau.so</code> as an optional module. </p>
+<pre><code>session optional    pam_systemd.so
+session required    pam_limits.so
+session optional    pam_unix.so try_first_pass
+session optional    pam_umask.so
+session optional    pam_himmelblau.so
+session optional    pam_env.so
+</code></pre>
+<p>In <code>/etc/pam.d/common-password</code>, set <code>pam_himmelblau.so</code> as sufficient. </p>
+<pre><code>password    sufficient  pam_himmelblau.so ignore_unknown_user
+password        optional        pam_gnome_keyring.so    use_authtok
+password    sufficient  pam_unix.so use_authtok nullok shadow try_first_pass 
+password    required    pam_deny.so
+</code></pre>
+<h2 id="return-values">RETURN VALUES</h2>
+<p><strong>PAM_SUCCESS</strong> </p>
+<p>Authentication or Hello PIN update succeeded. </p>
+<p><strong>PAM_AUTH_ERR</strong> </p>
+<p>Authentication failed. This may include incorrect credentials, rejected MFA, or other auth-layer failures. </p>
+<p><strong>PAM_USER_UNKNOWN</strong> </p>
+<p>The user was not found in Entra ID. This is bypassed if the <code>ignore_unknown_user</code> option is specified. </p>
+<p><strong>PAM_IGNORE</strong> </p>
+<p>The module was instructed to skip processing (e.g., due to <code>ignore_unknown_user</code>). This allows fallback to other PAM modules. </p>
+<p><strong>PAM_SERVICE_ERR</strong> </p>
+<p>A configuration or initialization error occurred in the module, or a required daemon was unreachable. </p>
+<p><strong>PAM_CRED_INSUFFICIENT</strong> </p>
+<p>The user did not meet the required credential policy. </p>
+<p><strong>PAM_ABORT</strong> </p>
+<p>A critical, unrecoverable failure occurred[em]such as a panic inside the <code>himmelblaud</code> service. </p>
+<h2 id="see-also">SEE ALSO</h2>
+<p><strong>himmelblaud(8)</strong>, <strong>aad-tool(1)</strong>, <strong>himmelblau.conf(5)</strong>, <strong>pam(8)</strong> </p>
+<h2 id="author">AUTHOR</h2>
+<p>David Mulder  dmulder@himmelblau-idm.org,  dmulder@samba.org</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../himmelblaud_tasks/" class="btn btn-neutral float-left" title="Himmelblaud tasks"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../advanced/Cloud-Kerberos-Trust-for-Linux/" class="btn btn-neutral float-right" title="Cloud Kerberos Trust for Linux">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
+        </span>
+    
+    
+      <span><a href="../himmelblaud_tasks/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../advanced/Cloud-Kerberos-Trust-for-Linux/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/distro_list.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

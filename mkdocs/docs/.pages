@@ -7,5 +7,6 @@ nav:
   - Ecosystem: ecosystem.md
   - Architecture: architecture.md
   - About: about.md
+  - Reference: reference
   - Advanced Topics: advanced
   - Troubleshooting: troubleshooting

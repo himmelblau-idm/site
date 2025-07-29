@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/reference/aad-tool/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Aad tool - Himmelblau Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Aad tool";
+        var mkdocs_page_input_path = "reference/aad-tool.md";
+        var mkdocs_page_url = "/docs/reference/aad-tool/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Himmelblau Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../registration/">Device Registration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../integration/">Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../ecosystem/">Ecosystem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Aad tool</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../himmelblau-conf/">Himmelblau conf</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../himmelblaud/">Himmelblaud</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../himmelblaud_tasks/">Himmelblaud tasks</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../pam_himmelblau/">Pam himmelblau</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Himmelblau Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Reference</li>
+      <li class="breadcrumb-item active">Aad tool</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/reference/aad-tool.md">Edit on Himmelblau Documentation</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="name">NAME</h2>
+<p>aad-tool - Azure Entra ID (AAD) management utility for Himmelblau </p>
+<h2 id="synopsis">SYNOPSIS</h2>
+<p><strong>aad-tool</strong> <em>&lt;COMMAND&gt;</em> [OPTIONS] </p>
+<h2 id="description">DESCRIPTION</h2>
+<p>The <code>aad-tool</code> utility is part of the Himmelblau project, designed to manage and interact with Azure Entra ID through various commands. It allows you to test authentication, manage caches, and check the status of services related to the <code>himmelblaud</code> resolver. </p>
+<h2 id="synopsis_1">SYNOPSIS</h2>
+<p><strong>aad-tool <em>&lt;COMMAND&gt;</em></strong> </p>
+<h2 id="description_1">DESCRIPTION</h2>
+<p>Himmelblau Management Utility </p>
+<h3 id="commands">Commands:</h3>
+<ul>
+<li>application </li>
+</ul>
+<p>Manage Entra ID application registrations, including creation, listing, and extension schema configuration </p>
+<ul>
+<li>auth-test </li>
+</ul>
+<p>Test authentication of a user via the himmelblaud resolver "pam" channel. This does not test that your pam configuration is correct - only that himmelblaud is correctly processing and validating authentications </p>
+<ul>
+<li>cache-clear </li>
+</ul>
+<p>Clear or invalidate the himmelblaud resolver cache </p>
+<ul>
+<li>cache-invalidate </li>
+</ul>
+<p>(Deprecated) Previously used to mark cache entries as stale for immediate refresh. Now behaves identically to <code>cache-clear</code> and will be removed in a future release </p>
+<ul>
+<li>configure-pam </li>
+</ul>
+<p>Configure PAM to use pam_himmelblau </p>
+<ul>
+<li>cred </li>
+</ul>
+<p>Manage confidential client credentials for authenticating to Entra ID </p>
+<ul>
+<li>enumerate </li>
+</ul>
+<p>Enumerate all users and groups in Entra ID that have <code>rfc2307</code> attributes, and cache their values locally. This addresses the issue where UID/GID mappings are needed before authentication can succeed, but are normally only retrievable after login </p>
+<ul>
+<li>user </li>
+</ul>
+<p>Manage Entra ID user accounts, including POSIX attribute assignment and UID mapping </p>
+<ul>
+<li>group </li>
+</ul>
+<p>Manage Entra ID groups, including POSIX attribute assignment and GID mapping </p>
+<ul>
+<li>idmap </li>
+</ul>
+<p>Manage the static idmapping cache used to map Entra ID accounts to static UID/GID values. This is useful for migrations from on-prem AD to Entra ID, where existing UID/GID mappings need to be preserved </p>
+<ul>
+<li>status </li>
+</ul>
+<p>Check that the himmelblaud daemon is online and able to connect correctly to the himmelblaud server </p>
+<ul>
+<li>version </li>
+</ul>
+<p>Show the version of this tool </p>
+<ul>
+<li>help </li>
+</ul>
+<p>Print this message or the help of the given subcommand(s) </p>
+<h2 id="options">OPTIONS</h2>
+<ul>
+<li><strong>-h</strong>, <strong>--help</strong> </li>
+</ul>
+<p>Print help </p>
+<h2 id="subcommand">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>application add-schema-extensions </em>[<em>OPTIONS</em>] <em>--client-id &lt;CLIENT_ID&gt; --schema-app-object-id &lt;SCHEMA_APP_OBJECT_ID&gt;</em></strong> </p>
+<h3 id="description_2">DESCRIPTION</h3>
+<p>Adds a standard set of POSIX-related schema extensions to an existing Entra ID application. </p>
+<p>This command registers directory extension attributes (e.g., <code>uidNumber</code>, <code>gidNumber</code>, <code>unixHomeDirectory</code>, <code>loginShell</code>, <code>gecos</code>) on the application specified by <code>--schema-app-object-id</code>. These extensions will be usable on user and/or group objects, as appropriate. </p>
+<p>The application specified by <code>--schema-app-object-id</code> must already exist in the tenant, and must be identified by its Object ID (not the Client ID). This value is labeled as "Object ID" in the Entra Admin Center and corresponds to the <code>id</code> field in Graph API responses. </p>
+<p>You must also supply a separate <code>--client-id</code> that grants <code>Application.ReadWrite.All</code> permissions to perform the extension registration. </p>
+<p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command attempts to authenticate as the specified Entra ID user. In this case, the command must be run as <code>root</code> to impersonate another user. </p>
+<p>This command must be run from a device that has already been joined to Entra ID. </p>
+<h3 id="options_1">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>--schema-app-object-id</strong> &lt;SCHEMA_APP_OBJECT_ID&gt; <strong>-h</strong>, <strong>--help</strong> </p>
+<p>Print help (see a summary with '-h') </p>
+<h2 id="subcommand_1">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>application create </em>[<em>OPTIONS</em>] <em>--client-id &lt;CLIENT_ID&gt; --display-name &lt;DISPLAY_NAME&gt;</em></strong> </p>
+<h3 id="description_3">DESCRIPTION</h3>
+<p>Creates a new Entra ID application registration in the current tenant. </p>
+<p>This command performs a delegated Microsoft Graph API request using an access token acquired via the specified client application (<code>--client-id</code>), which must have <code>Application.ReadWrite.All</code> permissions in the tenant. </p>
+<p>The new application will be created with the provided <code>--display-name</code>. </p>
+<p>You may specify one or more <code>--redirect-uri</code> options to configure redirect URIs for the application (used for public client authentication). If no redirect URIs are provided, the application will not include any by default. </p>
+<p>Use the <code>--user-read-write</code> and/or <code>--group-read-write</code> flags to grant the application additional Microsoft Graph API permissions at registration time, including <code>User.ReadWrite.All</code> and <code>Group.ReadWrite.All</code>. </p>
+<p>NOTE: If you grant these permissions, it is strongly recommended that you restrict access to the application to specific administrators or groups: </p>
+<ol>
+<li>In the Microsoft Entra admin portal, go to Entra???ID -&gt; Enterprise applications and find your app's entry. 2. Under Properties, set "Assignment required?" to Yes. 3. Go to Users and groups, click Add, and assign only the specific users or groups you want to have access. </li>
+</ol>
+<p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command attempts to authenticate as the specified Entra ID user. In this case, the command must be run as <code>root</code> to impersonate another user. </p>
+<p>This command must be run from a device that has already been joined to Entra ID. </p>
+<h3 id="options_2">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>--display-name</strong> &lt;DISPLAY_NAME&gt; <strong>--redirect-uri</strong> &lt;URI&gt; <strong>--user-read-write</strong> <strong>--group-read-write</strong> <strong>-h</strong>, <strong>--help</strong> </p>
+<p>Print help (see a summary with '-h') </p>
+<h2 id="subcommand_2">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>application list-schema-extensions </em>[<em>OPTIONS</em>] <em>--client-id &lt;CLIENT_ID&gt; --schema-app-object-id &lt;SCHEMA_APP_OBJECT_ID&gt;</em></strong> </p>
+<h3 id="description_4">DESCRIPTION</h3>
+<p>Lists the schema extension attributes registered on an Entra ID application. </p>
+<p>This command retrieves the directory extension attributes (e.g., <code>uidNumber</code>, <code>gidNumber</code>, etc.) that have been added to the application identified by <code>--schema-app-object-id</code>. </p>
+<p>The <code>--schema-app-object-id</code> parameter must be the Object ID of the application (not the Client ID), as shown in the Entra Admin Center. This value corresponds to the <code>id</code> field in Microsoft Graph and is required to query extension properties. </p>
+<p>You must also supply a separate <code>--client-id</code> that grants <code>Application.Read.All</code> or <code>Application.ReadWrite.All</code> permissions in the tenant to perform this query. </p>
+<p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command attempts to authenticate as the specified Entra ID user. In this case, the command must be run as <code>root</code> to impersonate another user. </p>
+<p>This command must be run from a device that has already been joined to Entra ID. </p>
+<h3 id="options_3">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>--schema-app-object-id</strong> &lt;SCHEMA_APP_OBJECT_ID&gt; <strong>-h</strong>, <strong>--help</strong> </p>
+<p>Print help (see a summary with '-h') </p>
+<h2 id="subcommand_3">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>application list </em>[<em>OPTIONS</em>] <em>--client-id &lt;CLIENT_ID&gt;</em></strong> </p>
+<h3 id="description_5">DESCRIPTION</h3>
+<p>Lists Entra ID application registrations in the current tenant. </p>
+<p>This command performs a delegated Microsoft Graph API request using an access token acquired via the specified client application (<code>--client-id</code>), which must have <code>Application.Read.All</code> permissions in the tenant. </p>
+<p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command attempts to authenticate as the specified Entra ID user. In this case, the command must be run as <code>root</code> to impersonate another user. </p>
+<p>This command must be run from a device that has already been joined to Entra ID. </p>
+<h3 id="options_4">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>-h</strong>, <strong>--help</strong> </p>
+<p>Print help (see a summary with '-h') </p>
+<h2 id="subcommand_4">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>auth-test </em>[<em>OPTIONS</em>] <em>--name &lt;ACCOUNT_ID&gt;</em></strong> </p>
+<h3 id="description_6">DESCRIPTION</h3>
+<p>Test authentication of a user via the himmelblaud resolver "pam" channel. This does not test that your pam configuration is correct - only that himmelblaud is correctly processing and validating authentications </p>
+<h3 id="options_5">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; </p>
+<h4 id="-h-help">-h<strong>, </strong>--help</h4>
+<p>Print help </p>
+<h2 id="subcommand_5">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>cache-clear </em>[<em>OPTIONS</em>]</strong> </p>
+<h3 id="description_7">DESCRIPTION</h3>
+<p>Clear or invalidate the himmelblaud resolver cache. </p>
+<p>By default, this marks all cached user and group entries as stale, forcing them to refresh immediately when next used. </p>
+<p>Specify <strong>--enumerate</strong>, <strong>--idmap</strong>, <strong>--nss</strong>, or <strong>--mapped</strong> to clear these individual caches as well. Omit all these to clear them all. </p>
+<p>Use <code>--full</code> to completely purge the user and group cache entries and unjoin the host from Entra ID. This is irreversible. </p>
+<h3 id="options_6">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>--enumerate</strong> </p>
+<p>Only clear the enumerated users/groups cache <strong>--idmap</strong> </p>
+<p>Only clear the idmap cache (alias for <strong>--enumerate</strong>) <strong>--nss</strong> </p>
+<p>Only clear the nss cache <strong>--mapped</strong> </p>
+<p>Only clear the mapped name cache <strong>--full</strong> </p>
+<p>Force a full cache wipe and unjoin the host from Entra ID. This is probably not what you want <strong>-h</strong>, <strong>--help</strong> </p>
+<p>Print help (see a summary with '-h') </p>
+<h2 id="subcommand_6">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>cache-invalidate </em>[<em>OPTIONS</em>]</strong> </p>
+<h3 id="description_8">DESCRIPTION</h3>
+<p>(Deprecated) Previously used to mark cache entries as stale for immediate refresh. Now behaves identically to <code>cache-clear</code> and will be removed in a future release </p>
+<h3 id="options_7">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>--enumerate</strong> <strong>--idmap</strong> <strong>--nss</strong> <strong>--mapped</strong> <strong>--full</strong> </p>
+<h4 id="-h-help_1">-h<strong>, </strong>--help</h4>
+<p>Print help </p>
+<h2 id="subcommand_7">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>configure-pam </em>[<em>OPTIONS</em>]</strong> </p>
+<h3 id="description_9">DESCRIPTION</h3>
+<p>Configure PAM to use pam_himmelblau </p>
+<h3 id="options_8">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>--really</strong> <strong>--auth-file</strong> &lt;AUTH_FILE&gt; <strong>--account-file</strong> &lt;ACCOUNT_FILE&gt; <strong>--session-file</strong> &lt;SESSION_FILE&gt; <strong>--password-file</strong> &lt;PASSWORD_FILE&gt; </p>
+<h4 id="-h-help_2">-h<strong>, </strong>--help</h4>
+<p>Print help </p>
+<h2 id="subcommand_8">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>cred cert </em>[<em>OPTIONS</em>] <em>--client-id &lt;CLIENT_ID&gt; --domain &lt;DOMAIN&gt; --valid-days &lt;VALID_DAYS&gt; --cert-out &lt;CERT_OUT&gt;</em></strong> </p>
+<h3 id="description_10">DESCRIPTION</h3>
+<p>Generate an RS256 HSM-backed key pair with a self-signed certificate for confidential client authentication. </p>
+<p>To set this up: </p>
+<ol>
+<li>
+<p>In the Entra ID portal, navigate to Azure Active Directory -&gt; App registrations, then open (or create) your application. </p>
+</li>
+<li>
+<p>Under Manage &gt; Certificates &amp; secrets, go to the Certificates tab. </p>
+</li>
+<li>
+<p>Click Upload certificate and select the PEM file generated by this command. </p>
+</li>
+<li>
+<p>Azure will store this cert for authenticating via public key. </p>
+</li>
+</ol>
+<p>The private key never leaves your TPM (or SoftHSM). </p>
+<p>When this cred needs renewed in the future, simple run this command again to replace the expired certificate. </p>
+<p>Example: aad-tool cred cert <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>--valid-days</strong> 365 <strong>--cert-out</strong> <em>/tmp/my-cert.crt</em> </p>
+<h3 id="options_9">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>--client-id</strong> &lt;CLIENT_ID&gt; </p>
+<p>The Azure AD application (client) ID this certificate is associated with <strong>--domain</strong> &lt;DOMAIN&gt; </p>
+<p>The tenant domain this certificate is associated with <strong>--valid-days</strong> &lt;VALID_DAYS&gt; </p>
+<p>Number of days the self-signed certificate will be valid <strong>--cert-out</strong> &lt;CERT_OUT&gt; </p>
+<p>Path to write the generated PEM certificate file. This is the file you will upload to Entra ID <strong>-h</strong>, <strong>--help</strong> </p>
+<p>Print help (see a summary with '-h') </p>
+<h2 id="subcommand_9">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>cred delete </em>[<em>OPTIONS</em>] <em>--domain &lt;DOMAIN&gt;</em></strong> </p>
+<h3 id="description_11">DESCRIPTION</h3>
+<p>Delete confidential client credentials (secret, certificate, or both) </p>
+<p>This deletes stored confidential client credentials from Himmelblau's encrypted cache. If neither <code>--secret</code> nor <code>--cert</code> is specified, both will be deleted. </p>
+<p>Example: aad-tool cred delete <strong>--domain</strong> &lt;DOMAIN&gt; aad-tool cred delete <strong>--domain</strong> &lt;DOMAIN&gt; <strong>--secret</strong> aad-tool cred delete <strong>--domain</strong> &lt;DOMAIN&gt; <strong>--cert</strong> </p>
+<h3 id="options_10">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>--domain</strong> &lt;DOMAIN&gt; </p>
+<p>The tenant domain whose creds will be deleted <strong>--secret</strong> </p>
+<p>Delete only the client secret (not the certificate) <strong>--cert</strong> </p>
+<p>Delete only the client certificate (not the secret) <strong>-h</strong>, <strong>--help</strong> </p>
+<p>Print help (see a summary with '-h') </p>
+<h2 id="subcommand_10">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>cred list </em>[<em>OPTIONS</em>] <em>--domain &lt;DOMAIN&gt;</em></strong> </p>
+<h3 id="description_12">DESCRIPTION</h3>
+<p>List the presence of confidential client credentials </p>
+<p>This checks Himmelblau's encrypted cache to see whether a client secret and/or client certificate exists for the given domain. </p>
+<p>Example: aad-tool cred list <strong>--domain</strong> &lt;DOMAIN&gt; </p>
+<h3 id="options_11">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>--domain</strong> &lt;DOMAIN&gt; <strong>-h</strong>, <strong>--help</strong> </p>
+<p>Print help (see a summary with '-h') </p>
+<h2 id="subcommand_11">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>cred secret </em>[<em>OPTIONS</em>] <em>--client-id &lt;CLIENT_ID&gt; --domain &lt;DOMAIN&gt; --secret &lt;SECRET&gt;</em></strong> </p>
+<h3 id="description_13">DESCRIPTION</h3>
+<p>Store a client secret for confidential client authentication. </p>
+<p>To set this up: </p>
+<ol>
+<li>
+<p>In the Entra ID portal, navigate to Azure Active Directory -&gt; App registrations, then open (or create) your application. </p>
+</li>
+<li>
+<p>Under Manage &gt; Certificates &amp; secrets, go to the Client secrets tab. </p>
+</li>
+<li>
+<p>Click New client secret, choose an expiry, and click Add. </p>
+</li>
+<li>
+<p>Copy the Value (not Secret ID) immediately. You won't be able to see it again. </p>
+</li>
+<li>
+<p>Use that value with this command to store it in Himmelblau???s encrypted cache. </p>
+</li>
+</ol>
+<p>When this cred needs renewed in the future, simple run this command again to replace the expired secret. </p>
+<p>Example: aad-tool cred secret <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>--secret</strong> &lt;SECRET_VALUE&gt; </p>
+<h3 id="options_12">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>--client-id</strong> &lt;CLIENT_ID&gt; </p>
+<p>The Azure AD application (client) ID this secret is associated with <strong>--domain</strong> &lt;DOMAIN&gt; </p>
+<p>The tenant domain this secret is associated with <strong>--secret</strong> &lt;SECRET&gt; </p>
+<p>The client secret value copied from the Entra ID portal <strong>-h</strong>, <strong>--help</strong> </p>
+<p>Print help (see a summary with '-h') </p>
+<h2 id="subcommand_12">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>enumerate </em>[<em>OPTIONS</em>]</strong> </p>
+<h3 id="description_14">DESCRIPTION</h3>
+<p>Enumerate all users and groups in Entra ID that have <code>rfc2307</code> attributes, and cache their values locally. This addresses the issue where UID/GID mappings are needed before authentication can succeed, but are normally only retrievable after login. </p>
+<p>The <code>--client-id</code> parameter is optional and must refer to a registered Entra ID application with <code>User.Read.All</code> and <code>Group.Read.All</code> permissions. </p>
+<p>The <code>--name</code> parameter specifies the Entra ID user on whose behalf the token is requested, enabling delegated access through the specified client application. </p>
+<p>This command can only be executed from an Entra Id enrolled host. </p>
+<h3 id="options_13">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>-h</strong>, <strong>--help</strong> </p>
+<p>Print help (see a summary with '-h') </p>
+<h2 id="subcommand_13">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>group set-posix-attrs </em>[<em>OPTIONS</em>] <em>--schema-client-id &lt;SCHEMA_CLIENT_ID&gt; --group-id &lt;GROUP_ID&gt; --gid &lt;GID&gt;</em></strong> </p>
+<h3 id="description_15">DESCRIPTION</h3>
+<p>Sets POSIX-related attributes on a specified Entra ID group object. </p>
+<p>This command updates the <code>gidNumber</code> attribute on the Entra ID group identified by <code>--group-id</code>, which must be a valid Object ID. </p>
+<p>You must also provide the <code>--schema-client-id</code>, which identifies the application where the extension properties were registered. This value must be the Client ID of the application used for schema registration. The application associated with <code>--schema-client-id</code> must supply <code>Group.ReadWrite.All</code> permissions in the tenant. </p>
+<p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command must be run as <code>root</code> to impersonate another user. </p>
+<p>This command must be run from a device that has already been joined to Entra ID. </p>
+<h3 id="options_14">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--schema-client-id</strong> &lt;SCHEMA_CLIENT_ID&gt; <strong>--group-id</strong> &lt;GROUP_ID&gt; <strong>--gid</strong> &lt;GID&gt; <strong>-h</strong>, <strong>--help</strong> </p>
+<p>Print help (see a summary with '-h') </p>
+<h2 id="subcommand_14">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>idmap group-add </em>[<em>OPTIONS</em>] <em>--name &lt;ACCOUNT_ID&gt; --gid &lt;GID&gt;</em></strong> </p>
+<h3 id="description_16">DESCRIPTION</h3>
+<p>Add a static group mapping to the idmap cache. This maps an Entra ID group (by name) to a fixed GID. This can be used to maintain group identity and membership compatibility after moving to Entra ID </p>
+<h3 id="options_15">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>-g</strong>, <strong>--gid</strong> &lt;GID&gt; </p>
+<h4 id="-h-help_3">-h<strong>, </strong>--help</h4>
+<p>Print help </p>
+<h2 id="subcommand_15">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>idmap user-add </em>[<em>OPTIONS</em>] <em>--name &lt;ACCOUNT_ID&gt; --uid &lt;UID&gt; --gid &lt;GID&gt;</em></strong> </p>
+<h3 id="description_17">DESCRIPTION</h3>
+<p>Add a static user mapping to the idmap cache. This maps an Entra ID user (by UPN or SAM-compatible name) to a fixed UID and primary group GID </p>
+<h3 id="options_16">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>-u</strong>, <strong>--uid</strong> &lt;UID&gt; <strong>-g</strong>, <strong>--gid</strong> &lt;GID&gt; </p>
+<h4 id="-h-help_4">-h<strong>, </strong>--help</h4>
+<p>Print help </p>
+<h2 id="subcommand_16">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>status </em>[<em>OPTIONS</em>]</strong> </p>
+<h3 id="description_18">DESCRIPTION</h3>
+<p>Check that the himmelblaud daemon is online and able to connect correctly to the himmelblaud server </p>
+<h3 id="options_17">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> </p>
+<h4 id="-h-help_5">-h<strong>, </strong>--help</h4>
+<p>Print help </p>
+<h2 id="subcommand_17">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>user set-posix-attrs </em>[<em>OPTIONS</em>] <em>--schema-client-id &lt;SCHEMA_CLIENT_ID&gt; --user-id &lt;USER_ID&gt;</em></strong> </p>
+<h3 id="description_19">DESCRIPTION</h3>
+<p>Sets POSIX-related attributes on a specified Entra ID user object. </p>
+<p>This command updates POSIX attributes (<code>uidNumber</code>, <code>gidNumber</code>, <code>unixHomeDirectory</code>, <code>loginShell</code>, and <code>gecos</code>) on the Entra ID user identified by <code>--user-id</code>, which must be a valid Object ID or UPN. </p>
+<p>You must also provide the <code>--schema-client-id</code>, which identifies the application where the extension properties were registered. This value must be the Client ID of the application used for schema registration. The application associated with <code>--schema-client-id</code> must supply <code>User.ReadWrite.All</code> permissions in the tenant. </p>
+<p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command must be run as <code>root</code> to impersonate another user. </p>
+<p>This command must be run from a device that has already been joined to Entra ID. </p>
+<h3 id="options_18">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--schema-client-id</strong> &lt;SCHEMA_CLIENT_ID&gt; <strong>--user-id</strong> &lt;USER_ID&gt; <strong>--uid</strong> &lt;UID&gt; <strong>--gid</strong> &lt;GID&gt; <strong>--home</strong> &lt;HOME&gt; <strong>--shell</strong> &lt;SHELL&gt; <strong>--gecos</strong> &lt;GECOS&gt; <strong>-h</strong>, <strong>--help</strong> </p>
+<p>Print help (see a summary with '-h') </p>
+<h2 id="see-also">SEE ALSO</h2>
+<p><strong>himmelblau.conf</strong>(5), <strong>himmelblaud</strong>(8), <strong>himmelblaud-tasks</strong>(8) </p>
+<h2 id="author">AUTHOR</h2>
+<p>David Mulder &lt;dmulder@himmelblau-idm.org&gt;, &lt;dmulder@samba.org&gt; </p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../about/" class="btn btn-neutral float-left" title="About"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../himmelblau-conf/" class="btn btn-neutral float-right" title="Himmelblau conf">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
+        </span>
+    
+    
+      <span><a href="../../about/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../himmelblau-conf/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/distro_list.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/Design/" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Enabling the Himmelblau QR Greeter gnome‐shell Extension - Himmelblau Documentation</title>
+    <title>Design Principles - Himmelblau Documentation</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Enabling the Himmelblau QR Greeter gnome\u2010shell Extension";
-        var mkdocs_page_input_path = "advanced/Enabling-the-Himmelblau-QR-Greeter-gnome\u2010shell-Extension.md";
-        var mkdocs_page_url = "/docs/advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/";
+        var mkdocs_page_name = "Design Principles";
+        var mkdocs_page_input_path = "advanced/Design.md";
+        var mkdocs_page_url = "/docs/advanced/Design/";
       </script>
     
     <!--[if lt IE 9]>
@@ -92,9 +92,13 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../Design/">Design Principles</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Design Principles</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#adherence-to-microsoft-specifications-and-windows-behavior">Adherence to Microsoft Specifications and Windows Behavior</a>
+    </li>
+    </ul>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
                   </li>
@@ -131,9 +135,9 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Advanced Topics</li>
-      <li class="breadcrumb-item active">Enabling the Himmelblau QR Greeter gnome‐shell Extension</li>
+      <li class="breadcrumb-item active">Design Principles</li>
     <li class="wy-breadcrumbs-aside">
-          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/advanced/Enabling-the-Himmelblau-QR-Greeter-gnome‐shell-Extension.md">Edit on Himmelblau Documentation</a>
+          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/advanced/Design.md">Edit on Himmelblau Documentation</a>
     </li>
   </ul>
   <hr/>
@@ -141,43 +145,87 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <ol>
-<li><strong>Download and Install the Extension Package</strong></li>
-</ol>
-<p><a href="https://himmelblau-idm.org/downloads.html">Download the appropriate package for your distribution</a></p>
-<p>The package is called <code>himmelblau-qr-greeter</code>. Follow your distribution’s instructions for installing system packages.</p>
-<ol>
-<li><strong>Enable the Extension for the GDM User</strong></li>
-</ol>
-<p>Since the extension runs on the GDM (login) screen, you must enable it as the gdm user. Run the following commands:</p>
-<ol>
-<li>
-<p><strong>Open a shell as the gdm user:</strong></p>
-<p><code>sudo machinectl shell gdm@ /bin/bash</code></p>
-</li>
-<li>
-<p><strong>Enable the extension for GDM:</strong></p>
-<p><code>gsettings set org.gnome.shell enabled-extensions "['qr-greeter@himmelblau-idm.org']"</code></p>
-</li>
-<li>
-<p><strong>Exit the shell:</strong></p>
-<p><code>exit</code></p>
-</li>
-<li>
-<p><strong>Restart GDM</strong></p>
-</li>
-</ol>
-<p>To apply the changes, restart GDM:</p>
-<p><code>sudo systemctl restart gdm3</code></p>
-<p>After these steps, the Himmelblau QR Greeter extension will be active on your login and lock screens.</p>
-<p><img alt="Login Screen" src="https://github.com/user-attachments/assets/382cdf17-f6d7-44e8-aa7c-204bd37bad9c" />
-<img alt="Lock Screen" src="https://github.com/user-attachments/assets/676e4573-9c48-4122-9f68-c21cee1e1846" /></p>
+                <h1 id="design-principles">Design Principles</h1>
+<h2 id="adherence-to-microsoft-specifications-and-windows-behavior">Adherence to Microsoft Specifications and Windows Behavior</h2>
+<p>While the project aims to align with Microsoft specifications where feasible,
+our primary guiding principle is adherence to actual Windows behavior. This
+approach ensures compatibility and interoperability within Microsoft's
+authentication ecosystem while accommodating any deviations or inaccuracies
+found in the specifications.</p>
+<h1 id="interaction-diagrams">Interaction Diagrams</h1>
+<p>Since we try to adhere to Windows behavior, it's helpful to review Microsoft
+design flows which explain those behaviors, such as
+<a href="https://learn.microsoft.com/en-us/entra/identity/devices/device-registration-how-it-works#microsoft-entra-joined-in-managed-environments">How it works: Device registration</a>
+and
+<a href="https://learn.microsoft.com/en-us/entra/identity/devices/concept-primary-refresh-token#prt-issuance-during-first-sign-in">Primary Refresh Token Issuance</a>.
+These flows are similar to the behavior of this project, but project specific
+design flows are provided here for clarity.</p>
+<h2 id="device-enrollment">Device Enrollment</h2>
+<p align="center">
+  <img src="enrollment.png" width="100%" height="auto" />
+</p>
+
+<p><strong>A:</strong> Enrollment is first initiated by authenticating to the
+https://enrollment.manage.microsoft.com resource. This is accomplished using the
+functions <code>acquire_token_by_username_password_for_device_enrollment()</code>,
+<code>initiate_device_flow_for_device_enrollment()</code> paired with
+<code>acquire_token_by_device_flow()</code>, or
+<code>initiate_acquire_token_by_mfa_flow_for_device_enrollment()</code> paired with
+<code>acquire_token_by_mfa_flow()</code>. The <code>UserToken</code> from the response is then
+provided in a call to <code>enroll_device()</code>.</p>
+<p><strong>B:</strong> The <code>enroll_device()</code> function communicates with the TPM and creates 2
+RSA keys. One will be used as the transport key, and the other will be used
+to create a Certificate Signing Request (CSR). The source for this request is
+found in <code>src/auth.rs</code> within the <code>BrokerClientApplication</code> struct
+implementation.</p>
+<p><strong>C:</strong> <code>enroll_device()</code> sends a GET request to
+https://enterpriseregistration.windows.net requesting a list of available
+services. This request is defined in
+<a href="https://github.com/himmelblau-idm/aad-join-spec/blob/main/aad-join-spec.md#31-device-registration-discovery-service">[MS-DRS] Section 3.1</a>
+and <a href="https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dvrd/8d2cc934-a5ac-4356-84fb-e7673b078a4c">[MS-DVRD] Section 4.3</a>.
+The source for this request is found in <code>src/discovery.rs</code>.</p>
+<p><strong>D:</strong> The <code>enroll_device_internal()</code> function processes the public transport
+key by generating a 
+<a href="https://learn.microsoft.com/en-us/windows/win32/api/bcrypt/ns-bcrypt-bcrypt_rsakey_blob">BCRYPT_RSAKEY_BLOB</a>,
+which is then encoded in base64 format.</p>
+<p><strong>E:</strong> The encoded transport key blob is subsequently included in the enrollment
+request payload, along with the Certificate Signing Request (CSR), which is also
+base64 encoded. These, included with the enrollment attributes passed to
+<code>enroll_device()</code>, are sent to the Azure DRS service for enrollment. The DRS
+service validates the access token received in <strong>A</strong>, creates a device id, then
+generates and signs a device certificate as requested. The device certificate
+is returned to the client.</p>
+<p><strong>F:</strong> The device certificate is associated with the transport key in the TPM.</p>
+<p>MDM enrollment is not yet implemented.</p>
+<h2 id="prt-issuance-via-usernamepassword">PRT Issuance via Username/Password</h2>
+<p align="center">
+  <img src="prt.png" width="100%" height="auto" />
+</p>
+
+<p><strong>A:</strong> The logon UI passes the UPN and password to
+<code>acquire_user_prt_by_username_password()</code>.</p>
+<p><strong>B:</strong> <code>build_jwt_by_username_password()</code> gets a nonce from Microsoft Entra ID.</p>
+<p><strong>C:</strong> <code>build_jwt_by_username_password()</code> constructs the authentication request
+with the user’s credentials, nonce, and a scope, and signs the request with the
+Device key. <code>acquire_user_prt_jwt()</code> sends the request to Microsoft Entra ID.</p>
+<p><strong>D:</strong> Microsoft Entra ID validates the user credentials, the nonce, and device
+signature, verifies that the device is valid in the tenant and issues the
+encrypted PRT. Along with the PRT, Microsoft Entra ID also issues a symmetric
+key, called the Session key encrypted by Microsoft Entra ID using the Transport
+key. In addition, the Session key is also embedded in the PRT. This Session key
+acts as the Proof-of-possession (PoP) key for subsequent requests with the PRT.
+Up to two Kerberos TGTs are embeded in the PRT, labeled <code>tgt_ad</code> and
+<code>tgt_cloud</code>. The first is an on-prem TGT (if configured), while the second is an
+Azure cloud TGT.</p>
+<p><strong>E:</strong> <code>acquire_user_prt_by_username_password()</code> encrypts the PRT using the
+Transport key and returns the encrypted blob. <code>exchange_prt_for_access_token()</code>
+can then be called to obtain an access token for the user.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../Design/" class="btn btn-neutral float-left" title="Design Principles"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../MS-specs-which-Himmelblau-uses/" class="btn btn-neutral float-right" title="MS specs which Himmelblau uses">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/" class="btn btn-neutral float-left" title="Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/" class="btn btn-neutral float-right" title="Enabling the Himmelblau QR Greeter gnome‐shell Extension">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -204,10 +252,10 @@
         </span>
     
     
-      <span><a href="../Design/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../MS-specs-which-Himmelblau-uses/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

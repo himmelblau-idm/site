@@ -12,7 +12,7 @@ Himmelblau’s architecture is modular, scalable, and designed to integrate deep
 
 The central daemon responsible for:
 
-- Initiating and processing OAuth2 and Kerberos authentication flows
+- Initiating and processing Entra Id authentication flows
 - Requesting Primary Refresh Tokens (PRTs) and access tokens
 - Managing token lifecycles: storage, renewal, expiration
 - Securely communicating with other services via UNIX sockets

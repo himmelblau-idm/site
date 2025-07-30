@@ -9,10 +9,12 @@ async function renderSupportedDistros() {
         ['tumbleweed', [['openSUSE', 'Tumbleweed']]],
         ['rawhide', [['Fedora', 'Rawhide']]],
         ['fedora41', [['Fedora', '41']]],
+		['fedora42', [['Fedora', '42']]],
         ['debian12', [['Debian', '12']]],
         ['ubuntu22.04', [['Ubuntu', '22.04'], ['Linux Mint', '21.3']]],
         ['ubuntu24.04', [['Ubuntu', '24.04'], ['Linux Mint', '22']]],
         ['sle15sp6', [['SUSE Linux Enterprise', '15 SP6'], ['openSUSE', '15.6']]],
+		['sle15sp7', [['SUSE Linux Enterprise', '15 SP7']]],
         ['sle16', [['SUSE Linux Enterprise', '16'], ['openSUSE', '16']]],
     ]);
 

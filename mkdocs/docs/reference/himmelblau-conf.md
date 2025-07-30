@@ -192,6 +192,13 @@ fi
 apply_policy = false 
 
 
+#### enable_experimental_intune_custom_compliance 
+
+  A boolean option that enables support for Linux Intune Custom Compliance policies. This feature is experimental and not yet fully functional. While policy settings should be applied locally, the compliance status is not reliably reported to Intune, and failed policies do not currently block authentication. By default, this option is disabled. This option requires `apply_policy = true`. 
+##### EXAMPLES
+enable_experimental_intune_custom_compliance = true 
+
+
 #### authority_host 
 
   Specifies the hostname for Microsoft authentication. The default value is **login.microsoftonline.com.** 

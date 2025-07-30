@@ -20,9 +20,7 @@ design flows are provided here for clarity.
 
 ## Device Enrollment
 
-<p align="center">
-  <img src="enrollment.png" width="100%" height="auto" />
-</p>
+![Device Enrollment](enrollment.png)
 
 **A:** Enrollment is first initiated by authenticating to the
 https://enrollment.manage.microsoft.com resource. This is accomplished using the
@@ -65,9 +63,7 @@ MDM enrollment is not yet implemented.
 
 ## PRT Issuance via Username/Password
 
-<p align="center">
-  <img src="prt.png" width="100%" height="auto" />
-</p>
+![PRT Issuance via Username/Password](prt.png)
 
 **A:** The logon UI passes the UPN and password to
 `acquire_user_prt_by_username_password()`.

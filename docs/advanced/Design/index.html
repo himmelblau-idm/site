@@ -161,10 +161,7 @@ and
 These flows are similar to the behavior of this project, but project specific
 design flows are provided here for clarity.</p>
 <h2 id="device-enrollment">Device Enrollment</h2>
-<p align="center">
-  <img src="enrollment.png" width="100%" height="auto" />
-</p>
-
+<p><img alt="Device Enrollment" src="../enrollment.png" /></p>
 <p><strong>A:</strong> Enrollment is first initiated by authenticating to the
 https://enrollment.manage.microsoft.com resource. This is accomplished using the
 functions <code>acquire_token_by_username_password_for_device_enrollment()</code>,
@@ -198,10 +195,7 @@ is returned to the client.</p>
 <p><strong>F:</strong> The device certificate is associated with the transport key in the TPM.</p>
 <p>MDM enrollment is not yet implemented.</p>
 <h2 id="prt-issuance-via-usernamepassword">PRT Issuance via Username/Password</h2>
-<p align="center">
-  <img src="prt.png" width="100%" height="auto" />
-</p>
-
+<p><img alt="PRT Issuance via Username/Password" src="../prt.png" /></p>
 <p><strong>A:</strong> The logon UI passes the UPN and password to
 <code>acquire_user_prt_by_username_password()</code>.</p>
 <p><strong>B:</strong> <code>build_jwt_by_username_password()</code> gets a nonce from Microsoft Entra ID.</p>

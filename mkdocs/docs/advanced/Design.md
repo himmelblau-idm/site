@@ -59,7 +59,7 @@ is returned to the client.
 
 **F:** The device certificate is associated with the transport key in the TPM.
 
-MDM enrollment is not yet implemented.
+MDM enrollment via Intune was implemented in Himmelblau 1.0.
 
 ## PRT Issuance via Username/Password
 

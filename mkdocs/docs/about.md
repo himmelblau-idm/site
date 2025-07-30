@@ -33,7 +33,7 @@ Our mission is simple:
   Early support for passwordless authentication paths.
 
 - **Rust-first, modular architecture**  
-  A DBus daemon (`himmelblaud`) plus PAM/NSS modules and CLI tooling — designed for reliability, memory safety, and maintainability.
+  A systemd daemon (`himmelblaud`) plus PAM/NSS modules and CLI tooling — designed for reliability, memory safety, and maintainability.
 
 - **Open source & community-driven**  
   Built in the open, with transparent design, rigorous logging, and well-defined extension points.
@@ -57,7 +57,7 @@ Himmelblau targets a wide range of enterprise and community Linux distributions,
 
 ## Who’s Behind It?
 
-Himmelblau is created and primarily maintained by **[David Mulder](mailto:dmulder@himmelblau-idm.org)**, with key early contributions from **William Brown** and support from **SUSE engineers** and a growing community of open-source contributors.
+Himmelblau is created and primarily maintained by **[David Mulder](mailto:dmulder@himmelblau-idm.org)**, with key contributions from **William Brown** and support from **SUSE engineers** and a growing community of open-source contributors.
 
 ---
 

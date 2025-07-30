@@ -73,13 +73,4 @@ Supported rules:
 
 ## Refreshing Compliance Status
 
-Compliance is checked:
-
-* During login
-* Periodically in the background (via `himmelblaud-tasks`)
-
-To force re-evaluation:
-
-* Restart `himmelblaud-tasks`
-* Reboot
-* Re-authenticate
+Compliance is checked during login. To force re-evaluation, simply re-authenticate.

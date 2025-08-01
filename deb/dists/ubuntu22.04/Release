@@ -4,21 +4,21 @@ Suite: ubuntu22.04
 Codename: ubuntu22.04
 Architectures: amd64
 Components: main
-Date: Wed, 30 Jul 2025 20:26:00 +0000
-Date: Wed, 30 Jul 2025 20:26:00 +0000
+Date: Fri, 01 Aug 2025 20:55:02 +0000
+Date: Fri, 01 Aug 2025 20:55:02 +0000
 MD5Sum:
- 3e1034a3f8460d511c60a38874572f36              192 Release
- 5134bf5657ab795c757165886181cd29             4436 main/binary-amd64/Packages
- 4db7b00e460bd1c6b87307294203e100             1398 main/binary-amd64/Packages.gz
+ 27987108f21d235517b48710b0a91985              192 Release
+ 21592727bfccddd8b2d671df0bb0301e             4436 main/binary-amd64/Packages
+ 8479350314467b6d1848123074a42474             1395 main/binary-amd64/Packages.gz
 SHA1:
- d1ca0219bf8184379794dee4740a9ddf3c6f38a0              192 Release
- f45d9d0be7c1999838b92e1a583ef4c236b10f8e             4436 main/binary-amd64/Packages
- b118223c504116032e35779fb656a203360f7bca             1398 main/binary-amd64/Packages.gz
+ b1b25b69274e24f2427194bf2c17d2e159a9c18f              192 Release
+ bfeffb9639a9eb0c9ba13a205bfc250d30a041b6             4436 main/binary-amd64/Packages
+ cfc3e41e0116334aa59ebb9c3cc226d788539352             1395 main/binary-amd64/Packages.gz
 SHA256:
- ea4cd8c143de591d28c51586bc8d3af8eb73866127d61cc6da1489fb2ec510a8              192 Release
- e6302f7a934fd45cabd05b708ef20430ff499658e83790fdc3a692196c60fda6             4436 main/binary-amd64/Packages
- b9d59a61549e30847012853f82c39373b57d6bced5e9787a1351c4c0baeaf89c             1398 main/binary-amd64/Packages.gz
+ b142260d059b21dcd63d4e99aa308c3bccad361c32638d489eb3f9402ed6b6ef              192 Release
+ 35daf2083bddc08cb70c0b7da093fae7c3f3472e5683682557ab021baca29dbc             4436 main/binary-amd64/Packages
+ ff5913eb64817f04d93835841f6f46efbb7b3ff9f89e0150ab68f678a5fb0a03             1395 main/binary-amd64/Packages.gz
 SHA512:
- bedae9f1e0f84ec3a686531bc26e7a1d6fa90e0705fc0b39d2827d443eee1f022326783763358ab5ef8a6292117c2888f496d5d1192b2c11e18846e8fbabdd2d              192 Release
- 575f94b1ea2cd8c39cb8256da1ef288533d57698183780a07100fee4dcbf5419d819037213de5e8f0d3ccac13b8fc2ea9dce1c4ed4b8062993d819485d19779d             4436 main/binary-amd64/Packages
- d4753c94e1e99f9a6be1186afc3225a6ad02111216286319085047be1eb99fe2ab0a3d48104061972746659363ff63d02d2c3fd4d3156f0797976735741da40d             1398 main/binary-amd64/Packages.gz
+ 65087a52d0e33493250993db0eb538532a7ca8d470e3792b631c8cf7545cd793d9eb013629804e2ae8b9570d439a3b8d906c8dad4b1e39e28cd1a4a1f3c520c3              192 Release
+ a537041d1ecdf400cb21a86370b64e65345b305b77c644eb5f2336938ac2fdd721c6b63e0f2d045d2ee7a34415b31f9e80c88dcb0aae84b71cb893805030b3bc             4436 main/binary-amd64/Packages
+ b8c5a5039aa4b95a06f5c14cc98bd6906aba0598a6ab1f0e44b0cdf786c3b16a2dedab365d05096946c481246c57531e643e91bad1bbaaa483687d553da76c7c             1395 main/binary-amd64/Packages.gz

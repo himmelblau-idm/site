@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/Syncing-Active-Directory-with-Azure-Entra-ID/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage/" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Syncing Active Directory with Azure Entra ID - Himmelblau Documentation</title>
+    <title>Configuring a Hardware TPM for Secure Key Storage - Himmelblau Documentation</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Syncing Active Directory with Azure Entra ID";
-        var mkdocs_page_input_path = "advanced/Syncing-Active-Directory-with-Azure-Entra-ID.md";
-        var mkdocs_page_url = "/docs/advanced/Syncing-Active-Directory-with-Azure-Entra-ID/";
+        var mkdocs_page_name = "Configuring a Hardware TPM for Secure Key Storage";
+        var mkdocs_page_input_path = "advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage.md";
+        var mkdocs_page_url = "/docs/advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage/";
       </script>
     
     <!--[if lt IE 9]>
@@ -90,7 +90,29 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../Configuring-a-Hardware-TPM-for-Secure-Key-Storage/">Configuring a Hardware TPM for Secure Key Storage</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Configuring a Hardware TPM for Secure Key Storage</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#when-should-i-use-tpm">When Should I Use TPM?</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#tpm-setup-instructions">🛠️ TPM Setup Instructions</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-ensure-the-tpm-is-available-and-functional">1. Ensure the TPM Is Available and Functional</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-configure-himmelblauconf">2. Configure himmelblau.conf</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3-restart-himmelblau-services">3. Restart Himmelblau Services</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#4-enroll-the-device">4. Enroll the Device</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#switching-to-tpm-after-enrollment">Switching to TPM After Enrollment</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#verifying-tpm-usage">Verifying TPM Usage</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a>
+    </li>
+    </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
                   </li>
@@ -102,9 +124,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Syncing Active Directory with Azure Entra ID</a>
-    <ul class="current">
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Troubleshooting</span></p>
@@ -137,9 +157,9 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Advanced Topics</li>
-      <li class="breadcrumb-item active">Syncing Active Directory with Azure Entra ID</li>
+      <li class="breadcrumb-item active">Configuring a Hardware TPM for Secure Key Storage</li>
     <li class="wy-breadcrumbs-aside">
-          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/advanced/Syncing-Active-Directory-with-Azure-Entra-ID.md">Edit on Himmelblau Documentation</a>
+          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage.md">Edit on Himmelblau Documentation</a>
     </li>
   </ul>
   <hr/>
@@ -147,27 +167,106 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h4 id="3-install-and-configure-microsoft-entra-connect"><strong>3. Install and Configure Microsoft Entra Connect</strong></h4>
-<ol>
-<li>Download <strong>Microsoft Entra Connect</strong> from Microsoft:<br />
-<a href="https://www.microsoft.com/en-us/download/details.aspx?id=47594">https://www.microsoft.com/en-us/download/details.aspx?id=47594</a></li>
-<li>Run the installer on your AD domain controller or another dedicated server.</li>
-<li>Choose <strong>"Custom installation"</strong> (recommended for better control).</li>
-<li><strong>Connect to Azure Entra ID</strong> using <strong>Global Admin credentials</strong>.</li>
-<li><strong>Connect to Active Directory</strong>:</li>
-<li>Enter your <strong>AD DS credentials</strong> (Enterprise Admin).</li>
-<li>It should verify and list your domain.</li>
-<li><strong>Choose Sync Options</strong>:</li>
-<li>If you want password hash synchronization (PHS), select it.</li>
-<li>If using Pass-through Authentication (PTA) or Federation, configure as needed.</li>
-<li><strong>Select "Start Synchronization"</strong> and finish setup.</li>
-</ol>
+                <h1 id="configuring-a-hardware-tpm-for-secure-key-storage">Configuring a Hardware TPM for Secure Key Storage</h1>
+<p>Himmelblau supports the use of a <strong>hardware TPM (Trusted Platform Module)</strong> to securely store cryptographic secrets, including Hello PIN keys, device credentials, and the Primary Refresh Token (PRT). By default, Himmelblau uses a <strong>software HSM</strong>, which provides no hardware-backed security. If your system includes a TPM, we strongly recommend configuring Himmelblau to use it <strong>before enrolling the device</strong>.</p>
+<blockquote>
+<p>⚠️ <strong>Warning:</strong> TPM support must be configured <strong>before</strong> authenticating to Entra ID or enrolling the device. If you've already enrolled, you'll need to <strong>reset the local cache</strong> and re-enroll in order to switch to TPM.</p>
+</blockquote>
+<hr />
+<h2 id="when-should-i-use-tpm">When Should I Use TPM?</h2>
+<p>You should configure Himmelblau to use TPM if:</p>
+<ul>
+<li>Your system includes a TPM 2.0 chip</li>
+<li>You want hardware-backed protection for Hello PIN credentials</li>
+<li>You want secure key binding tied to the physical machine (e.g., protection against disk cloning)</li>
+<li>You're deploying to security-sensitive environments (e.g., laptops, remote workers)</li>
+</ul>
+<hr />
+<h2 id="tpm-setup-instructions">🛠️ TPM Setup Instructions</h2>
+<h3 id="1-ensure-the-tpm-is-available-and-functional">1. Ensure the TPM Is Available and Functional</h3>
+<p>Check whether a TPM is exposed on your system by running:</p>
+<pre><code class="language-bash">ls /dev/tpmrm0
+</code></pre>
+<p>If that file exists, you likely have a usable TPM. For further inspection, you can optionally install TPM tools:</p>
+<ul>
+<li>On <strong>openSUSE</strong>:</li>
+</ul>
+<p><code>bash
+  sudo zypper install tpm2.0-tools</code>
+* On <strong>Debian/Ubuntu</strong>:</p>
+<p><code>bash
+  sudo apt install tpm2-tools</code></p>
+<p>Then run:</p>
+<pre><code class="language-bash">sudo tpm2_getcap properties-fixed
+</code></pre>
+<p>This should output a list of TPM capabilities. If not, verify:</p>
+<ul>
+<li>TPM is <strong>enabled</strong> in BIOS/UEFI</li>
+<li>Kernel drivers (<code>tpm_crb</code>, <code>tpm_tis</code>) are loaded</li>
+</ul>
+<hr />
+<h3 id="2-configure-himmelblauconf">2. Configure <code>himmelblau.conf</code></h3>
+<p>Open <code>/etc/himmelblau/himmelblau.conf</code> and change the <code>hsm_type</code> setting:</p>
+<pre><code class="language-ini">hsm_type = tpm
+</code></pre>
+<p>If you want to fall back to software HSM on systems without a TPM:</p>
+<pre><code class="language-ini">hsm_type = tpm_if_possible
+</code></pre>
+<blockquote>
+<p>ℹ️ You <strong>do not need to set</strong> <code>tpm_tcti_name</code> unless your TPM is exposed through a nonstandard interface. By default, Himmelblau uses:</p>
+<p><code>ini
+tpm_tcti_name = device:/dev/tpmrm0</code></p>
+</blockquote>
+<hr />
+<h3 id="3-restart-himmelblau-services">3. Restart Himmelblau Services</h3>
+<pre><code class="language-bash">sudo systemctl restart himmelblaud
+sudo systemctl restart himmelblaud-tasks
+</code></pre>
+<hr />
+<h3 id="4-enroll-the-device">4. Enroll the Device</h3>
+<p>Once TPM is configured, proceed with Entra ID authentication and device enrollment. All future key material will be generated and bound to the TPM.</p>
+<hr />
+<h2 id="switching-to-tpm-after-enrollment">Switching to TPM After Enrollment</h2>
+<p>If you've already enrolled the device using <code>hsm_type = soft</code>, you can still switch to TPM, but you'll need to <strong>reset the local key cache</strong> and re-enroll:</p>
+<pre><code class="language-bash">sudo aad-tool cache-clear --full
+</code></pre>
+<p>Then update <code>himmelblau.conf</code> to use <code>hsm_type = tpm</code>, restart services, and begin re-enrollment.</p>
+<hr />
+<h2 id="verifying-tpm-usage">Verifying TPM Usage</h2>
+<p>Check the logs for TPM initialization:</p>
+<pre><code class="language-bash">journalctl -u himmelblaud | grep -i tpm
+</code></pre>
+<p>You should see messages indicating successful communication with the TPM and key creation/binding.</p>
+<hr />
+<h2 id="summary">Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Default</th>
+<th>Recommended for TPM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hsm_type</code></td>
+<td><code>soft</code> (no TPM)</td>
+<td><code>tpm</code> or <code>tpm_if_possible</code></td>
+</tr>
+<tr>
+<td><code>tpm_tcti_name</code></td>
+<td><code>device:/dev/tpmrm0</code></td>
+<td>(usually don't change)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Remember:</strong> TPM must be configured before enrollment. Switching afterward requires clearing the secure key cache.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../MS-specs-which-Himmelblau-uses/" class="btn btn-neutral float-left" title="MS specs which Himmelblau uses"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/" class="btn btn-neutral float-right" title="Capturing authentication traffic using cirrus‐scope">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/" class="btn btn-neutral float-left" title="Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/" class="btn btn-neutral float-right" title="Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -194,10 +293,10 @@
         </span>
     
     
-      <span><a href="../MS-specs-which-Himmelblau-uses/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

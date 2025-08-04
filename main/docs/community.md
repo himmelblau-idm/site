@@ -36,7 +36,7 @@ We welcome all kinds of contributions:
 You can get started here:  
 📦 [GitHub Repository](https://github.com/himmelblau-idm/himmelblau)
 
-If you're interested in deeper collaboration (e.g., packaging, backend integration, OAuth analysis), reach out in the Matrix channel — we regularly coordinate live sessions and RFCs.
+If you're interested in deeper collaboration (e.g., packaging, backend integration, OAuth analysis), reach out in the Matrix channel — we regularly coordinate live sessions.
 
 ---
 

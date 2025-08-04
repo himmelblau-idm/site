@@ -1,4 +1,7 @@
-all: docs deb
+all: site docs deb
+
+site:
+	make -C main
 
 deb:
 	pushd deb; make; popd
@@ -6,4 +9,4 @@ deb:
 docs:
 	make -C mkdocs
 
-.PHONY: all docs deb
+.PHONY: all site docs deb

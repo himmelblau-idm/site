@@ -1,4 +1,5 @@
 nav:
+  - Home: https://himmelblau-idm.org/s/
   - Quickstart: index.md
   - Installation: installation.md
   - Configuration: configuration.md

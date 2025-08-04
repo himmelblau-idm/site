@@ -1,0 +1,42 @@
+site_name: Himmelblau
+site_url: https://himmelblau-idm.org
+theme:
+  name: material
+  palette:
+    scheme: default
+    primary: blue
+    accent: indigo
+  font:
+    text: Poppins
+    code: Courier Prime
+  logo: assets/tux.png
+  favicon: assets/favicon.ico
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - content.code.copy
+extra_css:
+  - css/custom.css
+nav:
+  - Home: index.md
+  - Downloads: downloads.md
+  - Documentation: https://himmelblau-idm.org/docs/
+  - Community: community.md
+  - Why Himmelblau?: why.md
+  - Donations: donations.md
+  - Blog: blog.md
+  - About: about.md
+plugins:
+  - search
+extra:
+  social:
+    - icon: material/github
+      link: https://github.com/himmelblau-idm/himmelblau
+    - icon: material/matrix
+      link: https://matrix.to/#/#himmelblau:matrix.org
+    - icon: material/linkedin
+      link: https://www.linkedin.com/in/davidmmulder/
+    - icon: material/email
+      link: dmulder@himmelblau-idm.org
+repo_url: https://github.com/himmelblau-idm/himmelblau
+repo_name: Himmelblau

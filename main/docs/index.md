@@ -12,7 +12,8 @@ hide:
 </script>
 
   <div>
-<ul>
+<div class="cta-list">
+<ul style="list-style: none">
   <li>Office 365 SSO</li>
   <li>MFA support</li>
   <li>Intune compliance</li>
@@ -21,6 +22,7 @@ hide:
   <li>Debian, RHEL, SUSE support</li>
   <li>Open source</li>
 </ul>
+</div>
     <h1>Seamless Azure Entra ID and Intune integration for Linux</h1>
     <p>Secure Entra ID integration for Linux systems — with SSO, MFA, and policy enforcement.</p>
     <div>

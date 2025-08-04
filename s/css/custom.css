@@ -171,8 +171,7 @@ body[data-home="true"] .md-footer {
   display: none;
 }
 
-body[data-home="true"] ul {
-  list-style: none;
+body[data-home="true"] .cta-list {
   margin-left: 0;
   padding-left: 1em;
   text-align: right;

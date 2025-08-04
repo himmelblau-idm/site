@@ -229,6 +229,9 @@ home_alias = CN
 use_etc_skel = true
 </code></pre>
 <p>Refer to the <a href="../reference/himmelblau-conf/">himmelblau.conf</a> man page for a full list of options.</p>
+<blockquote>
+<p>⚠️<strong>Important</strong>: To enable hardware-backed security, you must configure TPM support <strong>before authenticating or enrolling this device</strong>. It is disabled by default. <a href="../advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage/">Learn how to configure TPM »</a>.</p>
+</blockquote>
 <hr />
 <h2 id="pam-configuration">PAM Configuration</h2>
 <p>To allow users to authenticate with Azure Entra ID, Himmelblau must be integrated into your system’s PAM (Pluggable Authentication Module) stack. This directs authentication requests to the <code>pam_himmelblau.so</code> module.</p>
@@ -253,12 +256,7 @@ use_etc_skel = true
 </code></pre>
 <p>This directly modifies PAM config files such as:</p>
 <ul>
-<li>
-<p><code>/etc/pam.d/common-auth</code> (Debian/Ubuntu)</p>
-</li>
-<li>
-<p><code>/etc/pam.d/system-auth</code> (RHEL/SUSE)</p>
-</li>
+<li><code>/etc/pam.d/common-auth</code></li>
 </ul>
 <blockquote>
 <p>ℹ️ This tool is safe to use as a starting point, and allows fine-grained control later if needed.</p>

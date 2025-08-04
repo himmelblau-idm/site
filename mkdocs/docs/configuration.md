@@ -46,6 +46,8 @@ use_etc_skel = true
 
 Refer to the [himmelblau.conf](reference/himmelblau-conf.md) man page for a full list of options.
 
+> ⚠️**Important**: To enable hardware-backed security, you must configure TPM support **before authenticating or enrolling this device**. It is disabled by default. [Learn how to configure TPM »](advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage.md).
+
 ---
 
 ## PAM Configuration
@@ -80,9 +82,7 @@ sudo aad-tool configure-pam
 
 This directly modifies PAM config files such as:
 
-* `/etc/pam.d/common-auth` (Debian/Ubuntu)
-
-* `/etc/pam.d/system-auth` (RHEL/SUSE)
+* `/etc/pam.d/common-auth`
 
 > ℹ️ This tool is safe to use as a starting point, and allows fine-grained control later if needed.
 

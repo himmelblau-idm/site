@@ -114,21 +114,27 @@ async function provideLinks() {
 	linksContainer.appendChild(item1);
 
 	if (distro.startsWith('sle') || distro === 'tumbleweed') {
-		const cmd1 = document.createElement('pre');
+		const cmd1 = document.createElement('code');
 		cmd1.textContent = 'sudo zypper update';
-		linksContainer.appendChild(cmd1);
+		const pre = document.createElement('pre');
+		pre.appendChild(cmd1);
+		linksContainer.appendChild(pre);
 	} else if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
-		const cmd1 = document.createElement('pre');
+		const cmd1 = document.createElement('code');
 		cmd1.textContent = 'sudo apt update && sudo apt upgrade';
-		linksContainer.appendChild(cmd1);
+		const pre = document.createElement('pre');
+        pre.appendChild(cmd1);
+		linksContainer.appendChild(pre);
 	} else if (
 		distro.startsWith('rocky') ||
 		distro === 'rawhide' ||
 		distro.startsWith('fedora')
 	) {
-		const cmd1 = document.createElement('pre');
+		const cmd1 = document.createElement('code');
 		cmd1.textContent = 'sudo dnf update';
-		linksContainer.appendChild(cmd1);
+		const pre = document.createElement('pre');
+        pre.appendChild(cmd1);
+		linksContainer.appendChild(pre);
 	}
 
 	const item2 = document.createElement('p');
@@ -143,54 +149,68 @@ async function provideLinks() {
 
 	if (distro.startsWith('sle') || distro === 'tumbleweed') {
 		// GPG key import command for Zypper
-		const keyCmd = document.createElement('pre');
+		const keyCmd = document.createElement('code');
 		keyCmd.textContent =
 			'sudo rpm --import https://himmelblau-idm.org/himmelblau.asc';
-		linksContainer.appendChild(keyCmd);
+		const pre = document.createElement('pre');
+        pre.appendChild(keyCmd);
+		linksContainer.appendChild(pre);
 
-		const cmd1 = document.createElement('pre');
+		const cmd1 = document.createElement('code');
 		cmd1.textContent = 'sudo zypper install ';
 		packages.forEach((pkg) => {
 			const filename = `${pkg}-${version}-1.x86_64-${distro}.rpm`;
 			cmd1.textContent += './' + filename + ' ';
 		});
-		linksContainer.appendChild(cmd1);
+		const pre2 = document.createElement('pre');
+        pre2.appendChild(cmd1);
+		linksContainer.appendChild(pre2);
 	} else if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
 		// GPG key install for APT
-		const keyCmd = document.createElement('pre');
+		const keyCmd = document.createElement('code');
 		keyCmd.textContent =
 			'curl -fsSL https://himmelblau-idm.org/himmelblau.asc | gpg --dearmor | sudo tee /usr/share/keyrings/himmelblau.gpg > /dev/null';
-		linksContainer.appendChild(keyCmd);
+		const pre = document.createElement('pre');
+        pre.appendChild(keyCmd);
+        linksContainer.appendChild(pre);
 
-		const repoAdd = document.createElement('pre');
+		const repoAdd = document.createElement('code');
 		repoAdd.textContent =
 			`echo "deb [signed-by=/usr/share/keyrings/himmelblau.gpg] https://himmelblau-idm.org/deb ${distro} main" | sudo tee /etc/apt/sources.list.d/himmelblau.list`;
-		linksContainer.appendChild(repoAdd);
+		const pre2 = document.createElement('pre');
+        pre2.appendChild(repoAdd);
+		linksContainer.appendChild(pre2);
 
-		const cmd1 = document.createElement('pre');
+		const cmd1 = document.createElement('code');
 		cmd1.textContent = 'sudo apt install -y ';
 		packages.forEach((pkg) => {
 			cmd1.textContent += `${pkg} `;
 		});
-		linksContainer.appendChild(cmd1);
+		pre = document.createElement('pre');
+        pre.appendChild(cmd1);
+        linksContainer.appendChild(pre);
 	} else if (
 		distro.startsWith('rocky') ||
 		distro === 'rawhide' ||
 		distro.startsWith('fedora')
 	) {
 		// GPG key import command for DNF/YUM-based systems
-		const keyCmd = document.createElement('pre');
+		const keyCmd = document.createElement('code');
 		keyCmd.textContent =
 			'sudo rpm --import https://himmelblau-idm.org/himmelblau.asc';
-		linksContainer.appendChild(keyCmd);
+		const pre = document.createElement('pre');
+        pre.appendChild(keyCmd);
+        linksContainer.appendChild(pre);
 
-		const cmd1 = document.createElement('pre');
+		const cmd1 = document.createElement('code');
 		cmd1.textContent = 'sudo dnf install ';
 		packages.forEach((pkg) => {
 			const filename = `${pkg}-${version}-1.x86_64-${distro}.rpm`;
 			cmd1.textContent += './' + filename + ' ';
 		});
-		linksContainer.appendChild(cmd1);
+		const pre2 = document.createElement('pre');
+        pre2.appendChild(cmd1);
+        linksContainer.appendChild(pre2);
 	}
 
 	const opt_title = document.createElement('h3');

@@ -26,7 +26,7 @@ hide:
     <h1>Seamless Azure Entra ID and Intune integration for Linux</h1>
     <p>Secure Entra ID integration for Linux systems — with SSO, MFA, and policy enforcement.</p>
     <div>
-      <a href="/s/downloads" class="md-button md-button--primary">Download Himmelblau for Linux</a>
-      <a href="/s/community" class="md-button">Join the Community</a>
+      <a href="/downloads" class="md-button md-button--primary">Download Himmelblau for Linux</a>
+      <a href="/community" class="md-button">Join the Community</a>
     </div>
   </div>

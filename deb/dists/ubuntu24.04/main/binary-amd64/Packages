@@ -1,3 +1,19 @@
+Package: cirrus-scope
+Version: 0.1.2-ubuntu24.04
+Architecture: amd64
+Maintainer: David Mulder <dmulder@himmelblau-idm.org>
+Installed-Size: 10071
+Depends: libc6 (>= 2.34), libsqlite3-0 (>= 3.7.15), libssl3t64 (>= 3.0.0), libudev1 (>= 183)
+Filename: dists/ubuntu24.04/main/binary-amd64/cirrus-scope_0.1.2-ubuntu24.04_amd64.deb
+Size: 2675424
+MD5sum: 58b9b2929b57285cd34e59e570faf6af
+SHA1: 5416dc96bd9d7c0167989efdd3d6f8bd16f2f72c
+SHA256: f2de20fce529be77d8d94ef4459c684af28c6d9fb1aeb7c8ba780122a5d17cd0
+Priority: optional
+Homepage: https://himmelblau-idm.org/
+Description: Diagnostic utility for debugging Entra ID authentication issues via
+ libhimmelblau
+
 Package: himmelblau
 Version: 1.1.0-ubuntu24.04
 Architecture: amd64

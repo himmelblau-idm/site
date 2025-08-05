@@ -6,23 +6,16 @@ body {
   background-color: #1a1a1a; /* fallback for dark theme */
 }
 
-/* Full-page lightened background image */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: url("../assets/background.png") no-repeat center center / cover;
-  z-index: -1;
-  opacity: 0.75;
-  filter: brightness(1.2) contrast(1.1);
-}
-
 /* Soften and blend the header */
 .md-header {
-  background-color: rgba(25, 118, 210, 0.85) !important; /* semi-transparent Material blue */
+  background-color: rgba(25, 118, 210, 0.3) !important; /* semi-transparent Material blue */
+  backdrop-filter: blur(6px);
+  transition: background-color 0.3s ease;
+  box-shadow: none;
+}
+
+.md-tabs {
+  background-color: rgba(25, 118, 210, 0.3) !important; /* semi-transparent Material blue */
   backdrop-filter: blur(6px);
   transition: background-color 0.3s ease;
   box-shadow: none;
@@ -161,8 +154,9 @@ body[data-home="true"] .md-content__inner {
 }
 
 body[data-home="true"] h1 {
-  font-size: clamp(1rem, 5vw, 1.5rem);
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.25);
+  font-size: clamp(1rem, 5vw, 1.8rem);
+  color: black;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2), 0 0 6px rgba(255, 165, 0, 0.2);
   font-weight: 700;
   letter-spacing: -0.5px;
 }
@@ -177,5 +171,9 @@ body[data-home="true"] .cta-list {
   text-align: right;
   list-style-position: outside;
   font-size: 1.25em;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2), 0 0 6px rgba(255, 165, 0, 0.3);
+}
+
+.md-button {
+  --md-accent-fg-color: rgba(255, 165, 0, 0.6);
 }

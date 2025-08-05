@@ -186,9 +186,13 @@ async function provideLinks() {
 		packages.forEach((pkg) => {
 			cmd1.textContent += `${pkg} `;
 		});
-		pre = document.createElement('pre');
-        pre.appendChild(cmd1);
-        linksContainer.appendChild(pre);
+		const pre3 = document.createElement('pre');
+        pre3.appendChild(cmd1);
+        linksContainer.appendChild(pre3);
+
+		const p = document.createElement('p');
+		p.innerHTML = 'See the <a href="../deb_mirrors">mirrors</a> page for additional details.';
+		linksContainer.appendChild(p);
 	} else if (
 		distro.startsWith('rocky') ||
 		distro === 'rawhide' ||

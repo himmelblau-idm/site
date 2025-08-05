@@ -15,6 +15,7 @@ theme:
     - navigation.tabs
     - navigation.tabs.sticky
     - content.code.copy
+  custom_dir: overrides
 extra_css:
   - css/custom.css
 nav:

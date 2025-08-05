@@ -3,6 +3,7 @@ set -e
 
 REPO_OWNER=himmelblau-idm
 REPO_NAME=himmelblau
+OTHER_REPO_NAME=cirrus-scope
 ARCH=amd64
 COMPONENT=main
 DISTS=("ubuntu22.04" "ubuntu24.04" "debian12")
@@ -13,8 +14,14 @@ for DIST in "${DISTS[@]}"; do
     OUTDIR=$REPO_ROOT/dists/$DIST/$COMPONENT/binary-$ARCH
     mkdir -p "$OUTDIR"
 
-    mapfile -t urls < <(curl -s "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest" |
-        jq -r ".assets[] | select(.name | endswith(\"${DIST}_${ARCH}.deb\")) | .browser_download_url")
+    mapfile -t urls < <(
+      {
+        curl -s "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest" |
+          jq -r ".assets[] | select(.name | endswith(\"${DIST}_${ARCH}.deb\")) | .browser_download_url"
+        curl -s "https://api.github.com/repos/$REPO_OWNER/$OTHER_REPO_NAME/releases/latest" |
+          jq -r ".assets[] | select(.name | endswith(\"${DIST}_${ARCH}.deb\")) | .browser_download_url"
+      }
+    )
 
     for url in "${urls[@]}"; do
         filename=$(basename "$url")

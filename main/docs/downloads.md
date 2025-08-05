@@ -33,6 +33,6 @@ Please select your Linux distribution:
 	<option value="ubuntu24.04">Linux Mint 22</option>
 </select>
 <div id="download-links" style="margin-top: 20px;"></div>
-<div id="configuration" style="display: none;" />
-
+<div id="configuration" style="display: none;"></div>
+Refer to [the documentation](../docs/index.html) for configuration.
 <script src="../js/install.js"></script>

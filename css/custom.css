@@ -8,14 +8,12 @@ body {
 
 /* Soften and blend the header */
 .md-header {
-  background-color: rgba(25, 118, 210, 0.3) !important; /* semi-transparent Material blue */
   backdrop-filter: blur(6px);
   transition: background-color 0.3s ease;
   box-shadow: none;
 }
 
 .md-tabs {
-  background-color: rgba(25, 118, 210, 0.3) !important; /* semi-transparent Material blue */
   backdrop-filter: blur(6px);
   transition: background-color 0.3s ease;
   box-shadow: none;

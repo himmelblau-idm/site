@@ -1,81 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Blog</title>
-    <link rel="stylesheet" href="announcements.css">
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0; url=blog/index.html">
+  <title>Redirecting...</title>
 </head>
 <body>
-    <div id="announcement-banner" style="display: none;">
-        <span id="close-banner">&times;</span>
-        <div id="announcement-content"></div>
-    </div>
-    <div class="document">
-<header class="header-nav">
-    <div class="nav-container">
-        <h1>Blog</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="downloads.html">Installation</a></li>
-                <li><a href="backers.html">Donations</a></li>
-                <li><a href="docs/index.html">Documentation</a></li>
-                <li><a href="index.html#community">Community</a></li>
-		<!-- <li><a href="blog.html">Blog</a></li> -->
-                <li><a href="about.html">About</a></li>
-            </ul>
-        </nav>
-    </div>
-</header>
-    <iframe src="https://mytechinsights.wordpress.com/" style="width: 100%; height: 800px; border: none;"></iframe>
-    <footer>
-        <p>&copy; 2025 Himmelblau Project. All rights reserved.</p>
-    </footer>
-    </div>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const banner = document.getElementById("announcement-banner");
-    const closeButton = document.getElementById("close-banner");
-    const content = document.getElementById("announcement-content");
-
-    // Function to generate a simple hash from a string
-    function generateHash(text) {
-        let hash = 0;
-        for (let i = 0; i < text.length; i++) {
-            hash = (hash << 5) - hash + text.charCodeAt(i);
-            hash |= 0; // Convert to 32-bit integer
-        }
-        return hash.toString();
-    }
-
-    // Fetch the announcement text
-    fetch("announcements.txt")
-        .then(response => response.text())
-        .then(html => {
-            const newHash = generateHash(html.trim()); // Generate hash from announcement text
-            const dismissedHash = localStorage.getItem("dismissedAnnouncementHash");
-
-            // Show the banner if the announcement is different from the last dismissed one
-            if (newHash !== dismissedHash) {
-                content.innerHTML = html;
-                banner.style.display = "flex";
-
-                // Store the current announcement's hash (but don't mark it dismissed)
-                localStorage.setItem("announcementHash", newHash);
-            }
-        })
-        .catch(error => console.error("Failed to load announcement:", error));
-
-    // Close the banner and remember dismissal only for the current announcement
-    closeButton.addEventListener("click", function () {
-        banner.style.display = "none";
-        const currentHash = localStorage.getItem("announcementHash");
-        localStorage.setItem("dismissedAnnouncementHash", currentHash); // Store only the dismissed announcement
-    });
-});
-</script>
+  <p>If you are not redirected automatically, <a href="blog/index.html">click here</a>.</p>
 </body>
 </html>

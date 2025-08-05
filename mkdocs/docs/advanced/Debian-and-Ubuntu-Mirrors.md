@@ -1,10 +1,4 @@
----
-hide:
-  - navigation
-  - toc
----
-
-# Debian Package Repository Mirrors
+# Ubuntu and Debian Repository Mirrors
 
 Himmelblau packages for Debian and Ubuntu are distributed through public APT repositories:
 
@@ -22,6 +16,7 @@ https://himmelblau-idm.org/deb
 - **Maintained by:** Himmelblau Project
 - **Bandwidth:** Limited — may be slower during high demand
 - **Key:** [`https://himmelblau-idm.org/himmelblau.asc`](https://himmelblau-idm.org/himmelblau.asc)
+- **Protocols:** Locked to HTTPS
 
 ### 🛠️ Setup Instructions
 
@@ -46,7 +41,9 @@ https://deb.archiesbytes.xyz/himmelblau/
 
 * **Maintained by:** Community contributor [@iLikeToCode](https://github.com/iLikeToCode)
 * **Bandwidth:** Generously hosted — may offer better performance in Europe
-- **Key:** [`https://himmelblau-idm.org/himmelblau.asc`](https://himmelblau-idm.org/himmelblau.asc)
+* **Key:** [`https://himmelblau-idm.org/himmelblau.asc`](https://himmelblau-idm.org/himmelblau.asc)
+* **Protocols:** HTTP and HTTPS (Works with transparent caching proxy)
+* **Info**: Syncs at 02:00 UTC daily
 
 ### 🛠️ Setup Instructions
 
@@ -65,7 +62,7 @@ echo "deb [signed-by=/usr/share/keyrings/himmelblau.gpg] https://deb.archiesbyte
 
 ## 📌 Notes
 
-* Replace `ubuntu24.04` with your system's codename if needed (e.g., `bookworm`, `noble`, etc.).
+* Replace `ubuntu24.04` with your system's codename if needed (e.g., `debian12`, `ubuntu22.04`, etc.).
 * Package contents are identical between mirrors.
 * Community mirrors are offered as-is and availability may vary.
 
@@ -73,8 +70,8 @@ echo "deb [signed-by=/usr/share/keyrings/himmelblau.gpg] https://deb.archiesbyte
 
 ## 📚 See Also
 
-* [Installation Guide](../docs/installation/)
+* [Installation Guide](../installation.md)
 
 ---
 
-Interested in hosting a mirror? [Let us know](../community).
+Interested in hosting a mirror? [Let us know](../../../community).

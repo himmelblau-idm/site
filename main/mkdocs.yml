@@ -21,7 +21,7 @@ extra_css:
 nav:
   - Home: index.md
   - Downloads: downloads.md
-  - Documentation: https://himmelblau-idm.org/docs/
+  - Documentation: /docs/
   - Community: community.md
   - Why Himmelblau?: why.md
   - Donations: donations.md

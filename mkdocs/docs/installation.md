@@ -16,6 +16,32 @@ This page covers how to install Himmelblau on Ubuntu, Debian, RHEL, Rocky, SUSE,
 
 ---
 
+## Installation from Software Repos
+
+### Ubuntu and Debian
+
+* Please visit the [Repository List](./advanced/Ubuntu-and-Debian-Repos.md) for setup instructions
+* Install the packages
+```bash
+sudo apt install himmelblau nss-himmelblau pam-himmelblau himmelblau-sso
+```
+
+### RHEL, Rocky, Fedora
+
+* Please visit the [Repository List](./advanced/RPM-Repos.md) for setup instructions
+* Install the packages
+```bash
+sudo rpm install himmelblau nss-himmelblau pam-himmelblau himmelblau-sso
+```
+
+### SUSE Linux Enterprise (SLE) / openSUSE
+
+* Please visit the [Repository List](./advanced/RPM-Repos.md) for setup instructions
+* Install the packages
+```bash
+sudo zypper in himmelblau nss-himmelblau pam-himmelblau himmelblau-sso
+```
+
 ## Installation from Prebuilt Packages
 
 [Download the packages for your distribution](https://himmelblau-idm.org/downloads.html), and install them using your flavor of package manager:

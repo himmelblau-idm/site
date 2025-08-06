@@ -185,3 +185,9 @@ body[data-home="true"] .cta-list {
 .md-header__button.md-logo img {
   height: 2.5rem;
 }
+
+.md-header__topic {
+  font-family: 'Inter', "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.5rem;
+  line-height: 3.2rem;
+}

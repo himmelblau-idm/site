@@ -175,3 +175,13 @@ body[data-home="true"] .cta-list {
 .md-button {
   --md-accent-fg-color: rgba(255, 165, 0, 0.6);
 }
+
+.md-header__button.md-logo {
+  margin: 0;
+  padding: 0;
+  padding-top: 1em;
+}
+
+.md-header__button.md-logo img {
+  height: 2.5rem;
+}

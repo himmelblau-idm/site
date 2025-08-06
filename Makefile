@@ -6,7 +6,10 @@ site:
 deb:
 	pushd deb; make; popd
 
+rpm:
+	pushd rpm; make; popd
+
 docs:
 	make -C mkdocs
 
-.PHONY: all site docs deb
+.PHONY: all site docs deb rpm

@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/Suse-Repos/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/RPM-Repos/" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>SUSE Repositories - Himmelblau Documentation</title>
+    <title>RPM Repos - Himmelblau Documentation</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "SUSE Repositories";
-        var mkdocs_page_input_path = "advanced/Suse-Repos.md";
-        var mkdocs_page_url = "/docs/advanced/Suse-Repos/";
+        var mkdocs_page_name = "RPM Repos";
+        var mkdocs_page_input_path = "advanced/RPM-Repos.md";
+        var mkdocs_page_url = "/docs/advanced/RPM-Repos/";
       </script>
     
     <!--[if lt IE 9]>
@@ -109,15 +109,21 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">SUSE Repositories</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">RPM Repos</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#official-repository-suse-hosted">✅ Official Repository (SUSE-hosted)</a>
+    <li class="toctree-l2"><a class="reference internal" href="#opensuse-suse-linux-enterprise">🖥️ openSUSE &amp; SUSE Linux Enterprise</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#setup-instructions">🛠️ Setup Instructions</a>
+    <li class="toctree-l3"><a class="reference internal" href="#tumbleweed">🔁 Tumbleweed</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#opensuse-leap-156-sle-15-sp6">🧱 openSUSE Leap 15.6 / SLE 15 SP6</a>
     </li>
         </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#see-also">📚 See Also</a>
+    <li class="toctree-l2"><a class="reference internal" href="#rhel-rocky-oracle-linux">🧱 RHEL / Rocky / Oracle Linux</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#fedora-41-42-rawhide">🐧 Fedora (41, 42, Rawhide)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#notes">📌 Notes</a>
     </li>
     </ul>
                   </li>
@@ -156,9 +162,9 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Advanced Topics</li>
-      <li class="breadcrumb-item active">SUSE Repositories</li>
+      <li class="breadcrumb-item active">RPM Repos</li>
     <li class="wy-breadcrumbs-aside">
-          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/advanced/Suse-Repos.md">Edit on Himmelblau Documentation</a>
+          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/advanced/RPM-Repos.md">Edit on Himmelblau Documentation</a>
     </li>
   </ul>
   <hr/>
@@ -166,30 +172,77 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="suse-repositories">SUSE Repositories</h1>
-<p>Himmelblau packages for openSUSE and SLE are distributed through the public openSUSE repository:</p>
+                <p>Here’s a unified and cleaned-up <strong>RPM-based repository instruction set</strong> for <strong>Himmelblau</strong>, covering:</p>
 <ul>
-<li>✅ <strong>Official Repository</strong> – Maintained by the SUSE project</li>
+<li>openSUSE (Tumbleweed &amp; Leap/SLE)</li>
+<li>RHEL / Rocky / Oracle Linux</li>
+<li>Fedora</li>
+</ul>
+<p>All use the official GPG key at <a href="https://himmelblau-idm.org/himmelblau.asc"><code>https://himmelblau-idm.org/himmelblau.asc</code></a>
+and the primary repository URL <a href="https://himmelblau-idm.org/rpm/"><code>https://himmelblau-idm.org/rpm/</code></a></p>
+<hr />
+<h1 id="rpm-repositories-himmelblau">✅ RPM Repositories – Himmelblau</h1>
+<p>Official RPM repositories for installing Himmelblau on major RPM-based distributions.</p>
+<ul>
+<li><strong>Main repo</strong>: <a href="https://himmelblau-idm.org/rpm/"><code>https://himmelblau-idm.org/rpm/</code></a></li>
+<li><strong>GPG key</strong>: <a href="https://himmelblau-idm.org/himmelblau.asc"><code>https://himmelblau-idm.org/himmelblau.asc</code></a></li>
 </ul>
 <hr />
-<h2 id="official-repository-suse-hosted">✅ Official Repository (SUSE-hosted)</h2>
-<pre><code>https://download.opensuse.org/repositories/network
+<h2 id="opensuse-suse-linux-enterprise">🖥️ openSUSE &amp; SUSE Linux Enterprise</h2>
+<h3 id="tumbleweed">🔁 Tumbleweed</h3>
+<pre><code class="language-bash">sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
+sudo zypper ar https://himmelblau-idm.org/rpm/tumbleweed/x86_64/ himmelblau
+sudo zypper ref
+sudo zypper in himmelblau nss-himmelblau pam-himmelblau himmelblau-sso
 </code></pre>
-<ul>
-<li><strong>Maintained by:</strong> SUSE</li>
-<li><strong>Key:</strong> <a href="https://himmelblau-idm.org/himmelblau.asc"><code>https://himmelblau-idm.org/himmelblau.asc</code></a></li>
-</ul>
-<h3 id="setup-instructions">🛠️ Setup Instructions</h3>
-<pre><code class="language-bash"># For Leap 15.6 or SUSE Linux Enterprise 15 SP6:
-sudo zypper ar https://download.opensuse.org/repositories/network:/idm/15.6/network:idm.repo
+<hr />
+<h3 id="opensuse-leap-156-sle-15-sp6">🧱 openSUSE Leap 15.6 / SLE 15 SP6</h3>
+<pre><code class="language-bash">sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
+sudo zypper ar https://himmelblau-idm.org/rpm/leap15.6/x86_64/ himmelblau
+sudo zypper ref
+sudo zypper in himmelblau
+</code></pre>
+<hr />
+<h2 id="rhel-rocky-oracle-linux">🧱 RHEL / Rocky / Oracle Linux</h2>
+<p>Replace <code>rocky9</code> with your actual version (<code>rocky8</code>, <code>rocky10</code>, etc.) if needed:</p>
+<pre><code class="language-bash">sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
 
-# For Leap 15.5 or SUSE Linux Enterprise 15 SP5:
-sudo zypper ar https://download.opensuse.org/repositories/network:/idm/15.5/network:idm.repo
+echo '[himmelblau]
+name=Himmelblau RPM Repo
+baseurl=https://himmelblau-idm.org/rpm/rocky9/x86_64/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://himmelblau-idm.org/himmelblau.asc' | sudo tee /etc/yum.repos.d/himmelblau.repo
+
+sudo dnf clean all
+sudo dnf makecache
+sudo dnf install himmelblau
 </code></pre>
 <hr />
-<h2 id="see-also">📚 See Also</h2>
+<h2 id="fedora-41-42-rawhide">🐧 Fedora (41, 42, Rawhide)</h2>
+<p>Replace <code>fedora42</code> with your version if different:</p>
+<pre><code class="language-bash">sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
+
+echo '[himmelblau]
+name=Himmelblau RPM Repo
+baseurl=https://himmelblau-idm.org/rpm/fedora42/x86_64/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://himmelblau-idm.org/himmelblau.asc' | sudo tee /etc/yum.repos.d/himmelblau.repo
+
+sudo dnf clean all
+sudo dnf makecache
+sudo dnf install himmelblau
+</code></pre>
+<hr />
+<h2 id="notes">📌 Notes</h2>
 <ul>
-<li><a href="../../installation/">Installation Guide</a></li>
+<li><code>gpgcheck=1</code> ensures individual RPMs are signed</li>
+<li><code>repo_gpgcheck=1</code> ensures <code>repomd.xml</code> is signed and verified</li>
+<li>All packages are served over HTTPS from <a href="https://himmelblau-idm.org"><code>https://himmelblau-idm.org</code></a></li>
+<li>Packages and repo metadata are signed with the same GPG key</li>
 </ul>
 <hr />
 <p>Interested in hosting a mirror? <a href="../../../community">Let us know</a>.</p>

@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/Device-Compliance-Settings-for-Linux-in-Intune-with-Himmelblau/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/Suse-Repos/" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Device Compliance Settings for Linux in Intune with Himmelblau - Himmelblau Documentation</title>
+    <title>SUSE Repositories - Himmelblau Documentation</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Device Compliance Settings for Linux in Intune with Himmelblau";
-        var mkdocs_page_input_path = "advanced/Device-Compliance-Settings-for-Linux-in-Intune-with-Himmelblau.md";
-        var mkdocs_page_url = "/docs/advanced/Device-Compliance-Settings-for-Linux-in-Intune-with-Himmelblau/";
+        var mkdocs_page_name = "SUSE Repositories";
+        var mkdocs_page_input_path = "advanced/Suse-Repos.md";
+        var mkdocs_page_url = "/docs/advanced/Suse-Repos/";
       </script>
     
     <!--[if lt IE 9]>
@@ -103,31 +103,23 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../Design/">Design Principles</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Device Compliance Settings for Linux in Intune with Himmelblau</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#policy-enforcement-in-himmelblau">Policy Enforcement in Himmelblau</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#linux-settings-categories">Linux Settings Categories</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#allowed-distributions">Allowed Distributions</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#custom-compliance">Custom Compliance</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#device-encryption">Device Encryption</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#password-policy">Password Policy</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#refreshing-compliance-status">Refreshing Compliance Status</a>
-    </li>
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../Device-Compliance-Settings-for-Linux-in-Intune-with-Himmelblau/">Device Compliance Settings for Linux in Intune with Himmelblau</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../Suse-Repos/">SUSE Repositories</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">SUSE Repositories</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#official-repository-suse-hosted">✅ Official Repository (SUSE-hosted)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#setup-instructions">🛠️ Setup Instructions</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#see-also">📚 See Also</a>
+    </li>
+    </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
                   </li>
@@ -164,9 +156,9 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Advanced Topics</li>
-      <li class="breadcrumb-item active">Device Compliance Settings for Linux in Intune with Himmelblau</li>
+      <li class="breadcrumb-item active">SUSE Repositories</li>
     <li class="wy-breadcrumbs-aside">
-          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/advanced/Device-Compliance-Settings-for-Linux-in-Intune-with-Himmelblau.md">Edit on Himmelblau Documentation</a>
+          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/advanced/Suse-Repos.md">Edit on Himmelblau Documentation</a>
     </li>
   </ul>
   <hr/>
@@ -174,69 +166,39 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="device-compliance-settings-for-linux-in-intune-with-himmelblau">Device Compliance Settings for Linux in Intune with Himmelblau</h1>
-<p>Himmelblau supports Microsoft Intune compliance policies for Linux by interpreting and enforcing policy settings locally—without requiring the Microsoft Intune app. This enables Linux systems to participate in compliance workflows while maintaining digital sovereignty and compatibility with a wide variety of distributions.</p>
-<blockquote>
-<p>⚠️ <strong>Critical Behavior Difference:</strong>
-In Himmelblau, <strong>non-compliance results in immediate authentication failure</strong>.
-If a device does not meet compliance requirements, login is denied.
-This is different from Microsoft Intune, where non-compliance typically results in a policy flag or limited access. Plan and test your policies accordingly.</p>
-</blockquote>
-<p>Himmelblau policies are configured using the Microsoft Intune Settings Catalog. When creating a compliance policy, select the desired settings as you would for other platforms.</p>
-<hr />
-<h2 id="policy-enforcement-in-himmelblau">Policy Enforcement in Himmelblau</h2>
-<p>To enable policy enforcement, you must set the following global configuration in <code>himmelblau.conf</code>:</p>
-<pre><code class="language-ini">apply_policy = true
-</code></pre>
-<p>Without this setting, compliance policies will not be evaluated or enforced.</p>
-<hr />
-<h2 id="linux-settings-categories">Linux Settings Categories</h2>
-<h3 id="allowed-distributions">Allowed Distributions</h3>
-<p>Define minimum and maximum OS versions for specific distributions. Devices outside the allowed range will be marked non-compliant.</p>
-<blockquote>
-<p>⚠️ <strong>Warning:</strong> Enforcing this setting may prevent some Himmelblau systems from authenticating.
-While Intune only supports Ubuntu and RedHat, Himmelblau is compatible with many more Linux distributions. If a user attempts to log in from an unsupported or disallowed distro, authentication will fail.</p>
-</blockquote>
-<h3 id="custom-compliance">Custom Compliance</h3>
-<p>Custom compliance settings are currently <strong>experimental</strong> in Himmelblau. You must explicitly enable them:</p>
-<pre><code class="language-ini">enable_experimental_intune_custom_compliance = true
-</code></pre>
-<p>Once enabled, Himmelblau will attempt to evaluate any custom compliance rules defined in your Intune policy. These are executed locally, and any failure results in blocked authentication.</p>
-<p>See <a href="https://learn.microsoft.com/en-us/intune/intune-service/protect/compliance-use-custom-settings">Microsoft's documentation</a> for guidance on policy creation.</p>
-<blockquote>
-<p>⚠️ <strong>Note:</strong> The Custom Compliance status is <strong>not reliably reported to Intune</strong>.</p>
-</blockquote>
-<h3 id="device-encryption">Device Encryption</h3>
-<p>Enforce disk encryption using dm-crypt (typically via LUKS and <code>cryptsetup</code>). Himmelblau checks for encrypted fixed writable volumes.</p>
-<blockquote>
-<p>💡 For best results, enable encryption during OS installation. Post-install encryption may be time-consuming and complex.</p>
-</blockquote>
-<h3 id="password-policy">Password Policy</h3>
-<p>These settings apply <strong>to the Linux Hello PIN</strong>, not the user's system password.</p>
-<blockquote>
-<p>⚠️ <strong>Important:</strong>
-Enforcing certain complexity rules (e.g., uppercase, symbols) will prevent numeric-only PINs. This may confuse users expecting a simple PIN login experience.</p>
-</blockquote>
-<p>Supported rules:</p>
+                <h1 id="suse-repositories">SUSE Repositories</h1>
+<p>Himmelblau packages for openSUSE and SLE are distributed through the public openSUSE repository:</p>
 <ul>
-<li>Minimum Lowercase</li>
-<li>Minimum Uppercase</li>
-<li>Minimum Symbols</li>
-<li>Minimum Length</li>
-<li>Minimum Digits</li>
+<li>✅ <strong>Official Repository</strong> – Maintained by the SUSE project</li>
 </ul>
-<blockquote>
-<p>Users supplying non-compliant PINs will be <strong>denied PIN enrollment</strong>.</p>
-</blockquote>
 <hr />
-<h2 id="refreshing-compliance-status">Refreshing Compliance Status</h2>
-<p>Compliance is checked during login. To force re-evaluation, simply re-authenticate.</p>
+<h2 id="official-repository-suse-hosted">✅ Official Repository (SUSE-hosted)</h2>
+<pre><code>https://download.opensuse.org/repositories/network
+</code></pre>
+<ul>
+<li><strong>Maintained by:</strong> SUSE</li>
+<li><strong>Key:</strong> <a href="https://himmelblau-idm.org/himmelblau.asc"><code>https://himmelblau-idm.org/himmelblau.asc</code></a></li>
+</ul>
+<h3 id="setup-instructions">🛠️ Setup Instructions</h3>
+<pre><code class="language-bash"># For Leap 15.6 or SUSE Linux Enterprise 15 SP6:
+sudo zypper ar https://download.opensuse.org/repositories/network:/idm/15.6/network:idm.repo
+
+# For Leap 15.5 or SUSE Linux Enterprise 15 SP5:
+sudo zypper ar https://download.opensuse.org/repositories/network:/idm/15.5/network:idm.repo
+</code></pre>
+<hr />
+<h2 id="see-also">📚 See Also</h2>
+<ul>
+<li><a href="../../installation/">Installation Guide</a></li>
+</ul>
+<hr />
+<p>Interested in hosting a mirror? <a href="../../../community">Let us know</a>.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../Design/" class="btn btn-neutral float-left" title="Design Principles"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/" class="btn btn-neutral float-right" title="Enabling the Himmelblau QR Greeter gnome‐shell Extension">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../MS-specs-which-Himmelblau-uses/" class="btn btn-neutral float-left" title="MS specs which Himmelblau uses"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../Syncing-Active-Directory-with-Azure-Entra-ID/" class="btn btn-neutral float-right" title="Syncing Active Directory with Azure Entra ID">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -263,10 +225,10 @@ Enforcing certain complexity rules (e.g., uppercase, symbols) will prevent numer
         </span>
     
     
-      <span><a href="../Design/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../MS-specs-which-Himmelblau-uses/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../Syncing-Active-Directory-with-Azure-Entra-ID/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

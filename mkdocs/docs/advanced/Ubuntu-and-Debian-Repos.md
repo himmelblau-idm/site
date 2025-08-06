@@ -1,4 +1,4 @@
-# Ubuntu and Debian Repository Mirrors
+# Ubuntu and Debian Repositories
 
 Himmelblau packages for Debian and Ubuntu are distributed through public APT repositories:
 

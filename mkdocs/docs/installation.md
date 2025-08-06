@@ -18,29 +18,28 @@ This page covers how to install Himmelblau on Ubuntu, Debian, RHEL, Rocky, SUSE,
 
 ## Installation from Software Repos
 
-### Instructions
-* [Ubuntu and Debian](./advanced/Ubuntu-and-Debian-Mirrors.md)
+### Ubuntu and Debian
+
+* Please visit the [Repository List](./advanced/Ubuntu-and-Debian-Repos.md) for setup instructions
+* Install the packages
+```bash
+sudo apt install himmelblau nss-himmelblau pam-himmelblau himmelblau-sso
+```
 
 ### RHEL, Rocky, Fedora
 
-1. [Download](https://himmelblau-idm.org/downloads.html) the `.rpm` packages.
-
-2. Install:
-
+* Please visit the [Repository List](./advanced/RPM-Repos.md) for setup instructions
+* Install the packages
 ```bash
-sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
-sudo dnf install ./himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-sshd-config-<version>-1.x86_64-<distro>.rpm ./himmelblau-sso-<version>-1.x86_64-<distro>.rpm ./nss-himmelblau-<version>-1.x86_64-<distro>.rpm ./pam-himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-qr-greeter-<version>-1.x86_64-<distro>.rpm
+sudo rpm install himmelblau nss-himmelblau pam-himmelblau himmelblau-sso
 ```
 
 ### SUSE Linux Enterprise (SLE) / openSUSE
 
-1. [Download](https://himmelblau-idm.org/downloads.html) the `.rpm` packages.
-
-2. Install:
-
+* Please visit the [Repository List](./advanced/RPM-Repos.md) for setup instructions
+* Install the packages
 ```bash
-sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
-sudo zypper install ./himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-sshd-config-<version>-1.x86_64-<distro>.rpm ./himmelblau-sso-<version>-1.x86_64-<distro>.rpm ./nss-himmelblau-<version>-1.x86_64-<distro>.rpm ./pam-himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-qr-greeter-<version>-1.x86_64-<distro>.rpm 
+sudo zypper in himmelblau nss-himmelblau pam-himmelblau himmelblau-sso
 ```
 
 ## Installation from Prebuilt Packages

@@ -39,5 +39,7 @@ extra:
       link: https://www.linkedin.com/in/davidmmulder/
     - icon: material/email
       link: dmulder@himmelblau-idm.org
+    - icon: fontawesome/brands/mastodon
+      link: https://mastodon.social/@dmulder
 repo_url: https://github.com/himmelblau-idm/himmelblau
 repo_name: Himmelblau

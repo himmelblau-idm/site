@@ -16,6 +16,33 @@ This page covers how to install Himmelblau on Ubuntu, Debian, RHEL, Rocky, SUSE,
 
 ---
 
+## Installation from Software Repos
+
+### Instructions
+* [Ubuntu and Debian](./advanced/Ubuntu-and-Debian-Mirrors.md)
+
+### RHEL, Rocky, Fedora
+
+1. [Download](https://himmelblau-idm.org/downloads.html) the `.rpm` packages.
+
+2. Install:
+
+```bash
+sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
+sudo dnf install ./himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-sshd-config-<version>-1.x86_64-<distro>.rpm ./himmelblau-sso-<version>-1.x86_64-<distro>.rpm ./nss-himmelblau-<version>-1.x86_64-<distro>.rpm ./pam-himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-qr-greeter-<version>-1.x86_64-<distro>.rpm
+```
+
+### SUSE Linux Enterprise (SLE) / openSUSE
+
+1. [Download](https://himmelblau-idm.org/downloads.html) the `.rpm` packages.
+
+2. Install:
+
+```bash
+sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
+sudo zypper install ./himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-sshd-config-<version>-1.x86_64-<distro>.rpm ./himmelblau-sso-<version>-1.x86_64-<distro>.rpm ./nss-himmelblau-<version>-1.x86_64-<distro>.rpm ./pam-himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-qr-greeter-<version>-1.x86_64-<distro>.rpm 
+```
+
 ## Installation from Prebuilt Packages
 
 [Download the packages for your distribution](https://himmelblau-idm.org/downloads.html), and install them using your flavor of package manager:
@@ -29,10 +56,6 @@ This page covers how to install Himmelblau on Ubuntu, Debian, RHEL, Rocky, SUSE,
 ```bash
 sudo apt install -y ./himmelblau_<version>-<distro>_amd64.deb ./himmelblau-sshd-config_<version>-<distro>_amd64.deb ./himmelblau-sso_<version>-<distro>_amd64.deb ./nss-himmelblau_<version>-<distro>_amd64.deb ./pam-himmelblau_<version>-<distro>_amd64.deb ./himmelblau-qr-greeter_<version>-<distro>_amd64.deb 
 ```
-
-#### Optional Debian repositories
-
-You can optionally install the latest package from the Himmelblau debian repositories, as described on the downloads page.
 
 ### RHEL, Rocky, Fedora
 
@@ -58,11 +81,9 @@ sudo zypper install ./himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-ss
 
 ---
 
-### From Source
+## Installation From Source
 
 If you prefer to build Himmelblau from source, you can use the provided `Makefile` to produce native packages for your target distribution.
-
-### Steps:
 
 1. Clone the repository:
 

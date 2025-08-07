@@ -23,9 +23,9 @@ for DIST in "${DISTS[@]}"; do
     mapfile -t urls < <(
       {
         curl -s "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest" |
-          jq -r ".assets[] | select(.name | endswith(\"${DIST}_${ARCH}.rpm\")) | .browser_download_url"
+          jq -r ".assets[] | select(.name | endswith(\"${ARCH}-${DIST}.rpm\")) | .browser_download_url"
         curl -s "https://api.github.com/repos/$REPO_OWNER/$OTHER_REPO_NAME/releases/latest" |
-          jq -r ".assets[] | select(.name | endswith(\"${DIST}_${ARCH}.rpm\")) | .browser_download_url"
+          jq -r ".assets[] | select(.name | endswith(\"${ARCH}-${DIST}.rpm\")) | .browser_download_url"
       }
     )
 

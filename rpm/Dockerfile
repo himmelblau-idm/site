@@ -9,6 +9,7 @@ RUN apt-get update && \
         jq \
         gzip \
         ca-certificates \
+	rpm-common \
         && rm -rf /var/lib/apt/lists/*
 
 # Add your script

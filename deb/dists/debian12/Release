@@ -4,21 +4,21 @@ Suite: debian12
 Codename: debian12
 Architectures: amd64
 Components: main
-Date: Tue, 05 Aug 2025 19:42:30 +0000
-Date: Tue, 05 Aug 2025 19:42:30 +0000
+Date: Thu, 07 Aug 2025 14:12:46 +0000
+Date: Thu, 07 Aug 2025 14:12:46 +0000
 MD5Sum:
- fd29460d7dd86348847e2b0fd0b25fe5              186 Release
- bbc24899bce99b2f5f6b4309f12d7e17             4992 main/binary-amd64/Packages
- 3ad88fe91109e2ec7897fd41b7e422a2             1585 main/binary-amd64/Packages.gz
+ 4f80889c5294ae61074d13939b4628e7              186 Release
+ a1c9e10f8b7de352596b26e1d59f9dd3             4992 main/binary-amd64/Packages
+ 388ad0b5a8a8c1c08e7572abae4b52d4             1583 main/binary-amd64/Packages.gz
 SHA1:
- 41d969387f4c73ea2fd634ae1f75d8934ff53728              186 Release
- b18d47851509503da61cd862e6fa17a5f2edb258             4992 main/binary-amd64/Packages
- 6e6b79130618a8b473666ee981a1bf484307c1f0             1585 main/binary-amd64/Packages.gz
+ 316beee98d551d3f34dc95379c97d9ff68583997              186 Release
+ 060376c0c2d07c1be6ef11980a54b2cb46e1ec20             4992 main/binary-amd64/Packages
+ e9a40b038404ec6ff25ea7fd673d3848b5460e52             1583 main/binary-amd64/Packages.gz
 SHA256:
- d5015001a90d919f2b03f4077a9e5df226c908fc87fc3e6b06af03b6d20e24ce              186 Release
- aa0bd0dc52d71e429fdc746d8477f311182e46c955c735d63779ccd0fd59aefa             4992 main/binary-amd64/Packages
- 7934da65ce33a83cefb5e7c7147d8d173b5b8cfc600c8aebbc0ec68d823a5173             1585 main/binary-amd64/Packages.gz
+ 1b867fa13b2e735f18f0595ac3f97db8a4ffb6e7019a0b31db4e9293282ada81              186 Release
+ c45649fcf1097651f8d944091870c766f075ddd7cdf0a120fb0b866f42ac9acf             4992 main/binary-amd64/Packages
+ 165cd81fbd0df86e386274ed57b733eeac16573d176bd389b12c118b1d1debc1             1583 main/binary-amd64/Packages.gz
 SHA512:
- 4aaa5b99153b417fb990a9820d4be955e57cb2777e61c1edd404a9c196bf1223680bedb5f36ba5489c159c0bb224847751a970bce5b58f8bc101ebc2fa15f1b9              186 Release
- c3b54da0cee615ca114319701db75a06ffa96749d5ab044df43396f746e4f2cbe72a40549fbb6163a9dcf98b89988f7b24669c8c6541062aad0ec420a9e86442             4992 main/binary-amd64/Packages
- 1bf8a752df716285806cb23bfa230e0b1371876e4cd2372161d9e491b3cdc4423c91db1b48219d142f16d20aeff19c71c96e3b466fba7d118ecde31fc8d7f304             1585 main/binary-amd64/Packages.gz
+ 11e8326da2be739fda01e523f1427f5c847b15f3bf1abbb8c29f0372336df128cd4515f4e79eeccc664af6ac90d6a666e386127ee9b96c17f5f88d033819bdd9              186 Release
+ cbc06fc373635ddddceb0bafd1a95ddeabe38b926c203211a9ebfcc995d213c2d9853eaa76c31e3f67042cc09ecb60434b723b4644a2287db81f0b4672379dd6             4992 main/binary-amd64/Packages
+ 5fca36a14255f27a03d90f70bfb512d8d3afbc1daf0cdf7764b532e71047b1568b24cc2fe7304b014bf6311dc4749e7d542fc91f68bb8b47d5f93af8efb5d552             1583 main/binary-amd64/Packages.gz

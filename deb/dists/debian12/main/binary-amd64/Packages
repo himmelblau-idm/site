@@ -15,93 +15,93 @@ Description: Diagnostic utility for debugging Entra ID authentication issues via
  libhimmelblau
 
 Package: himmelblau
-Version: 1.1.0-debian12
+Version: 1.2.0-debian12
 Architecture: amd64
 Maintainer: David Mulder <dmulder@suse.com>
-Installed-Size: 40259
+Installed-Size: 40271
 Depends: libc6 (>= 2.34), libdbus-1-3 (>= 1.9.14), libsqlite3-0 (>= 3.7.15), libssl3 (>= 3.0.0), libtss2-esys-3.0.2-0 (>= 2.3.1), libtss2-mu0 (>= 3.0.1), libtss2-tctildr0 (>= 3.0.1), libudev1 (>= 183), libunistring2 (>= 0.9.7)
 Recommends: nss-himmelblau, pam-himmelblau, krb5-user
-Filename: dists/debian12/main/binary-amd64/himmelblau_1.1.0-debian12_amd64.deb
-Size: 9725704
-MD5sum: 0188f9f91f41f670d24be7da33399e88
-SHA1: 92786bc46b6eee1f15e35d2e29724cd678828799
-SHA256: 86c06587980fa2105674d2ae2a9fe85be367184b4c68d2e6124f17ed43c62005
+Filename: dists/debian12/main/binary-amd64/himmelblau_1.2.0-debian12_amd64.deb
+Size: 9730752
+MD5sum: 84c1997183e95f8e260613e505f2233c
+SHA1: 2c89ca438cd13325696d2f1d63b53ff7d93cc2e7
+SHA256: c4687aea5e4e6fa32dcb2cb52be4009c53bf78d90d5972298df9045609932564
 Priority: optional
 Homepage: https://github.com/himmelblau-idm/himmelblau
 Description: Himmelblau Authentication Daemon
 
 Package: himmelblau-qr-greeter
-Version: 1.1.0-debian12
+Version: 1.2.0-debian12
 Architecture: amd64
 Maintainer: David Mulder <dmulder@suse.com>
 Installed-Size: 41
 Depends: gnome-shell
-Filename: dists/debian12/main/binary-amd64/himmelblau-qr-greeter_1.1.0-debian12_amd64.deb
+Filename: dists/debian12/main/binary-amd64/himmelblau-qr-greeter_1.2.0-debian12_amd64.deb
 Size: 29616
-MD5sum: 408d5315d7bc14e5f7d47d72a3c934c8
-SHA1: 21b4c4a16a5f4dcd4801c8cf9a34abade7e9117c
-SHA256: da60903c6f8b41f168f038ff58eb853c000e64f7ef2220a8a37e3fc86c14552e
+MD5sum: f6658bfdcdc8d56e92700262be960e38
+SHA1: 06c08404f02275092ac27801f0927af8973c5586
+SHA256: fb1691eccf21b3674330a4728f477d842600199d3d15d5adf198f960e9c5cb41
 Priority: optional
 Homepage: https://github.com/himmelblau-idm/himmelblau
 Description: GNOME Shell extension that adds a QR code to authentication prompts when a MS
  DAG URL is detected.
 
 Package: himmelblau-sshd-config
-Version: 1.1.0-debian12
+Version: 1.2.0-debian12
 Architecture: amd64
 Maintainer: David Mulder <dmulder@suse.com>
 Installed-Size: 4
 Depends: openssh-server
-Filename: dists/debian12/main/binary-amd64/himmelblau-sshd-config_1.1.0-debian12_amd64.deb
+Filename: dists/debian12/main/binary-amd64/himmelblau-sshd-config_1.2.0-debian12_amd64.deb
 Size: 1040
-MD5sum: d65ec5a43a49c20f77bdd4af4179a975
-SHA1: 697e8de60b6255d070a0db97dbf6adc0e19ebb15
-SHA256: 4304209c77a34c0e645cf1815f16e0554e3945da735514608bdba75544ad56e2
+MD5sum: 3576a515f620642a76ae081b5a00788d
+SHA1: 08754840b3224d664ee550dadf2a8102e00437f3
+SHA256: 6339ea711aeef1e47c789a29b328ac66d9f875ac8cb356e8d3c9b5d821a44724
 Priority: optional
 Homepage: https://github.com/himmelblau-idm/himmelblau
 Description: Himmelblau Required SSHD Configuration
 
 Package: himmelblau-sso
-Version: 1.1.0-debian12
+Version: 1.2.0-debian12
 Architecture: amd64
 Maintainer: David Mulder <dmulder@suse.com>
 Installed-Size: 5342
 Depends: libc6 (>= 2.34), libdbus-1-3 (>= 1.9.14), libsqlite3-0 (>= 3.5.9), libssl3 (>= 3.0.0), libtss2-esys-3.0.2-0 (>= 2.3.1), libtss2-mu0 (>= 3.0.1), libtss2-tctildr0 (>= 3.0.1), libudev1 (>= 183), libunistring2 (>= 0.9.7)
-Filename: dists/debian12/main/binary-amd64/himmelblau-sso_1.1.0-debian12_amd64.deb
-Size: 1298088
-MD5sum: 00ccd27727b942ff745ae3c6655f60d5
-SHA1: b9320ff5d089d420aff9f6716f1dbf2fe91affa1
-SHA256: f4efc0ac4ca8d862c4cfe4edb2cef85391d8e7a9728e8e89eb2b90c86597374b
+Filename: dists/debian12/main/binary-amd64/himmelblau-sso_1.2.0-debian12_amd64.deb
+Size: 1298356
+MD5sum: 615ead350fd257e83914c1e3960bcd0d
+SHA1: db7dafc15ba8efbe8e0e39e1e1a34654e4ec10b5
+SHA256: 35628f7fce2829348918f22942eb42b43004320fe7e9b57134cc03d2ee3d0ba3
 Priority: optional
 Homepage: https://github.com/himmelblau-idm/himmelblau
 Description: Entra ID SSO via Himmelblau Identity Broker
 
 Package: nss-himmelblau
-Version: 1.1.0-debian12
+Version: 1.2.0-debian12
 Architecture: amd64
 Maintainer: David Mulder <dmulder@suse.com>
 Installed-Size: 800
 Depends: libc6 (>= 2.34), libsqlite3-0 (>= 3.7.15), libssl3 (>= 3.0.0), libtss2-esys-3.0.2-0 (>= 2.3.1), libtss2-mu0 (>= 3.0.1), libtss2-tctildr0 (>= 3.0.1), libudev1 (>= 183), libunistring2 (>= 0.9.7)
-Filename: dists/debian12/main/binary-amd64/nss-himmelblau_1.1.0-debian12_amd64.deb
-Size: 300592
-MD5sum: 413e0ba66c2bfb5173808504bdf4b4c9
-SHA1: bfd0d4a5d5d1d7f4d5a1e317ca249e463d0f413c
-SHA256: 647b19ef4be33434a4162f42c37588a7c365ca6876443eca7961bd331d4febeb
+Filename: dists/debian12/main/binary-amd64/nss-himmelblau_1.2.0-debian12_amd64.deb
+Size: 300680
+MD5sum: 963729c828cc997722dc8b84f19a89eb
+SHA1: 79f0ff6d8d6bf116793a34c77304562cb449ef0b
+SHA256: b290c78dc60ddeb0471fa02e8fb83b922b8f8d94bcdca97dca40f4b754d476c1
 Priority: optional
 Homepage: https://github.com/himmelblau-idm/himmelblau
 Description: Himmelblau NSS Module
 
 Package: pam-himmelblau
-Version: 1.1.0-debian12
+Version: 1.2.0-debian12
 Architecture: amd64
 Maintainer: David Mulder <dmulder@suse.com>
 Installed-Size: 9940
 Depends: libc6 (>= 2.34), libcairo-gobject2 (>= 1.10.0), libcairo2 (>= 1.2.4), libgdk-pixbuf-2.0-0 (>= 2.22.0), libglib2.0-0 (>= 2.53.1), libgtk-3-0 (>= 3.0.0), libjavascriptcoregtk-4.1-0, libpam0g (>= 0.99.7.1), libpango-1.0-0 (>= 1.14.0), libsqlite3-0 (>= 3.7.15), libssl3 (>= 3.0.0), libtss2-esys-3.0.2-0 (>= 2.3.1), libtss2-mu0 (>= 3.0.1), libtss2-tctildr0 (>= 3.0.1), libudev1 (>= 183), libunistring2 (>= 0.9.7), libwebkit2gtk-4.1-0 (>= 2.39.90)
-Filename: dists/debian12/main/binary-amd64/pam-himmelblau_1.1.0-debian12_amd64.deb
-Size: 2541332
-MD5sum: df525f1a81c9c722513f8768141e1ce9
-SHA1: a85016d405b5418c9361f50a00745edbbd4838d4
-SHA256: edef436612e28b82f81bd39fcbb1fc87309a719ab8ee74ea8ca3dd895647d476
+Filename: dists/debian12/main/binary-amd64/pam-himmelblau_1.2.0-debian12_amd64.deb
+Size: 2541908
+MD5sum: 2ce1a117d8161792d5748fa19a9f7dfd
+SHA1: eb328aac768ad8903f630319d59ed98d74698325
+SHA256: b17660f7bf63dc3db37a8db87ffffd54b1c3ca6dd7bc0eb8e37d8ec8e8a1f743
 Priority: optional
 Homepage: https://github.com/himmelblau-idm/himmelblau
 Description: Himmelblau PAM Module

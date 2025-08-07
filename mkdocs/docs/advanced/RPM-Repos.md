@@ -1,15 +1,4 @@
-Here’s a unified and cleaned-up **RPM-based repository instruction set** for **Himmelblau**, covering:
-
-* openSUSE (Tumbleweed & Leap/SLE)
-* RHEL / Rocky / Oracle Linux
-* Fedora
-
-All use the official GPG key at [`https://himmelblau-idm.org/himmelblau.asc`](https://himmelblau-idm.org/himmelblau.asc)
-and the primary repository URL [`https://himmelblau-idm.org/rpm/`](https://himmelblau-idm.org/rpm/)
-
----
-
-# ✅ RPM Repositories – Himmelblau
+# RPM Repositories
 
 Official RPM repositories for installing Himmelblau on major RPM-based distributions.
 

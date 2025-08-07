@@ -1,6 +1,6 @@
 1. **Download and Install the Extension Package**
 
-   [Download the appropriate package for your distribution](https://himmelblau-idm.org/downloads.html)
+   [Download the appropriate package for your distribution](https://himmelblau-idm.org/downloads)
 
    The package is called `himmelblau-qr-greeter`. Follow your distribution’s instructions for installing system packages.
 

@@ -12,7 +12,7 @@ You’ll learn how to capture traffic, then obfuscate sensitive details using `c
 
 	Prebuilt binaries are available from the official Himmelblau downloads page:
 
-	👉 [https://himmelblau-idm.org/downloads.html](https://himmelblau-idm.org/downloads.html)
+	👉 [https://himmelblau-idm.org/downloads](https://himmelblau-idm.org/downloads)
 
 2. **Download `mitmproxy`**:
 

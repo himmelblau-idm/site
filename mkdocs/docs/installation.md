@@ -44,11 +44,11 @@ sudo zypper in himmelblau nss-himmelblau pam-himmelblau himmelblau-sso
 
 ## Installation from Prebuilt Packages
 
-[Download the packages for your distribution](https://himmelblau-idm.org/downloads.html), and install them using your flavor of package manager:
+[Download the packages for your distribution](https://himmelblau-idm.org/downloads), and install them using your flavor of package manager:
 
 ### Debian & Ubuntu
 
-1. [Download](https://himmelblau-idm.org/downloads.html) the `.deb` packages.
+1. [Download](https://himmelblau-idm.org/downloads) the `.deb` packages.
 
 2. Install:
 
@@ -56,13 +56,9 @@ sudo zypper in himmelblau nss-himmelblau pam-himmelblau himmelblau-sso
 sudo apt install -y ./himmelblau_<version>-<distro>_amd64.deb ./himmelblau-sshd-config_<version>-<distro>_amd64.deb ./himmelblau-sso_<version>-<distro>_amd64.deb ./nss-himmelblau_<version>-<distro>_amd64.deb ./pam-himmelblau_<version>-<distro>_amd64.deb ./himmelblau-qr-greeter_<version>-<distro>_amd64.deb 
 ```
 
-#### Optional Debian repositories
-
-You can optionally install the latest package from the Himmelblau debian repositories, as described on the downloads page.
-
 ### RHEL, Rocky, Fedora
 
-1. [Download](https://himmelblau-idm.org/downloads.html) the `.rpm` packages.
+1. [Download](https://himmelblau-idm.org/downloads) the `.rpm` packages.
 
 2. Install:
 
@@ -73,7 +69,7 @@ sudo dnf install ./himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-sshd-
 
 ### SUSE Linux Enterprise (SLE) / openSUSE
 
-1. [Download](https://himmelblau-idm.org/downloads.html) the `.rpm` packages.
+1. [Download](https://himmelblau-idm.org/downloads) the `.rpm` packages.
 
 2. Install:
 
@@ -84,11 +80,9 @@ sudo zypper install ./himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-ss
 
 ---
 
-### From Source
+## Installation From Source
 
 If you prefer to build Himmelblau from source, you can use the provided `Makefile` to produce native packages for your target distribution.
-
-### Steps:
 
 1. Clone the repository:
 

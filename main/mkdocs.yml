@@ -20,7 +20,6 @@ extra_css:
   - css/custom.css
 nav:
   - Home: index.md
-  - Downloads: downloads.md
   - Documentation: /docs/
   - Community: community.md
   - Why Himmelblau?: why.md

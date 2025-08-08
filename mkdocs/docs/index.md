@@ -13,7 +13,7 @@
 
 Himmelblau is designed with sensible defaults to make initial setup fast and simple. If you're eager to get started without reading all the details, follow these basic steps:
 
-1. 📦 **[Download and install the packages](https://himmelblau-idm.org/downloads.html)**
+1. 📦 **[Download and install the packages](https://himmelblau-idm.org/downloads)**
 
    (Choose the appropriate DEB or RPM for your system and install them.)
 

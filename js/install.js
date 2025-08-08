@@ -1,3 +1,10 @@
+window.addEventListener('DOMContentLoaded', () => {
+	const distroSelect = document.getElementById('linux-distro');
+	if (distroSelect.value) {
+		provideLinks(); // Call it if a value is already selected
+	}
+});
+
 document.getElementById('linux-distro').addEventListener('change', function () {
 	provideLinks(); // Call the function directly when the selection changes
 });

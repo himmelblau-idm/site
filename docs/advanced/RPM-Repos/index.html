@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/Cloud-Kerberos-Trust-for-Linux/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/RPM-Repos/" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Cloud Kerberos Trust for Linux - Himmelblau Documentation</title>
+    <title>RPM Repositories - Himmelblau Documentation</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Cloud Kerberos Trust for Linux";
-        var mkdocs_page_input_path = "advanced/Cloud-Kerberos-Trust-for-Linux.md";
-        var mkdocs_page_url = "/docs/advanced/Cloud-Kerberos-Trust-for-Linux/";
+        var mkdocs_page_name = "RPM Repositories";
+        var mkdocs_page_input_path = "advanced/RPM-Repos.md";
+        var mkdocs_page_url = "/docs/advanced/RPM-Repos/";
       </script>
     
     <!--[if lt IE 9]>
@@ -93,17 +93,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Advanced Topics</span></p>
               <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Cloud Kerberos Trust for Linux</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#step-1-configure-microsoft-entra-kerberos-server-object">Step 1: Configure Microsoft Entra Kerberos Server Object</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#step-2-configure-kerberos-on-the-linux-client">Step 2: Configure Kerberos on the Linux Client</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#step-3-validate-the-configuration-on-linux-devices">Step 3: Validate the Configuration on Linux Devices</a>
-    </li>
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
                   </li>
@@ -119,7 +109,23 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../RPM-Repos/">RPM Repositories</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">RPM Repositories</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#opensuse-suse-linux-enterprise">🖥️ openSUSE &amp; SUSE Linux Enterprise</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#tumbleweed">🔁 Tumbleweed</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#opensuse-leap-156-sle-15-sp6">🧱 openSUSE Leap 15.6 / SLE 15 SP6</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rhel-rocky-oracle-linux">🧱 RHEL / Rocky / Oracle Linux</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#fedora-41-42-rawhide">🐧 Fedora (41, 42, Rawhide)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#notes">📌 Notes</a>
+    </li>
+    </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
                   </li>
@@ -156,9 +162,9 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Advanced Topics</li>
-      <li class="breadcrumb-item active">Cloud Kerberos Trust for Linux</li>
+      <li class="breadcrumb-item active">RPM Repositories</li>
     <li class="wy-breadcrumbs-aside">
-          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/advanced/Cloud-Kerberos-Trust-for-Linux.md">Edit on Himmelblau Documentation</a>
+          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/advanced/RPM-Repos.md">Edit on Himmelblau Documentation</a>
     </li>
   </ul>
   <hr/>
@@ -166,97 +172,77 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <p>⚠️ <strong>Warning: This document is a work in progress. Cloud Kerberos Trust for Linux is also a work in progress and likely requires additional configuration and bug fixes to Himmelblau.</strong></p>
-<h2 id="cloud-kerberos-trust-setup-for-entra-id-joined-linux-devices">Cloud Kerberos Trust Setup for Entra ID Joined Linux Devices</h2>
-<p>This guide outlines the steps to configure Cloud Kerberos Trust between Microsoft Entra ID (formerly Azure AD) and an on-premises Active Directory (AD) for Linux devices joined to Entra ID using Himmelblau.</p>
-<h3 id="prerequisites">Prerequisites</h3>
+                <h1 id="rpm-repositories">RPM Repositories</h1>
+<p>Official RPM repositories for installing Himmelblau on major RPM-based distributions.</p>
 <ul>
-<li>Microsoft Entra ID is configured.</li>
-<li>On-premises Active Directory is operational.</li>
-<li>Entra Id Connect is installed and synchronizing users from on-premises AD to Entra ID.</li>
-<li>Linux client is joined to Entra ID via Himmelblau.</li>
-<li>Kerberos utilities (e.g., <code>mit-krb5</code>) are installed on the Linux client.</li>
-<li>Network connectivity between the Linux client and on-prem AD domain controllers.</li>
-<li>Administrative privileges in both on-prem AD and Entra ID.</li>
+<li><strong>Main repo</strong>: <a href="https://himmelblau-idm.org/rpm/"><code>https://himmelblau-idm.org/rpm/</code></a></li>
+<li><strong>GPG key</strong>: <a href="https://himmelblau-idm.org/himmelblau.asc"><code>https://himmelblau-idm.org/himmelblau.asc</code></a></li>
 </ul>
-<h3 id="step-1-configure-microsoft-entra-kerberos-server-object">Step 1: Configure Microsoft Entra Kerberos Server Object</h3>
-<ol>
-<li>Install the AzureADHybridAuthenticationManagement PowerShell module on a Windows machine with AD access:</li>
-</ol>
-<pre><code class="language-powershell">Install-Module -Name AzureADHybridAuthenticationManagement -AllowClobber
+<hr />
+<h2 id="opensuse-suse-linux-enterprise">🖥️ openSUSE &amp; SUSE Linux Enterprise</h2>
+<h3 id="tumbleweed">🔁 Tumbleweed</h3>
+<pre><code class="language-bash">sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
+sudo zypper ar https://himmelblau-idm.org/rpm/tumbleweed/x86_64/ himmelblau
+sudo zypper ref
+sudo zypper in himmelblau nss-himmelblau pam-himmelblau himmelblau-sso
 </code></pre>
-<ol>
-<li>Create the Kerberos server object:</li>
-</ol>
-<pre><code class="language-powershell"># Specify the on-premises Active Directory domain. A new Azure AD
-# Kerberos Server object will be created in this Active Directory domain.
-$domain = $env:USERDNSDOMAIN
-
-# Enter a UPN of an Azure Active Directory global administrator
-$userPrincipalName = &quot;administrator@contoso.onmicrosoft.com&quot;
-
-# Enter a domain administrator username and password.
-$domainCred = Get-Credential
-
-# Create the new Azure AD Kerberos Server object in Active Directory
-# and then publish it to Azure Active Directory.
-# Open an interactive sign-in prompt with given username to access the Azure AD.
-Set-AzureADKerberosServer -Domain $domain -UserPrincipalName $userPrincipalName -DomainCredential $domainCred
+<hr />
+<h3 id="opensuse-leap-156-sle-15-sp6">🧱 openSUSE Leap 15.6 / SLE 15 SP6</h3>
+<pre><code class="language-bash">sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
+sudo zypper ar https://himmelblau-idm.org/rpm/leap15.6/x86_64/ himmelblau
+sudo zypper ref
+sudo zypper in himmelblau
 </code></pre>
-<ol>
-<li>Verify that the Kerberos server RODC object was created successfully.</li>
-</ol>
-<pre><code class="language-powershell">Get-AzureADKerberosServer -Domain $domain -UserPrincipalName $userPrincipalName
-</code></pre>
-<h3 id="step-2-configure-kerberos-on-the-linux-client">Step 2: Configure Kerberos on the Linux Client</h3>
-<ol>
-<li>Edit the Kerberos configuration file (<code>/etc/krb5.conf</code>):</li>
-</ol>
-<pre><code class="language-ini">   [libdefaults]
-       default_realm = EXAMPLE.COM
-       dns_lookup_realm = false
-       dns_lookup_kdc = false
+<hr />
+<h2 id="rhel-rocky-oracle-linux">🧱 RHEL / Rocky / Oracle Linux</h2>
+<p>Replace <code>rocky9</code> with your actual version (<code>rocky8</code>, <code>rocky10</code>, etc.) if needed:</p>
+<pre><code class="language-bash">sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
 
-   [realms]
-       EXAMPLE.COM = {
-           kdc = dc1.example.com
-           kdc = dc2.example.com
-           admin_server = dc1.example.com
-       }
+echo '[himmelblau]
+name=Himmelblau RPM Repo
+baseurl=https://himmelblau-idm.org/rpm/rocky9/x86_64/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://himmelblau-idm.org/himmelblau.asc' | sudo tee /etc/yum.repos.d/himmelblau.repo
 
-   [domain_realm]
-       .example.com = EXAMPLE.COM
-       example.com = EXAMPLE.COM
+sudo dnf clean all
+sudo dnf makecache
+sudo dnf install himmelblau
 </code></pre>
+<hr />
+<h2 id="fedora-41-42-rawhide">🐧 Fedora (41, 42, Rawhide)</h2>
+<p>Replace <code>fedora42</code> with your version if different:</p>
+<pre><code class="language-bash">sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
+
+echo '[himmelblau]
+name=Himmelblau RPM Repo
+baseurl=https://himmelblau-idm.org/rpm/fedora42/x86_64/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://himmelblau-idm.org/himmelblau.asc' | sudo tee /etc/yum.repos.d/himmelblau.repo
+
+sudo dnf clean all
+sudo dnf makecache
+sudo dnf install himmelblau
+</code></pre>
+<hr />
+<h2 id="notes">📌 Notes</h2>
 <ul>
-<li>Replace <code>EXAMPLE.COM</code> with your AD domain in uppercase.</li>
-<li>Replace <code>example.com</code> with your AD domain in lowercase.</li>
-<li>
-<p>Replace <code>dc1.example.com</code> and <code>dc2.example.com</code> with FQDNs of your domain controllers.</p>
-</li>
-<li>
-<p>Verify that time synchronization between the Linux client and the domain controllers is accurate.</p>
-</li>
+<li><code>gpgcheck=1</code> ensures individual RPMs are signed</li>
+<li><code>repo_gpgcheck=1</code> ensures <code>repomd.xml</code> is signed and verified</li>
+<li>All packages are served over HTTPS from <a href="https://himmelblau-idm.org"><code>https://himmelblau-idm.org</code></a></li>
+<li>Packages and repo metadata are signed with the same GPG key</li>
 </ul>
-<h3 id="step-3-validate-the-configuration-on-linux-devices">Step 3: Validate the Configuration on Linux Devices</h3>
-<p>After configuring the policies, validate that Linux devices can obtain Kerberos tickets:</p>
-<ol>
-<li><strong>Log Out and Log In</strong>:</li>
-</ol>
-<p>On the Linux device, log out and then log back in to initiate the authentication process.</p>
-<ol>
-<li><strong>Check Kerberos Tickets</strong>:</li>
-</ol>
-<p>Open a terminal and run:</p>
-<pre><code class="language-bash">klist
-</code></pre>
-<p>You should see a valid Kerberos ticket listed, indicating successful authentication.</p>
+<hr />
+<p>Interested in hosting a mirror? <a href="../../../community">Let us know</a>.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../../reference/pam_himmelblau/" class="btn btn-neutral float-left" title="Pam himmelblau"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/" class="btn btn-neutral float-right" title="Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../MS-specs-which-Himmelblau-uses/" class="btn btn-neutral float-left" title="MS specs which Himmelblau uses"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../Syncing-Active-Directory-with-Azure-Entra-ID/" class="btn btn-neutral float-right" title="Syncing Active Directory with Azure Entra ID">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -283,10 +269,10 @@ Set-AzureADKerberosServer -Domain $domain -UserPrincipalName $userPrincipalName 
         </span>
     
     
-      <span><a href="../../reference/pam_himmelblau/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../MS-specs-which-Himmelblau-uses/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../Syncing-Active-Directory-with-Azure-Entra-ID/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

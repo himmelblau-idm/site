@@ -8,6 +8,8 @@ ARCH=amd64
 COMPONENT=main
 DISTS=("ubuntu22.04" "ubuntu24.04" "debian12")
 REPO_ROOT=/output
+TOKEN_FILE="$REPO_ROOT/.github_token"
+GITHUB_TOKEN=$(<"$TOKEN_FILE")
 
 for DIST in "${DISTS[@]}"; do
     echo "Processing $DIST..."
@@ -16,9 +18,9 @@ for DIST in "${DISTS[@]}"; do
 
     mapfile -t urls < <(
       {
-        curl -s "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest" |
+        curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest" |
           jq -r ".assets[] | select(.name | endswith(\"${DIST}_${ARCH}.deb\")) | .browser_download_url"
-        curl -s "https://api.github.com/repos/$REPO_OWNER/$OTHER_REPO_NAME/releases/latest" |
+        curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/$REPO_OWNER/$OTHER_REPO_NAME/releases/latest" |
           jq -r ".assets[] | select(.name | endswith(\"${DIST}_${ARCH}.deb\")) | .browser_download_url"
       }
     )

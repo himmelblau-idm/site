@@ -7,28 +7,28 @@ Suite: ubuntu22.04
 Codename: ubuntu22.04
 Architectures: amd64
 Components: main
-Date: Thu, 07 Aug 2025 14:12:21 +0000
-Date: Thu, 07 Aug 2025 14:12:21 +0000
+Date: Fri, 08 Aug 2025 16:53:48 +0000
+Date: Fri, 08 Aug 2025 16:53:48 +0000
 MD5Sum:
- 4207bf11757161527eb748b859bfd349              192 Release
- 4293629d15f785c803752a8a4a1ece54             5095 main/binary-amd64/Packages
- 42f9fec937b77f89f5083bf868419364             1597 main/binary-amd64/Packages.gz
+ 657bc02f54f6de36099d2aa5cae2b67d              192 Release
+ 3ddc638104f94c47e9316389e7a9a4eb             5095 main/binary-amd64/Packages
+ b3fb341c55e5e8adde392f5342156cca             1602 main/binary-amd64/Packages.gz
 SHA1:
- 7ddd769bcbff9f35b1df0fc5a2f608874716c51d              192 Release
- 7ec05aededb17d417b8f640784e50013796a415f             5095 main/binary-amd64/Packages
- 9511cc368e53ab8432cb8153d5451a3aa9b8f9bf             1597 main/binary-amd64/Packages.gz
+ 36bfce3f001184bb14c3676f325896c975d62f56              192 Release
+ a3af277a8f2a4fc6ccf071c979a68689020e40bc             5095 main/binary-amd64/Packages
+ ec187e727af5c4df507161d7bf3087e744d5c91b             1602 main/binary-amd64/Packages.gz
 SHA256:
- 9558eaddfd9e262dd99c5dca88d33d911631046e25a4e50c593beb8f6af9f5a6              192 Release
- a09c45a1a4345a7bae73b6bda391a71fc096c8e7beb48e2c80b47d4f8784511e             5095 main/binary-amd64/Packages
- 68a035d2d6c0d9dd10cbe9cd7be3eb61ba8e382ebb2f40e5a2019f14f129f7e9             1597 main/binary-amd64/Packages.gz
+ d1efc463ffa204583bb20616aa5dd0f54fbcd2b22421f605bb36a8ee599eb545              192 Release
+ 6d8704220bac29573686baf13064d56a73a3e025226b99921541b37456649c25             5095 main/binary-amd64/Packages
+ 4d516f72a372151f19180e46083dcb21a227468a980fc1a50341f04eda8ffb3b             1602 main/binary-amd64/Packages.gz
 SHA512:
- 9a3be9ae71f97427335ad98a42c30e1e5aa460aa68ee9d595e2af4586b9e2c1b65ec2d92795d823d4dea7533a01a64edb76bf63c0fb66a5426cb48b50949cf1f              192 Release
- a92816d5dc2060add69fee1a72a83354f2cb577d4a6b6e07fb1d1825960ae19349c1bac0ce82f0dcca5a44db7b20410554a8d195b0320237cc6069fe1c61fb7f             5095 main/binary-amd64/Packages
- c4e2618dde3055d126f6627871ff8f97d906a3d702f9386bd10a342093fef79b27355fee6b508df397e01f650f093af0433d75a573123174f4834853122f983f             1597 main/binary-amd64/Packages.gz
+ ca28838413b01798dd0d390f6e4b2f80a351f51032aeff74d938b43e33e300b0ba5af24f3532af8cd0df978c5b3454e624e83acaa40a126b283e6ad00c039f3f              192 Release
+ 1642d1aadbba049779892cfd1d9b9e2c85ec4a536a86447b0e976699f2e45f571ba285b790f3029658db8723c8446b026da372ba24517efcc06cc39f04194767             5095 main/binary-amd64/Packages
+ 1094517fc1d02faf7c3a7ce01df1292daf0cf116bdb595d4bf8bc6fbafe9528f30c0157fed09eb252e72b7aee54347d9d3ddb25dd89aad11354544648fa24b9b             1602 main/binary-amd64/Packages.gz
 -----BEGIN PGP SIGNATURE-----
 
-iHUEARYKAB0WIQQ9RsiBaLL/jXXQsXhsykjyORb8AwUCaJS0XgAKCRBsykjyORb8
-A2X/AQD5JTiHWxoxL3iZUZiC6moYAJGuVXtGTQAlIg+ROd6q3AD/SuyE+SAxNthe
-j14rPvlZBRbL2CZOEADtxBIFGlv58QE=
-=BfRF
+iHUEARYKAB0WIQQ9RsiBaLL/jXXQsXhsykjyORb8AwUCaJYrvAAKCRBsykjyORb8
+A8mOAQCtq0VPufFwYXpnw1/pBFG5m9JaCz4uasASZ1fouspN0AD/dNyY5rHZmoxZ
+aHtXf8El/k8aLJzgAvw73L+AuWT3XAE=
+=yDVh
 -----END PGP SIGNATURE-----

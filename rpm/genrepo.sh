@@ -5,6 +5,9 @@ REPO_OWNER=himmelblau-idm
 REPO_NAME=himmelblau
 OTHER_REPO_NAME=cirrus-scope
 ARCH=x86_64
+REPO_ROOT=/output
+TOKEN_FILE="$REPO_ROOT/.github_token"
+GITHUB_TOKEN=$(<"$TOKEN_FILE")
 
 # Include SUSE targets
 DISTS=(
@@ -13,8 +16,6 @@ DISTS=(
   "tumbleweed" "leap15.6" "sle15sp6" "sle15sp7" "sle16"
 )
 
-REPO_ROOT=/output
-
 for DIST in "${DISTS[@]}"; do
     echo "Processing $DIST..."
     OUTDIR=$REPO_ROOT/$DIST/$ARCH
@@ -22,9 +23,9 @@ for DIST in "${DISTS[@]}"; do
 
     mapfile -t urls < <(
       {
-        curl -s "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest" |
+        curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest" |
           jq -r ".assets[] | select(.name | endswith(\"${ARCH}-${DIST}.rpm\")) | .browser_download_url"
-        curl -s "https://api.github.com/repos/$REPO_OWNER/$OTHER_REPO_NAME/releases/latest" |
+        curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/$REPO_OWNER/$OTHER_REPO_NAME/releases/latest" |
           jq -r ".assets[] | select(.name | endswith(\"${ARCH}-${DIST}.rpm\")) | .browser_download_url"
       }
     )

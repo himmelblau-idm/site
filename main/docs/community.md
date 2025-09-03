@@ -17,6 +17,7 @@ Join the conversation, share your experience, and help shape the future of secur
 Connect with fellow users and contributors:
 
 - 🟢 [Matrix Channel](https://matrix.to/#/#himmelblau:matrix.org) — our real-time chat for support, planning, and collaboration  
+- 🟢 [Slack Channel (backup)](https://join.slack.com/t/himmelblaugroup/shared_invite/zt-3cnnz478y-6PDfqiI8X0ScIityafWXzw) — our Slack channel syncs with Matrix, and is used as a backup (for when Matrix occasionally goes down).
 - 💬 [GitHub Discussions](https://github.com/himmelblau-idm/himmelblau/discussions) — open Q&A, design threads, and feedback
 
 We encourage open discussion and questions of all levels — from “How do I deploy this on Rocky?” to “Let’s improve Intune compliance reporting!”

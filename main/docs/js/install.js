@@ -200,8 +200,13 @@ async function provideLinks() {
 	) {
 		// GPG key import command for DNF/YUM-based systems
 		const keyCmd = document.createElement('code');
-		keyCmd.textContent =
-			'sudo rpm --import https://himmelblau-idm.org/himmelblau.asc';
+		if (distro === 'rocky8') {
+			keyCmd.textContent =
+				'sudo rpm --import https://himmelblau-idm.org/himmelblau-el8.asc';
+		} else {
+			keyCmd.textContent =
+				'sudo rpm --import https://himmelblau-idm.org/himmelblau.asc';
+		}
 		const pre = document.createElement('pre');
         pre.appendChild(keyCmd);
         linksContainer.appendChild(pre);

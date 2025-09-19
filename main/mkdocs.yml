@@ -18,6 +18,9 @@ theme:
   custom_dir: overrides
 extra_css:
   - css/custom.css
+  - assets/feedback.css
+extra_javascript:
+  - assets/feedback.js
 nav:
   - Home: index.md
   - Downloads: downloads.md

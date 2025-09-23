@@ -103,6 +103,7 @@ You’re not just donating—you’re actively driving Himmelblau’s evolution!
                     "2025-02-18T18:31:54.631Z": "60",
                     "2025-04-23T10:19:19.914Z": "60",
                     "2025-04-23T10:18:01.038Z": "60",
+                    "2025-09-22T18:32:56.895Z": "724",
                     // Add additional mappings as needed.
                 };
 

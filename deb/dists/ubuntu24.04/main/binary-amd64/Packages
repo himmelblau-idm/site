@@ -1,107 +1,107 @@
 Package: cirrus-scope
-Version: 0.1.2-ubuntu24.04
+Version: 0.1.3-ubuntu24.04
 Architecture: amd64
 Maintainer: David Mulder <dmulder@himmelblau-idm.org>
-Installed-Size: 10071
+Installed-Size: 11433
 Depends: libc6 (>= 2.34), libsqlite3-0 (>= 3.7.15), libssl3t64 (>= 3.0.0), libudev1 (>= 183)
-Filename: dists/ubuntu24.04/main/binary-amd64/cirrus-scope_0.1.2-ubuntu24.04_amd64.deb
-Size: 2675424
-MD5sum: 58b9b2929b57285cd34e59e570faf6af
-SHA1: 5416dc96bd9d7c0167989efdd3d6f8bd16f2f72c
-SHA256: f2de20fce529be77d8d94ef4459c684af28c6d9fb1aeb7c8ba780122a5d17cd0
+Filename: dists/ubuntu24.04/main/binary-amd64/cirrus-scope_0.1.3-ubuntu24.04_amd64.deb
+Size: 3033572
+MD5sum: cf2232a6408780581fb9c482784b070e
+SHA1: 8253acd625f27002bf5a8b299ca07cd1a8d50be5
+SHA256: 6db121487afb8408c30c972a92849bde71a047c4cf7fed219572c15a54074b9e
 Priority: optional
 Homepage: https://himmelblau-idm.org/
 Description: Diagnostic utility for debugging Entra ID authentication issues via
  libhimmelblau
 
 Package: himmelblau
-Version: 1.2.3-ubuntu24.04
+Version: 1.3.0-ubuntu24.04
 Architecture: amd64
 Maintainer: David Mulder <dmulder@suse.com>
-Installed-Size: 38086
+Installed-Size: 37830
 Depends: libc6 (>= 2.34), libc6 (>= 2.39), libdbus-1-3 (>= 1.9.14), libsqlite3-0 (>= 3.7.15), libssl3t64 (>= 3.0.0), libtss2-esys-3.0.2-0t64 (>= 2.3.1), libtss2-mu-4.0.1-0t64 (>= 3.0.1), libtss2-tctildr0t64 (>= 3.0.1), libudev1 (>= 183), libunistring5 (>= 1.1)
 Recommends: nss-himmelblau, pam-himmelblau, krb5-user
-Filename: dists/ubuntu24.04/main/binary-amd64/himmelblau_1.2.3-ubuntu24.04_amd64.deb
-Size: 9273860
-MD5sum: e749ecadad5af9cf8a69c454853313ca
-SHA1: 7413139946a55e5806d215de3dad577b3f77ec4f
-SHA256: d773d0c77c9044efb55e6f978f722051607a481fa9ee168c0474de15b4a71f1d
+Filename: dists/ubuntu24.04/main/binary-amd64/himmelblau_1.3.0-ubuntu24.04_amd64.deb
+Size: 9207104
+MD5sum: 8b944d63e494a10dc65a10559c1b2c94
+SHA1: 70c373979ac50e2f49d72c9ab1d83919afc38a1f
+SHA256: e8c51e61c8c887270000785c4d1aa57aa63f090974744ce000c364297f6e499f
 Priority: optional
 Homepage: https://github.com/himmelblau-idm/himmelblau
 Description: Himmelblau Authentication Daemon
 
 Package: himmelblau-qr-greeter
-Version: 1.2.3-ubuntu24.04
+Version: 1.3.0-ubuntu24.04
 Architecture: amd64
 Maintainer: David Mulder <dmulder@suse.com>
 Installed-Size: 41
 Depends: gnome-shell
-Filename: dists/ubuntu24.04/main/binary-amd64/himmelblau-qr-greeter_1.2.3-ubuntu24.04_amd64.deb
+Filename: dists/ubuntu24.04/main/binary-amd64/himmelblau-qr-greeter_1.3.0-ubuntu24.04_amd64.deb
 Size: 29620
-MD5sum: e317a19ca436cd8f722db5950ca08351
-SHA1: 85f83a9ab373b192078b32c43931d458fbbf667e
-SHA256: 9fd5b8da5d4f8d4ef862b8b5beea00622ce92e9468c92595bb595ff63c66144d
+MD5sum: befc57a234e2a3b2b2f4563f3e8feca8
+SHA1: 1cee1f089788327e5e308a8eccb45959395c4727
+SHA256: 184594b8db2c222479e76747bc07d29324c849c31927962d9020415aeca463c2
 Priority: optional
 Homepage: https://github.com/himmelblau-idm/himmelblau
 Description: GNOME Shell extension that adds a QR code to authentication prompts when a MS
  DAG URL is detected.
 
 Package: himmelblau-sshd-config
-Version: 1.2.3-ubuntu24.04
+Version: 1.3.0-ubuntu24.04
 Architecture: amd64
 Maintainer: David Mulder <dmulder@suse.com>
 Installed-Size: 4
 Depends: openssh-server
-Filename: dists/ubuntu24.04/main/binary-amd64/himmelblau-sshd-config_1.2.3-ubuntu24.04_amd64.deb
+Filename: dists/ubuntu24.04/main/binary-amd64/himmelblau-sshd-config_1.3.0-ubuntu24.04_amd64.deb
 Size: 1040
-MD5sum: f600a5885a8e717c1fe1c5b57c0def21
-SHA1: e81c8a29de95c809cea3cb3a4d2d15e0e398111b
-SHA256: 7d8f8342cee0d51c9e893b486d4ebbf2ea7f475c34062ac3065bc1224900c99a
+MD5sum: 63c938131b0c87f0380369fe001b1c8c
+SHA1: 7fd3f2064dddd5ba10f89dbc8e7a43df07e21f52
+SHA256: badb6ef897c2b9536f9d6af91d2c1710b1646905f4f2ee9c658cb751262356a0
 Priority: optional
 Homepage: https://github.com/himmelblau-idm/himmelblau
 Description: Himmelblau Required SSHD Configuration
 
 Package: himmelblau-sso
-Version: 1.2.3-ubuntu24.04
+Version: 1.3.0-ubuntu24.04
 Architecture: amd64
 Maintainer: David Mulder <dmulder@suse.com>
 Installed-Size: 5386
 Depends: libc6 (>= 2.34), libc6 (>= 2.39), libdbus-1-3 (>= 1.9.14), libsqlite3-0 (>= 3.5.9), libssl3t64 (>= 3.0.0), libtss2-esys-3.0.2-0t64 (>= 2.3.1), libtss2-mu-4.0.1-0t64 (>= 3.0.1), libtss2-tctildr0t64 (>= 3.0.1), libudev1 (>= 183), libunistring5 (>= 1.1)
-Filename: dists/ubuntu24.04/main/binary-amd64/himmelblau-sso_1.2.3-ubuntu24.04_amd64.deb
-Size: 1306908
-MD5sum: 8b71012377cfcd593479c6106943db61
-SHA1: 64960859cea05156341ceb18e27dc786eb9491a2
-SHA256: bec771acb6c39edcba537691ecbef36cd8a98976e53b8d3077ed725186942f05
+Filename: dists/ubuntu24.04/main/binary-amd64/himmelblau-sso_1.3.0-ubuntu24.04_amd64.deb
+Size: 1307344
+MD5sum: 28e20c954d90c9f0f3daeffbeccf61f0
+SHA1: 4d15c178f579e831ac41ef60dd5380390466b6b5
+SHA256: 87f812c2b2ad9fbfeab50a6a071e6bef887611e1eeedb281cac7e2306a9f911e
 Priority: optional
 Homepage: https://github.com/himmelblau-idm/himmelblau
 Description: Entra ID SSO via Himmelblau Identity Broker
 
 Package: nss-himmelblau
-Version: 1.2.3-ubuntu24.04
+Version: 1.3.0-ubuntu24.04
 Architecture: amd64
 Maintainer: David Mulder <dmulder@suse.com>
 Installed-Size: 808
 Depends: libc6 (>= 2.39), libsqlite3-0 (>= 3.7.15), libssl3t64 (>= 3.0.0), libtss2-esys-3.0.2-0t64 (>= 2.3.1), libtss2-mu-4.0.1-0t64 (>= 3.0.1), libtss2-tctildr0t64 (>= 3.0.1), libudev1 (>= 183), libunistring5 (>= 1.1)
-Filename: dists/ubuntu24.04/main/binary-amd64/nss-himmelblau_1.2.3-ubuntu24.04_amd64.deb
-Size: 304060
-MD5sum: 55d619a7a97db3b0ff6fef60d9e1859c
-SHA1: 74e47c4e8176beeeb467815f434e1ba443b3610f
-SHA256: d9ab5a6e1e33564f1a4703e40612cc5574a83d03c6b3ddf271c0187681369f23
+Filename: dists/ubuntu24.04/main/binary-amd64/nss-himmelblau_1.3.0-ubuntu24.04_amd64.deb
+Size: 303832
+MD5sum: 67e5f8e2408d2b7f2a4b2046a055ee9f
+SHA1: 1fabd1d88fb178f030ab4b6b2040bcb60f5844a5
+SHA256: 003f2c3c9cf94cdb97c5061fc48c443c8f29bb18a6008eca65b56eea7c2653e4
 Priority: optional
 Homepage: https://github.com/himmelblau-idm/himmelblau
 Description: Himmelblau NSS Module
 
 Package: pam-himmelblau
-Version: 1.2.3-ubuntu24.04
+Version: 1.3.0-ubuntu24.04
 Architecture: amd64
 Maintainer: David Mulder <dmulder@suse.com>
 Installed-Size: 10192
 Depends: libc6 (>= 2.39), libcairo-gobject2 (>= 1.10.0), libcairo2 (>= 1.2.4), libgdk-pixbuf-2.0-0 (>= 2.22.0), libglib2.0-0t64 (>= 2.54.0), libgtk-3-0t64 (>= 3.0.0), libjavascriptcoregtk-4.1-0, libpam0g (>= 0.99.7.1), libpango-1.0-0 (>= 1.14.0), libsqlite3-0 (>= 3.7.15), libssl3t64 (>= 3.0.0), libtss2-esys-3.0.2-0t64 (>= 2.3.1), libtss2-mu-4.0.1-0t64 (>= 3.0.1), libtss2-tctildr0t64 (>= 3.0.1), libudev1 (>= 183), libunistring5 (>= 1.1), libwebkit2gtk-4.1-0 (>= 2.39.90)
-Filename: dists/ubuntu24.04/main/binary-amd64/pam-himmelblau_1.2.3-ubuntu24.04_amd64.deb
-Size: 2625208
-MD5sum: 9a6e86a317284a44117565bb9e9b5747
-SHA1: 2275d4e3fe93cc0134e23acfddde0867ffb3b840
-SHA256: 93f91a9728385e77f4293e1022529b9f2404be16fe1b48992091d1e61142fe19
+Filename: dists/ubuntu24.04/main/binary-amd64/pam-himmelblau_1.3.0-ubuntu24.04_amd64.deb
+Size: 2626572
+MD5sum: e6f1b442b60917e8d22a6bb2414a67e1
+SHA1: 0999b7e000fdb2b736f3c8d02f79bb3010d9baa9
+SHA256: ecb61d94a508a0f6b2c11f2ab9e58ffb902b53cbb3516619fd0ee62556b38ce5
 Priority: optional
 Homepage: https://github.com/himmelblau-idm/himmelblau
 Description: Himmelblau PAM Module

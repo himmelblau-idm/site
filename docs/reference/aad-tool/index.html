@@ -288,12 +288,10 @@
 <h3 id="description_7">DESCRIPTION</h3>
 <p>Clear or invalidate the himmelblaud resolver cache. </p>
 <p>By default, this marks all cached user and group entries as stale, forcing them to refresh immediately when next used. </p>
-<p>Specify <strong>--enumerate</strong>, <strong>--idmap</strong>, <strong>--nss</strong>, or <strong>--mapped</strong> to clear these individual caches as well. Omit all these to clear them all. </p>
+<p>Specify <strong>--nss</strong> or <strong>--mapped</strong> to clear these individual caches as well. Omit both these to clear them all. </p>
 <p>Use <code>--full</code> to completely purge the user and group cache entries and unjoin the host from Entra ID. This is irreversible. </p>
 <h3 id="options_6">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>--enumerate</strong> </p>
-<p>Only clear the enumerated users/groups cache <strong>--idmap</strong> </p>
-<p>Only clear the idmap cache (alias for <strong>--enumerate</strong>) <strong>--nss</strong> </p>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>--nss</strong> </p>
 <p>Only clear the nss cache <strong>--mapped</strong> </p>
 <p>Only clear the mapped name cache <strong>--full</strong> </p>
 <p>Force a full cache wipe and unjoin the host from Entra ID. This is probably not what you want <strong>-h</strong>, <strong>--help</strong> </p>
@@ -303,7 +301,7 @@
 <h3 id="description_8">DESCRIPTION</h3>
 <p>(Deprecated) Previously used to mark cache entries as stale for immediate refresh. Now behaves identically to <code>cache-clear</code> and will be removed in a future release </p>
 <h3 id="options_7">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>--enumerate</strong> <strong>--idmap</strong> <strong>--nss</strong> <strong>--mapped</strong> <strong>--full</strong> </p>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>--nss</strong> <strong>--mapped</strong> <strong>--full</strong> </p>
 <h4 id="-h-help_1">-h<strong>, </strong>--help</h4>
 <p>Print help </p>
 <h2 id="subcommand_7">SUBCOMMAND</h2>
@@ -416,38 +414,46 @@
 <p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--schema-client-id</strong> &lt;SCHEMA_CLIENT_ID&gt; <strong>--group-id</strong> &lt;GROUP_ID&gt; <strong>--gid</strong> &lt;GID&gt; <strong>-h</strong>, <strong>--help</strong> </p>
 <p>Print help (see a summary with '-h') </p>
 <h2 id="subcommand_14">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>idmap group-add </em>[<em>OPTIONS</em>] <em>--name &lt;ACCOUNT_ID&gt; --gid &lt;GID&gt;</em></strong> </p>
+<p><strong>aad-tool <em>idmap clear </em>[<em>OPTIONS</em>]</strong> </p>
 <h3 id="description_16">DESCRIPTION</h3>
-<p>Add a static group mapping to the idmap cache. This maps an Entra ID group (by name) to a fixed GID. This can be used to maintain group identity and membership compatibility after moving to Entra ID </p>
+<p>Clear the contents of the idmap static cache </p>
 <h3 id="options_15">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>-g</strong>, <strong>--gid</strong> &lt;GID&gt; </p>
+<p><strong>-d</strong>, <strong>--debug</strong> </p>
 <h4 id="-h-help_3">-h<strong>, </strong>--help</h4>
 <p>Print help </p>
 <h2 id="subcommand_15">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>idmap user-add </em>[<em>OPTIONS</em>] <em>--name &lt;ACCOUNT_ID&gt; --uid &lt;UID&gt; --gid &lt;GID&gt;</em></strong> </p>
+<p><strong>aad-tool <em>idmap group-add </em>[<em>OPTIONS</em>] <em>--object_id &lt;OBJECT_ID&gt; --gid &lt;GID&gt;</em></strong> </p>
 <h3 id="description_17">DESCRIPTION</h3>
-<p>Add a static user mapping to the idmap cache. This maps an Entra ID user (by UPN or SAM-compatible name) to a fixed UID and primary group GID </p>
+<p>Add a static group mapping to the idmap cache. This maps an Entra ID group (by Object Id GUID) to a fixed GID. This can be used to maintain group identity and membership compatibility after moving to Entra ID </p>
 <h3 id="options_16">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>-u</strong>, <strong>--uid</strong> &lt;UID&gt; <strong>-g</strong>, <strong>--gid</strong> &lt;GID&gt; </p>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--object_id</strong> &lt;OBJECT_ID&gt; <strong>-g</strong>, <strong>--gid</strong> &lt;GID&gt; </p>
 <h4 id="-h-help_4">-h<strong>, </strong>--help</h4>
 <p>Print help </p>
 <h2 id="subcommand_16">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>status </em>[<em>OPTIONS</em>]</strong> </p>
+<p><strong>aad-tool <em>idmap user-add </em>[<em>OPTIONS</em>] <em>--name &lt;ACCOUNT_ID&gt; --uid &lt;UID&gt; --gid &lt;GID&gt;</em></strong> </p>
 <h3 id="description_18">DESCRIPTION</h3>
-<p>Check that the himmelblaud daemon is online and able to connect correctly to the himmelblaud server </p>
+<p>Add a static user mapping to the idmap cache. This maps an Entra ID user (by UPN or SAM-compatible name) to a fixed UID and primary group GID </p>
 <h3 id="options_17">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> </p>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>-u</strong>, <strong>--uid</strong> &lt;UID&gt; <strong>-g</strong>, <strong>--gid</strong> &lt;GID&gt; </p>
 <h4 id="-h-help_5">-h<strong>, </strong>--help</h4>
 <p>Print help </p>
 <h2 id="subcommand_17">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>user set-posix-attrs </em>[<em>OPTIONS</em>] <em>--schema-client-id &lt;SCHEMA_CLIENT_ID&gt; --user-id &lt;USER_ID&gt;</em></strong> </p>
+<p><strong>aad-tool <em>status </em>[<em>OPTIONS</em>]</strong> </p>
 <h3 id="description_19">DESCRIPTION</h3>
+<p>Check that the himmelblaud daemon is online and able to connect correctly to the himmelblaud server </p>
+<h3 id="options_18">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> </p>
+<h4 id="-h-help_6">-h<strong>, </strong>--help</h4>
+<p>Print help </p>
+<h2 id="subcommand_18">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>user set-posix-attrs </em>[<em>OPTIONS</em>] <em>--schema-client-id &lt;SCHEMA_CLIENT_ID&gt; --user-id &lt;USER_ID&gt;</em></strong> </p>
+<h3 id="description_20">DESCRIPTION</h3>
 <p>Sets POSIX-related attributes on a specified Entra ID user object. </p>
 <p>This command updates POSIX attributes (<code>uidNumber</code>, <code>gidNumber</code>, <code>unixHomeDirectory</code>, <code>loginShell</code>, and <code>gecos</code>) on the Entra ID user identified by <code>--user-id</code>, which must be a valid Object ID or UPN. </p>
 <p>You must also provide the <code>--schema-client-id</code>, which identifies the application where the extension properties were registered. This value must be the Client ID of the application used for schema registration. The application associated with <code>--schema-client-id</code> must supply <code>User.ReadWrite.All</code> permissions in the tenant. </p>
 <p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command must be run as <code>root</code> to impersonate another user. </p>
 <p>This command must be run from a device that has already been joined to Entra ID. </p>
-<h3 id="options_18">OPTIONS</h3>
+<h3 id="options_19">OPTIONS</h3>
 <p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--schema-client-id</strong> &lt;SCHEMA_CLIENT_ID&gt; <strong>--user-id</strong> &lt;USER_ID&gt; <strong>--uid</strong> &lt;UID&gt; <strong>--gid</strong> &lt;GID&gt; <strong>--home</strong> &lt;HOME&gt; <strong>--shell</strong> &lt;SHELL&gt; <strong>--gecos</strong> &lt;GECOS&gt; <strong>-h</strong>, <strong>--help</strong> </p>
 <p>Print help (see a summary with '-h') </p>
 <h2 id="see-also">SEE ALSO</h2>

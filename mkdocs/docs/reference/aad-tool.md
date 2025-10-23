@@ -216,17 +216,13 @@ Clear or invalidate the himmelblaud resolver cache.
 
 By default, this marks all cached user and group entries as stale, forcing them to refresh immediately when next used. 
 
-Specify **--enumerate**, **--idmap**, **--nss**, or **--mapped** to clear these individual caches as well. Omit all these to clear them all. 
+Specify **--nss** or **--mapped** to clear these individual caches as well. Omit both these to clear them all. 
 
 Use `--full` to completely purge the user and group cache entries and unjoin the host from Entra ID. This is irreversible. 
 
 ### OPTIONS
 
-**-d**, **--debug** **--enumerate** 
-
-Only clear the enumerated users/groups cache **--idmap** 
-
-Only clear the idmap cache (alias for **--enumerate**) **--nss** 
+**-d**, **--debug** **--nss** 
 
 Only clear the nss cache **--mapped** 
 
@@ -246,7 +242,7 @@ Print help (see a summary with '-h')
 
 ### OPTIONS
 
-**-d**, **--debug** **--enumerate** **--idmap** **--nss** **--mapped** **--full** 
+**-d**, **--debug** **--nss** **--mapped** **--full** 
 
 
 #### -h**, **--help 
@@ -430,15 +426,32 @@ Print help (see a summary with '-h')
 
 ## SUBCOMMAND
 
-**aad-tool _idmap group-add _[_OPTIONS_] _--name &lt;ACCOUNT_ID&gt; --gid &lt;GID&gt;_** 
+**aad-tool _idmap clear _[_OPTIONS_]** 
 
 ### DESCRIPTION
 
-Add a static group mapping to the idmap cache. This maps an Entra ID group (by name) to a fixed GID. This can be used to maintain group identity and membership compatibility after moving to Entra ID 
+Clear the contents of the idmap static cache 
 
 ### OPTIONS
 
-**-d**, **--debug** **-D**, **--name** &lt;ACCOUNT_ID&gt; **-g**, **--gid** &lt;GID&gt; 
+**-d**, **--debug** 
+
+
+#### -h**, **--help 
+
+  Print help 
+
+## SUBCOMMAND
+
+**aad-tool _idmap group-add _[_OPTIONS_] _--object_id &lt;OBJECT_ID&gt; --gid &lt;GID&gt;_** 
+
+### DESCRIPTION
+
+Add a static group mapping to the idmap cache. This maps an Entra ID group (by Object Id GUID) to a fixed GID. This can be used to maintain group identity and membership compatibility after moving to Entra ID 
+
+### OPTIONS
+
+**-d**, **--debug** **-D**, **--object_id** &lt;OBJECT_ID&gt; **-g**, **--gid** &lt;GID&gt; 
 
 
 #### -h**, **--help 

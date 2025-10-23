@@ -289,7 +289,7 @@ auth        sufficient    pam_himmelblau.so ignore_unknown_user
 auth        required      pam_deny.so
 </code></pre>
 <blockquote>
-<p>💡 For Passwordless login, move Himmelblau <strong>above</strong> <code>pam_unix.so</code> to avoid fallback password prompts.</p>
+<p>💡 For Passwordless login, move pam_himmelblau.so <strong>above</strong> <code>pam_unix.so</code>in the pam <strong>auth</strong> stack to avoid fallback password prompts.</p>
 </blockquote>
 <hr />
 <h4 id="example-etcpamdcommon-account">Example: <code>/etc/pam.d/common-account</code></h4>

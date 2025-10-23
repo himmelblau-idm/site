@@ -111,7 +111,7 @@ auth        sufficient    pam_himmelblau.so ignore_unknown_user
 auth        required      pam_deny.so
 ```
 
-> 💡 For Passwordless login, move Himmelblau **above** `pam_unix.so` to avoid fallback password prompts.
+> 💡 For Passwordless login, move pam_himmelblau.so **above** `pam_unix.so`in the pam **auth** stack to avoid fallback password prompts.
 
 ---
 

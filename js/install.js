@@ -1,132 +1,261 @@
-function addCopyButtons() {
-  document.querySelectorAll('#download-links pre').forEach((pre) => {
-    // Skip if already wrapped
-    if (pre.parentElement.classList.contains('code-block')) return;
-
-    // Create wrapper
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('code-block');
-    pre.parentNode.insertBefore(wrapper, pre);
-    wrapper.appendChild(pre);
-
-    // Create copy button
-    const button = document.createElement('button');
-    button.className = 'copy-btn';
-    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M10 1.5A1.5 1.5 0 0 1 11.5 3v9A1.5 1.5 0 0 1 10 13.5H4A1.5 1.5 0 0 1 2.5 12V3A1.5 1.5 0 0 1 4 1.5h6zm0 1H4a.5.5 0 0 0-.5.5v9c0 .28.22.5.5.5h6a.5.5 0 0 0 .5-.5V3a.5.5 0 0 0-.5-.5zM13.5 4a.5.5 0 0 1 .5.5v8A1.5 1.5 0 0 1 12.5 14h-6a.5.5 0 0 1 0-1h6a.5.5 0 0 0 .5-.5v-8a.5.5 0 0 1 .5-.5z"/></svg>';
-    wrapper.appendChild(button);
-
-    // Copy logic
-    button.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(pre.textContent.trim());
-        button.classList.add('copied');
-        setTimeout(() => button.classList.remove('copied'), 2000);
-      } catch (err) {
-        console.error('Copy failed:', err);
-      }
-    });
-  });
-}
-
 document.getElementById('linux-distro').addEventListener('change', function () {
-  provideRepoInstructions();
+	provideLinks(); // Call the function directly when the selection changes
 });
 
-function provideRepoInstructions() {
-  const distro = document.getElementById('linux-distro').value;
-  const linksContainer = document.getElementById('download-links');
-  linksContainer.innerHTML = ''; // clear previous content
+async function fetchLatestVersion(apiUrl) {
+	try {
+		const response = await fetch(apiUrl);
+		if (!response.ok) {
+			throw new Error('Failed to fetch the latest release info');
+		}
+		const data = await response.json();
+		return data.tag_name; // Assuming the tag name is the version number
+	} catch (error) {
+		console.error('Error fetching release data:', error);
+		return null; // Handle the error appropriately in your production environment
+	}
+}
 
-  if (!distro) {
-    linksContainer.innerHTML = 'Please select a valid distribution.';
-    return;
-  }
+async function provideLinks() {
+	const version = await fetchLatestVersion(
+		'https://api.github.com/repos/himmelblau-idm/himmelblau/releases/latest',
+	); // Get the latest version number
+	if (!version) {
+		document.getElementById('download-links').innerHTML =
+			'Failed to retrieve the latest version.';
+		return;
+	}
+	const cirrus_scope_version = await fetchLatestVersion(
+		'https://api.github.com/repos/himmelblau-idm/cirrus-scope/releases/latest',
+	);
+	if (!cirrus_scope_version) {
+		document.getElementById('download-links').innerHTML =
+			'Failed to retrieve the latest cirrus-scope version.';
+		return;
+	}
 
-  const baseUrl = 'https://packages.himmelblau-idm.org/stable/latest';
-  const gpgKeyUrl = 'https://packages.himmelblau-idm.org/himmelblau.asc';
+	const distro = document.getElementById('linux-distro').value;
+	const linksContainer = document.getElementById('download-links');
+	linksContainer.innerHTML = ''; // Clear previous links
 
-  const title = document.createElement('h2');
-  title.textContent = 'Installing Himmelblau';
-  linksContainer.appendChild(title);
+	if (!distro) {
+		linksContainer.innerHTML = 'Please select a valid distribution.';
+		return;
+	}
 
-  const intro = document.createElement('p');
-  intro.textContent =
-    'Himmelblau can be installed directly from the official repositories. These repositories provide the latest stable builds for your Linux distribution.';
-  linksContainer.appendChild(intro);
+	const configSection = document.getElementById('configuration');
+	if (!distro) {
+		configSection.style.display = 'none';
+		linksContainer.innerHTML = 'Please select a valid distribution.';
+		return;
+	}
 
-  const updateSection = document.createElement('h3');
-  updateSection.textContent = '1. Update your system';
-  linksContainer.appendChild(updateSection);
+	configSection.style.display = 'block';
 
-  let updateCmd = '';
-  if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
-    updateCmd = 'sudo apt update && sudo apt upgrade';
-  } else if (distro.startsWith('rocky') || distro.startsWith('fedora') || distro === 'rawhide') {
-    updateCmd = 'sudo dnf update';
-  } else if (distro.startsWith('sle') || distro === 'tumbleweed') {
-    updateCmd = 'sudo zypper update';
-  }
+	const baseUrl =
+		'https://github.com/himmelblau-idm/himmelblau/releases/latest/download/';
+	const packages = [
+		'himmelblau',
+		'himmelblau-sshd-config',
+		'himmelblau-sso',
+		'nss-himmelblau',
+		'pam-himmelblau',
+		'himmelblau-qr-greeter',
+	];
+	const cirrus_scope_base_url =
+		'https://github.com/himmelblau-idm/cirrus-scope/releases/latest/download/';
 
-  const updatePre = document.createElement('pre');
-  updatePre.textContent = updateCmd;
-  linksContainer.appendChild(updatePre);
+	const list = document.createElement('ul');
+	list.classList.add('download-list');
+	packages.forEach((pkg) => {
+		const filename =
+			distro === 'debian12' || distro.startsWith('ubuntu')
+				? `${pkg}_${version}-${distro}_amd64.deb`
+				: `${pkg}-${version}-1.x86_64-${distro}.rpm`;
+		const link = document.createElement('a');
+		link.href = baseUrl + filename;
+		link.textContent = filename;
+		link.target = '_blank';
 
-  const repoSection = document.createElement('h3');
-  repoSection.textContent = '2. Add the Himmelblau repository and import the signing key';
-  linksContainer.appendChild(repoSection);
+		if (pkg === 'himmelblau') {
+			link.addEventListener('click', () => {
+				if (typeof report_conversion === 'function') {
+					report_conversion(window.location.href);
+				}
+			});
+		}
 
-  if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
-    const steps = [
-      `curl -fsSL ${gpgKeyUrl} | gpg --dearmor | sudo tee /usr/share/keyrings/himmelblau.gpg > /dev/null`,
-      `echo "deb [signed-by=/usr/share/keyrings/himmelblau.gpg] ${baseUrl}/deb/${distro} ./ " | sudo tee /etc/apt/sources.list.d/himmelblau.list`,
-      'sudo apt update'
-    ];
-    steps.forEach((cmd) => {
-      const pre = document.createElement('pre');
-      pre.textContent = cmd;
-      linksContainer.appendChild(pre);
-    });
-  } else if (distro.startsWith('rocky') || distro.startsWith('fedora') || distro === 'rawhide') {
-    const cmd1 = `sudo rpm --import ${gpgKeyUrl}`;
-    const cmd2 = `sudo dnf config-manager --add-repo=${baseUrl}/rpm/${distro}`;
-    const cmd3 = 'sudo dnf makecache';
-    [cmd1, cmd2, cmd3].forEach((cmd) => {
-      const pre = document.createElement('pre');
-      pre.textContent = cmd;
-      linksContainer.appendChild(pre);
-    });
-  } else if (distro.startsWith('sle') || distro === 'tumbleweed') {
-    const cmd1 = `sudo rpm --import ${gpgKeyUrl}`;
-    const cmd2 = `sudo zypper addrepo ${baseUrl}/rpm/${distro} himmelblau`;
-    const cmd3 = 'sudo zypper refresh';
-    [cmd1, cmd2, cmd3].forEach((cmd) => {
-      const pre = document.createElement('pre');
-      pre.textContent = cmd;
-      linksContainer.appendChild(pre);
-    });
-  }
+		const listItem = document.createElement('li');
+		listItem.appendChild(link);
+		list.appendChild(listItem);
+	});
+	const cirrus_scope_filename =
+		distro === 'debian12' || distro.startsWith('ubuntu')
+			? `cirrus-scope_${cirrus_scope_version}-${distro}_amd64.deb`
+			: `cirrus-scope-${cirrus_scope_version}-1.x86_64-${distro}.rpm`;
+	const link = document.createElement('a');
+	link.href = cirrus_scope_base_url + cirrus_scope_filename;
+	link.textContent = cirrus_scope_filename;
+	link.target = '_blank';
 
-  const installSection = document.createElement('h3');
-  installSection.textContent = '3. Install Himmelblau';
-  linksContainer.appendChild(installSection);
+	const listItem = document.createElement('li');
+	listItem.appendChild(link);
+	list.appendChild(listItem);
 
-  const installCmd = document.createElement('pre');
-  if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
-    installCmd.textContent =
-      'sudo apt install -y himmelblau pam-himmelblau nss-himmelblau himmelblau-qr-greeter';
-  } else if (distro.startsWith('sle') || distro.startsWith('tumbleweed')) {
-    installCmd.textContent =
-      'sudo zypper in -y himmelblau pam-himmelblau nss-himmelblau himmelblau-qr-greeter';
-  } else {
-    installCmd.textContent =
-      'sudo dnf install -y himmelblau pam-himmelblau nss-himmelblau himmelblau-qr-greeter';
-  }
-  linksContainer.appendChild(installCmd);
+	linksContainer.appendChild(list);
 
-  const opt = document.createElement('p');
-  opt.textContent =
-    'Optional packages: himmelblau-sshd-config (for SSH integration) and himmelblau-sso (for browser single sign-on).';
-  linksContainer.appendChild(opt);
+	const title = document.createElement('h2');
+	title.textContent = 'Installing Himmelblau';
+	linksContainer.appendChild(title);
 
-  addCopyButtons();
+	const item1 = document.createElement('p');
+	item1.textContent =
+		'Ensure the system is updated and you have administrative access:';
+	linksContainer.appendChild(item1);
+
+	if (distro.startsWith('sle') || distro === 'tumbleweed') {
+		const cmd1 = document.createElement('code');
+		cmd1.textContent = 'sudo zypper update';
+		const pre = document.createElement('pre');
+		pre.appendChild(cmd1);
+		linksContainer.appendChild(pre);
+	} else if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
+		const cmd1 = document.createElement('code');
+		cmd1.textContent = 'sudo apt update && sudo apt upgrade';
+		const pre = document.createElement('pre');
+        pre.appendChild(cmd1);
+		linksContainer.appendChild(pre);
+	} else if (
+		distro.startsWith('rocky') ||
+		distro === 'rawhide' ||
+		distro.startsWith('fedora')
+	) {
+		const cmd1 = document.createElement('code');
+		cmd1.textContent = 'sudo dnf update';
+		const pre = document.createElement('pre');
+        pre.appendChild(cmd1);
+		linksContainer.appendChild(pre);
+	}
+
+	const item2 = document.createElement('p');
+	if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
+		item2.textContent =
+			'Import the repo signing key, add the Himmelblau repo, and install the packages:';
+	} else {
+		item2.textContent =
+			'Download the packages from the links above, import the package signing key, and install the packages:';
+	};
+	linksContainer.appendChild(item2);
+
+	if (distro.startsWith('sle') || distro === 'tumbleweed') {
+		// GPG key import command for Zypper
+		const keyCmd = document.createElement('code');
+		keyCmd.textContent =
+			'sudo rpm --import https://himmelblau-idm.org/himmelblau.asc';
+		const pre = document.createElement('pre');
+        pre.appendChild(keyCmd);
+		linksContainer.appendChild(pre);
+
+		const cmd1 = document.createElement('code');
+		cmd1.textContent = 'sudo zypper install ';
+		packages.forEach((pkg) => {
+			const filename = `${pkg}-${version}-1.x86_64-${distro}.rpm`;
+			cmd1.textContent += './' + filename + ' ';
+		});
+		const pre2 = document.createElement('pre');
+        pre2.appendChild(cmd1);
+		linksContainer.appendChild(pre2);
+	} else if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
+		// GPG key install for APT
+		const keyCmd = document.createElement('code');
+		keyCmd.textContent =
+			'curl -fsSL https://himmelblau-idm.org/himmelblau.asc | gpg --dearmor | sudo tee /usr/share/keyrings/himmelblau.gpg > /dev/null';
+		const pre = document.createElement('pre');
+        pre.appendChild(keyCmd);
+        linksContainer.appendChild(pre);
+
+		const repoAdd = document.createElement('code');
+		repoAdd.textContent =
+			`echo "deb [signed-by=/usr/share/keyrings/himmelblau.gpg] https://himmelblau-idm.org/deb ${distro} main" | sudo tee /etc/apt/sources.list.d/himmelblau.list`;
+		const pre2 = document.createElement('pre');
+        pre2.appendChild(repoAdd);
+		linksContainer.appendChild(pre2);
+
+		const cmd1 = document.createElement('code');
+		cmd1.textContent = 'sudo apt install -y ';
+		packages.forEach((pkg) => {
+			cmd1.textContent += `${pkg} `;
+		});
+		const pre3 = document.createElement('pre');
+        pre3.appendChild(cmd1);
+        linksContainer.appendChild(pre3);
+
+		const p = document.createElement('p');
+		p.innerHTML = 'See the <a href="../deb_mirrors">mirrors</a> page for additional details.';
+		linksContainer.appendChild(p);
+	} else if (
+		distro.startsWith('rocky') ||
+		distro === 'rawhide' ||
+		distro.startsWith('fedora')
+	) {
+		// GPG key import command for DNF/YUM-based systems
+		const keyCmd = document.createElement('code');
+		if (distro === 'rocky8') {
+			keyCmd.textContent =
+				'sudo rpm --import https://himmelblau-idm.org/himmelblau-el8.asc';
+		} else {
+			keyCmd.textContent =
+				'sudo rpm --import https://himmelblau-idm.org/himmelblau.asc';
+		}
+		const pre = document.createElement('pre');
+        pre.appendChild(keyCmd);
+        linksContainer.appendChild(pre);
+
+		const cmd1 = document.createElement('code');
+		cmd1.textContent = 'sudo dnf install ';
+		packages.forEach((pkg) => {
+			const filename = `${pkg}-${version}-1.x86_64-${distro}.rpm`;
+			cmd1.textContent += './' + filename + ' ';
+		});
+		const pre2 = document.createElement('pre');
+        pre2.appendChild(cmd1);
+        linksContainer.appendChild(pre2);
+	}
+
+	const opt_title = document.createElement('h3');
+	opt_title.textContent = 'Optional Packages';
+	linksContainer.appendChild(opt_title);
+
+	const sshd_pkg = 'himmelblau-sshd-config';
+	const sshd_filename =
+		distro === 'debian12' || distro.startsWith('ubuntu')
+			? `${sshd_pkg}_${version}-${distro}_amd64.deb`
+			: `${sshd_pkg}-${version}-1.x86_64-${distro}.rpm`;
+	const sso_pkg = 'himmelblau-sso';
+	const sso_filename =
+		distro === 'debian12' || distro.startsWith('ubuntu')
+			? `${sso_pkg}_${version}-${distro}_amd64.deb`
+			: `${sso_pkg}-${version}-1.x86_64-${distro}.rpm`;
+	const item3 = document.createElement('p');
+	item3.textContent = `You need only install the package ${sshd_filename} if the host will require ssh access, and need only install the ${sso_filename} package if you require Firefox and Chrome Single-Sign-On.`;
+	linksContainer.appendChild(item3);
+
+	if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
+		const krb5_title = document.createElement('h3');
+		krb5_title.textContent = 'krb5.conf Configuration';
+		linksContainer.appendChild(krb5_title);
+
+		const item = document.createElement('p');
+		item.textContent =
+			"If you're prompted to configure your krb5.conf with a realm during installation, set this to your on-prem synced local Active Directory realm. If you do not have an on-prem synced Active Directory, you may leave this realm field empty. After installation, you must ensure that your krb5.conf contains an `includedir  /etc/krb5.conf.d` entry. Himmelblau will automatically configure your cloud realm in the /etc/krb5.conf.d directory.";
+		linksContainer.appendChild(item);
+	}
+
+	const debug_title = document.createElement('h3');
+	debug_title.textContent = 'Debugging Himmelblau';
+	linksContainer.appendChild(debug_title);
+
+	const item4 = document.createElement('p');
+	item4.textContent = `The purpose of the package ${cirrus_scope_filename} is for debugging authentication scenarios in Entra Id via libhimmelblau. A developer may request that you install this package for collecting network packet captures. See the cirrus-scope man page for instructions.`;
+	linksContainer.appendChild(item4);
 }

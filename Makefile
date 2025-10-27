@@ -3,12 +3,6 @@ all: site docs deb
 site:
 	make -C main
 
-deb:
-	pushd deb; make; popd
-
-rpm:
-	pushd rpm; make; popd
-
 docs:
 	make -C mkdocs
 

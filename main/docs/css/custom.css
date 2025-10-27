@@ -191,3 +191,68 @@ body[data-home="true"] .cta-list {
   font-size: 1.5rem;
   line-height: 3.2rem;
 }
+
+pre {
+  overflow-x: auto;
+  white-space: pre;
+  padding: 1em;
+  background-color: #f6f8fa;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font-size: 0.9em;
+  position: relative; /* needed for absolute button placement */
+}
+
+/* Optional: better scrollbar visibility on dark themes */
+pre::-webkit-scrollbar {
+  height: 8px;
+}
+pre::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.code-block {
+  position: relative;
+  margin: 1em 0;
+}
+
+/* Scrollable <pre> itself */
+.code-block pre {
+  overflow-x: auto;
+  white-space: pre;
+  padding: 1em;
+  background-color: #f6f8fa;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font-size: 0.9em;
+  margin: 0;
+}
+
+/* Copy button stays fixed in top-right of wrapper */
+.copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: none;
+  border: none;
+  padding: 4px;
+  font-size: 0.9em;
+  color: #6e7781;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.code-block:hover .copy-btn {
+  opacity: 1; /* show only on hover */
+}
+
+.copy-btn:hover {
+  color: #24292f;
+}
+
+.copy-btn.copied::before {
+  content: "✓";
+  font-weight: bold;
+}

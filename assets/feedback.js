@@ -1,7 +1,7 @@
 (function () {
   const FEEDBACK_URL =
-    "https://feedbackportal.microsoft.com/feedback/idea/b7970846-5195-f011-aa44-6045bd7f402a";
-  const STORAGE_KEY = "hb_hide_feedback_fab_v1";
+    "https://sambaxp.org/#Registration";
+  const STORAGE_KEY = "hb_hide_feedback_fab_v2";
 
   // Respect prior dismissal
   try { if (localStorage.getItem(STORAGE_KEY) === "1") return; } catch (e) {}
@@ -12,7 +12,7 @@
     <a class="hb-fab__link"
        href="${FEEDBACK_URL}"
        target="_blank" rel="noopener noreferrer">
-      <span class="hb-fab__text">📢 Petition Microsoft: Shared PC + DEM on Intune Linux</span>
+      <span class="hb-fab__text">📢 Register to join us at sambaXP April 2026!
     </a>
     <button class="hb-fab__close" type="button" aria-label="Hide this message">×</button>
   `;

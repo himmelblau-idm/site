@@ -5,8 +5,8 @@
  **************************************************************************/
 const REPO_SUPPORT = {
   stable: {
-    include: [],                   // [] => allow all by default (except exclude)
-    exclude: ['debian13', 'sle16'],            // example: sle16 not yet in stable
+    include: [],
+    exclude: ['rawhide', 'debian13', 'sle16'],
   },
   nightly: {
     include: [],

@@ -113,19 +113,19 @@ function provideRepoInstructions() {
   const installCmd = document.createElement('pre');
   if (distro.startsWith('ubuntu') || distro.startsWith('debian')) {
     installCmd.textContent =
-      'sudo apt install -y himmelblau pam-himmelblau nss-himmelblau himmelblau-qr-greeter';
+      'sudo apt install -y himmelblau pam-himmelblau nss-himmelblau';
   } else if (distro.startsWith('sle') || distro.startsWith('tumbleweed')) {
     installCmd.textContent =
-      'sudo zypper in -y himmelblau pam-himmelblau nss-himmelblau himmelblau-qr-greeter';
+      'sudo zypper in -y himmelblau pam-himmelblau nss-himmelblau';
   } else {
     installCmd.textContent =
-      'sudo dnf install -y himmelblau pam-himmelblau nss-himmelblau himmelblau-qr-greeter';
+      'sudo dnf install -y himmelblau pam-himmelblau nss-himmelblau';
   }
   linksContainer.appendChild(installCmd);
 
   const opt = document.createElement('p');
   opt.textContent =
-    'Optional packages: himmelblau-sshd-config (for SSH integration) and himmelblau-sso (for browser single sign-on).';
+    'Optional packages: himmelblau-sshd-config (for SSH integration), himmelblau-qr-greeter (for DAG QR integration in GDM), and himmelblau-sso (for browser single sign-on).';
   linksContainer.appendChild(opt);
 
   addCopyButtons();

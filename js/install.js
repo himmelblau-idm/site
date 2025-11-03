@@ -6,11 +6,11 @@
 const REPO_SUPPORT = {
   stable: {
     include: [],
-    exclude: ['rawhide', 'debian13', 'sle16'],
+    exclude: ['rawhide', 'debian13', 'sle16', 'fedora43'],
   },
   nightly: {
     include: [],
-    exclude: [],
+    exclude: ['fedora41'],
   },
 };
 

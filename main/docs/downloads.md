@@ -12,6 +12,7 @@ Please select your Linux distribution:
     <option value="" selected>Select a distribution</option>
 	<option value="fedora41">Fedora 41</option>
 	<option value="fedora42">Fedora 42</option>
+    <option value="fedora43">Fedora 43</option>
 	<option value="rawhide">Fedora Rawhide</option>
 	<option value="rocky8">Rocky Linux 8</option>
 	<option value="rocky9">Rocky Linux 9</option>

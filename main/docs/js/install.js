@@ -124,9 +124,8 @@ async function provideRepoInstructions() {
 
   if (isDeb(distro)) {
     [
-      `curl -fsSL ${gpgKeyUrl} | gpg --dearmor | sudo tee /usr/share/keyrings/himmelblau.gpg > /dev/null`,
-      `echo "deb [signed-by=/usr/share/keyrings/himmelblau.gpg] ${baseUrl}/deb/${distro} ./ " | sudo tee /etc/apt/sources.list.d/himmelblau.list`,
-      'sudo apt update'
+      `sudo apt install curl && curl -fsSL ${gpgKeyUrl} | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/himmelblau.gpg`,
+      `sudo add-apt-repository "deb [arch=amd64] ${baseUrl}/deb/${distro}/ ./"`
     ].forEach(cmd => linksContainer.appendChild(Object.assign(document.createElement('pre'), { textContent: cmd })));
   } else if (distro.startsWith('sle') || distro === 'tumbleweed') {
     [

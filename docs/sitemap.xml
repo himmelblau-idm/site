@@ -2,122 +2,122 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://himmelblau-idm.org/docs/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/about/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/architecture/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/configuration/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/ecosystem/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/installation/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/integration/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/introduction/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/registration/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/advanced/Cloud-Kerberos-Trust-for-Linux/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/advanced/Design/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/advanced/Device-Compliance-Settings-for-Linux-in-Intune-with-Himmelblau/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/advanced/MS-specs-which-Himmelblau-uses/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/advanced/Syncing-Active-Directory-with-Azure-Entra-ID/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/advanced/Tray-Icons-for-o365-on-GNOME-Shell/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/reference/aad-tool/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/reference/himmelblau-conf/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/reference/himmelblaud/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/reference/himmelblaud_tasks/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/reference/pam_himmelblau/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
     <url>
          <loc>https://himmelblau-idm.org/docs/troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-05</lastmod>
     </url>
 </urlset>

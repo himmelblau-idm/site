@@ -9,7 +9,7 @@ description: A hands-on technical walkthrough for setting up Himmelblau from scr
 
 Himmelblau is an open-source authentication framework that provides Microsoft's Azure Entra ID login for Linux systems. Its seamless and simple installation makes it easy to integrate Linux systems into Azure Entra ID and Intune.  Both the enforcement of configured policies and Hello PIN support are provided for Linux systems. Himmelblau also offers support for Office 365 single sign-on (SSO) and multi-factor authentication (MFA). Debian, Suse, and RedHat distributions are supported.
 
-## Techhnical detals
+## Technical details
 
 *Azure Entra ID* was formerly known as *Azure Active Directory* and manages all user login data in the cloud. There are no longer any local domain controllers; all login information is managed centrally in the cloud. Clients no longer need to be explicitly added to the domain; a client is added when any user logs in for the first time. However, unlike a local login to a local Active Directory, a user registration is only valid on the client on which the user has registered. If a user wants to use a different client, they must first re-register there. To do this, they always need their Entra ID password, which they generated when they first logged in. However, users can generate different PINs on each client. An administrator can also require PINs of different lengths for different clients.
 

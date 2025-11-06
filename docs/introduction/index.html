@@ -53,7 +53,7 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">A Practical Introduction to Himmelblau</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#techhnical-detals">Techhnical detals</a>
+    <li class="toctree-l2"><a class="reference internal" href="#technical-details">Technical details</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#core-features-and-benefits">Core features and benefits</a>
     </li>
@@ -186,7 +186,7 @@
                 <h1 id="a-practical-introduction-to-himmelblau">A Practical Introduction to Himmelblau</h1>
 <p><em>by <a href="https://www.kania-online.de">Stefan Kania</a></em></p>
 <p>Himmelblau is an open-source authentication framework that provides Microsoft's Azure Entra ID login for Linux systems. Its seamless and simple installation makes it easy to integrate Linux systems into Azure Entra ID and Intune.  Both the enforcement of configured policies and Hello PIN support are provided for Linux systems. Himmelblau also offers support for Office 365 single sign-on (SSO) and multi-factor authentication (MFA). Debian, Suse, and RedHat distributions are supported.</p>
-<h2 id="techhnical-detals">Techhnical detals</h2>
+<h2 id="technical-details">Technical details</h2>
 <p><em>Azure Entra ID</em> was formerly known as <em>Azure Active Directory</em> and manages all user login data in the cloud. There are no longer any local domain controllers; all login information is managed centrally in the cloud. Clients no longer need to be explicitly added to the domain; a client is added when any user logs in for the first time. However, unlike a local login to a local Active Directory, a user registration is only valid on the client on which the user has registered. If a user wants to use a different client, they must first re-register there. To do this, they always need their Entra ID password, which they generated when they first logged in. However, users can generate different PINs on each client. An administrator can also require PINs of different lengths for different clients.</p>
 <p>Azure Entra ID is initially only a service for authentication on Windows clients. It is only through the development of Himmelblau that users with Linux clients can also authenticate with their Intra ID. This requires the authentication processes developed by Microsoft to be implemented on Linux. The extent of the problem that arises can be described here based on the very first login of a new user to a new client:</p>
 <p>When an administrator hands a user a laptop configured with Himmelblau and the user wants to log in from this device for the first time, this is possible. The only problem is that they have to authenticate with a DAG (Device Authorization Grant). Anyone who has ever authenticated with a video service such as Netflix is already familiar with this DAG authentication. With a DAG, the user is shown a code and a URL, and authentication with this information must then be performed from another device. </p>

@@ -35,6 +35,7 @@ Please select your Linux distribution:
 	<option value="ubuntu24.04">Ubuntu 24.04</option>
 	<option value="ubuntu22.04">Linux Mint 21.3</option>
 	<option value="ubuntu24.04">Linux Mint 22</option>
+    <option value="nixos">NixOS</option>
 </select>
 <select id="channel">
     <option value="stable" selected>Stable</option>

@@ -1,6 +1,7 @@
 nav:
   - Home: https://himmelblau-idm.org/
   - Quickstart: index.md
+  - A Practical Introduction to Himmelblau: introduction.md
   - Installation: installation.md
   - Configuration: configuration.md
   - Device Registration: registration.md

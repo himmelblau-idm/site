@@ -2,8 +2,6 @@ site_name: Himmelblau Documentation
 theme:
   name: readthedocs
   custom_dir: overrides
-extra_javascript:
-  - js/distro_list.js
 plugins:
   - search
   - awesome-pages

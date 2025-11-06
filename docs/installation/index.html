@@ -61,21 +61,17 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#supported-distributions">Supported Distributions</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#installation-from-prebuilt-packages">Installation from Prebuilt Packages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#debian-ubuntu">Debian &amp; Ubuntu</a>
+    <li class="toctree-l3"><a class="reference internal" href="#prebuilt-packages-recommended">Prebuilt Packages (Recommended)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#building-from-source-advanced-developer-use">Building from Source (Advanced / Developer Use)</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#optional-debian-repositories">Optional Debian repositories</a>
+    <li class="toctree-l4"><a class="reference internal" href="#steps">Steps</a>
     </li>
         </ul>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#rhel-rocky-fedora">RHEL, Rocky, Fedora</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#suse-linux-enterprise-sle-opensuse">SUSE Linux Enterprise (SLE) / openSUSE</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#from-source">From Source</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#steps">Steps:</a>
+    <li class="toctree-l3"><a class="reference internal" href="#need-another-distro">Need another distro?</a>
     </li>
         </ul>
     </li>
@@ -188,79 +184,79 @@
 <hr />
 <h2 id="supported-distributions">Supported Distributions</h2>
 <div id="supported-distros">
-  Loading supported distributions...
+<p>The following distributions are currently packaged by the Himmelblau project:</p>
+<table>
+  <thead>
+    <tr><th>Distribution</th><th>Version</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Fedora</td><td>41</td></tr>
+    <tr><td>Fedora</td><td>42</td></tr>
+    <tr><td>Fedora</td><td>43</td></tr>
+    <tr><td>Fedora</td><td>Rawhide</td></tr>
+    <tr><td>Rocky Linux</td><td>8</td></tr>
+    <tr><td>Rocky Linux</td><td>9</td></tr>
+    <tr><td>Rocky Linux</td><td>10</td></tr>
+    <tr><td>Red Hat Enterprise Linux</td><td>8</td></tr>
+    <tr><td>Red Hat Enterprise Linux</td><td>9</td></tr>
+    <tr><td>Red Hat Enterprise Linux</td><td>10</td></tr>
+    <tr><td>Oracle Linux</td><td>8</td></tr>
+    <tr><td>Oracle Linux</td><td>9</td></tr>
+    <tr><td>Oracle Linux</td><td>10</td></tr>
+    <tr><td>SUSE Linux Enterprise</td><td>15 SP6</td></tr>
+    <tr><td>SUSE Linux Enterprise</td><td>15 SP7</td></tr>
+    <tr><td>SUSE Linux Enterprise</td><td>16</td></tr>
+    <tr><td>openSUSE Leap</td><td>15.6</td></tr>
+    <tr><td>openSUSE Leap</td><td>16</td></tr>
+    <tr><td>openSUSE Tumbleweed</td><td></td></tr>
+    <tr><td>Debian</td><td>12</td></tr>
+    <tr><td>Debian</td><td>13</td></tr>
+    <tr><td>Ubuntu</td><td>22.04</td></tr>
+    <tr><td>Ubuntu</td><td>24.04</td></tr>
+    <tr><td>Linux Mint</td><td>21.3</td></tr>
+    <tr><td>Linux Mint</td><td>22</td></tr>
+    <tr><td>NixOS</td><td></td></tr>
+  </tbody>
+</table>
 </div>
 
 <hr />
-<h2 id="installation-from-prebuilt-packages">Installation from Prebuilt Packages</h2>
-<p><a href="https://himmelblau-idm.org/downloads.html">Download the packages for your distribution</a>, and install them using your flavor of package manager:</p>
-<h3 id="debian-ubuntu">Debian &amp; Ubuntu</h3>
-<ol>
-<li>
-<p><a href="https://himmelblau-idm.org/downloads.html">Download</a> the <code>.deb</code> packages.</p>
-</li>
-<li>
-<p>Install:</p>
-</li>
-</ol>
-<pre><code class="language-bash">sudo apt install -y ./himmelblau_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./himmelblau-sshd-config_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./himmelblau-sso_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./nss-himmelblau_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./pam-himmelblau_&lt;version&gt;-&lt;distro&gt;_amd64.deb ./himmelblau-qr-greeter_&lt;version&gt;-&lt;distro&gt;_amd64.deb 
-</code></pre>
-<h4 id="optional-debian-repositories">Optional Debian repositories</h4>
-<p>You can optionally install the latest package from the Himmelblau debian repositories, as described on the downloads page.</p>
-<h3 id="rhel-rocky-fedora">RHEL, Rocky, Fedora</h3>
-<ol>
-<li>
-<p><a href="https://himmelblau-idm.org/downloads.html">Download</a> the <code>.rpm</code> packages.</p>
-</li>
-<li>
-<p>Install:</p>
-</li>
-</ol>
-<pre><code class="language-bash">sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
-sudo dnf install ./himmelblau-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./himmelblau-sshd-config-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./himmelblau-sso-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./nss-himmelblau-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./pam-himmelblau-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./himmelblau-qr-greeter-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm
-</code></pre>
-<h3 id="suse-linux-enterprise-sle-opensuse">SUSE Linux Enterprise (SLE) / openSUSE</h3>
-<ol>
-<li>
-<p><a href="https://himmelblau-idm.org/downloads.html">Download</a> the <code>.rpm</code> packages.</p>
-</li>
-<li>
-<p>Install:</p>
-</li>
-</ol>
-<pre><code class="language-bash">sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
-sudo zypper install ./himmelblau-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./himmelblau-sshd-config-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./himmelblau-sso-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./nss-himmelblau-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./pam-himmelblau-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm ./himmelblau-qr-greeter-&lt;version&gt;-1.x86_64-&lt;distro&gt;.rpm 
-</code></pre>
+<h2 id="installation">Installation</h2>
+<h3 id="prebuilt-packages-recommended">Prebuilt Packages (Recommended)</h3>
+<p>Himmelblau provides prebuilt packages for all major Linux distributions — including Debian, Ubuntu, Fedora, Rocky Linux, RHEL, openSUSE Leap, SLE, and NixOS — via our official build server.</p>
+<p>➡️ <strong><a href="https://himmelblau-idm.org/downloads">Visit the Downloads page</a></strong> to:</p>
+<ul>
+<li>Select your distribution and release channel (Stable / Nightly)</li>
+<li>View the correct repository setup commands for your system</li>
+<li>Copy one-click install instructions for your package manager (<code>apt</code>, <code>dnf</code>, or <code>zypper</code>)</li>
+</ul>
+<blockquote>
+<p>This is the <strong>recommended</strong> installation method for production systems and most users.
+The downloads page is always kept in sync with the latest release metadata on <a href="https://packages.himmelblau-idm.org/">packages.himmelblau-idm.org</a>.</p>
+</blockquote>
 <hr />
-<h3 id="from-source">From Source</h3>
-<p>If you prefer to build Himmelblau from source, you can use the provided <code>Makefile</code> to produce native packages for your target distribution.</p>
-<h3 id="steps">Steps:</h3>
-<ol>
-<li>Clone the repository:</li>
-</ol>
-<pre><code class="language-bash">git clone https://github.com/himmelblau-idm/himmelblau
+<h3 id="building-from-source-advanced-developer-use">Building from Source (Advanced / Developer Use)</h3>
+<p>If you prefer to build Himmelblau locally — for testing, development, or packaging validation — use the included <code>Makefile</code>.<br />
+The build system automatically detects your host distribution and uses either Podman or Docker for reproducible container builds.</p>
+<h4 id="steps">Steps</h4>
+<h5 id="1-clone-the-repository">1. Clone the repository:</h5>
+<pre><code>git clone https://github.com/himmelblau-idm/himmelblau
 cd himmelblau
 </code></pre>
-<ol>
-<li>Build packages for your distro:</li>
-</ol>
-<pre><code class="language-bash">make ubuntu24.04         # Replace with your target distro
+<h5 id="2-build-packages">2. Build packages:</h5>
+<pre><code>make               # auto-detects host distro and builds matching packages
 </code></pre>
-<p>Available distro targets:</p>
-<pre><code>ubuntu22.04  ubuntu24.04  debian12
-rocky8       rocky9       rocky10
-sle15sp6     sle15sp7     tumbleweed
-fedora41     fedora42     rawhide
+<p>or build explicitly for a target:</p>
+<pre><code>make ubuntu24.04   # or debian13, rocky9, sle16, etc.
 </code></pre>
-<ol>
-<li>Find the resulting <code>.deb</code> or <code>.rpm</code> packages in:</li>
-</ol>
-<pre><code>./packages/
+<p>Run <code>make help</code> for the full list of available targets.</p>
+<h5 id="3-install-on-your-current-host">3. Install on your current host:</h5>
+<pre><code>sudo make install
 </code></pre>
-<p>You can then install the generated package as normal using your system's package manager (e.g., <code>dpkg</code>, <code>dnf</code>, or <code>zypper</code>).</p>
-<blockquote>
-<p>💡 This method ensures proper packaging with dependencies and systemd service files — ideal for testing or contributing to Himmelblau.</p>
-</blockquote>
+<p>This installs the locally built packages using the native package manager (apt / dnf / zypper).</p>
+<hr />
+<h3 id="need-another-distro">Need another distro?</h3>
+<p>If your environment isn’t listed on the <a href="#supported-distributions">Supported Distributions</a> table, please <a href="https://github.com/himmelblau-idm/himmelblau/issues">open an issue</a> or contact a maintainer — we’re happy to help add new targets.</p>
               
             </div>
           </div><footer>
@@ -304,7 +300,6 @@ fedora41     fedora42     rawhide
     <script>var base_url = "..";</script>
     <script src="../js/theme_extra.js"></script>
     <script src="../js/theme.js"></script>
-      <script src="../js/distro_list.js"></script>
       <script src="../search/main.js"></script>
     <script>
         jQuery(function () {

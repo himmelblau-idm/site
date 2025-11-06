@@ -11,87 +11,99 @@ This page covers how to install Himmelblau on Ubuntu, Debian, RHEL, Rocky, SUSE,
 ## Supported Distributions
 
 <div id="supported-distros">
-  Loading supported distributions...
+<p>The following distributions are currently packaged by the Himmelblau project:</p>
+<table>
+  <thead>
+    <tr><th>Distribution</th><th>Version</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Fedora</td><td>41</td></tr>
+    <tr><td>Fedora</td><td>42</td></tr>
+    <tr><td>Fedora</td><td>43</td></tr>
+    <tr><td>Fedora</td><td>Rawhide</td></tr>
+    <tr><td>Rocky Linux</td><td>8</td></tr>
+    <tr><td>Rocky Linux</td><td>9</td></tr>
+    <tr><td>Rocky Linux</td><td>10</td></tr>
+    <tr><td>Red Hat Enterprise Linux</td><td>8</td></tr>
+    <tr><td>Red Hat Enterprise Linux</td><td>9</td></tr>
+    <tr><td>Red Hat Enterprise Linux</td><td>10</td></tr>
+    <tr><td>Oracle Linux</td><td>8</td></tr>
+    <tr><td>Oracle Linux</td><td>9</td></tr>
+    <tr><td>Oracle Linux</td><td>10</td></tr>
+    <tr><td>SUSE Linux Enterprise</td><td>15 SP6</td></tr>
+    <tr><td>SUSE Linux Enterprise</td><td>15 SP7</td></tr>
+    <tr><td>SUSE Linux Enterprise</td><td>16</td></tr>
+    <tr><td>openSUSE Leap</td><td>15.6</td></tr>
+    <tr><td>openSUSE Leap</td><td>16</td></tr>
+    <tr><td>openSUSE Tumbleweed</td><td></td></tr>
+    <tr><td>Debian</td><td>12</td></tr>
+    <tr><td>Debian</td><td>13</td></tr>
+    <tr><td>Ubuntu</td><td>22.04</td></tr>
+    <tr><td>Ubuntu</td><td>24.04</td></tr>
+    <tr><td>Linux Mint</td><td>21.3</td></tr>
+    <tr><td>Linux Mint</td><td>22</td></tr>
+    <tr><td>NixOS</td><td></td></tr>
+  </tbody>
+</table>
 </div>
 
 ---
 
-## Installation from Prebuilt Packages
+## Installation
 
-[Download the packages for your distribution](https://himmelblau-idm.org/downloads.html), and install them using your flavor of package manager:
+### Prebuilt Packages (Recommended)
 
-### Debian & Ubuntu
+Himmelblau provides prebuilt packages for all major Linux distributions — including Debian, Ubuntu, Fedora, Rocky Linux, RHEL, openSUSE Leap, SLE, and NixOS — via our official build server.
 
-1. [Download](https://himmelblau-idm.org/downloads.html) the `.deb` packages.
+➡️ **[Visit the Downloads page](https://himmelblau-idm.org/downloads)** to:
 
-2. Install:
+- Select your distribution and release channel (Stable / Nightly)
+- View the correct repository setup commands for your system
+- Copy one-click install instructions for your package manager (`apt`, `dnf`, or `zypper`)
 
-```bash
-sudo apt install -y ./himmelblau_<version>-<distro>_amd64.deb ./himmelblau-sshd-config_<version>-<distro>_amd64.deb ./himmelblau-sso_<version>-<distro>_amd64.deb ./nss-himmelblau_<version>-<distro>_amd64.deb ./pam-himmelblau_<version>-<distro>_amd64.deb ./himmelblau-qr-greeter_<version>-<distro>_amd64.deb 
-```
-
-#### Optional Debian repositories
-
-You can optionally install the latest package from the Himmelblau debian repositories, as described on the downloads page.
-
-### RHEL, Rocky, Fedora
-
-1. [Download](https://himmelblau-idm.org/downloads.html) the `.rpm` packages.
-
-2. Install:
-
-```bash
-sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
-sudo dnf install ./himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-sshd-config-<version>-1.x86_64-<distro>.rpm ./himmelblau-sso-<version>-1.x86_64-<distro>.rpm ./nss-himmelblau-<version>-1.x86_64-<distro>.rpm ./pam-himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-qr-greeter-<version>-1.x86_64-<distro>.rpm
-```
-
-### SUSE Linux Enterprise (SLE) / openSUSE
-
-1. [Download](https://himmelblau-idm.org/downloads.html) the `.rpm` packages.
-
-2. Install:
-
-```bash
-sudo rpm --import https://himmelblau-idm.org/himmelblau.asc
-sudo zypper install ./himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-sshd-config-<version>-1.x86_64-<distro>.rpm ./himmelblau-sso-<version>-1.x86_64-<distro>.rpm ./nss-himmelblau-<version>-1.x86_64-<distro>.rpm ./pam-himmelblau-<version>-1.x86_64-<distro>.rpm ./himmelblau-qr-greeter-<version>-1.x86_64-<distro>.rpm 
-```
+> This is the **recommended** installation method for production systems and most users.
+> The downloads page is always kept in sync with the latest release metadata on [packages.himmelblau-idm.org](https://packages.himmelblau-idm.org/).
 
 ---
 
-### From Source
+### Building from Source (Advanced / Developer Use)
 
-If you prefer to build Himmelblau from source, you can use the provided `Makefile` to produce native packages for your target distribution.
+If you prefer to build Himmelblau locally — for testing, development, or packaging validation — use the included `Makefile`.  
+The build system automatically detects your host distribution and uses either Podman or Docker for reproducible container builds.
 
-### Steps:
+#### Steps
 
-1. Clone the repository:
+##### 1. Clone the repository:
 
-```bash
+```
 git clone https://github.com/himmelblau-idm/himmelblau
 cd himmelblau
 ```
 
-2. Build packages for your distro:
-
-```bash
-make ubuntu24.04         # Replace with your target distro
-```
-
-   Available distro targets:
+##### 2. Build packages:
 
 ```
-ubuntu22.04  ubuntu24.04  debian12
-rocky8       rocky9       rocky10
-sle15sp6     sle15sp7     tumbleweed
-fedora41     fedora42     rawhide
+make               # auto-detects host distro and builds matching packages
 ```
 
-3. Find the resulting `.deb` or `.rpm` packages in:
+   or build explicitly for a target:
 
 ```
-./packages/
+make ubuntu24.04   # or debian13, rocky9, sle16, etc.
 ```
 
-You can then install the generated package as normal using your system's package manager (e.g., `dpkg`, `dnf`, or `zypper`).
+Run `make help` for the full list of available targets.
 
-> 💡 This method ensures proper packaging with dependencies and systemd service files — ideal for testing or contributing to Himmelblau.
+##### 3. Install on your current host:
+
+```
+sudo make install
+```
+
+This installs the locally built packages using the native package manager (apt / dnf / zypper).
+
+---
+
+### Need another distro?
+
+If your environment isn’t listed on the [Supported Distributions](#supported-distributions) table, please [open an issue](https://github.com/himmelblau-idm/himmelblau/issues) or contact a maintainer — we’re happy to help add new targets.

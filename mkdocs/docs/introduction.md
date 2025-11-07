@@ -67,7 +67,7 @@ Himmelblau is available for almost all major distributions. The current version 
 | Ubuntu                | 22.04 + 24.04 |
 | NixOS                 |               |
 
-In the first part, a Linux system without a graphical user interface is set up. For the distributions listed in the table here, there are repositories available at https/himmelblau-idm.ordownloadindex.html. Himmelblau consists of a total of eight packages (at the moment there are no RPM-packages available):
+In the first part, a Linux system without a graphical user interface is set up. For the distributions listed in the table here, there are repositories available at https://himmelblau-idm.org/downloads/index.html. Himmelblau consists of a total of eight packages:
 
 ```
 himmelblau_<version><distribution>
@@ -98,9 +98,9 @@ To test the login for the first time, a Linux client without a graphical user in
 
 are installed for this purpose. The himmelblau-sshd-config package is only required if login via SSH on the client is to be possible.
 
-After installing the packages, distributions based on Red Hat and SUSE require some manual work for integration into PAM. For all supported distributions based on Debian, all necessary PAM entries are made automatically. On Debian systems, the Himmelblau entries are made in the *common-** files in the etpam.d* directory. On Suse systems, it is necessary to customize the PAM system with the command *sudo pam-config --add --himmelblau*. For all other distributions, the command *aad-tool configure-pam* can be used. The *aad-tool* command is part of the Himmelblau packages. 
+After installing the packages, distributions based on Red Hat and SUSE require some manual work for integration into PAM. For all supported distributions based on Debian, all necessary PAM entries are made automatically. On Debian systems, the Himmelblau entries are made in the *common-** files in the /etc/pam.d/* directory. On Suse systems, it is necessary to customize the PAM system with the command *sudo pam-config --add --himmelblau*. For all other distributions, the command *aad-tool configure-pam* can be used. The *aad-tool* command is part of the Himmelblau packages. 
 
-To also allow users to access via SSH using the PIN, it is necessary to adjust the line from Listing 1 in the fileetpam.common-auth:
+To also allow users to access via SSH using the PIN, it is necessary to adjust the line from Listing 1 in the file /etc/pam.d/common-auth:
 
 ```
 --------- Listing 1-------
@@ -110,7 +110,7 @@ auth    [success=2 default=ignore]    pam_himmelblau.so ignore_unknown_user mfa_
 
 Without this adjustment, the password will always be requested instead of the PIN. The option *mfa_poll_prompt* is only needed if a distribution is usesd with an unfixed patch of OpenSSH. In Ubuntu and openSUSE OpenSSH isd already patched.
 
-To access a Linux client via SSH, you also need to adjust the SSH configuration. To do this, create the file etsssshd_config.himmelblau.conf* with the content from Listing 2:
+To access a Linux client via SSH, you also need to adjust the SSH configuration. To do this, create the file */etc/ssh/sshd_config.d/himmelblau.conf* with the content from Listing 2:
 
 ```
 ----- Listing 2 -----------

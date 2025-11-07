@@ -281,7 +281,7 @@
 </tr>
 </tbody>
 </table>
-<p>In the first part, a Linux system without a graphical user interface is set up. For the distributions listed in the table here, there are repositories available at https/himmelblau-idm.ordownloadindex.html. Himmelblau consists of a total of eight packages (at the moment there are no RPM-packages available):</p>
+<p>In the first part, a Linux system without a graphical user interface is set up. For the distributions listed in the table here, there are repositories available at https://himmelblau-idm.org/downloads/index.html. Himmelblau consists of a total of eight packages:</p>
 <pre><code>himmelblau_&lt;version&gt;&lt;distribution&gt;
 himmelblau-sshd-config_&lt;version&gt;&lt;distribution&gt;
 himmelblau-sso_&lt;version&gt;&lt;distribution&gt;
@@ -304,14 +304,14 @@ o365_&lt;version&gt;&lt;distribution&gt;
 <li>himmelblau-sshd-config<version><distribution></li>
 </ul>
 <p>are installed for this purpose. The himmelblau-sshd-config package is only required if login via SSH on the client is to be possible.</p>
-<p>After installing the packages, distributions based on Red Hat and SUSE require some manual work for integration into PAM. For all supported distributions based on Debian, all necessary PAM entries are made automatically. On Debian systems, the Himmelblau entries are made in the <em>common-</em><em> files in the etpam.d</em> directory. On Suse systems, it is necessary to customize the PAM system with the command <em>sudo pam-config --add --himmelblau</em>. For all other distributions, the command <em>aad-tool configure-pam</em> can be used. The <em>aad-tool</em> command is part of the Himmelblau packages. </p>
-<p>To also allow users to access via SSH using the PIN, it is necessary to adjust the line from Listing 1 in the fileetpam.common-auth:</p>
+<p>After installing the packages, distributions based on Red Hat and SUSE require some manual work for integration into PAM. For all supported distributions based on Debian, all necessary PAM entries are made automatically. On Debian systems, the Himmelblau entries are made in the <em>common-</em><em> files in the /etc/pam.d/</em> directory. On Suse systems, it is necessary to customize the PAM system with the command <em>sudo pam-config --add --himmelblau</em>. For all other distributions, the command <em>aad-tool configure-pam</em> can be used. The <em>aad-tool</em> command is part of the Himmelblau packages. </p>
+<p>To also allow users to access via SSH using the PIN, it is necessary to adjust the line from Listing 1 in the file /etc/pam.d/common-auth:</p>
 <pre><code>--------- Listing 1-------
 auth    [success=2 default=ignore]    pam_himmelblau.so ignore_unknown_user mfa_poll_prompt
 ----------------------------
 </code></pre>
 <p>Without this adjustment, the password will always be requested instead of the PIN. The option <em>mfa_poll_prompt</em> is only needed if a distribution is usesd with an unfixed patch of OpenSSH. In Ubuntu and openSUSE OpenSSH isd already patched.</p>
-<p>To access a Linux client via SSH, you also need to adjust the SSH configuration. To do this, create the file etsssshd_config.himmelblau.conf* with the content from Listing 2:</p>
+<p>To access a Linux client via SSH, you also need to adjust the SSH configuration. To do this, create the file <em>/etc/ssh/sshd_config.d/himmelblau.conf</em> with the content from Listing 2:</p>
 <pre><code>----- Listing 2 -----------
 KbdInteractiveAuthentication yes
 ---------------------------- 

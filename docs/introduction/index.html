@@ -341,7 +341,7 @@ KbdInteractiveAuthentication yes
 ---------------------------- 
 </code></pre>
 <p>Then restart the SSH service.</p>
-<p>To enable the Linux system to access the user database, the file etnsswitch.conf* must now be adjusted. Listing 2 shows the adjustments:</p>
+<p>To enable the Linux system to access the user database, the file <em>/etc/nsswitch.conf</em> must now be adjusted. Listing 2 shows the adjustments:</p>
 <pre><code>------- Listing 3 -------
 passwd:     files systemd himmelblau
 group:      files systemd himmelblau 
@@ -427,7 +427,7 @@ user02@himmelblau:~$
 --------------------------- 
 </code></pre>
 <h2 id="the-linux-client">The Linux client</h2>
-<p>What happens on the Linux client when it is integrated into Azure? During setup, Himmelblau was entered into theetnssswitch.conf file. Now the domain specified in the configuration is searched for users and groups. The identity of the user can also be queried with the command <em>id</em> or <em>getent passwd <username></em>. Listing 10 shows the information for the user just set up:</p>
+<p>What happens on the Linux client when it is integrated into Azure? During setup, Himmelblau was entered into the <em>/etc/nsswitch.conf</em> file. Now the domain specified in the configuration is searched for users and groups. The identity of the user can also be queried with the command <em>id</em> or <em>getent passwd <username></em>. Listing 10 shows the information for the user just set up:</p>
 <pre><code>------------ Listing 10 -----------
 user02@himmelblau:~$ id 
 uid=773235643(user02) gid=773235643(user02) groups=773235643(user02),100(users),145696387(datengruppe),154317179(MSFT)
@@ -452,10 +452,10 @@ datengruppe:x:1496389:user01,stka
 <h2 id="local-parameters">Local parameters</h2>
 <p>Local parameters can also be defined in the configuration file. These are settings that affect behavior on the client. For example, you can specify which local group a user from the domains is a member of.</p>
 <p>The local parameters that affect settings on the local client are located in the [global] section of the configuration; unfortunately, there is no separate section for adjustments that affect settings on the local client.</p>
-<p>To enter users locally in groups on a client, the <em>local_groups</em> variable is extended. The individual local groups are entered separated by commas. If a group is later removed at this point, the users must be manually removed from the group. To do this, edit the etgroups* file. </p>
+<p>To enter users locally in groups on a client, the <em>local_groups</em> variable is extended. The individual local groups are entered separated by commas. If a group is later removed at this point, the users must be manually removed from the group. To do this, edit the <em>/etc/groups</em> file.</p>
 <p>When a user logs in for the first time, a home directory is automatically created. The default directory for this is home<em>. If you want the directory to be created in a different location in the file system,  you can specify this using the variable  </em>home_prefix =*.</p>
-<p>It is also possible to copy certain data from a directory to the user's new home directory. This process is identical to creating a local user via the etskel<em> directory. To transfer data, the variable </em>use_etc_skel = true<em> can be set, then all files and directories from etskel</em> will be transferred. </p>
-<p>Since no shell is specified in the user's profile in the Azure domain, a default shell can be assigned to all users using the variable <em>shell =bibash</em>.</p>
+<p>It is also possible to copy certain data from a directory to the user's new home directory. This process is identical to creating a local user via the <em>/etc/skel</em> directory. To transfer data, the variable <em>use_etc_skel = true</em> can be set, then all files and directories from <em>/etc/skel</em> will be transferred.</p>
+<p>Since no shell is specified in the user's profile in the Azure domain, a default shell can be assigned to all users using the variable <em>shell =/bin/bash</em>.</p>
 <p>Note: The attributes from Listing 12 should always be set on Debian and Ubuntu systems. These values are also always entered in the configuration when installing the packages:</p>
 <pre><code>----- Listing 12 -----
 home_attr = CN
@@ -517,7 +517,7 @@ Connection closed by 192.168.56.81 port 22
 <h2 id="domain-parameters">Domain parameters</h2>
 <p>In addition to the local and global parameters, it is also possible to configure specific settings for individual domains. The settings for a domain always begin with the name of the domain in square brackets.</p>
 <h2 id="adjusting-the-idmap-range">Adjusting the idmap range</h2>
-<p>No individual ID mapping has been performed up to this point. If no individual ID mapping is configured, the range from 200000 to 2000200000 is always used as default. Since multiple domains separated by commas can be specified in the configuration file for the <em>domains</em> variable, it is necessary to define a separate range for each domain at this point at the latest. To do this, the fileethimmelblahimmelblau.conf is adjusted as shown in Listing 18:</p>
+<p>No individual ID mapping has been performed up to this point. If no individual ID mapping is configured, the range from 200000 to 2000200000 is always used as default. Since multiple domains separated by commas can be specified in the configuration file for the <em>domains</em> variable, it is necessary to define a separate range for each domain at this point at the latest. To do this, the file <em>/etc/himmelblau/himmelblau.conf</em> is adjusted as shown in Listing 18:</p>
 <pre><code>------ Listing 18 ------
 [example.onmicrosoft.com] 
 idmap_range = 1000000-1999999

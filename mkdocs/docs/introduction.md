@@ -125,7 +125,7 @@ KbdInteractiveAuthentication yes
 
 Then restart the SSH service.
 
-To enable the Linux system to access the user database, the file etnsswitch.conf* must now be adjusted. Listing 2 shows the adjustments:
+To enable the Linux system to access the user database, the file */etc/nsswitch.conf* must now be adjusted. Listing 2 shows the adjustments:
 
 ```
 ------- Listing 3 -------
@@ -258,7 +258,7 @@ user02@himmelblau:~$
 
 ## The Linux client
 
-What happens on the Linux client when it is integrated into Azure? During setup, Himmelblau was entered into theetnssswitch.conf file. Now the domain specified in the configuration is searched for users and groups. The identity of the user can also be queried with the command *id* or *getent passwd <username>*. Listing 10 shows the information for the user just set up:
+What happens on the Linux client when it is integrated into Azure? During setup, Himmelblau was entered into the */etc/nsswitch.conf* file. Now the domain specified in the configuration is searched for users and groups. The identity of the user can also be queried with the command *id* or *getent passwd <username>*. Listing 10 shows the information for the user just set up:
 
 ```
 ------------ Listing 10 -----------
@@ -293,13 +293,13 @@ Local parameters can also be defined in the configuration file. These are settin
 
 The local parameters that affect settings on the local client are located in the [global] section of the configuration; unfortunately, there is no separate section for adjustments that affect settings on the local client.
 
-To enter users locally in groups on a client, the *local_groups* variable is extended. The individual local groups are entered separated by commas. If a group is later removed at this point, the users must be manually removed from the group. To do this, edit the etgroups* file. 
+To enter users locally in groups on a client, the *local_groups* variable is extended. The individual local groups are entered separated by commas. If a group is later removed at this point, the users must be manually removed from the group. To do this, edit the */etc/groups* file.
 
 When a user logs in for the first time, a home directory is automatically created. The default directory for this is home*. If you want the directory to be created in a different location in the file system,  you can specify this using the variable  *home_prefix =*.
 
-It is also possible to copy certain data from a directory to the user's new home directory. This process is identical to creating a local user via the etskel* directory. To transfer data, the variable *use_etc_skel = true* can be set, then all files and directories from etskel* will be transferred. 
+It is also possible to copy certain data from a directory to the user's new home directory. This process is identical to creating a local user via the */etc/skel* directory. To transfer data, the variable *use_etc_skel = true* can be set, then all files and directories from */etc/skel* will be transferred.
 
-Since no shell is specified in the user's profile in the Azure domain, a default shell can be assigned to all users using the variable *shell =bibash*.
+Since no shell is specified in the user's profile in the Azure domain, a default shell can be assigned to all users using the variable *shell =/bin/bash*.
 
 Note: The attributes from Listing 12 should always be set on Debian and Ubuntu systems. These values are also always entered in the configuration when installing the packages:
 
@@ -391,7 +391,7 @@ In addition to the local and global parameters, it is also possible to configure
 
 ## Adjusting the idmap range
 
-No individual ID mapping has been performed up to this point. If no individual ID mapping is configured, the range from 200000 to 2000200000 is always used as default. Since multiple domains separated by commas can be specified in the configuration file for the *domains* variable, it is necessary to define a separate range for each domain at this point at the latest. To do this, the fileethimmelblahimmelblau.conf is adjusted as shown in Listing 18:
+No individual ID mapping has been performed up to this point. If no individual ID mapping is configured, the range from 200000 to 2000200000 is always used as default. Since multiple domains separated by commas can be specified in the configuration file for the *domains* variable, it is necessary to define a separate range for each domain at this point at the latest. To do this, the file */etc/himmelblau/himmelblau.conf* is adjusted as shown in Listing 18:
 
 ```
 ------ Listing 18 ------

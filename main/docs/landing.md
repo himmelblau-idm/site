@@ -9,9 +9,11 @@ hide:
 ## Why Himmelblau?
 
 - ✅ **Seamless Azure Entra ID authentication on Linux**
+- ✅ **Intune compliance integration**
 - ✅ **Supports Native Multi-Factor Authentication (MFA)**
-- ✅ **Single Sign-On (SSO) for Firefox and Chrome**
-- ✅ **Integrates with Kerberos for hybrid environments**
+- ✅ **Entra Id multi-user SSH support**
+- ✅ **Single Sign-On (SSO) for Firefox, Chrome and Edge**
+- ✅ **Office 365 Web Apps**
 - ✅ **Secure & open-source**
 
 <a class="button" href="https://github.com/himmelblau-idm/himmelblau">Himmelblau Project Page 🚀</a>

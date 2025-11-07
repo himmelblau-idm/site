@@ -1,6 +1,6 @@
 ## Overview
 
-Himmelblau requires additional API permissions to read group names and extended attributes such as a groups' `gidNumber` (which is essential for RFC2307 attribute ID mapping). The following instructions guide you through registering an Azure Entra ID application, assigning it permissions, and configuring Himmelblau to use either *delegated* or *confidential client* authentication.
+Himmelblau requires additional API permissions to read group names and extended attributes such as a groups' `gidNumber` or users' `uidNumber` (which is essential for RFC2307 attribute ID mapping). The following instructions guide you through registering an Azure Entra ID application, assigning it permissions, and configuring Himmelblau to use either *delegated* or *confidential client* authentication.
 
 With the default configuration, Himmelblau will attempt to resolve group memberships by masquerading as the Edge browser with **delegated access**, but this doesn't work in every tenant, and has the limitation of only resolving group memberships *after* each user has authenticated.
 
@@ -26,12 +26,16 @@ With the default configuration, Himmelblau will attempt to resolve group members
 2. Click **Add a permission**.
 3. Select **Microsoft Graph**.
 4. If utilizing Confidential Client Credentials (Option A below) choose **Application permissions**, otherwise choose **Delegated permissions** (Option B).
-5. Search for `GroupMember.Read.All` and select it.
+5. Search for `GroupMember.Read.All` and select it. Also search for `User.Read.All` and add this permission.
 6. Click **Add permissions**.
 
 ![Assign API Permissions](app-reg2.png)
 
 7. Click **Grant admin consent** to approve these permissions for your tenant.
+8. Continue with the same procedure for the User.Read.All permission.
+
+> **Warning!:**
+> Never use Group.Read.All instead of the GroupMember.Read.All permission, because for Microsoft 365 groups, Group.* permissions [grant the app access to the contents of the group](https://learn.microsoft.com/en-us/graph/permissions-reference); for example, conversations, files, notes, and so on.
 
 ![Grant Admin Consent](app-reg3.png)
 

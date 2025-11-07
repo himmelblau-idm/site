@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-and-User.Read.All-Permissions/" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions - Himmelblau Documentation</title>
+    <title>Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions - Himmelblau Documentation</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions";
-        var mkdocs_page_input_path = "advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions.md";
-        var mkdocs_page_url = "/docs/advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions/";
+        var mkdocs_page_name = "Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions";
+        var mkdocs_page_input_path = "advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-and-User.Read.All-Permissions.md";
+        var mkdocs_page_url = "/docs/advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-and-User.Read.All-Permissions/";
       </script>
     
     <!--[if lt IE 9]>
@@ -103,7 +103,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../Configuring-a-Hardware-TPM-for-Secure-Key-Storage/">Configuring a Hardware TPM for Secure Key Storage</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions</a>
     <ul class="current">
     </ul>
                   </li>
@@ -150,9 +150,9 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Advanced Topics</li>
-      <li class="breadcrumb-item active">Creating an Entra ID Application for Himmelblau GroupMember.Read.All Permissions</li>
+      <li class="breadcrumb-item active">Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions</li>
     <li class="wy-breadcrumbs-aside">
-          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-Permissions.md">Edit on Himmelblau Documentation</a>
+          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-and-User.Read.All-Permissions.md">Edit on Himmelblau Documentation</a>
     </li>
   </ul>
   <hr/>
@@ -161,7 +161,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h2 id="overview">Overview</h2>
-<p>Himmelblau requires additional API permissions to read group names and extended attributes such as a groups' <code>gidNumber</code> (which is essential for RFC2307 attribute ID mapping). The following instructions guide you through registering an Azure Entra ID application, assigning it permissions, and configuring Himmelblau to use either <em>delegated</em> or <em>confidential client</em> authentication.</p>
+<p>Himmelblau requires additional API permissions to read group names and extended attributes such as a groups' <code>gidNumber</code> or users' <code>uidNumber</code> (which is essential for RFC2307 attribute ID mapping). The following instructions guide you through registering an Azure Entra ID application, assigning it permissions, and configuring Himmelblau to use either <em>delegated</em> or <em>confidential client</em> authentication.</p>
 <p>With the default configuration, Himmelblau will attempt to resolve group memberships by masquerading as the Edge browser with <strong>delegated access</strong>, but this doesn't work in every tenant, and has the limitation of only resolving group memberships <em>after</em> each user has authenticated.</p>
 <blockquote>
 <p><strong>Note:</strong><br />
@@ -185,13 +185,18 @@
 <li>Click <strong>Add a permission</strong>.</li>
 <li>Select <strong>Microsoft Graph</strong>.</li>
 <li>If utilizing Confidential Client Credentials (Option A below) choose <strong>Application permissions</strong>, otherwise choose <strong>Delegated permissions</strong> (Option B).</li>
-<li>Search for <code>GroupMember.Read.All</code> and select it.</li>
+<li>Search for <code>GroupMember.Read.All</code> and select it. Also search for <code>User.Read.All</code> and add this permission.</li>
 <li>Click <strong>Add permissions</strong>.</li>
 </ol>
 <p><img alt="Assign API Permissions" src="../app-reg2.png" /></p>
 <ol>
 <li>Click <strong>Grant admin consent</strong> to approve these permissions for your tenant.</li>
+<li>Continue with the same procedure for the User.Read.All permission.</li>
 </ol>
+<blockquote>
+<p><strong>Warning!:</strong>
+Never use Group.Read.All instead of the GroupMember.Read.All permission, because for Microsoft 365 groups, Group.* permissions <a href="https://learn.microsoft.com/en-us/graph/permissions-reference">grant the app access to the contents of the group</a>; for example, conversations, files, notes, and so on.</p>
+</blockquote>
 <p><img alt="Grant Admin Consent" src="../app-reg3.png" /></p>
 <h3 id="3-obtain-the-application-id">3. Obtain the Application ID</h3>
 <ol>

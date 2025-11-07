@@ -322,10 +322,10 @@ o365_&lt;version&gt;&lt;distribution&gt;
 <h2 id="installation-and-setup-of-the-packages">Installation and setup of the packages</h2>
 <p>To test the login for the first time, a Linux client without a graphical user interface is sufficient. Only the packages: </p>
 <ul>
-<li>himmelblau_<version><distribution></li>
-<li>pam-himmelblau_<version><distribution></li>
-<li>nss-himmelblau_<version><distribution>  </li>
-<li>himmelblau-sshd-config<version><distribution></li>
+<li><code>himmelblau_&lt;version&gt;&lt;distribution&gt;</code></li>
+<li><code>pam-himmelblau_&lt;version&gt;&lt;distribution&gt;</code></li>
+<li><code>nss-himmelblau_&lt;version&gt;&lt;distribution</code></li>
+<li><code>himmelblau-sshd-config_&lt;version&gt;&lt;distribution&gt;</code></li>
 </ul>
 <p>are installed for this purpose. The himmelblau-sshd-config package is only required if login via SSH on the client is to be possible.</p>
 <p>After installing the packages, distributions based on Red Hat and SUSE require some manual work for integration into PAM. For all supported distributions based on Debian, all necessary PAM entries are made automatically. On Debian systems, the Himmelblau entries are made in the <em>common-</em><em> files in the /etc/pam.d/</em> directory. On Suse systems, it is necessary to customize the PAM system with the command <em>sudo pam-config --add --himmelblau</em>. For all other distributions, the command <em>aad-tool configure-pam</em> can be used. The <em>aad-tool</em> command is part of the Himmelblau packages. </p>
@@ -349,12 +349,11 @@ shadow:     files systemd himmelblau
 -------------------------
 </code></pre>
 <p>If the packages from the original URL are used, these entries are also generated automatically.</p>
-<p>The only thing missing is the domain at which users should log in on the client. To do this, the configuration of Himmelblau is adjusted in the fileethimmelblahimmelblau.conf. Listing 4 shows the change in the file:</p>
+<p>The only thing missing is the domain at which users should log in on the client. To do this, the configuration of Himmelblau is adjusted in the file /etc/himmelblau/himmelblau.conf. Listing 4 shows the change in the file:</p>
 <pre><code>------- Listing 4 --------
-domains=example.onmicrosoft.com
+domain=example.onmicrosoft.com
 ---------------------------
 </code></pre>
-<p>NOTE: The Name for this option is <em>domains</em> not <em>domain</em> but there is an alias so both, <em>domains</em> or <em>domain</em>, will work.</p>
 <p>Only the name of your own domain is required. All other settings can be adopted for the time being. </p>
 <p>Anyone who has already gained experience with Entra ID and Microsoft clients will be surprised by this entry, because with a Windows client, the name of the domain is determined from the user's UPN when they log in, which does not yet work with Himmelblau.</p>
 <p>After configuring Himmelblau, it is still necessary to start the two services <em>himmelblaud</em> and <em>himmelblaud-tasks</em> and activate them permanently. Only then can the first login be performed. Listing 5 shows how to start the services:</p>
@@ -392,7 +391,7 @@ Press enter to continue
 <p><img alt="MS Authenticator Finished" src="../ChatGPT%20Image%20Nov%206%2C%202025%2C%2008_25_42%20PM.png" /></p>
 <p>Finally, the successful first login is summarized and displayed again.</p>
 <p><img alt="MS Authenticator Successful" src="../ChatGPT%20Image%20Nov%206%2C%202025%2C%2008_28_00%20PM.png" /></p>
-<p>If the app needs to be changed later, the user can do this themselves via the URL https/mysignins.microsoft.cosecurity-info.</p>
+<p>If the app needs to be changed later, the user can do this themselves via the URL https://mysignins.microsoft.com/security-info.</p>
 <p>After completing the setup, the first login (here via ssh) to the Linux client follows. However, it is also possible to log in directly to a client integrated in Azure. Even when logging in locally on the client, it is sufficient to specify the CN (the CN is the part before the @ in the UPN); it is not necessary to specify the full name (User Principle Name (UPN)). The name is resolved via NSS, because himmelblau is entered there as the authentication source.</p>
 <p>Note: To make user logins unique, care should be taken to ensure that there are no local users with the same name in the domain.  Listing 7 shows the first login attempt after setting up two-factor authentication:</p>
 <pre><code>--------------Listing 7 ---------------
@@ -526,10 +525,10 @@ idmap_range = 1000000-1999999
 </code></pre>
 <p>It is important to enter the adjustment at the end of the file, otherwise the parameters of the [global] section below the entry will no longer be evaluated.  Even if the lines are commented out, they must not be located in the middle of the [global] section. After changing the idmap range and restarting the two Himmelblau services, the users and groups can be displayed with a new ID. </p>
 <p>It is important to make the change on all clients, otherwise the same user (and also the groups) will have different IDs.  </p>
-<p>In addition to adjusting the <em>idmap_range</em>, it is possible to set additional parameters. Here, it is also possible to override certain local settings. For example, if a different target directory for the home directories is to be created for each domain, the additional variable <em>home_prefixdomainnam</em> ensures that the home directory for all users of this domain is created in a corresponding directory. The variable entry must be placed below the domain name in square brackets. </p>
+<p>In addition to adjusting the <em>idmap_range</em>, it is possible to set additional parameters. Here, it is also possible to override certain local settings. For example, if a different target directory for the home directories is to be created for each domain, the additional variable <em>home_prefix=/domainname/</em> ensures that the home directory for all users of this domain is created in a corresponding directory. The variable entry must be placed below the domain name in square brackets. </p>
 <p>Further variables that can be set up specifically for domains are described in the man page for the <em>himmelblau.conf</em> file.</p>
 <h2 id="resetting-a-client">Resetting a client</h2>
-<p>All information about all users set up on this client is stored in an SQLite database in the file vacachhimmelblauhimmelblau.cache.db.* If a client is to be permanently removed from the domain, or if all users are to re-register their accounts on the client, the file can be deleted. This will invalidate all information about all users on this client. Before deleting, the two Himmelblau services should be stopped in any case. Once the file has been deleted and the services have been restarted, the database will be rebuilt.</p>
+<p>All information about all users set up on this client is stored in an SQLite database in the file <em>/var/cache/himmelblaud/himmelblau.cache.db.</em> If a client is to be permanently removed from the domain, or if all users are to re-register their accounts on the client, the file can be deleted. This will invalidate all information about all users on this client. Before deleting, the two Himmelblau services should be stopped in any case. Once the file has been deleted and the services have been restarted, the database will be rebuilt.</p>
 <p>The database can be reset and the client removed from the domain using the <em>aad-tool</em> command. Listing 19 shows the process:</p>
 <pre><code>------ Listing 19 -----
 root@skyblue:skyblue# aad-tool cache-clear --full 

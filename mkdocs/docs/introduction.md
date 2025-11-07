@@ -96,10 +96,10 @@ Starting with version 2.0 for some distributions ther will be a special selinux 
 
 To test the login for the first time, a Linux client without a graphical user interface is sufficient. Only the packages: 
 
-- himmelblau_<version><distribution>
-- pam-himmelblau_<version><distribution>
-- nss-himmelblau_<version><distribution>  
-- himmelblau-sshd-config<version><distribution>
+- `himmelblau_<version><distribution>`
+- `pam-himmelblau_<version><distribution>`
+- `nss-himmelblau_<version><distribution`
+- `himmelblau-sshd-config_<version><distribution>`
 
 are installed for this purpose. The himmelblau-sshd-config package is only required if login via SSH on the client is to be possible.
 
@@ -137,15 +137,13 @@ shadow: 	files systemd himmelblau
 
 If the packages from the original URL are used, these entries are also generated automatically.
 
-The only thing missing is the domain at which users should log in on the client. To do this, the configuration of Himmelblau is adjusted in the fileethimmelblahimmelblau.conf. Listing 4 shows the change in the file:
+The only thing missing is the domain at which users should log in on the client. To do this, the configuration of Himmelblau is adjusted in the file /etc/himmelblau/himmelblau.conf. Listing 4 shows the change in the file:
 
 ```
 ------- Listing 4 --------
-domains=example.onmicrosoft.com
+domain=example.onmicrosoft.com
 ---------------------------
 ```
-
-NOTE: The Name for this option is *domains* not *domain* but there is an alias so both, *domains* or *domain*, will work.
 
 Only the name of your own domain is required. All other settings can be adopted for the time being. 
 
@@ -213,7 +211,7 @@ Finally, the successful first login is summarized and displayed again.
 
 ![MS Authenticator Successful](ChatGPT Image Nov 6, 2025, 08_28_00 PM.png)
 
-If the app needs to be changed later, the user can do this themselves via the URL https/mysignins.microsoft.cosecurity-info.
+If the app needs to be changed later, the user can do this themselves via the URL https://mysignins.microsoft.com/security-info.
 
 After completing the setup, the first login (here via ssh) to the Linux client follows. However, it is also possible to log in directly to a client integrated in Azure. Even when logging in locally on the client, it is sufficient to specify the CN (the CN is the part before the @ in the UPN); it is not necessary to specify the full name (User Principle Name (UPN)). The name is resolved via NSS, because himmelblau is entered there as the authentication source.
 
@@ -406,13 +404,13 @@ It is important to enter the adjustment at the end of the file, otherwise the pa
 
 It is important to make the change on all clients, otherwise the same user (and also the groups) will have different IDs.  
 
-In addition to adjusting the *idmap_range*, it is possible to set additional parameters. Here, it is also possible to override certain local settings. For example, if a different target directory for the home directories is to be created for each domain, the additional variable *home_prefixdomainnam* ensures that the home directory for all users of this domain is created in a corresponding directory. The variable entry must be placed below the domain name in square brackets. 
+In addition to adjusting the *idmap_range*, it is possible to set additional parameters. Here, it is also possible to override certain local settings. For example, if a different target directory for the home directories is to be created for each domain, the additional variable *home_prefix=/domainname/* ensures that the home directory for all users of this domain is created in a corresponding directory. The variable entry must be placed below the domain name in square brackets. 
 
 Further variables that can be set up specifically for domains are described in the man page for the *himmelblau.conf* file.
 
 ## Resetting a client
 
-All information about all users set up on this client is stored in an SQLite database in the file vacachhimmelblauhimmelblau.cache.db.* If a client is to be permanently removed from the domain, or if all users are to re-register their accounts on the client, the file can be deleted. This will invalidate all information about all users on this client. Before deleting, the two Himmelblau services should be stopped in any case. Once the file has been deleted and the services have been restarted, the database will be rebuilt.
+All information about all users set up on this client is stored in an SQLite database in the file */var/cache/himmelblaud/himmelblau.cache.db.* If a client is to be permanently removed from the domain, or if all users are to re-register their accounts on the client, the file can be deleted. This will invalidate all information about all users on this client. Before deleting, the two Himmelblau services should be stopped in any case. Once the file has been deleted and the services have been restarted, the database will be rebuilt.
 
 The database can be reset and the client removed from the domain using the *aad-tool* command. Listing 19 shows the process:
 

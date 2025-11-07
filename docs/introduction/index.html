@@ -189,7 +189,31 @@
 <h2 id="technical-details">Technical details</h2>
 <p><em>Azure Entra ID</em> was formerly known as <em>Azure Active Directory</em> and manages all user login data in the cloud. There are no longer any local domain controllers; all login information is managed centrally in the cloud. Clients no longer need to be explicitly added to the domain; a client is added when any user logs in for the first time. However, unlike a local login to a local Active Directory, a user registration is only valid on the client on which the user has registered. If a user wants to use a different client, they must first re-register there. To do this, they always need their Entra ID password, which they generated when they first logged in. However, users can generate different PINs on each client. An administrator can also require PINs of different lengths for different clients.</p>
 <p>Azure Entra ID is initially only a service for authentication on Windows clients. It is only through the development of Himmelblau that users with Linux clients can also authenticate with their Intra ID. This requires the authentication processes developed by Microsoft to be implemented on Linux. The extent of the problem that arises can be described here based on the very first login of a new user to a new client:</p>
-<p>When an administrator hands a user a laptop configured with Himmelblau and the user wants to log in from this device for the first time, this is possible. The only problem is that they have to authenticate with a DAG (Device Authorization Grant). Anyone who has ever authenticated with a video service such as Netflix is already familiar with this DAG authentication. With a DAG, the user is shown a code and a URL, and authentication with this information must then be performed from another device. </p>
+<p>When an administrator hands a user a laptop configured with Himmelblau and the user wants to log in from this device for the first time, this is possible. The only problem is that they have to authenticate with a DAG (Device Authorization Grant). Anyone who has ever authenticated with a video service such as Netflix is already familiar with this DAG authentication. With a DAG, the user is shown a code and a URL, and authentication with this information must then be performed from another device.</p>
+<table>
+<thead>
+<tr>
+<th>User’s MFA status</th>
+<th>Device state</th>
+<th>DAG needed?</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MFA <strong>already set up</strong></td>
+<td><strong>Unjoined</strong> new device</td>
+<td><strong>No</strong></td>
+<td>User signs in with normal MFA; join/enroll proceeds.</td>
+</tr>
+<tr>
+<td>MFA <strong>not set up</strong> (brand new user)</td>
+<td><strong>Unjoined</strong> new device</td>
+<td><strong>Yes</strong></td>
+<td>Use DAG once; then complete MFA setup after login.</td>
+</tr>
+</tbody>
+</table>
 <p>With Himmelblau, this is a little more complicated. For the user, the process is almost transparent. With Himmelblau, it is not possible to register a real Hello key with DAG authentication (Microsoft prohibits this). Himmelblau therefore sets up a so-called "disconnected" Hello PIN. This Hello PIN is cryptographically secure, but Himmelblau cannot request new Entra ID credentials in this way, only update existing credentials (a regular Hello key registered with MFA can do both). Himmelblau's offline login and SSO strategy is slightly less effective when the user authenticates in this way. The user will probably not notice this particularly, but they may have to re-authenticate via the DAG every few weeks to maintain their SSO.</p>
 <p>If a user changes their temporary password and sets up MFA from another client first, none of this is necessary, but it does require a client already integrated into Azure for the user's initial authentication.</p>
 <p>One way to circumvent all this is to support a so-called Temporary Access Pass (TAP). This is a concept developed by Microsoft. A TAP is valid for a limited number of uses or for a limited period of time. These can be issued by an administrator so that a user can register with Himmelblau using a Hello PIN. With this method, the user never has Entra ID credentials except those that are exclusively linked to that specific host. From that point on, users authenticate with their device PIN. This PIN grants users MFA SSO in the browser. However, users do not have the option of using this Entra ID to authenticate on another client.</p>

@@ -39,11 +39,11 @@ The file consists of sections headed by a name enclosed in square brackets. Each
 This section contains settings that apply globally to all operations of Himmelblau. 
 
 
-#### domains 
+#### domain 
 
-  A comma-separated list of primary domains for your Azure Entra ID tenants. This parameter is **REQUIRED** for successful authentication. If this option is not specified, no users will be permitted to authenticate. The first user to authenticate to each domain will become the owner of the device object in the directory. Specify ONLY the primary domain for each tenant. Specifying multiple custom domains which belong to a single tenant will cause an idmap range overlap and the himmelblaud daemon will NOT start. If multiple domains are specified, you **MUST** define an **idmap_range** for each domain to avoid conflicts in user and group ID mappings. Overlapping ID ranges will cause the idmapper to throw a critical error and stop the daemon. This safeguard ensures that two users are not mistakenly mapped to the same UID. 
+  The primary Azure Entra ID domain name used for authentication. This value **SHOULD** match the domain name that users enter when signing in (for example, the domain portion of their UPN). In most cases, this will be the primary domain of your Azure Entra ID tenant. If your organization uses multiple verified domains or aliases, choose the one that your users actually use to sign in. This parameter is **REQUIRED** for successful authentication. If it is not specified, no users will be permitted to authenticate. 
 ##### EXAMPLES
-domains = example.com,example2.com [example.com] idmap_range = 5000000-5999999 [example2.com] idmap_range = 6000000-6999999 
+domain = example.com 
 
 
 #### debug 
@@ -62,7 +62,7 @@ pam_allow_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12,5ba4ef1d-e454-4f43-ba7c-
 
 #### id_attr_map 
 
-  Specify whether to map uid/gid based on the object name, the object uuid, or based on the rfc2307 schema extension attributes synchronized from an on-prem Active Directory instance. Mapping by name or by rfc2307 is recommeneded. 
+  Specify whether to map uid/gid based on the object name, the object uuid, or based on the rfc2307 schema extension attributes synchronized from an on-prem Active Directory instance. Mapping by name or by rfc2307 is recommeneded. By name mapping is the default. 
 ##### EXAMPLES
 id_attr_map = &lt;name|uuid|rfc2307&gt; 
 
@@ -72,13 +72,6 @@ id_attr_map = &lt;name|uuid|rfc2307&gt;
   Specify whether to map group IDs (GIDs) based on the object name or object UUID when no **gidNumber** attribute is found in an on-prem Active Directory instance synchronized to Azure Entra ID. This option is only applicable if **id_attr_map** is set to **rfc2307.** If **id_attr_map = rfc2307** and a group does not have a **gidNumber** defined in the directory, this setting determines the fallback method for mapping the group ID. If this option is not set, groups without a **gidNumber** will not be available to NSS. 
 ##### EXAMPLES
 rfc2307_group_fallback_map = &lt;name|uuid&gt; 
-
-
-#### odc_provider 
-
-  Specifies the hostname for sending federationProvider requests. 
-##### EXAMPLES
-odc_provider = odc.officeapps.live.com 
 
 
 #### enable_hello 
@@ -141,18 +134,54 @@ cn_name_mapping = true
 local_groups = sudo,admin 
 
 
+#### sudo_groups 
+
+  A comma-separated list of Azure Entra ID group object IDs whose members should be granted **sudo** access on this system. If **local_sudo_group** is not defined, the local group **sudo** will be used. 
+##### EXAMPLES
+
+
+sudo_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12,5ba4ef1d-e454-4f43-ba7c-6fe6f1601915 
+
+
+#### local_sudo_group 
+
+  The local group that should be given to users in any of the groups specified in sudo_groups. Only has an affect if sudo_groups is set. Removes group from user if they are no longer a member of the specified entra group. 
+
+
 #### logon_script 
 
-  A script that will execute every time a user logs on. Two environment variables are set: USERNAME, and ACCESS_TOKEN. The ACCESS_TOKEN environment variable is an access token for the MS Graph. The token scope config option sets the comma-separated scopes that should be requested for the ACCESS_TOKEN. ACCESS_TOKEN will be empty during offline logon. The return code of the script determines how authentication proceeds. 0 is success, 1 is a soft failure and authentication will proceed, while 2 is a hard failure causing authentication to fail. The **app_id** option **MUST** be set for each domain to ensure the **logon_token_scopes** option has the correct API permissions. Failing to do so will prevent the **logon_script** from executing. 
+  A script that will execute every time a user logs on. Two environment variables are set: USERNAME, and ACCESS_TOKEN. The ACCESS_TOKEN environment variable is an access token for the MS Graph. The token scope config option sets the comma-separated scopes that should be requested for the ACCESS_TOKEN. ACCESS_TOKEN will be empty during offline logon. The return code of the script determines how authentication proceeds. 0 is success, 1 is a soft failure and authentication will proceed, while 2 is a hard failure causing authentication to fail. 
 ##### EXAMPLES
 logon_script = /etc/himmelblau/logon.sh 
 
 
 #### logon_token_scopes 
 
-  A comma-separated list of the scopes to be requested for the ACCESS_TOKEN during logon. These scopes **MUST** correspond to the API permissions assigned to the Entra Id Application specified by the **app_id** domain option. 
+  A comma-separated list of the scopes to be requested for the ACCESS_TOKEN during logon. These scopes **MUST** correspond to the API permissions assigned to the Entra Id Application specified by the **app_id** option. 
 ##### EXAMPLES
 logon_token_scopes = user.read,mail.read 
+
+
+#### app_id 
+
+  Specifies the Azure Entra ID application (client) ID used by Himmelblau for directory operations such as reading extended attributes (for example, the **gidNumber** attribute used in RFC 2307 idmapping). If **logon_token_app_id** is not set, this application ID is also used when requesting access tokens for the user logon script. 
+
+**Note:** In the Azure Portal for the application corresponding to **app_id**, ensure that the redirect URI _himmelblau://Himmelblau.EntraId.BrokerPlugin_ is enabled under “Mobile and desktop applications” in the Authentication section. This allows Himmelblau to correctly handle interactive token redirection. 
+##### EXAMPLES
+
+
+app_id = d023f7aa-d214-4b59-911d-6074de623765 
+
+
+#### logon_token_app_id 
+
+  Specifies an alternate Azure Entra ID application (client) ID to be used exclusively for acquiring **ACCESS_TOKEN** values on behalf of the user during logon script execution. If not set, the value of **app_id** will be used instead. This option allows using a separate application registration that carries the specific API permissions required by logon scripts. 
+
+**Note:** In the Azure Portal for the application corresponding to **logon_token_app_id**, ensure that the redirect URI _https://login.microsoftonline.com/common/oauth2/nativeclient_ is enabled under “Mobile and desktop applications” in the Authentication section. This is required for Himmelblau to obtain tokens via the public client flow. 
+##### EXAMPLES
+
+
+logon_token_app_id = 544e695f-5d78-442e-b14e-e114e95e640c 
 
 
 #### enable_experimental_mfa 
@@ -215,15 +244,15 @@ db_path = /var/cache/himmelblau/himmelblau.cache.db
 
 #### hsm_type 
 
-  Specifies how Himmelblau should handle secure key storage. This option determines whether to use a software-based HSM, a TPM (Trusted Platform Module), or a hybrid approach. The available options are:
+  Specifies how Himmelblau should handle secure key storage. This option determines whether to use a TPM (Trusted Platform Module) bound software-based HSM, a TPM, or a hybrid approach. The available options are:
 
-* **soft** – Use a software-based HSM that encrypts key material locally on the system.
+* **tpm_bound_soft_if_possible** – Use a software-based HSM that encrypts key material locally on the system, but binds the parent AuthCode to the TPM, if available.
 
 * **tpm** – Use a hardware TPM exclusively for storing and binding cryptographic keys.
 
-* **tpm_if_possible** – Attempt to use a hardware TPM if available; if not, fall back to the software HSM. If the TPM has previously been used for key storage, the system will not fall back to the software HSM. The default is **soft** his setting is important for protecting sensitive cryptographic keys in a secure environment, reducing the risk of compromise if the system is breached.
+* **tpm_if_possible** – Attempt to use a hardware TPM if available; if not, fall back to the software HSM. If the TPM has previously been used for key storage, the system will not fall back to the software HSM. The default is **tpm_bound_soft_if_possible** his setting is important for protecting sensitive cryptographic keys in a secure environment, reducing the risk of compromise if the system is breached.Note that the old **soft** option has been deprecated. Environments currently enrolled using **soft** will be automatically migrated to **tpm_bound_soft_if_possible.** To validate whether Himmelblau is utilizing the hardware TPM, run the command `sudo aad-tool tpm` for a status report. 
 ##### EXAMPLES
-hsm_type = soft 
+hsm_type = tpm_bound_soft_if_possible 
 
 
 #### tpm_tcti_name 
@@ -339,75 +368,77 @@ use_etc_skel = false
 ##### EXAMPLES
 selinux = true 
 
-## DOMAIN-SPECIFIC SECTIONS
 
-Overrides can be defined for individual domains by using a section named after the domain in square brackets. 
+#### join_type 
 
-### [example.com]
-
-This section allows customization of specific parameters for the domain **example.com.** Domain-specific sections override global values for the specified domain. 
-
-
-#### odc_provider 
-
-  Overrides the `odc_provider` value for this domain. 
+  Specifies whether the system should join or register with Microsoft Entra ID. 
 ##### EXAMPLES
-[example.com] odc_provider = custom.odcprovider.example.com 
+join_type = register 
 
 
-#### home_prefix 
+#### user_map_file 
 
-  Overrides the `home_prefix` value for this domain. 
+  Specifies the path to a user-mapping file used to map local user accounts to Azure Entra ID user accounts, allowing them to authenticate using Entra ID credentials. Each line of the file must contain a single mapping entry in the format: 
+
+local_username:name@domain 
+
+Blank lines and lines beginning with ‘#’ are ignored. If this option is not set, the default path _/etc/himmelblau/user-map_ is used. 
 ##### EXAMPLES
-[example.com] home_prefix = /home/ 
-
-
-#### home_attr 
-
-  Overrides the `home_attr` value for this domain. 
+user_map_file = /path/to/user_map 
 ##### EXAMPLES
-[example.com] home_attr = UUID 
 
 
-#### home_alias 
+# Example user-map file entries: 
+# local_username:samaccountname@domain 
+alice:alice@contoso.com 
+bob:bob.smith@example.org 
+svcuser:service.account@tenant.local 
 
-  Overrides the `home_alias` value for this domain. 
+## OFFLINE BREAKGLASS CONFIGURATION
+
+The **[offline_breakglass]** section configures Himmelblau’s emergency offline authentication mechanism, used when Azure Entra ID is unavailable. 
+
+Offline breakglass allows Entra ID users who normally require multi-factor authentication (MFA) to authenticate with their cached password when the host is offline. This feature provides a controlled fallback for MFA-only users who would otherwise be unable to sign in during an outage. 
+
+Single-factor authentication (SFA-only) users and Hello-PIN users already have offline sign-in capability, and are unaffected by this setting. This option exists solely to extend limited offline access to MFA-enabled users when network connectivity to Entra ID cannot be established. 
+
+### [offline_breakglass]
+
+This section controls whether and how Himmelblau may perform offline password authentication for MFA-enabled users in emergency conditions. 
+
+
+#### enabled 
+
+  Boolean value specifying whether offline breakglass mode is permitted. 
+
+When set to **true,** Himmelblau will cache secure, salted password verifiers for **MFA-enabled** Entra ID users who successfully authenticate online. These verifiers can then be used to authenticate the same users when Entra ID is unreachable, allowing MFA users to log in using their cached password. 
+
+If this option is set to **false** (the default), Himmelblau will continue to cache password verifiers only for SFA-only users, and MFA-enabled users will **not** be able to authenticate when offline. The **aad-tool**(1) command **aad-tool offline-breakglass** will also have no effect. 
+
+Administrators must enable this option well in advance of an outage, as password verifiers for MFA users are only stored following a successful online authentication. It is too late to enable this feature once Entra ID is already unreachable. 
+
+Enabling offline breakglass mode carries significant risk. If a device is stolen or compromised, and network access to Entra ID is blocked, attackers could effectively disable MFA protection by forcing the system into a simple password-only (SFA) authentication state. Administrators should enable this mode **only after careful consideration** of their organization’s security posture and offline access requirements. 
+
+This feature does not apply to passwordless accounts. If an MFA user signs in using a passwordless method, no password hash exists to cache, and offline breakglass cannot function for that user. 
 ##### EXAMPLES
-[example.com] home_alias = SPN 
 
 
-#### shell 
+[offline_breakglass] 
+enabled = true 
+ttl = 2h 
+# Allow MFA users to authenticate offline for up to 2 hours 
 
-  Overrides the `shell` value for this domain. 
+
+#### ttl 
+
+  Specifies how long breakglass mode should remain active once triggered. The value may include a suffix to indicate the unit of time: **m** for minutes, **h** for hours, or **d** for days. If no suffix is provided, the value is interpreted as seconds. After the specified period, offline breakglass mode automatically expires and normal authentication resumes. 
 ##### EXAMPLES
-[example.com] shell = /bin/bash 
 
 
-#### idmap_range 
-
-  Overrides the `idmap_range` value for this domain. When this option is modified, you **SHOULD** run: 
-
-sudo aad-tool cache-clear --really To ensure that old cached ID mappings are cleared, preventing potential UID overlaps caused by stale cache data. 
-##### EXAMPLES
-[example.com] idmap_range = 5000000-5999999 
-
-
-#### logon_token_app_id 
-
-  Specifies the Entra ID application ID to be used when requesting an ACCESS_TOKEN on behalf of the user for the logon script. If not set, the domain’s **app_id** will be used instead. This option allows configuring a separate application ID specifically for logon token requests, ensuring the correct API permissions are applied. 
-
-**Note:** In the Azure Portal for the application corresponding to **logon_token_app_id**, ensure that the redirect URI _https://login.microsoftonline.com/common/oauth2/nativeclient_ is enabled in the application's Authentication section under “Mobile and desktop applications.” This is required so that Himmelblau can obtain the necessary tokens. 
-##### EXAMPLES
-[example.com] logon_token_app_id = 544e695f-5d78-442e-b14e-e114e95e640c 
-
-
-#### app_id 
-
-  Specifies the Entra ID application identifier that permits Himmelblau to fetch the **gidNumber** extended attribute using the **GroupMember.Read.All** API permission for rfc2307 idmapping. If **logon_token_app_id** is not set, this app_id will also be used for requesting access tokens for the logon script. 
-
-**Note:** For the application corresponding to **app_id**, ensure that the redirect URI _himmelblau://Himmelblau.EntraId.BrokerPlugin_ is added in the application's Authentication section under “Mobile and desktop applications” in the Azure Portal. This allows Himmelblau to properly handle token redirection for the extended attribute lookups. 
-##### EXAMPLES
-[example.com] app_id = d023f7aa-d214-4b59-911d-6074de623765 
+[offline_breakglass] 
+enabled = true 
+ttl = 1d 
+# Permit offline MFA logins for up to 24 hours after activation 
 
 ## SEE ALSO
 

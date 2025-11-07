@@ -10,7 +10,7 @@ all: man
 
 MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 HB_DIR       := $(abspath $(MAKEFILE_DIR)/himmelblau)
-LATEST_STABLE:= stable-1.x
+LATEST_STABLE:= stable-2.x
 
 MAN_DIR      := $(HB_DIR)/man
 MAN_OUT_DIR  := docs/reference

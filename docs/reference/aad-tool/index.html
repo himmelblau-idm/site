@@ -212,9 +212,17 @@
 </ul>
 <p>Manage the static idmapping cache used to map Entra ID accounts to static UID/GID values. This is useful for migrations from on-prem AD to Entra ID, where existing UID/GID mappings need to be preserved </p>
 <ul>
+<li>offline-breakglass </li>
+</ul>
+<p>Activate or deactivate Himmelblau's offline breakglass mode </p>
+<ul>
 <li>status </li>
 </ul>
 <p>Check that the himmelblaud daemon is online and able to connect correctly to the himmelblaud server </p>
+<ul>
+<li>tpm </li>
+</ul>
+<p>Check whether Himmelblau is utilizing the TPM </p>
 <ul>
 <li>version </li>
 </ul>
@@ -385,7 +393,7 @@
 <p>Copy the Value (not Secret ID) immediately. You won't be able to see it again. </p>
 </li>
 <li>
-<p>Use that value with this command to store it in Himmelblau???s encrypted cache. </p>
+<p>Use that value with this command to store it in Himmelblau's encrypted cache. </p>
 </li>
 </ol>
 <p>When this cred needs renewed in the future, simple run this command again to replace the expired secret. </p>
@@ -442,22 +450,47 @@
 <h4 id="-h-help_5">-h<strong>, </strong>--help</h4>
 <p>Print help </p>
 <h2 id="subcommand_17">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>status </em>[<em>OPTIONS</em>]</strong> </p>
+<p><strong>aad-tool <em>offline-breakglass </em>[<em>OPTIONS</em>]</strong> </p>
 <h3 id="description_19">DESCRIPTION</h3>
-<p>Check that the himmelblaud daemon is online and able to connect correctly to the himmelblaud server </p>
+<p>Activate or deactivate Himmelblau's offline breakglass mode. </p>
+<p>This command enables temporary offline password authentication when Azure Entra ID is unreachable. When invoked, Himmelblau enters a controlled "breakglass" state, allowing cached Entra ID user passwords to be used for login until the TTL expires. </p>
+<p>Breakglass mode can only be activated if it was previously enabled in <code>/etc/himmelblau/himmelblau.conf</code> under the <code>[offline_breakglass]</code> section. If the feature was disabled, calling this command will have no effect, and no password verifiers will have been cached. </p>
+<p>Once activated, Himmelblau will: * Allow cached Entra ID users to log in using their known password. * Automatically exit breakglass mode after the TTL expires or once Entra ID connectivity has been restored. </p>
+<p>Use <code>--ttl</code> to override the configured duration for this session. The TTL value accepts a time unit suffix (<code>m</code>, <code>h</code>, or <code>d</code>) and defaults to the value defined in <code>himmelblau.conf</code> if omitted. </p>
+<p>To manually exit breakglass mode before TTL expiry, run: aad-tool offline-breakglass <strong>--ttl</strong> 0 </p>
 <h3 id="options_18">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> <strong>--ttl</strong> &lt;TTL&gt; <strong>-h</strong>, <strong>--help</strong> </p>
+<p>Print help (see a summary with '-h') </p>
+<h2 id="examples">EXAMPLES</h2>
+<h1 id="activate-breakglass-mode-for-2-hours-aad-tool-offline-breakglass-ttl-2h">Activate breakglass mode for 2 hours aad-tool offline-breakglass --ttl 2h</h1>
+<h1 id="force-disable-breakglass-mode-immediately-aad-tool-offline-breakglass-ttl-0">Force disable breakglass mode immediately aad-tool offline-breakglass --ttl 0</h1>
+<h1 id="use-the-configured-default-ttl-from-himmelblauconf-aad-tool-offline-breakglass">Use the configured default TTL (from himmelblau.conf) aad-tool offline-breakglass</h1>
+<p>Notes: - If <code>[offline_breakglass] enabled = false</code> in himmelblau.conf, this command will do nothing. - Himmelblau will not cache Entra ID password hashes unless offline breakglass has been explicitly enabled in advance. - This feature should only be used for emergency access during verified outages. </p>
+<h2 id="subcommand_18">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>status </em>[<em>OPTIONS</em>]</strong> </p>
+<h3 id="description_20">DESCRIPTION</h3>
+<p>Check that the himmelblaud daemon is online and able to connect correctly to the himmelblaud server </p>
+<h3 id="options_19">OPTIONS</h3>
 <p><strong>-d</strong>, <strong>--debug</strong> </p>
 <h4 id="-h-help_6">-h<strong>, </strong>--help</h4>
 <p>Print help </p>
-<h2 id="subcommand_18">SUBCOMMAND</h2>
+<h2 id="subcommand_19">SUBCOMMAND</h2>
+<p><strong>aad-tool <em>tpm </em>[<em>OPTIONS</em>]</strong> </p>
+<h3 id="description_21">DESCRIPTION</h3>
+<p>Check whether Himmelblau is utilizing the TPM </p>
+<h3 id="options_20">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong> </p>
+<h4 id="-h-help_7">-h<strong>, </strong>--help</h4>
+<p>Print help </p>
+<h2 id="subcommand_20">SUBCOMMAND</h2>
 <p><strong>aad-tool <em>user set-posix-attrs </em>[<em>OPTIONS</em>] <em>--schema-client-id &lt;SCHEMA_CLIENT_ID&gt; --user-id &lt;USER_ID&gt;</em></strong> </p>
-<h3 id="description_20">DESCRIPTION</h3>
+<h3 id="description_22">DESCRIPTION</h3>
 <p>Sets POSIX-related attributes on a specified Entra ID user object. </p>
 <p>This command updates POSIX attributes (<code>uidNumber</code>, <code>gidNumber</code>, <code>unixHomeDirectory</code>, <code>loginShell</code>, and <code>gecos</code>) on the Entra ID user identified by <code>--user-id</code>, which must be a valid Object ID or UPN. </p>
 <p>You must also provide the <code>--schema-client-id</code>, which identifies the application where the extension properties were registered. This value must be the Client ID of the application used for schema registration. The application associated with <code>--schema-client-id</code> must supply <code>User.ReadWrite.All</code> permissions in the tenant. </p>
 <p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command must be run as <code>root</code> to impersonate another user. </p>
 <p>This command must be run from a device that has already been joined to Entra ID. </p>
-<h3 id="options_19">OPTIONS</h3>
+<h3 id="options_21">OPTIONS</h3>
 <p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--schema-client-id</strong> &lt;SCHEMA_CLIENT_ID&gt; <strong>--user-id</strong> &lt;USER_ID&gt; <strong>--uid</strong> &lt;UID&gt; <strong>--gid</strong> &lt;GID&gt; <strong>--home</strong> &lt;HOME&gt; <strong>--shell</strong> &lt;SHELL&gt; <strong>--gecos</strong> &lt;GECOS&gt; <strong>-h</strong>, <strong>--help</strong> </p>
 <p>Print help (see a summary with '-h') </p>
 <h2 id="see-also">SEE ALSO</h2>

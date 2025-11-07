@@ -161,21 +161,31 @@
             <div class="section" itemprop="articleBody">
               
                 <h2 id="name">NAME</h2>
-<p><strong>pam_himmelblau</strong> [em] enable Azure Entra ID authentication via Himmelblau </p>
+<p><strong>pam_himmelblau</strong> (em enable Azure Entra ID authentication via Himmelblau </p>
 <h2 id="synopsis">SYNOPSIS</h2>
 <p><strong>pam_himmelblau.so</strong> [debug] [use_first_pass] [ignore_unknown_user] [mfa_poll_prompt] [no_hello_pin] </p>
 <h2 id="description">DESCRIPTION</h2>
 <p><strong>pam_himmelblau</strong> is a PAM module that authenticates users against Microsoft Azure Entra ID using the Himmelblau daemon (<code>himmelblaud</code>). </p>
 <h2 id="options">OPTIONS</h2>
-<p><strong>debug</strong> </p>
+<ul>
+<li><strong>debug</strong> </li>
+</ul>
 <p>Enables verbose logging to stdout. </p>
-<p><strong>use_first_pass</strong> </p>
+<ul>
+<li><strong>use_first_pass</strong> </li>
+</ul>
 <p>Uses a password already provided by a previous PAM module as either a Linux Hello PIN or an Entra Id password, instead of prompting again. </p>
-<p><strong>ignore_unknown_user</strong> </p>
+<ul>
+<li><strong>ignore_unknown_user</strong> </li>
+</ul>
 <p>Returns CR]PAM_IGNORER] for users not in Entra ID, allowing fallback to local authentication via subsequent PAM modules. </p>
-<p><strong>mfa_poll_prompt</strong> </p>
+<ul>
+<li><strong>mfa_poll_prompt</strong> </li>
+</ul>
 <p>Workaround for OpenSSH Bug 2876, which prevents PAM messages from being flushed to stdout until after sending a prompt for input. This workaround causes pam to prompt the user to `press enter to continue' when polling on another device for MFA. </p>
-<p><strong>no_hello_pin</strong> </p>
+<ul>
+<li><strong>no_hello_pin</strong> </li>
+</ul>
 <p>Disables Linux Hello PIN login for this service (e.g., for <code>sudo</code> or <code>ssh</code>), even if Hello is configured globally. </p>
 <h2 id="pam-configuration">PAM CONFIGURATION</h2>
 <p>Configuring PAM ensures authentication requests go through Entra ID when appropriate. </p>
@@ -183,14 +193,14 @@
 <p>On Ubuntu/Debian: </p>
 <pre><code>sudo pam-auth-update
 </code></pre>
-<p>Enable [lq]Azure authentication[rq] and verify PAM files. </p>
+<p>Enable “Azure authentication” and verify PAM files. </p>
 <p>On openSUSE Tumbleweed or SLE: </p>
 <pre><code>pam-config --add --himmelblau
 </code></pre>
 <p>The <code>aad-tool configure-pam</code> command also inserts recommended directives (dry-run unless <code>--really</code> is used). </p>
 <h3 id="manual-configuration">Manual configuration</h3>
 <p>In <code>/etc/pam.d/common-auth</code>, ensure that the <code>pam_himmelblau.so</code> module is placed after other authentication methods (such as <code>pam_unix.so</code>). Ensure that other authentication modules are not set to <code>required</code>, as this could cause authentication to fail prior to PAM communicating with Entra ID. Include the <code>ignore_unknown_user</code> option for Himmelblau. Ensure <code>pam_deny.so</code> is placed after all modules, so that unknown users are not implicitly allowed. </p>
-<h3 id="note-if-you-intend-to-use-hello-or-passwordless-authentication-itcqs-recommended-that-pam_himmelblauso-be-placed-before-pam_unixso-in-the-pam-auth-stack-but-always-after-pam_localuserso-otherwise-pam_unix-will-unnecessarily-prompt-for-a-password"><strong>Note:</strong> If you intend to use Hello or Passwordless authentication, it[cq]s recommended that <code>pam_himmelblau.so</code> be placed before <code>pam_unix.so</code> in the pam <code>auth</code> stack (but always after <code>pam_localuser.so</code>), otherwise <code>pam_unix</code> will unnecessarily prompt for a password.</h3>
+<h3 id="note-if-you-intend-to-use-hello-or-passwordless-authentication-itcqs-recommended-that-pam_himmelblauso-be-placed-before-pam_unixso-in-the-pam-auth-stack-but-always-after-pam_localuserso-otherwise-pam_unix-will-unnecessarily-prompt-for-a-password"><strong>Note:</strong> If you intend to use Hello or Passwordless authentication, it(cqs recommended that <code>pam_himmelblau.so</code> be placed before <code>pam_unix.so</code> in the pam <code>auth</code> stack (but always after <code>pam_localuser.so</code>), otherwise <code>pam_unix</code> will unnecessarily prompt for a password.</h3>
 <pre><code>auth        required      pam_env.so
 auth        [default=1 ignore=ignore success=ok] pam_localuser.so
 auth        sufficient    pam_unix.so nullok try_first_pass
@@ -218,20 +228,34 @@ password    sufficient  pam_unix.so use_authtok nullok shadow try_first_pass
 password    required    pam_deny.so
 </code></pre>
 <h2 id="return-values">RETURN VALUES</h2>
-<p><strong>PAM_SUCCESS</strong> </p>
+<ul>
+<li><strong>PAM_SUCCESS</strong> </li>
+</ul>
 <p>Authentication or Hello PIN update succeeded. </p>
-<p><strong>PAM_AUTH_ERR</strong> </p>
+<ul>
+<li>B]PAM_AUTH_ERRR] </li>
+</ul>
 <p>Authentication failed. This may include incorrect credentials, rejected MFA, or other auth-layer failures. </p>
-<p><strong>PAM_USER_UNKNOWN</strong> </p>
+<ul>
+<li>B]PAM_USER_UNKNOWNR] </li>
+</ul>
 <p>The user was not found in Entra ID. This is bypassed if the <code>ignore_unknown_user</code> option is specified. </p>
-<p><strong>PAM_IGNORE</strong> </p>
+<ul>
+<li>B]PAM_IGNORER] </li>
+</ul>
 <p>The module was instructed to skip processing (e.g., due to <code>ignore_unknown_user</code>). This allows fallback to other PAM modules. </p>
-<p><strong>PAM_SERVICE_ERR</strong> </p>
+<ul>
+<li>B]PAM_SERVICE_ERRR] </li>
+</ul>
 <p>A configuration or initialization error occurred in the module, or a required daemon was unreachable. </p>
-<p><strong>PAM_CRED_INSUFFICIENT</strong> </p>
+<ul>
+<li>B]PAM_CRED_INSUFFICIENTR] </li>
+</ul>
 <p>The user did not meet the required credential policy. </p>
-<p><strong>PAM_ABORT</strong> </p>
-<p>A critical, unrecoverable failure occurred[em]such as a panic inside the <code>himmelblaud</code> service. </p>
+<ul>
+<li>B]PAM_ABORTR] </li>
+</ul>
+<p>A critical, unrecoverable failure occurred(emsuch as a panic inside the <code>himmelblaud</code> service. </p>
 <h2 id="see-also">SEE ALSO</h2>
 <p><strong>himmelblaud(8)</strong>, <strong>aad-tool(1)</strong>, <strong>himmelblau.conf(5)</strong>, <strong>pam(8)</strong> </p>
 <h2 id="author">AUTHOR</h2>

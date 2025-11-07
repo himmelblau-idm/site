@@ -1,7 +1,7 @@
 
 ## NAME
 
-**pam_himmelblau** \[em] enable Azure Entra ID authentication via Himmelblau 
+**pam_himmelblau** \(em enable Azure Entra ID authentication via Himmelblau 
 
 ## SYNOPSIS
 
@@ -13,23 +13,27 @@
 
 ## OPTIONS
 
-**debug** 
+* **debug** 
 
 Enables verbose logging to stdout. 
 
-**use_first_pass** 
+
+* **use_first_pass** 
 
 Uses a password already provided by a previous PAM module as either a Linux Hello PIN or an Entra Id password, instead of prompting again. 
 
-**ignore_unknown_user** 
+
+* **ignore_unknown_user** 
 
 Returns CR]PAM_IGNORER] for users not in Entra ID, allowing fallback to local authentication via subsequent PAM modules. 
 
-**mfa_poll_prompt** 
+
+* **mfa_poll_prompt** 
 
 Workaround for OpenSSH Bug 2876, which prevents PAM messages from being flushed to stdout until after sending a prompt for input. This workaround causes pam to prompt the user to `press enter to continue' when polling on another device for MFA. 
 
-**no_hello_pin** 
+
+* **no_hello_pin** 
 
 Disables Linux Hello PIN login for this service (e.g., for `sudo` or `ssh`), even if Hello is configured globally. 
 
@@ -45,7 +49,7 @@ On Ubuntu/Debian:
 sudo pam-auth-update
 ```
 
-Enable \[lq]Azure authentication\[rq] and verify PAM files. 
+Enable “Azure authentication” and verify PAM files. 
 
 On openSUSE Tumbleweed or SLE: 
 
@@ -59,7 +63,7 @@ The `aad-tool configure-pam` command also inserts recommended directives (dry-ru
 
 In `/etc/pam.d/common-auth`, ensure that the `pam_himmelblau.so` module is placed after other authentication methods (such as `pam_unix.so`). Ensure that other authentication modules are not set to `required`, as this could cause authentication to fail prior to PAM communicating with Entra ID. Include the `ignore_unknown_user` option for Himmelblau. Ensure `pam_deny.so` is placed after all modules, so that unknown users are not implicitly allowed. 
 
-### **Note:** If you intend to use Hello or Passwordless authentication, it\[cq]s recommended that `pam_himmelblau.so` be placed before `pam_unix.so` in the pam `auth` stack (but always after `pam_localuser.so`), otherwise `pam_unix` will unnecessarily prompt for a password.
+### **Note:** If you intend to use Hello or Passwordless authentication, it\(cqs recommended that `pam_himmelblau.so` be placed before `pam_unix.so` in the pam `auth` stack (but always after `pam_localuser.so`), otherwise `pam_unix` will unnecessarily prompt for a password.
 
 ```
 auth        required      pam_env.so
@@ -100,33 +104,39 @@ password    required    pam_deny.so
 
 ## RETURN VALUES
 
-**PAM_SUCCESS** 
+* **PAM_SUCCESS** 
 
 Authentication or Hello PIN update succeeded. 
 
-**PAM_AUTH_ERR** 
+
+* B]PAM_AUTH_ERRR] 
 
 Authentication failed. This may include incorrect credentials, rejected MFA, or other auth-layer failures. 
 
-**PAM_USER_UNKNOWN** 
+
+* B]PAM_USER_UNKNOWNR] 
 
 The user was not found in Entra ID. This is bypassed if the `ignore_unknown_user` option is specified. 
 
-**PAM_IGNORE** 
+
+* B]PAM_IGNORER] 
 
 The module was instructed to skip processing (e.g., due to `ignore_unknown_user`). This allows fallback to other PAM modules. 
 
-**PAM_SERVICE_ERR** 
+
+* B]PAM_SERVICE_ERRR] 
 
 A configuration or initialization error occurred in the module, or a required daemon was unreachable. 
 
-**PAM_CRED_INSUFFICIENT** 
+
+* B]PAM_CRED_INSUFFICIENTR] 
 
 The user did not meet the required credential policy. 
 
-**PAM_ABORT** 
 
-A critical, unrecoverable failure occurred\[em]such as a panic inside the `himmelblaud` service. 
+* B]PAM_ABORTR] 
+
+A critical, unrecoverable failure occurred\(emsuch as a panic inside the `himmelblaud` service. 
 
 ## SEE ALSO
 

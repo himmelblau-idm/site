@@ -10,7 +10,6 @@ Please select your Linux distribution:
 
 <select id="linux-distro">
     <option value="" selected>Select a distribution</option>
-	<option value="fedora41">Fedora 41</option>
 	<option value="fedora42">Fedora 42</option>
     <option value="fedora43">Fedora 43</option>
 	<option value="rawhide">Fedora Rawhide</option>

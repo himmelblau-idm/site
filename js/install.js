@@ -301,10 +301,7 @@ async function provideRepoInstructions() {
 	linksContainer.appendChild(installPre);
 
 	const opt = document.createElement('p');
-	opt.textContent =
-		channel === 'nightly'
-			? 'Optional packages: himmelblau-sshd-config (for SSH integration), himmelblau-qr-greeter (for DAG QR integration in GDM), himmelblau-sso (for browser single sign-on), o365 (Office 365 web apps), and himmelblau-selinux (SELinux module).'
-			: 'Optional packages: himmelblau-sshd-config (for SSH integration), himmelblau-qr-greeter (for DAG QR integration in GDM), and himmelblau-sso (for browser single sign-on).';
+	opt.textContent = 'Optional packages: himmelblau-sshd-config (for SSH integration), himmelblau-qr-greeter (for DAG QR integration in GDM), himmelblau-sso (for browser single sign-on), o365 (Office 365 web apps), and himmelblau-selinux (SELinux module).';
 	linksContainer.appendChild(opt);
 
 	addCopyButtons();

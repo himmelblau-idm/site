@@ -20,6 +20,9 @@ function isDeb(d) {
 function isNix(d) {
 	return d === 'nixos';
 }
+function isFedora(d) {
+  return d === 'fedora42' || d === 'fedora43' || d === 'rawhide';
+}
 
 function baseUrlFor(channel) {
 	return channel === 'nightly'
@@ -121,6 +124,9 @@ async function provideRepoInstructions() {
 		updateCmd = 'sudo nixos-rebuild switch --upgrade';
 	} else if (distro.startsWith('sle') || distro === 'tumbleweed') {
 		updateCmd = 'sudo zypper update';
+	} else if (isFedora(distro)) {
+		// DNF5 everywhere for our Fedora targets
+		updateCmd = 'sudo dnf upgrade --refresh';
 	} else {
 		updateCmd = 'sudo dnf update';
 	}
@@ -271,6 +277,17 @@ async function provideRepoInstructions() {
 				Object.assign(document.createElement('pre'), {
 					textContent: cmd,
 				}),
+			),
+		);
+	} else if (isFedora(distro)) {
+		const repoFileUrl = `${baseUrl}/rpm/${distro}/himmelblau.repo`;
+		[
+			`sudo rpm --import ${gpgKeyUrl}`,
+			`sudo dnf config-manager addrepo --from-repofile=${repoFileUrl}`,
+			'sudo dnf makecache',
+		].forEach((cmd) =>
+			linksContainer.appendChild(
+				Object.assign(document.createElement('pre'), { textContent: cmd }),
 			),
 		);
 	} else {

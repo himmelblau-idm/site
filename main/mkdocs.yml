@@ -21,7 +21,6 @@ extra_css:
   - assets/feedback.css
 extra_javascript:
   - assets/feedback.js
-  - assets/render_logo.js
 nav:
   - Home: index.md
   - Downloads: downloads.md

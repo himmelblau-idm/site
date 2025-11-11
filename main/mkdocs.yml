@@ -9,7 +9,7 @@ theme:
   font:
     text: Poppins
     code: Courier Prime
-  logo: assets/tux.png
+  logo: assets/himmelblau_logo.svg
   favicon: assets/favicon.ico
   features:
     - navigation.tabs

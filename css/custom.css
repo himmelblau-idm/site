@@ -12,6 +12,11 @@ body {
   background-color: #1a1a1a; /* fallback for dark theme */
 }
 
+/* Hide the site name only in the top header bar */
+.md-header__title .md-header__ellipsis {
+  display: none !important;
+}
+
 /* Soften and blend the header */
 .md-header {
   backdrop-filter: blur(6px);
@@ -190,6 +195,7 @@ body[data-home="true"] .cta-list {
 
 .md-header__button.md-logo img {
   height: 2.5rem;
+  filter: invert(1) brightness(2);
 }
 
 .md-header__topic {

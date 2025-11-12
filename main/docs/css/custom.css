@@ -156,13 +156,48 @@ a.button:hover {
 }
 
 body[data-home="true"] .md-content__inner {
-  position: absolute;
-  bottom: .5rem;
-  left: 0;
-  right: 0;
-  padding: 1rem;
+  position: static;
+  bottom: auto;
+  left: auto;
+  right: auto;
+  padding: 0;
   background: none;
   box-shadow: none;
+}
+
+/* Home: don't push content down to compensate for fixed header/tabs */
+body[data-home="true"] .md-main,
+body[data-home="true"] .md-main__inner,
+body[data-home="true"] .md-content {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+:root {
+  --hb-header-h: 3.2rem;  /* MkDocs Material header ≈ 3.2rem */
+  --hb-tabs-h: 2.2rem;    /* Set to 0 if you don't show tabs */
+}
+
+/* Replace your current .home-hero min-height line with this: */
+body[data-home="true"] .home-hero {
+  min-height: calc(100svh - var(--hb-header-h) - var(--hb-tabs-h));
+  box-sizing: border-box;   /* keep your padding inside the height */
+  display: grid;
+  grid-template: 1fr / 1fr;
+  padding: 1rem;
+  background: none;
+  margin-left: calc(50% - 50vw);   /* breakout left */
+  margin-right: calc(50% - 50vw);  /* breakout right */
+  padding-inline: max(1rem, env(safe-area-inset-left)); /* side padding + notch safe */
+}
+
+/* Hero card sits bottom-left inside that panel */
+body[data-home="true"] .home-hero .hero-card {
+  align-self: end;      /* bottom */
+  justify-self: start;  /* left */
+  max-width: clamp(20rem, 40vw, 48rem);
+  margin: 0 0 2rem 0;
+  margin-left: 1rem;
 }
 
 body[data-home="true"] h1 {
@@ -173,17 +208,101 @@ body[data-home="true"] h1 {
   letter-spacing: -0.5px;
 }
 
-body[data-home="true"] .md-footer {
-  display: none;
+/* Slider container */
+body[data-home="true"] .hb-slider {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 2rem;
 }
 
-body[data-home="true"] .cta-list {
-  margin-left: 0;
-  padding-left: 1em;
-  text-align: right;
-  list-style-position: outside;
-  font-size: 1.25em;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2), 0 0 6px rgba(255, 165, 0, 0.3);
+/* Horizontal track with scroll-snap */
+body[data-home="true"] .hb-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-snap-stop: always;   /* ✅ hard-stop on each slide */
+  scroll-behavior: smooth;
+  gap: 0;
+  outline: none;
+  scrollbar-width: none;
+  padding: 0;
+}
+body[data-home="true"] .hb-track::-webkit-scrollbar { display: none; }
+
+body[data-home="true"] .hb-track::before,
+body[data-home="true"] .hb-track::after {
+  content: "";
+  flex: 0 0 50%;
+}
+
+body[data-home="true"] .hb-slide {
+  flex: 0 0 100%;               /* one slide per viewport width */
+  scroll-snap-align: center;    /* center each slide */
+  margin: 0;
+  position: relative;           /* for arrows */
+}
+
+body[data-home="true"] .hb-slide img {
+  width: 100%;
+  display: block;
+  aspect-ratio: 16/9;   /* remove if you want natural height */
+  object-fit: cover;
+  border-radius: .75rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+body[data-home="true"] .hb-slide figcaption { font-size: .95rem; opacity: .9; margin-top: .5rem; }
+
+/* Dots */
+body[data-home="true"] .hb-dots {
+  display: flex; gap: .5rem; justify-content: center; margin-top: .75rem; user-select: none;
+}
+body[data-home="true"] .hb-dots a {
+  text-decoration: none; font-size: 1.5rem; line-height: 1; opacity: .45;
+  transition: opacity .2s ease, transform .2s ease;
+}
+body[data-home="true"] .hb-dots a:hover, body[data-home="true"] .hb-dots a:focus {
+  opacity: .9; transform: scale(1.1);
+}
+
+/* Reuse your .hb-prev/.hb-next look, but position per slide */
+body[data-home="true"] .hb-slide .hb-prev,
+body[data-home="true"] .hb-slide .hb-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  font-size: 1.75rem;
+  line-height: 1;
+  border-radius: 999px;
+  background: rgba(0,0,0,.35);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  transition: opacity .2s ease, transform .2s ease, background .2s ease;
+  opacity: .85;
+  z-index: 2;
+}
+body[data-home="true"] .hb-slide .hb-prev:hover,
+body[data-home="true"] .hb-slide .hb-next:hover {
+  opacity: 1; transform: translateY(-50%) scale(1.05);
+}
+body[data-home="true"] .hb-slide .hb-prev { left: .5rem; }
+body[data-home="true"] .hb-slide .hb-next { right: .5rem; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  body[data-home="true"] .hb-track { scroll-behavior: auto; }
+}
+
+/* Ensure content layers above the gradient bar */
+.md-content,
+.md-header,
+.md-tabs {
+  position: relative;
+  z-index: 1;
 }
 
 .md-button {

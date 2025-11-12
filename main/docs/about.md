@@ -6,28 +6,19 @@ hide:
 
 # About
 
-## Origins and Mission
+## How Himmelblau Came to Be
 
-Himmelblau was conceived to address the growing need for seamless integration between Linux environments and Microsoft’s Azure Entra ID. Himmelblau bridges compatibility barriers, delivering robust Azure Entra ID authentication for Linux systems.
+In late 2022 and early 2023, several Linux vendors met with Microsoft to explore Entra ID integration for Linux. Microsoft's proposal centered on a proprietary "broker" the community would be expected to integrate with. The debates around that direction - and concerns about quality, security, and openness - left a clear gap for a community-driven alternative. Himmelblau started in 2023 to fill that vacuum with a transparent, community-driven implementation that prioritizes security and quality.
 
-Originating as a fork of the **Kanidm OAuth2 client** led by **William Brown**, a SUSE engineer, Himmelblau tailors the Kanidm framework for Azure Entra ID, leveraging its proven reliability for cloud and hybrid authentication.
+Early on, Himmelblau reused client components from **Kanidm** (a Rust identity platform), then evolved quickly to address Entra ID and Intune specifics; the two projects continue to share a number of dependencies.
 
-## Key Features
+Samba's role has been integral from day one. With continuous discussions happening within the Samba Team, Himmelblau offers a path that some engineers view as the future direction for Samba - keeping the project relevant as the ecosystem evolves.
 
-Himmelblau includes several distinct features designed to support robust and seamless integration with Azure Entra ID for Linux environments:
-
-- **Azure Entra ID Integration:** Native support for Azure Entra ID, enabling multi-factor authentication (MFA), single sign-on (SSO), secure token management, and compliance with modern enterprise identity standards.
-- **Kerberos Compatibility:** Extends Azure Entra ID functionality to include Kerberos authentication, supporting both cloud and on-premises use cases.
-- **Open Source and Modular:** Built on the open-source principles established by Kanidm, Himmelblau continues the tradition of transparency, flexibility, and community-driven innovation.
-- **Advanced Roadmap:** Future development plans include adding passwordless MFA, improving Kerberos caching, and integrating with Gnome Online Accounts to enhance user experience and security.
-
-## Kanidm’s Legacy
-
-Led by **William Brown**, Kanidm provided secure, open-source identity services for Linux environments, forming the foundation on which Himmelblau builds.
+> **Name.** "Himmelblau" is German for "sky-blue/Azure," a playful nod to Microsoft's cloud while signaling that our implementation is open.
 
 ## The Team Behind Himmelblau
 
-Key contributors include **David Mulder** and **William Brown**, backed by a team of SUSE engineers and open-source contributors.
+Key engineers include **David Mulder**, **Samuel Cabrero** and **William Brown**, backed by a team of community contributors.
 
 ## Supported Platforms
 
@@ -35,8 +26,8 @@ Himmelblau supports multiple enterprise and community Linux distributions such a
 
 ## Vision
 
-Himmelblau envisions seamless integration of Linux systems with modern identity platforms, ensuring parity with Windows environments in terms of authentication security and ease.
+Himmelblau exists to make Linux work cleanly with Entra ID and Intune - open, auditable, and production-ready - so admins get Windows-grade login, MFA, and device management without vendor lock-in.
 
 ## Get Involved
 
-Contribute to Himmelblau’s development by visiting our [GitHub page](https://github.com/himmelblau-idm/himmelblau).
+Contribute to Himmelblau's development by visiting our [GitHub page](https://github.com/himmelblau-idm/himmelblau).

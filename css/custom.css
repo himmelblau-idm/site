@@ -12,6 +12,51 @@ body {
   background-color: #1a1a1a; /* fallback for dark theme */
 }
 
+/* 1a) Clear individual backgrounds so they merge visually */
+.md-header,
+.md-tabs {
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none;           /* let the shared layer do the work */
+  -webkit-backdrop-filter: none;
+}
+
+/* 1b) One shared “glass” background for both bars */
+:root{
+  --hb-header-h: 64px; /* adjust if your header is taller/shorter */
+  --hb-tabs-h: 48px;   /* desktop tabs height; will be 0 on mobile */
+  --hb-nav-bg: rgba(12, 28, 52, 0.78); /* dark translucent */
+  --hb-nav-bg-strong: rgba(12, 28, 52, 0.92);
+  --hb-nav-blur: 8px;
+}
+
+/* fixed overlay behind header + tabs */
+.md-header::before{
+  content:"";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: calc(var(--hb-header-h) + var(--hb-tabs-h));
+  background: linear-gradient(0deg, var(--hb-nav-bg) 0%, var(--hb-nav-bg-strong) 100%);
+  backdrop-filter: blur(var(--hb-nav-blur));
+  -webkit-backdrop-filter: blur(var(--hb-nav-blur));
+  z-index: -1;           /* sits behind the header/tabs content */
+  pointer-events: none;
+}
+
+/* optional: hairline at the bottom of the block for depth */
+.md-header::after{
+  content:"";
+  position: fixed;
+  left: 0; right: 0;
+  top: calc(var(--hb-header-h) + var(--hb-tabs-h) - 1px);
+  height: 1px;
+  background: rgba(255,255,255,.08);
+  pointer-events: none;
+}
+
+/* When tabs collapse (Material’s desktop → mobile breakpoint), hide the tabs height */
+@media (max-width: 76.1875em){ :root{ --hb-tabs-h: 0px; } }
+
 /* Hide the site name only in the top header bar */
 .md-header__title .md-header__ellipsis {
   display: none !important;
@@ -33,16 +78,17 @@ body {
   box-shadow: none;
 }
 
-/* Optional: smooth top fade effect between header and content */
-body::after {
-  content: "";
+/* Remove the old top fade entirely */
+body::after { content: none !important; }
+
+/* Optional: bottom fade for hero text/buttons */
+body[data-home="true"]::after{
+  content:"";
   position: fixed;
-  top: 0;
-  left: 0;
-  height: 4rem;
-  width: 100%;
-  background: linear-gradient(to bottom, rgba(25, 118, 210, 1), rgba(25, 118, 210, 0));
-  z-index: 0;
+  left:0; right:0; bottom:0;
+  height: 25vh;
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,.55) 100%);
+  pointer-events:none;
 }
 
 .md-copyright {
@@ -50,7 +96,7 @@ body::after {
 }
 
 .md-content__inner {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.9);
   padding: 2rem;
   border-radius: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -160,14 +206,16 @@ body[data-home="true"] .md-content__inner {
   bottom: .5rem;
   left: 0;
   right: 0;
-  padding: 0;
+  padding: 1rem;
   background: none;
   box-shadow: none;
+  font-size: clamp(.9rem, 2.5vw, 1.1rem);
+  color: white;
 }
 
 body[data-home="true"] h1 {
   font-size: clamp(1rem, 5vw, 1.8rem);
-  color: black;
+  color: white;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2), 0 0 6px rgba(255, 165, 0, 0.2);
   font-weight: 700;
   letter-spacing: -0.5px;

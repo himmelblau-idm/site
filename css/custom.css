@@ -268,7 +268,7 @@ body[data-home="true"] .hb-dots a:hover, body[data-home="true"] .hb-dots a:focus
 body[data-home="true"] .hb-slide .hb-prev,
 body[data-home="true"] .hb-slide .hb-next {
   position: absolute;
-  top: 50%;
+  top: 42%;
   transform: translateY(-50%);
   width: 2.25rem;
   height: 2.25rem;

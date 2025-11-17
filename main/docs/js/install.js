@@ -18,6 +18,29 @@ const REPO_SUPPORT = {
 	},
 };
 
+const channelSelect   = document.getElementById('channel');
+const channelButtons  = document.querySelectorAll('#channel-buttons .channel-btn');
+
+function applyChannelSelection(channelValue) {
+  // update hidden select
+  channelSelect.value = channelValue;
+
+  // update button active state
+  channelButtons.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.value === channelValue);
+  });
+}
+
+channelButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const value = btn.getAttribute('data-value');
+    applyChannelSelection(value);
+
+    // trigger your existing logic
+    channelSelect.dispatchEvent(new Event('change'));
+  });
+});
+
 function isDeb(d) {
 	return d.startsWith('ubuntu') || d.startsWith('debian');
 }
@@ -136,6 +159,7 @@ async function provideRepoInstructions() {
 			fallback = { from: requestedChannel, to: null };
 		}
 	}
+	applyChannelSelection(channel);
 
 	// If nothing is supported at all, bail out with a hard message.
 	if (fallback && fallback.to === null) {
@@ -154,15 +178,15 @@ async function provideRepoInstructions() {
 	const distroLabel = distroEl.options[distroEl.selectedIndex].text;
 
 	if (channel === 'subscription') {
-		title.textContent = 'Installing Himmelblau (subscription)';
+		title.textContent = 'Installing Himmelblau (Subscription)';
 		intro.textContent =
 			`On ${distroLabel}, Himmelblau is delivered as supported packages via your subscription channels.`;
 	} else if (channel === 'nightly') {
-		title.textContent = 'Installing Himmelblau (nightly)';
+		title.textContent = 'Installing Himmelblau (Community Nightly)';
 		intro.textContent =
 			'Nightly builds include the latest changes and may support more distributions.';
 	} else {
-		title.textContent = 'Installing Himmelblau (stable)';
+		title.textContent = 'Installing Himmelblau (Community Stable)';
 		intro.textContent =
 			'Stable builds are recommended for most users and track tested releases.';
 	}

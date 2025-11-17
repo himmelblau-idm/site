@@ -580,8 +580,13 @@
 
 
 <h1 id="download-himmelblau-for-linux">Download Himmelblau for Linux</h1>
-<p>Please select your Linux distribution:</p>
-<p><select id="linux-distro">
+<div class="download-selector">
+<div id="channel-buttons" class="channel-buttons">
+  <button data-value="subscription" class="channel-btn active">Subscription</button>
+  <button data-value="stable" class="channel-btn">Community Stable</button>
+  <button data-value="nightly" class="channel-btn">Community Nightly</button>
+</div>
+<select id="linux-distro" class="linux-distro-select">
     <option value="" selected>Select a distribution</option>
     <option value="fedora42">Fedora 42</option>
     <option value="fedora43">Fedora 43</option>
@@ -609,7 +614,8 @@
     <option value="ubuntu24.04">Linux Mint 22</option>
     <option value="nixos">NixOS</option>
 </select>
-<select id="channel">
+</div>
+<p><select id="channel" style="display:none;">
     <option value="subscription" selected>Subscription</option>
     <option value="stable">Community Stable</option>
     <option value="nightly">Community Nightly</option>

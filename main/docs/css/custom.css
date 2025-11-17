@@ -390,3 +390,87 @@ pre::-webkit-scrollbar-thumb {
   content: "✓";
   font-weight: bold;
 }
+
+.channel-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.channel-btn {
+  aspect-ratio: 1 / 1;       /* square */
+  width: 7rem;               /* overall size of each square */
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 0.3rem;
+  border: 1px solid #1c4a7c;
+  background: #ffffff;
+  color: #1c4a7c;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-wrap: balance;        /* nicer multi-line text if browser supports it */
+  transition:
+    background-color 0.15s ease-in-out,
+    color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out,
+    transform 0.05s ease-in-out;
+}
+
+.channel-btn:not(.active):hover {
+  background: #f3f7fb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.channel-btn.active {
+  background: #1c4a7c;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.channel-btn:active {
+  transform: translateY(1px);
+}
+
+/* Center the whole control block */
+.download-selector {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Make the distro select feel like a sibling to the squares */
+.linux-distro-select {
+  display: inline-block;
+  margin-top: 0.75rem;
+  min-width: 15rem;
+  padding: 0.45rem 2.2rem 0.45rem 0.75rem;
+
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1c4a7c;
+
+  border: 1px solid #1c4a7c;
+  border-radius: 0.3rem;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image:
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"><path fill="%231c4a7c" d="M1.41 0L6 4.58 10.59 0 12 1.41 6 7.41 0 1.41z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: calc(100% - 0.9rem) center;
+  background-size: 12px 8px;
+}
+
+/* slight hover feedback */
+.linux-distro-select:hover {
+  background-color: #f3f7fb;
+}

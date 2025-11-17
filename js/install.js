@@ -385,7 +385,7 @@ async function provideRepoInstructions() {
 		'2. Add the Himmelblau repository and import the signing key';
 	linksContainer.appendChild(repoSection);
 
-	if (isUbuntu(distro)) {
+	if (isUbuntu(distro) || distro === 'debian12') {
 		[
 			`sudo apt install curl && curl -fsSL ${gpgKeyUrl} | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/himmelblau.gpg`,
 			`sudo add-apt-repository "deb [arch=amd64] ${baseUrl}/deb/${distro}/ ./"`,

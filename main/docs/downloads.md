@@ -37,8 +37,9 @@ Please select your Linux distribution:
     <option value="nixos">NixOS</option>
 </select>
 <select id="channel">
-    <option value="stable" selected>Stable</option>
-    <option value="nightly">Nightly</option>
+    <option value="subscription" selected>Subscription</option>
+    <option value="stable">Community Stable</option>
+    <option value="nightly">Community Nightly</option>
 </select>
 <div id="download-links" style="margin-top: 20px;"></div>
 <div id="configuration" style="display: none;"></div>

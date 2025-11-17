@@ -12,6 +12,10 @@ const REPO_SUPPORT = {
 		include: [],
 		exclude: [],
 	},
+	subscription: {
+		include: ['sle15sp7', 'sle16', 'tumbleweed'],
+		exclude: [],
+	},
 };
 
 function isDeb(d) {
@@ -88,29 +92,94 @@ async function provideRepoInstructions() {
 	let fallback = null;
 
 	if (!isSupported(requestedChannel, distro)) {
-		const alt = requestedChannel === 'nightly' ? 'stable' : 'nightly';
-		if (isSupported(alt, distro)) {
-			channel = alt;
-			fallback = { from: requestedChannel, to: alt };
+		if (requestedChannel === 'subscription') {
+			// subscription → stable → nightly
+			if (isSupported('stable', distro)) {
+				channel = 'stable';
+				fallback = {
+					from: 'subscription',
+					to: 'stable',
+					reason: 'no-subscription-support',
+				};
+			} else if (isSupported('nightly', distro)) {
+				channel = 'nightly';
+				fallback = {
+					from: 'subscription',
+					to: 'nightly',
+					reason: 'no-subscription-support',
+				};
+			} else {
+				fallback = {
+					from: 'subscription',
+					to: null,
+					reason: 'no-subscription-support',
+				};
+			}
+		} else if (requestedChannel === 'stable') {
+			// stable → nightly
+			if (isSupported('nightly', distro)) {
+				channel = 'nightly';
+				fallback = {
+					from: 'stable',
+					to: 'nightly',
+					reason: 'no-stable',
+				};
+			} else {
+				fallback = {
+					from: 'stable',
+					to: null,
+					reason: 'no-stable-or-nightly',
+				};
+			}
 		} else {
-			// neither supported; keep requested but flag a hard note
+			// nightly (or anything else) has no fallback
 			fallback = { from: requestedChannel, to: null };
 		}
+	}
+
+	// If nothing is supported at all, bail out with a hard message.
+	if (fallback && fallback.to === null) {
+		linksContainer.textContent =
+			fallback.from === 'subscription'
+				? 'Himmelblau is not yet available for this platform via SUSE subscription or community repositories. Please choose a different distribution.'
+				: 'Himmelblau is not yet available for this platform. Please choose a different distribution.';
+		return;
 	}
 
 	const gpgKeyUrl = 'https://packages.himmelblau-idm.org/himmelblau.asc';
 	const baseUrl = baseUrlFor(channel);
 
 	const title = document.createElement('h2');
-	title.textContent = `Installing Himmelblau (${channel})`;
-	linksContainer.appendChild(title);
-
 	const intro = document.createElement('p');
-	intro.textContent =
-		channel === 'nightly'
-			? 'Nightly builds include the latest changes and may support more distributions.'
-			: 'Stable builds are recommended for most users and track tested releases.';
+	const distroLabel = distroEl.options[distroEl.selectedIndex].text;
+
+	if (channel === 'subscription') {
+		title.textContent = 'Installing Himmelblau (subscription)';
+		intro.textContent =
+			`On ${distroLabel}, Himmelblau is delivered as supported packages via your subscription channels.`;
+	} else if (channel === 'nightly') {
+		title.textContent = 'Installing Himmelblau (nightly)';
+		intro.textContent =
+			'Nightly builds include the latest changes and may support more distributions.';
+	} else {
+		title.textContent = 'Installing Himmelblau (stable)';
+		intro.textContent =
+			'Stable builds are recommended for most users and track tested releases.';
+	}
+
+	linksContainer.appendChild(title);
 	linksContainer.appendChild(intro);
+
+	// Warn if we requested "subscription" but had to fall back
+	if (fallback && fallback.from === 'subscription' && fallback.to) {
+		const warn = document.createElement('p');
+		warn.className = 'support-warning';
+		warn.textContent =
+			'Note: this platform does not have supported subscription packages for Himmelblau. Falling back to the community ' +
+			fallback.to +
+			' channel; there are no vendor support options for this platform.';
+		linksContainer.appendChild(warn);
+	}
 
 	// 1) Update
 	const updateSection = document.createElement('h3');
@@ -135,6 +204,39 @@ async function provideRepoInstructions() {
 			textContent: updateCmd,
 		}),
 	);
+
+	// SLE subscription flow (no Himmelblau community repo)
+	if (channel === 'subscription') {
+		const subSection = document.createElement('h3');
+		subSection.textContent = '2. Install Himmelblau from your SUSE subscription';
+		linksContainer.appendChild(subSection);
+
+		const subText = document.createElement('p');
+		subText.textContent =
+			'Install Himmelblau directly from your subscription channels using zypper:';
+		linksContainer.appendChild(subText);
+
+		const subPre = document.createElement('pre');
+		subPre.textContent =
+			'sudo zypper in -y ' +
+			[
+				'himmelblau',
+				'himmelblau-sso',
+				'pam-himmelblau',
+				'libnss_himmelblau2',
+				'himmelblau-qr-greeter',
+				'himmelblau-sshd-config',
+			].join(' ');
+		linksContainer.appendChild(subPre);
+
+		const note = document.createElement('p');
+		note.textContent =
+			`Note: on ${distroLabel} the NSS package is named "libnss_himmelblau2", which differs from the community package name "nss-himmelblau" used in the community repositories.`;
+		linksContainer.appendChild(note);
+
+		addCopyButtons();
+		return; // Don’t show repo instructions for subscription
+	}
 
 	if (isNix(distro)) {
 		if (channel === 'stable') {

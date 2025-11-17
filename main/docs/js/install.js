@@ -44,6 +44,9 @@ channelButtons.forEach(btn => {
 function isDeb(d) {
 	return d.startsWith('ubuntu') || d.startsWith('debian');
 }
+function isUbuntu(d) {
+	return d.startsWith('ubuntu');
+}
 function isNix(d) {
 	return d === 'nixos';
 }
@@ -382,10 +385,21 @@ async function provideRepoInstructions() {
 		'2. Add the Himmelblau repository and import the signing key';
 	linksContainer.appendChild(repoSection);
 
-	if (isDeb(distro)) {
+	if (isUbuntu(distro)) {
 		[
 			`sudo apt install curl && curl -fsSL ${gpgKeyUrl} | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/himmelblau.gpg`,
 			`sudo add-apt-repository "deb [arch=amd64] ${baseUrl}/deb/${distro}/ ./"`,
+		].forEach((cmd) =>
+			linksContainer.appendChild(
+				Object.assign(document.createElement('pre'), {
+					textContent: cmd,
+				}),
+			),
+		);
+	} else if (isDeb(distro)) {
+		[
+			`sudo apt install curl && curl -fsSL ${gpgKeyUrl} | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/himmelblau.gpg`,
+			`echo "deb [signed-by=/etc/apt/trusted.gpg.d/himmelblau.gpg] ${baseUrl}/deb/${distro} ./ " | sudo tee /etc/apt/sources.list.d/himmelblau.list`,
 		].forEach((cmd) =>
 			linksContainer.appendChild(
 				Object.assign(document.createElement('pre'), {

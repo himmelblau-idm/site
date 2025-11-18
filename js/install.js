@@ -399,7 +399,8 @@ async function provideRepoInstructions() {
 	} else if (isDeb(distro)) {
 		[
 			`sudo apt install curl && curl -fsSL ${gpgKeyUrl} | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/himmelblau.gpg`,
-			`echo "deb [signed-by=/etc/apt/trusted.gpg.d/himmelblau.gpg] ${baseUrl}/deb/${distro} ./ " | sudo tee /etc/apt/sources.list.d/himmelblau.list`,
+			`echo 'deb [signed-by=/etc/apt/trusted.gpg.d/himmelblau.gpg] ${baseUrl}/deb/${distro} ./ ' | sudo tee /etc/apt/sources.list.d/himmelblau.list`,
+			"sudo apt update",
 		].forEach((cmd) =>
 			linksContainer.appendChild(
 				Object.assign(document.createElement('pre'), {

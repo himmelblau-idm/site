@@ -26,6 +26,13 @@ Himmelblau is designed with sensible defaults to make initial setup fast and sim
 domains = example.onmicrosoft.com
 ```
 
+   To enforce MDM Intune compliance, enable it:
+
+```conf
+[global]
+apply_policy = true
+```
+
 3. 🔐 **[Configure PAM](configuration.md#pam-configuration)**
 
    On Debian based distros, pam configuration happened automatically when you installed Himmelblau.

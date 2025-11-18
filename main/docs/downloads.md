@@ -14,24 +14,24 @@ hide:
 </div>
 <select id="linux-distro" class="linux-distro-select">
     <option value="" selected>Select a distribution</option>
+    <option value="sle15sp6">SUSE Linux Enterprise 15 SP6</option>
+    <option value="sle15sp7">SUSE Linux Enterprise 15 SP7</option>
+    <option value="sle16">SUSE Linux Enterprise 16</option>
+    <option value="sle15sp6">openSUSE Leap 15.6</option>
+    <option value="sle16">openSUSE Leap 16</option>
+    <option value="tumbleweed">openSUSE Tumbleweed</option>
+    <option value="rocky8">Rocky Linux 8</option>
+    <option value="rocky9">Rocky Linux 9</option>
+    <option value="rocky10">Rocky Linux 10</option>
 	<option value="fedora42">Fedora 42</option>
     <option value="fedora43">Fedora 43</option>
 	<option value="rawhide">Fedora Rawhide</option>
-	<option value="rocky8">Rocky Linux 8</option>
-	<option value="rocky9">Rocky Linux 9</option>
-	<option value="rocky10">Rocky Linux 10</option>
 	<option value="rocky8">Red Hat Enterprise Linux 8</option>
 	<option value="rocky9">Red Hat Enterprise Linux 9</option>
 	<option value="rocky10">Red Hat Enterprise Linux 10</option>
 	<option value="rocky8">Oracle Linux 8</option>
     <option value="rocky9">Oracle Linux 9</option>
 	<option value="rocky10">Oracle Linux 10</option>
-	<option value="sle15sp6">SUSE Linux Enterprise 15 SP6</option>
-	<option value="sle15sp7">SUSE Linux Enterprise 15 SP7</option>
-    <option value="sle16">SUSE Linux Enterprise 16</option>
-    <option value="sle15sp6">openSUSE Leap 15.6</option>
-    <option value="sle16">openSUSE Leap 16</option>
-	<option value="tumbleweed">openSUSE Tumbleweed</option>
 	<option value="debian12">Debian 12</option>
     <option value="debian13">Debian 13</option>
 	<option value="ubuntu22.04">Ubuntu 22.04</option>

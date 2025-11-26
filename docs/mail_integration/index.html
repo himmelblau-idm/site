@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/installation/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/mail_integration/" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>Installation - Himmelblau Documentation</title>
+    <title>Evolution Mail Integration - Himmelblau Documentation</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Installation";
-        var mkdocs_page_input_path = "installation.md";
-        var mkdocs_page_url = "/docs/installation/";
+        var mkdocs_page_name = "Evolution Mail Integration";
+        var mkdocs_page_input_path = "mail_integration.md";
+        var mkdocs_page_url = "/docs/mail_integration/";
       </script>
     
     <!--[if lt IE 9]>
@@ -54,28 +54,8 @@
                 <li class="toctree-l1"><a class="reference internal" href="../introduction/">A Practical Introduction to Himmelblau</a>
                 </li>
               </ul>
-              <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="#">Installation</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#supported-distributions">Supported Distributions</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#prebuilt-packages-recommended">Prebuilt Packages (Recommended)</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#building-from-source-advanced-developer-use">Building from Source (Advanced / Developer Use)</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#steps">Steps</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#need-another-distro">Need another distro?</a>
-    </li>
-        </ul>
-    </li>
-    </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
                 </li>
               </ul>
               <ul>
@@ -90,8 +70,28 @@
                 <li class="toctree-l1"><a class="reference internal" href="../integration/">Migration from On-Prem</a>
                 </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../mail_integration/">Evolution Mail Integration</a>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Evolution Mail Integration</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#step-by-step-setup-instructions">Step-by-Step Setup Instructions</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-open-evolution-account-settings">1. Open Evolution Account Settings</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-add-a-new-mail-account">2. Add a New Mail Account</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3-configure-the-account-as-microsoft-365">3. Configure the Account as Microsoft 365</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#4-save-account-changes">4. Save Account Changes</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#authorizing-evolution">Authorizing Evolution</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a>
+    </li>
+    </ul>
                 </li>
               </ul>
               <ul>
@@ -171,9 +171,9 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-      <li class="breadcrumb-item active">Installation</li>
+      <li class="breadcrumb-item active">Evolution Mail Integration</li>
     <li class="wy-breadcrumbs-aside">
-          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/installation.md">Edit on Himmelblau Documentation</a>
+          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/mail_integration.md">Edit on Himmelblau Documentation</a>
     </li>
   </ul>
   <hr/>
@@ -181,92 +181,78 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="installing-himmelblau">Installing Himmelblau</h1>
-<h2 id="overview">Overview</h2>
-<p>Himmelblau is packaged for a wide range of Linux distributions and supports multiple installation methods, including <code>.deb</code> and <code>.rpm</code> packages, container builds, and manual source compilation.</p>
-<p>This page covers how to install Himmelblau on Ubuntu, Debian, RHEL, Rocky, SUSE, and other distributions.</p>
+                <h1 id="setting-up-office-365-email-in-evolution">Setting Up Office 365 Email in Evolution</h1>
+<p>This guide explains how to configure <strong>Office 365 email</strong> in the <strong>Evolution</strong> mail client when you are <strong>already signed in on your system using Himmelblau</strong>. Evolution integrates with Himmelblau's Entra ID authentication, but a brief one-time setup is required.</p>
 <hr />
-<h2 id="supported-distributions">Supported Distributions</h2>
-<div id="supported-distros">
-<p>The following distributions are currently packaged by the Himmelblau project:</p>
-<table>
-  <thead>
-    <tr><th>Distribution</th><th>Version</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>Fedora</td><td>41</td></tr>
-    <tr><td>Fedora</td><td>42</td></tr>
-    <tr><td>Fedora</td><td>43</td></tr>
-    <tr><td>Fedora</td><td>Rawhide</td></tr>
-    <tr><td>Rocky Linux</td><td>8</td></tr>
-    <tr><td>Rocky Linux</td><td>9</td></tr>
-    <tr><td>Rocky Linux</td><td>10</td></tr>
-    <tr><td>Red Hat Enterprise Linux</td><td>8</td></tr>
-    <tr><td>Red Hat Enterprise Linux</td><td>9</td></tr>
-    <tr><td>Red Hat Enterprise Linux</td><td>10</td></tr>
-    <tr><td>Oracle Linux</td><td>8</td></tr>
-    <tr><td>Oracle Linux</td><td>9</td></tr>
-    <tr><td>Oracle Linux</td><td>10</td></tr>
-    <tr><td>SUSE Linux Enterprise</td><td>15 SP6</td></tr>
-    <tr><td>SUSE Linux Enterprise</td><td>15 SP7</td></tr>
-    <tr><td>SUSE Linux Enterprise</td><td>16</td></tr>
-    <tr><td>openSUSE Leap</td><td>15.6</td></tr>
-    <tr><td>openSUSE Leap</td><td>16</td></tr>
-    <tr><td>openSUSE Tumbleweed</td><td></td></tr>
-    <tr><td>Debian</td><td>12</td></tr>
-    <tr><td>Debian</td><td>13</td></tr>
-    <tr><td>Ubuntu</td><td>22.04</td></tr>
-    <tr><td>Ubuntu</td><td>24.04</td></tr>
-    <tr><td>Linux Mint</td><td>21.3</td></tr>
-    <tr><td>Linux Mint</td><td>22</td></tr>
-    <tr><td>NixOS</td><td></td></tr>
-  </tbody>
-</table>
-</div>
-
-<hr />
-<h2 id="installation">Installation</h2>
-<h3 id="prebuilt-packages-recommended">Prebuilt Packages (Recommended)</h3>
-<p>Himmelblau provides prebuilt packages for all major Linux distributions — including Debian, Ubuntu, Fedora, Rocky Linux, RHEL, openSUSE Leap, SLE, and NixOS — via our official build server.</p>
-<p>➡️ <strong><a href="https://himmelblau-idm.org/downloads">Visit the Downloads page</a></strong> to:</p>
+<h2 id="prerequisites">Prerequisites</h2>
 <ul>
-<li>Select your distribution and release channel (Stable / Nightly)</li>
-<li>View the correct repository setup commands for your system</li>
-<li>Copy one-click install instructions for your package manager (<code>apt</code>, <code>dnf</code>, or <code>zypper</code>)</li>
+<li>You are logged into your Linux system using Himmelblau.</li>
+<li>Evolution (3.53.2+) is installed.</li>
 </ul>
-<blockquote>
-<p>This is the <strong>recommended</strong> installation method for production systems and most users.
-The downloads page is always kept in sync with the latest release metadata on <a href="https://packages.himmelblau-idm.org/">packages.himmelblau-idm.org</a>.</p>
-</blockquote>
+<p>No passwords will be required during this setup. Himmelblau provides the authentication tokens; Evolution only needs application authorization.</p>
 <hr />
-<h3 id="building-from-source-advanced-developer-use">Building from Source (Advanced / Developer Use)</h3>
-<p>If you prefer to build Himmelblau locally — for testing, development, or packaging validation — use the included <code>Makefile</code>.<br />
-The build system automatically detects your host distribution and uses either Podman or Docker for reproducible container builds.</p>
-<h4 id="steps">Steps</h4>
-<h5 id="1-clone-the-repository">1. Clone the repository:</h5>
-<pre><code>git clone https://github.com/himmelblau-idm/himmelblau
-cd himmelblau
-</code></pre>
-<h5 id="2-build-packages">2. Build packages:</h5>
-<pre><code>make               # auto-detects host distro and builds matching packages
-</code></pre>
-<p>or build explicitly for a target:</p>
-<pre><code>make ubuntu24.04   # or debian13, rocky9, sle16, etc.
-</code></pre>
-<p>Run <code>make help</code> for the full list of available targets.</p>
-<h5 id="3-install-on-your-current-host">3. Install on your current host:</h5>
-<pre><code>sudo make install
-</code></pre>
-<p>This installs the locally built packages using the native package manager (apt / dnf / zypper).</p>
+<h2 id="step-by-step-setup-instructions">Step-by-Step Setup Instructions</h2>
+<h3 id="1-open-evolution-account-settings">1. Open Evolution Account Settings</h3>
+<ol>
+<li>Launch <strong>Evolution</strong>.</li>
+<li>In the top‑right corner, click the <strong>menu button</strong> (three horizontal bars).</li>
+<li>Select <strong>Edit → Accounts</strong>.</li>
+</ol>
+<h3 id="2-add-a-new-mail-account">2. Add a New Mail Account</h3>
+<ol>
+<li>Click <strong>Add → Mail Account</strong>.</li>
+<li>At the welcome screen, click <strong>Next</strong>.</li>
+<li>
+<p>Enter the following:</p>
+</li>
+<li>
+<p><strong>Full Name</strong>: Your name</p>
+</li>
+<li><strong>Email Address</strong>: Your Office 365 / Entra ID email address</li>
+<li>Click <strong>Next</strong>.</li>
+</ol>
+<h3 id="3-configure-the-account-as-microsoft-365">3. Configure the Account as Microsoft 365</h3>
+<ol>
+<li>When prompted for account type settings, change <strong>Server Type</strong> to:
+   <strong>Microsoft 365</strong></li>
+<li>Click <strong>Finish</strong>.</li>
+</ol>
+<h3 id="4-save-account-changes">4. Save Account Changes</h3>
+<ul>
+<li>Click <strong>Apply</strong>.</li>
+</ul>
 <hr />
-<h3 id="need-another-distro">Need another distro?</h3>
-<p>If your environment isn’t listed on the <a href="#supported-distributions">Supported Distributions</a> table, please <a href="https://github.com/himmelblau-idm/himmelblau/issues">open an issue</a> or contact a maintainer — we’re happy to help add new targets.</p>
+<h2 id="authorizing-evolution">Authorizing Evolution</h2>
+<p>You may see an error immediately after clicking <strong>Apply</strong>. This is expected.</p>
+<ol>
+<li>A dialog will appear asking you to authorize Evolution.</li>
+<li>Click to open the <strong>connection / authorization dialog</strong>.</li>
+<li>
+<p>You will be redirected to the <strong>Office 365 login authorization page</strong>.</p>
+</li>
+<li>
+<p>You <strong>will not</strong> be asked for your username or password. Himmelblau automatically provides authentication.</p>
+</li>
+<li>You <strong>will</strong> be asked to confirm that Evolution is allowed to access your account.</li>
+<li>Approve the authorization.</li>
+</ol>
+<p>Once authorized, Evolution will connect normally and begin syncing your mailbox.</p>
+<hr />
+<h2 id="summary">Summary</h2>
+<p>With Himmelblau handling authentication, setting up Office 365 in Evolution takes only a few steps:</p>
+<ol>
+<li>Add account → enter name/email.</li>
+<li>Select <strong>Microsoft 365</strong> server type.</li>
+<li>Apply.</li>
+<li>Authorize the Evolution app when prompted.</li>
+</ol>
+<p>After authorization, your mail, calendar, and contacts will sync automatically.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../introduction/" class="btn btn-neutral float-left" title="A Practical Introduction to Himmelblau"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../configuration/" class="btn btn-neutral float-right" title="Configuration">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../integration/" class="btn btn-neutral float-left" title="Migration from On-Prem"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../ecosystem/" class="btn btn-neutral float-right" title="Ecosystem">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -293,10 +279,10 @@ cd himmelblau
         </span>
     
     
-      <span><a href="../introduction/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../integration/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../configuration/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../ecosystem/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

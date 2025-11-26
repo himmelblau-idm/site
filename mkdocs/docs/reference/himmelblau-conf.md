@@ -336,7 +336,7 @@ shell = /bin/bash
 
   Specifies the range of IDs to be used for the user and group mappings. When this option is modified, you **SHOULD** run: 
 
-sudo aad-tool cache-clear --really To ensure that old cached ID mappings are cleared, preventing potential UID overlaps caused by stale cache data. 
+sudo aad-tool cache-clear --full To ensure that old cached ID mappings are cleared, preventing potential UID overlaps caused by stale cache data. Afterwards, restart himmelblaud. 
 ##### EXAMPLES
 idmap_range = 5000000-5999999 
 

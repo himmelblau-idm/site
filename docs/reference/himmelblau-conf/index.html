@@ -71,6 +71,10 @@
                 </li>
               </ul>
               <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../mail_integration/">Evolution Mail Integration</a>
+                </li>
+              </ul>
+              <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../../ecosystem/">Ecosystem</a>
                 </li>
               </ul>
@@ -375,7 +379,7 @@ fi
 <p>shell = /bin/bash </p>
 <h4 id="idmap_range">idmap_range</h4>
 <p>Specifies the range of IDs to be used for the user and group mappings. When this option is modified, you <strong>SHOULD</strong> run: </p>
-<p>sudo aad-tool cache-clear --really To ensure that old cached ID mappings are cleared, preventing potential UID overlaps caused by stale cache data. </p>
+<p>sudo aad-tool cache-clear --full To ensure that old cached ID mappings are cleared, preventing potential UID overlaps caused by stale cache data. Afterwards, restart himmelblaud. </p>
 <h5 id="examples_36">EXAMPLES</h5>
 <p>idmap_range = 5000000-5999999 </p>
 <h4 id="connection_timeout">connection_timeout</h4>

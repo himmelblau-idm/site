@@ -6,6 +6,7 @@ nav:
   - Configuration: configuration.md
   - Device Registration: registration.md
   - Migration from On-Prem: integration.md
+  - Evolution Mail Integration: mail_integration.md
   - Ecosystem: ecosystem.md
   - Architecture: architecture.md
   - About: about.md

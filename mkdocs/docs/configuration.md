@@ -10,7 +10,7 @@ This page also describes required system integration steps, including PAM and NS
 
 ## Config File: [`/etc/himmelblau/himmelblau.conf`](reference/himmelblau-conf.md)
 
-To enable authentication, you must configure the `domains` option in the [`/etc/himmelblau/himmelblau.conf`](reference/himmelblau-conf.md) file. This setting determines which domains are permitted to authenticate to the host. You MUST only specify the primary domain from each tenant.
+To enable authentication, you must configure the `domain` option in the [`/etc/himmelblau/himmelblau.conf`](reference/himmelblau-conf.md) file. This setting determines which tenant/domain is permitted to authenticate to the host. You SHOULD specify the primary domain for the tenant.
 All other configuration options are optional.
 
 ### Format
@@ -19,7 +19,7 @@ The file uses an INI-like syntax with support for `[global]` and per-domain sect
 
 ```ini
 [global]
-domains = example.com
+domain = example.com
 
 [example.com]
 app_id = 00000000-1111-2222-3333-444444444444
@@ -29,7 +29,7 @@ app_id = 00000000-1111-2222-3333-444444444444
 
 | Key                   | Description|
 | --------------------- | ------------------------------------------------------------- |
-| `domains`		        | Comma-separated list of allowed Entra ID domains				|
+| `domain`		        | The allowed Entra ID domain                                   |
 | `pam_allow_groups`    | Group object IDs and user UPNs allowed to authenticate        |
 | `enable_hello`        | Enables Linux Hello PIN support                               |
 
@@ -160,27 +160,6 @@ To ensure system tools can resolve Entra ID users and groups:
 passwd:     files himmelblau
 group:      files himmelblau
 ```
-
----
-
-## Using Multiple Tenants
-
-You can support multiple Azure Entra ID tenants by listing their primary domain names in the global `domains` key:
-
-```ini
-[global]
-domains = example.com,contoso.com
-
-[example.com]
-home_attr = CN
-
-[contoso.com]
-app_id = 1111-2222-3333-4444
-```
-
-Only the **primary** domain need be listed in the `domains` key. Other domains associated with the same tenant will be configured automatically.
-
-Each domain block may override options like `app_id`, `idmap_range`, or `shell`. Refer to the `himmelblau.conf` man page for a full list of options.
 
 ---
 

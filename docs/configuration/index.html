@@ -91,8 +91,6 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#nss-configuration">NSS Configuration</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#using-multiple-tenants">Using Multiple Tenants</a>
-    </li>
     <li class="toctree-l2"><a class="reference internal" href="#disabling-linux-hello-pin">Disabling Linux Hello PIN</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#debug-logging">Debug Logging</a>
@@ -205,12 +203,12 @@
 <p>This page also describes required system integration steps, including PAM and NSS configuration.</p>
 <hr />
 <h2 id="config-file-etchimmelblauhimmelblauconf">Config File: <a href="../reference/himmelblau-conf/"><code>/etc/himmelblau/himmelblau.conf</code></a></h2>
-<p>To enable authentication, you must configure the <code>domains</code> option in the <a href="../reference/himmelblau-conf/"><code>/etc/himmelblau/himmelblau.conf</code></a> file. This setting determines which domains are permitted to authenticate to the host. You MUST only specify the primary domain from each tenant.
+<p>To enable authentication, you must configure the <code>domain</code> option in the <a href="../reference/himmelblau-conf/"><code>/etc/himmelblau/himmelblau.conf</code></a> file. This setting determines which tenant/domain is permitted to authenticate to the host. You SHOULD specify the primary domain for the tenant.
 All other configuration options are optional.</p>
 <h3 id="format">Format</h3>
 <p>The file uses an INI-like syntax with support for <code>[global]</code> and per-domain sections:</p>
 <pre><code class="language-ini">[global]
-domains = example.com
+domain = example.com
 
 [example.com]
 app_id = 00000000-1111-2222-3333-444444444444
@@ -225,8 +223,8 @@ app_id = 00000000-1111-2222-3333-444444444444
 </thead>
 <tbody>
 <tr>
-<td><code>domains</code></td>
-<td>Comma-separated list of allowed Entra ID domains</td>
+<td><code>domain</code></td>
+<td>The allowed Entra ID domain</td>
 </tr>
 <tr>
 <td><code>pam_allow_groups</code></td>
@@ -333,20 +331,6 @@ password    required    pam_deny.so
 <pre><code class="language-conf">passwd:     files himmelblau
 group:      files himmelblau
 </code></pre>
-<hr />
-<h2 id="using-multiple-tenants">Using Multiple Tenants</h2>
-<p>You can support multiple Azure Entra ID tenants by listing their primary domain names in the global <code>domains</code> key:</p>
-<pre><code class="language-ini">[global]
-domains = example.com,contoso.com
-
-[example.com]
-home_attr = CN
-
-[contoso.com]
-app_id = 1111-2222-3333-4444
-</code></pre>
-<p>Only the <strong>primary</strong> domain need be listed in the <code>domains</code> key. Other domains associated with the same tenant will be configured automatically.</p>
-<p>Each domain block may override options like <code>app_id</code>, <code>idmap_range</code>, or <code>shell</code>. Refer to the <code>himmelblau.conf</code> man page for a full list of options.</p>
 <hr />
 <h2 id="disabling-linux-hello-pin">Disabling Linux Hello PIN</h2>
 <p>Linux Hello authentication is enabled by default. To disable it:</p>

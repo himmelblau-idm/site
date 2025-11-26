@@ -218,7 +218,7 @@
 <h3 id="etchimmelblauhimmelblauconf-configuration-file"><code>/etc/himmelblau/himmelblau.conf</code>: Configuration File</h3>
 <p>Defines the global and per-domain settings used by Himmelblau:</p>
 <ul>
-<li>Entra ID domains (automatically associated with tenants)</li>
+<li>Entra ID domain (automatically associated with the tenant)</li>
 <li>Logging and debugging options</li>
 <li>POSIX mapping preferences</li>
 <li>Allowed groups for login authorization</li>
@@ -226,7 +226,7 @@
 </ul>
 <p>Example:</p>
 <pre><code class="language-ini">[global]
-domains = example.com
+domain = example.com
 pam_allow_groups = 00000000-1111-2222-3333-444444444444
 home_attr = CN
 use_etc_skel = true

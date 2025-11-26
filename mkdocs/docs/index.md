@@ -23,7 +23,7 @@ Himmelblau is designed with sensible defaults to make initial setup fast and sim
 
 ```conf
 [global]
-domains = example.onmicrosoft.com
+domain = example.onmicrosoft.com
 ```
 
    To enforce MDM Intune compliance, enable it:

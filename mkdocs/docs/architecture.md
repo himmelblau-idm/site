@@ -52,7 +52,7 @@ It runs as a system service alongside `himmelblaud`.
 
 Defines the global and per-domain settings used by Himmelblau:
 
-- Entra ID domains (automatically associated with tenants)
+- Entra ID domain (automatically associated with the tenant)
 - Logging and debugging options
 - POSIX mapping preferences
 - Allowed groups for login authorization
@@ -62,7 +62,7 @@ Example:
 
 ```ini
 [global]
-domains = example.com
+domain = example.com
 pam_allow_groups = 00000000-1111-2222-3333-444444444444
 home_attr = CN
 use_etc_skel = true

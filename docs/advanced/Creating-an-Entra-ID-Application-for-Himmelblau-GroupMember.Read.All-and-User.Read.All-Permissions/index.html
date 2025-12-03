@@ -247,12 +247,13 @@ This method prevents the enumeration of rfc2307 attributes and group memberships
 <pre><code class="language-bash">sudo systemctl restart himmelblaud
 sudo systemctl restart himmelblaud-tasks
 </code></pre>
-<h2 id="6-optional-pre-cache-uidgid-mappings">6. (Optional) Pre-cache UID/GID Mappings</h2>
+<h2 id="6-option-a-only-pre-cache-uidgid-mappings">6. (<strong>Option A Only</strong>) Pre-cache UID/GID Mappings</h2>
 <p>You can optionally pre-fetch all users and groups with RFC2307 attributes:</p>
 <pre><code class="language-bash">aad-tool enumerate
 </code></pre>
 <p>This avoids lookups being triggered on first login.</p>
-<h2 id="7-managing-credentials">7. Managing Credentials</h2>
+<p>User and group enumeration is <strong>only</strong> available when Confidential Client Credentials are configured (<strong>Option A</strong> above).</p>
+<h2 id="7-option-a-only-managing-credentials">7. (<strong>Option A Only</strong>) Managing Credentials</h2>
 <ul>
 <li>List stored credentials:</li>
 </ul>

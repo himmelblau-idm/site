@@ -103,7 +103,7 @@ sudo systemctl restart himmelblaud
 sudo systemctl restart himmelblaud-tasks
 ```
 
-## 6. (Optional) Pre-cache UID/GID Mappings
+## 6. (**Option A Only**) Pre-cache UID/GID Mappings
 
 You can optionally pre-fetch all users and groups with RFC2307 attributes:
 
@@ -113,7 +113,9 @@ aad-tool enumerate
 
 This avoids lookups being triggered on first login.
 
-## 7. Managing Credentials
+User and group enumeration is **only** available when Confidential Client Credentials are configured (**Option A** above).
+
+## 7. (**Option A Only**) Managing Credentials
 
 * List stored credentials:
 

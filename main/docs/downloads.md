@@ -8,7 +8,7 @@ hide:
 
 <div class="download-selector">
 <div id="channel-buttons" class="channel-buttons">
-  <button data-value="subscription" class="channel-btn active">Subscription</button>
+  <button data-value="subscription" class="channel-btn active">Vendor Supported<sup class="footnote-mark">*</sup></button>
   <button data-value="stable" class="channel-btn">Community Stable</button>
   <button data-value="nightly" class="channel-btn">Community Nightly</button>
 </div>
@@ -42,7 +42,7 @@ hide:
 </select>
 </div>
 <select id="channel" style="display:none;">
-    <option value="subscription" selected>Subscription</option>
+    <option value="subscription" selected>Vendor Supported</option>
     <option value="stable">Community Stable</option>
     <option value="nightly">Community Nightly</option>
 </select>
@@ -50,3 +50,8 @@ hide:
 <div id="configuration" style="display: none;"></div>
 Refer to [the documentation](../docs/index.html) for configuration.
 <script src="../js/install.js"></script>
+
+<p class="footnote">
+  <span class="footnote-mark">*</span>
+  Vendor-supported packages are installed using your distribution’s subscription channels (e.g. SLE, Rocky Linux).
+</p>

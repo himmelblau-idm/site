@@ -185,6 +185,7 @@ body[data-home="true"] .home-hero {
   display: grid;
   grid-template: 1fr / 1fr;
   padding: 1rem;
+  position: relative;
   background: none;
   margin-left: calc(50% - 50vw);   /* breakout left */
   margin-right: calc(50% - 50vw);  /* breakout right */
@@ -473,4 +474,68 @@ pre::-webkit-scrollbar-thumb {
 /* slight hover feedback */
 .linux-distro-select:hover {
   background-color: #f3f7fb;
+}
+
+/* Floating Press Badge in Hero */
+body[data-home="true"] .press-float {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 10;
+}
+
+body[data-home="true"] .press-float:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.22);
+}
+
+body[data-home="true"] .press-float-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: white;
+  background: linear-gradient(135deg, #e63946 0%, #c92a2a 100%);
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.25rem;
+}
+
+body[data-home="true"] .press-float-logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+body[data-home="true"] .press-float-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Responsive: smaller on mobile */
+@media (max-width: 768px) {
+  body[data-home="true"] .press-float {
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.5rem 0.75rem 0.75rem;
+  }
+
+  body[data-home="true"] .press-float-logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  body[data-home="true"] .press-float-text {
+    font-size: 0.7rem;
+  }
 }

@@ -12,6 +12,11 @@ hide:
 </script>
 
 <section class="home-hero">
+  <a href="https://www.heise.de/select/ix/2026/1/2528006422371218161" target="_blank" rel="noopener" class="press-float">
+    <span class="press-float-badge">Featured In</span>
+    <img src="assets/ix-logo.svg" alt="iX Magazine" class="press-float-logo">
+    <span class="press-float-text">iX Magazine</span>
+  </a>
   <div class="hero-card">
     <h1>Seamless Azure Entra ID and Intune integration for Linux</h1>
     <p>SSO, MFA, Intune compliance and TPM-backed keys — with a cleaner experience than Windows.</p>

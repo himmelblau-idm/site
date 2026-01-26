@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/intune/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Intune Policies for Linux Clients - Himmelblau Documentation</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Intune Policies for Linux Clients";
+        var mkdocs_page_input_path = "intune.md";
+        var mkdocs_page_url = "/docs/intune/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script>
+   
+  <script type="text/javascript" data-cmp-ab="1" src="https://cdn.consentmanager.net/delivery/autoblocking/8bffa521a2c48.js" data-cmp-host="c.delivery.consentmanager.net" data-cmp-cdn="cdn.consentmanager.net" data-cmp-codesrc="16"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Himmelblau Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="" href="https://himmelblau-idm.org/">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../introduction/">A Practical Introduction to Himmelblau</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Intune Policies for Linux Clients</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#what-is-intune">What is Intune?</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#checking-the-encryption-of-local-disks">Checking the encryption of local disks</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#removing-devices-that-have-not-been-logged-in-for-a-preset-period-of-time">Removing devices that have not been logged in for a preset period of time</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#use-of-custom-scripts-for-compliance-testing">Use of custom scripts for compliance testing</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../registration/">Device Registration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../integration/">Migration from On-Prem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../mail_integration/">Evolution Mail Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../ecosystem/">Ecosystem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../reference/aad-tool/">Aad tool</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../reference/himmelblau-conf/">Himmelblau conf</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../reference/himmelblaud/">Himmelblaud</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../reference/himmelblaud_tasks/">Himmelblaud tasks</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../reference/pam_himmelblau/">Pam himmelblau</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage/">Configuring a Hardware TPM for Secure Key Storage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-and-User.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Design/">Design Principles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Device-Compliance-Settings-for-Linux-in-Intune-with-Himmelblau/">Device Compliance Settings for Linux in Intune with Himmelblau</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Tray-Icons-for-o365-on-GNOME-Shell/">Tray Icons for o365 on GNOME Shell</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Himmelblau Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Intune Policies for Linux Clients</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/intune.md">Edit on Himmelblau Documentation</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="intune-policies-for-linux-clients">Intune Policies for Linux Clients</h1>
+<p><em>by <a href="https://www.kania-online.de">Stefan Kania</a></em></p>
+<p>This part deals with the use of Intune to create policies when deploying
+Linux clients in an Entra Id environment.</p>
+<h2 id="what-is-intune">What is Intune?</h2>
+<p>Intune is comparable to Group Policy Objects (GPOs) in Active Directory.
+Many GPOs from an existing Active Directory can be exported to Intune.
+GPOs for Linux clients can also be set up in Intune. However, it is not
+possible to import Linux GPOs (e.g., from a Samba AD). This is not due
+to Himmelblau, but rather to Microsoft's restrictions. Linux clients are
+supported, but not very extensively.</p>
+<p>There is another major limitation when setting up policies for Linux
+clients. Regardless of the type of policies set up for a Linux client,
+logging in to a Linux client is then only possible with one user, namely
+the user who integrated the machine into Entra Id. This limitation does
+not come from Himmelblau, but is also a Microsoft requirement. This
+means that the use of policies on Linux clients only makes sense for
+machines that are used by a single user.</p>
+<p>The policies can be managed via the URL https://intune.microsoft.com/.
+If you have already logged in to the Entra Id portal, the same user will
+be automatically logged in here.</p>
+<p>First, let's take a look at device management in Entra Id. Without
+further restrictions, any user who has an account in the Entra Id domain
+can add a machine to the domain.</p>
+<p>If a Linux client is to be managed in Intune at a later date, it is
+essential that the user who adds the client to the domain has the
+appropriate license. Licenses can be managed at
+<a href="https://admin.cloud.microsoft/">https://admin.cloud.microsoft/</a>. The following figure shows an excerpt
+from the list of all users, with and without licenses.</p>
+<p><img alt="media/image1.png" src="../media/image1.png" /></p>
+<p>Only when the user adds a client to the domain will the client be
+recognized as a Linux client in both Entra Id and Intune.</p>
+<p>In Intune, all devices that can be managed are displayed in the device
+overview, sorted by operating system. Linux clients added to the domain
+by a user without a license are not listed here. Only the device
+overview of the Entra Id portal displays all devices.</p>
+<p>Now policies can be set up and assigned.</p>
+<p>First, a policy for passwords should be created and assigned. To avoid
+having to add each client individually to the policy, a group can be
+created either in the Entra Id portal or directly in Intune, in which
+all desired systems are entered as members. In the Intune Admin Center,
+select the menu item Devices→Linux → Compliance.</p>
+<p><img alt="media/image2.png" src="../media/image2.png" /></p>
+<p>Currently, no policies are listed there. You can then create an initial
+policy via the <strong>Create Policy</strong> link.</p>
+<p>After clicking on the link, the following selection is displayed on the
+right-hand side.</p>
+<p><img alt="media/image3.png" src="../media/image3.png" /></p>
+<p>Now select the Settings Catalog option and confirm at the bottom.</p>
+<p>In the next window, enter the name for the policy. The description is
+optional, but always useful and helpful.</p>
+<p><img alt="media/image4.png" src="../media/image4.png" /></p>
+<p>After saving the empty policy, a new page is displayed. Clicking on the
+<strong>Add Settings</strong> link then allows you to
+define the actual settings for the policy.</p>
+<p>A selection of policies that can be used for Linux clients now appears
+on the right-hand side. Clicking on Password Policies then displays all
+the setting options below.</p>
+<p><img alt="media/image5.png" src="../media/image5.png" /></p>
+<p>Clicking on one of the options opens a display on the left side where
+the settings can be made.</p>
+<p>Once all the desired settings have been made, the policy can be saved.
+You then have the option of sending an email to owners of incompatible
+devices. This option makes sense if the policy is only intended for
+Linux clients for a specific distribution. The password policy created
+here should now only apply to Ubuntu clients. For this reason, the
+policy will be expanded later.</p>
+<p>The policy can now be assigned to a group. The assignment is made in the
+<strong>Assignments</strong> section of the policy
+creation. The <strong>Scope Tags</strong> item remains
+unchanged.</p>
+<p>In the Assignments section, the previously created group with the
+corresponding Linux clients is now added.</p>
+<p><img alt="media/image6.png" src="../media/image6.png" /></p>
+<p>After clicking <strong>Next</strong>, a summary is
+displayed. Only now is the policy entered into the system by clicking
+<strong>Create</strong>.</p>
+<p>To ensure that the policy is only effective for Ubuntu clients, the
+policy is now extended. To do this, the properties of the policy are
+called up and an existing policy can be changed there via the link
+<strong>Compliance Settings</strong> →
+<strong>Edit</strong>.</p>
+<p>Now a new setting is to be added, namely a setting of the type
+<strong>Allowed Distributions</strong></p>
+<p><img alt="media/image7.png" src="../media/image7.png" /></p>
+<p>After making your selection, you can configure the settings for the
+distribution on the left-hand side.</p>
+<p><img alt="media/image8.png" src="../media/image8.png" /></p>
+<p>Unfortunately, only Ubuntu and Redhat are currently available for
+selection. Other distributions are not (yet) supported.</p>
+<p>Redhat only supports versions 8 and 9, and Ubuntu only supports desktop
+versions 22.04 and 24.04.</p>
+<p>However, the restriction on Ubuntu versions only applies to the use of
+the Microsoft client for Linux systems.</p>
+<p>Himmelblau can also recognize newer versions and display them as
+compatible. The use of Ubuntu Server is also not a problem.</p>
+<p>Now the settings can be checked again and then saved. Afterwards, a
+summary of all settings can be displayed again. To do this, go to the
+menu item Devices → Linux → Manage Devices → Compliance. All policies
+are displayed at this point. After clicking on the new policy, the
+properties can be displayed as shown in the following figure.</p>
+<p><img alt="media/image9.png" src="../media/image9.png" /></p>
+<p>Another option for managing Linux clients is to assign scripts. The
+corresponding setting can be found under Devices → Linux → Manage
+Devices → Scripts</p>
+<p><img alt="media/image10.png" src="../media/image10.png" /></p>
+<p>A new script is now added here. The first step is to enter a name and
+description for the script.</p>
+<p><img alt="media/image11.png" src="../media/image11.png" /></p>
+<p>In the next step, the configuration of the script can be adjusted. There
+are two ways to provide the script: Either the script can be uploaded
+from the local system, in which case it is important to ensure that the
+file extension is .sh; other extensions are not permitted and will
+result in an error message. The other option is to create the script
+directly in the "Bash script" field. When a script is uploaded, its
+content also appears in this area and can be customized here. Another
+important setting here is the execution time of the script. The
+following image shows the creation of a script.</p>
+<p><img alt="media/image12.png" src="../media/image12.png" /></p>
+<p>As with the first policy, the next step is to assign the script to the
+desired groups and users.</p>
+<p>To check whether a script has been executed without errors, go to
+Devices → Linux → Scripts. There you can check the status of the
+scripts. The following image shows the successful execution of the
+script.</p>
+<p><img alt="media/image13.png" src="../media/image13.png" /></p>
+<p>Unfortunately, there is currently no way to check which policies are applied on the
+Linux client, as is the case with Linux GPOs in Samba Active Directory,
+for example. At the moment, the only option is to test the settings on
+the client.</p>
+<p>In addition to the policy options described here, the following policies
+can also be set up for Linux clients.</p>
+<h2 id="checking-the-encryption-of-local-disks">Checking the encryption of local disks</h2>
+<p>Especially with notebooks, it may be necessary to ensure that the file
+system is encrypted. A new policy can be used to check this for specific
+devices.</p>
+<p>The first step is to create a new group that includes all Linux devices
+for which file system encryption needs to be checked.</p>
+<p>Now, a new policy can be created in Intune under Devices→ Linux → Manage
+devices → Compliance. As in the example for passwords, a policy is
+selected from the settings catalog. After assigning a name for the
+policy and a descriptive description, a new policy type can be added by
+clicking on Add setting.</p>
+<p><img alt="media/image14.png" src="../media/image14.png" /></p>
+<p>On the left side, the setting Require device encryption is then set to TRUE. The following two items (Actions in case of incompatibility and
+Scope tags) can be set according to your own specifications, but are not
+relevant for device verification.</p>
+<p>The new policy is then assigned to the group created at the beginning.</p>
+<p><img alt="media/image15.png" src="../media/image15.png" /></p>
+<p>After clicking Continue, the summary of the new policy appears again.
+You can then complete the creation of the policy. The new policy will
+then appear in the list of previously created policies.</p>
+<h2 id="removing-devices-that-have-not-been-logged-in-for-a-preset-period-of-time">Removing devices that have not been logged in for a preset period of time</h2>
+<p>This policy can be used to ensure that devices that have been inactive
+for a long time are removed from Entra Id management. The device must
+then be re-added the next time it logs in.</p>
+<h2 id="use-of-custom-scripts-for-compliance-testing">Use of custom scripts for compliance testing</h2>
+<p>Custom policies for compliance testing are not currently possible.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../introduction/" class="btn btn-neutral float-left" title="A Practical Introduction to Himmelblau"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../installation/" class="btn btn-neutral float-right" title="Installation">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
+        </span>
+    
+    
+      <span><a href="../introduction/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../installation/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

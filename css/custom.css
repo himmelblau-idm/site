@@ -1,9 +1,9 @@
 /* Full background across the whole site */
 body {
   background-image: image-set(
-    url("../assets/background.webp") type("image/webp"),
-    url("../assets/background.jpg")  type("image/jpeg"),
-    url("../assets/background.png")  type("image/png")
+    url("../assets/minimalist-blue-white-wave-background.webp") type("image/webp"),
+    url("../assets/minimalist-blue-white-wave-background.png") type("image/png"),
+    url("../assets/minimalist-blue-white-wave-background-compressed.jpg") type("image/jpeg")
   );
   background-repeat: no-repeat;
   background-position: center center;

@@ -33,7 +33,7 @@ hide:
 <div class="hb-track" tabindex="0">
   <figure id="gif-login" class="hb-slide">
     <a class="hb-prev" href="#gif-o365" aria-label="Previous">‹</a>
-    <a class="hb-next" href="#gif-nss"  aria-label="Next">›</a>
+    <a class="hb-next" href="#gif-display-manager"  aria-label="Next">›</a>
 
     <img src="assets/login.gif" alt="Device join and Hello enrollment" loading="lazy" decoding="async">
     <figcaption><strong>Join &amp; Hello Enroll</strong><br>
@@ -41,8 +41,18 @@ hide:
     </figcaption>
   </figure>
 
+  <figure id="gif-display-manager" class="hb-slide">
+    <a class="hb-prev" href="#gif-login" aria-label="Previous">‹</a>
+    <a class="hb-next" href="#gif-nss"  aria-label="Next">›</a>
+
+    <img src="assets/himmelblau-display-manager.gif" alt="Himmelblau Display Manager login screen" loading="lazy" decoding="async">
+    <figcaption><strong>Display Manager</strong><br>
+      Himmelblau Display Manager — a GDM replacement with native Entra ID and OIDC support. Currently experimental.
+    </figcaption>
+  </figure>
+
   <figure id="gif-nss" class="hb-slide">
-    <a class="hb-prev" href="#gif-login"   aria-label="Previous">‹</a>
+    <a class="hb-prev" href="#gif-display-manager"   aria-label="Previous">‹</a>
     <a class="hb-next" href="#gif-firefox" aria-label="Next">›</a>
 
     <img src="assets/nss.gif" alt="NSS id and getent demo" loading="lazy" decoding="async">
@@ -73,6 +83,7 @@ hide:
 </div>
     <nav class="hb-dots" aria-label="Choose slide">
       <a href="#gif-login"   aria-label="Join & Hello Enroll">•</a>
+      <a href="#gif-display-manager" aria-label="Display Manager">•</a>
       <a href="#gif-nss"     aria-label="Identity Lookup">•</a>
       <a href="#gif-firefox" aria-label="Browser SSO">•</a>
       <a href="#gif-o365"    aria-label="O365 Web Apps">•</a>

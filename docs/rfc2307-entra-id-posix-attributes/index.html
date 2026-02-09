@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/rfc2307-entra-id-posix-attributes/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>RFC2307 Schema Attributes - Himmelblau Documentation</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "RFC2307 Schema Attributes";
+        var mkdocs_page_input_path = "rfc2307-entra-id-posix-attributes.md";
+        var mkdocs_page_url = "/docs/rfc2307-entra-id-posix-attributes/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script>
+   
+  <script type="text/javascript" data-cmp-ab="1" src="https://cdn.consentmanager.net/delivery/autoblocking/8bffa521a2c48.js" data-cmp-host="c.delivery.consentmanager.net" data-cmp-cdn="cdn.consentmanager.net" data-cmp-codesrc="16"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Himmelblau Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="" href="https://himmelblau-idm.org/">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../introduction/">A Practical Introduction to Himmelblau</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../intune/">Intune Policies for Linux Clients</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">RFC2307 Schema Attributes</a>
+    <ul class="current">
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../registration/">Device Registration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../integration/">Migration from On-Prem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../mail_integration/">Evolution Mail Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../ecosystem/">Ecosystem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../reference/aad-tool/">Aad tool</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../reference/himmelblau-conf/">Himmelblau conf</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../reference/himmelblaud/">Himmelblaud</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../reference/himmelblaud_tasks/">Himmelblaud tasks</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../reference/pam_himmelblau/">Pam himmelblau</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage/">Configuring a Hardware TPM for Secure Key Storage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-and-User.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Design/">Design Principles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Device-Compliance-Settings-for-Linux-in-Intune-with-Himmelblau/">Device Compliance Settings for Linux in Intune with Himmelblau</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../advanced/Tray-Icons-for-o365-on-GNOME-Shell/">Tray Icons for o365 on GNOME Shell</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Himmelblau Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">RFC2307 Schema Attributes</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/rfc2307-entra-id-posix-attributes.md">Edit on Himmelblau Documentation</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="rfc2307-schema-attributes">RFC2307 Schema Attributes</h1>
+<p><em>by <a href="https://www.kania-online.de">Stefan Kania</a></em></p>
+<p>There are no attributes in the user and group objects of Entra ID that
+define a Unix user or a Unix group. These attributes are not provided by
+Entra ID. However, if the attributes such as uidNumber or gidNumber of a
+user or group from Entra ID are to be assigned fixed values, Entra ID
+must be extended with the corresponding schema. The Linux systems must
+then be authorized to read these new attributes. These attributes can
+also be synced from an on-prem Active Directory. It is therefore not
+only necessary to set up an extension of the Entra ID tenant, but all
+hosts must also be granted read permission.</p>
+<p>When is this necessary or useful?</p>
+<p>Whenever a local domain has been converted to Entra ID and the Linux
+systems have been assigned user information such as gidNumber and
+uidNumber via Winbind. In this case, the uidNumber and gidNumber should
+be taken from the local Active Directory if possible. Or, when setting
+up Entra ID for the first time, all Linux users and groups should be
+directly assigned the POSIX attributes.</p>
+<p>However, it is not the case that users and groups from Entra ID do not
+receive a uidNumber and gidNumber. By default, the uidNumber and
+gidNumber are assigned by Himmelblau via the UPN name of the
+authenticating user. This may seem unusual, but in Entra ID, the UPN is
+the only attribute whose validity can be queried during the first
+authentication, i.e., when the client joins the domain. At this point,
+it is not possible to query further user attributes.</p>
+<p>This behavior differs significantly from the behavior of a local Active
+Directory. In Active Directory, the host first joins the domain. The
+resulting host credentials enable directory queries for user and group
+attributes, including the SID of the objects. This is not permitted in
+Entra ID. After the client joins, the client still does not have
+permission to perform attribute queries for users or groups.</p>
+<p>But what happens with all subsequent authentications?</p>
+<p>Once the client is connected, the protocol allows both the UPN and the
+object ID of each authenticating user to be verified. In Windows Active
+Directory, the attribute is called the SID. In Entra ID, it is referred
+to as the object ID. However, both represent the same identity
+attribute. For this reason, a UPN-based mapping is always required
+first. This is why the SID and object ID are only available after the
+client has joined the Entra ID domain.</p>
+<p>As already described in the first part of the documentation, ID mapping
+is defined using the two options <em>id_attr_map</em> and <em>idmap_range</em> in the
+configuration file <em>/etc/himmelblau/himmelblau.conf</em>. The option
+<em>id_attr_map</em> can be compared to the option <em>idmap config * :
+\&lt;backend&gt;</em> in smb.conf. The <em>idmap_range</em> option can be compared to
+the <em>idmap config * : \&lt;range&gt;</em> option.</p>
+<p>The default value for <em>id_attr_map</em> is the UPN of the object. Other
+possible options are UUID or rfc2307. To use the rfc2307 option, it is
+necessary to extend the schema.</p>
+<p>The default value for idmap_range is 5000000-5999999.</p>
+<p>But where do the default values come from when the UPN of the user is
+used as <em>id_attr_map</em>? In Active Directory, together with Winbind, the
+RID is used as a factor. In Himmelblau, the mapping function of <em>sssd</em>
+is used to determine the uidNumber or gidNumber. The UPN is converted
+into a numerical value using <em>murmurhash3</em>.</p>
+<p>If the range is changed, it is first necessary to clear the cache for
+the ID mapping and then restart the Himmelblau services. The following
+listing shows the required commands:</p>
+<pre><code>root@skyblue:~# aad-tool cache-clear --full  
+This will unjoin the host, clear all caches, and cannot be undone.
+Proceed? \[Y/N\]: y  
+success  
+
+root@skyblue:~# systemctl restart himmelblaud.service
+himmelblaud-tasks.service
+</code></pre>
+<p>As can be seen in the listing, the client is removed from the domain and
+must then be re-added.</p>
+<p>However, this is not sufficient to assign your own values for the POSIX
+attributes; a schema extension is required for this. The schema
+extension itself can be set up via the command line of a client
+integrated into the domain. However, in order to set up the extension,
+additional permissions are required in Entra ID. Permissions are
+assigned via independent applications that are set up in the Entra ID
+portal.</p>
+<p>Creating the applications:</p>
+<p>After logging into the portal, click on App Registration and then on New
+Registration. The following figure shows the values entered:</p>
+<p><img alt="App registration values" src="../media/100000010000072F0000043643335BAC.png" /></p>
+<p>You can choose any name for the application. When selecting the
+"Supported account types," it is essential to ensure that the option
+"Only accounts in this organizational unit..." is selected. An incorrect
+selection could result in the application being visible and usable by
+all Entra ID users.</p>
+<p>The "Redirect URI" is still missing. Here, select "Public
+client/native...". The URL must be
+<a href="https://login.microsoftonline.com/common/oauth2/nativeclient">https://login.microsoftonline.com/common/oauth2/nativeclient</a>.</p>
+<p>After clicking on Register, an overview of all currently available
+applications is displayed.</p>
+<p><img alt="App registrations overview" src="../media/1000000100000B80000002BA11A23A0C.png" /></p>
+<p>You can then return to the main menu and click on the Enterprise
+Applications menu item on the left-hand side. This will display an
+overview of all currently available applications. Clicking on the newly
+created application will display the content shown in the following
+figure:</p>
+<p><img alt="Enterprise application details" src="../media/1000000100000B80000003692F733B3E.png" /></p>
+<p>Clicking on Properties under the heading Manage displays the settings
+options for the application. It is essential that the item "Assignment
+required" is set to "Yes." The following illustration shows the change:</p>
+<p><img alt="Assignment required setting" src="../media/10000001000006720000054F687B7A36.png" /></p>
+<p>Without this change, any user could use the application later. However,
+the application should only be available to administrators. Next, click
+on Users and Groups to select the authorized users or groups. Now click
+on Add Users/Groups. The display that appears is initially empty. Only
+after clicking on None selected on the left side under the heading
+"Users and Groups" will an overview of all existing users and groups be
+displayed. Here, you can now select multiple users and/or groups that
+should later have access to the application. The following illustration
+shows the selection:</p>
+<p><img alt="User and group selection" src="../media/10000001000009520000064826D98CCE.png" /></p>
+<p>Now there is an application that can only be used by selected users or
+groups, but which does not yet have any permissions. Each authorized
+user should be able to read and write the POSIX attributes later. This
+requires the appropriate permissions in "Microsoft Graph." "Microsoft
+Graph" is comparable to an LDAP. Basically, all that is happening here
+is the assignment of ACLs for access to an LDAP. The assignment of
+permissions follows in the next steps.</p>
+<p>To assign permissions, select the new application again under the main
+menu item "App Registration." Clicking on API Permissions will bring up
+an overview of all permissions assigned to the application. This list is
+currently empty. Clicking on Add Permission will open a new window on
+the right-hand side. Select the top item, Microsoft Graph:</p>
+<p><img alt="Microsoft Graph selection" src="../media/100000010000053E00000205C777CF82.png" /></p>
+<p>A new window appears in which you then click on Delegated Permissions.
+In the following window from the image below:</p>
+<p><img alt="Delegated permissions selection" src="../media/100000010000053E0000034F46144715.png" /></p>
+<p>Now select the following three permissions using the "Select permission"
+search:  </p>
+<ul>
+<li>
+<p>Application.Read.All</p>
+</li>
+<li>
+<p>Application.ReadWrite.All</p>
+</li>
+<li>
+<p>User.Read</p>
+</li>
+</ul>
+<p>After confirming all permissions, the window with the overview of all
+permissions reappears. However, the status of the permissions is still
+marked with a yellow exclamation mark. All permissions must first be
+confirmed before they take effect. To confirm the new permissions, click
+on Grant administrator approval for ...</p>
+<p>The following figure shows the result of the customized application
+permission:</p>
+<p><img alt="Application permissions overview" src="../media/1000000100000B770000047576AD32C4.png" /></p>
+<p>Only now can a second application be created, which then extends the
+schema with the rfc2307 attributes. The second application is now
+created via the command line of a Linux client that is already a member
+of the domain. All of the following commands are always executed as the
+<em>root</em> user.</p>
+<p>The schema extension is also entered via an application. Since certain
+users or groups have already been granted permission to create
+applications, the additional application can now be created using one of
+the users in Entra ID. The following listing shows how to create the
+application:</p>
+<pre><code>root@skyblue:~# aad-tool application create --client-id
+e2bec932-5338-4c72-ae14-8ff5143eae2d --name
+stkania@0pndv.onmicrosoft.com --  
+display-name &quot;Tenant Schema Extension App&quot; --user-read-write
+--group-read-write  
+stkania@0pndv.onmicrosoft.com password:    
+Open your Authenticator app, and enter the number '45' to sign in.  
+</code></pre>
+<p>The <em>--client-id</em> option is the application ID for the application used
+to access Microsoft Graph.</p>
+<p>The --name option is used to enter one of the authorized users who is
+permitted to use the application, along with their full UPN.</p>
+<p>The <em>--display-name</em> option assigns the name for the new application.
+Although the name can be freely chosen, the Microsoft default here is
+<em>Tenant Schema Extension App</em>.</p>
+<p>The <em>--user-read-write</em> and <em>--group-read-write</em> options assign the
+required permissions:</p>
+<ul>
+<li>
+<p>Group.ReadWrite.All</p>
+</li>
+<li>
+<p>User.ReadWrite.All</p>
+</li>
+</ul>
+<p>After the command has been executed without errors, the application is
+now displayed in the portal in the "App Registration" overview, as shown
+in the following figure:</p>
+<p><img alt="Tenant Schema Extension App registration" src="../media/1000000100000B7C0000033865BA4F84.png" /></p>
+<p>Only now can all configured applications be listed on the command line
+of the Linux client. The following listing shows all applications</p>
+<pre><code>root@himmelblau:~# aad-tool application list --client-id
+e2bec932-5338-4c72-ae14-8ff5143eae2d --name
+stkania@0pndv.onmicrosoft.com  
+stkania@0pndv.onmicrosoft.com password:    
+Open your Authenticator app, and enter the number '70' to sign in.  
+{  
+&quot;value&quot;: \[  
+   {  
+     &quot;id&quot;: &quot;8df2811d-486b-4ee0-9bf7-8103ad5449af&quot;,  
+     &quot;appId&quot;: &quot;e2bec932-5338-4c72-ae14-8ff5143eae2d&quot;,  
+     &quot;displayName&quot;: &quot;grant-aad-tool-permission&quot;  
+   },  
+   {  
+     &quot;id&quot;: &quot;f8fb9572-be58-48a9-9384-d8fc0308b740&quot;,  
+     &quot;appId&quot;: &quot;6eda7046-fff5-491e-b70a-915257cd6bd1&quot;,  
+     &quot;displayName&quot;: &quot;Tenant Schema Extension App&quot;  
+   }  
+\]  
+}  
+</code></pre>
+<p>The schema cannot be extended without listing the applications. The <em>ID</em>
+of the "Tenant Schema Extension App" application is required to extend
+the schema.</p>
+<p>Now the schema is extended. The following listing shows the required
+command:</p>
+<pre><code>root@skyblue:~# aad-tool application add-schema-extensions --client-id
+e2bec932-5338-4c72-ae14-8ff5143eae2d --name stkania@0pndv.onm  
+icrosoft.com --schema-app-object-id
+f8fb9572-be58-48a9-9384-d8fc0308b740  
+stkania@0pndv.onmicrosoft.com password:    
+Open your Authenticator app, and enter the number '87' to sign in.  
+</code></pre>
+<p>The --schema-app-object-id option is the <em>ID</em> of the "Tenant Schema
+Extension App."</p>
+<p>Once all permissions have been set, the POSIX attributes for groups and
+users can now be set. The following examples show the extension for a
+group and then the extension for a user. It is noticeable that the
+object ID is used for the group and not the name of the group. The
+reason for this is that there is no UPN for groups, so it could happen
+that the same group name is used in different domains of a tenant. For
+users, the UPN can be specified, which is unique throughout the tenant.</p>
+<p>In order to be able to assign a <em>gidNumber</em> to a user, the example first
+extends a group with the <em>gidNumber</em>. Then, in the second command, the
+user can be assigned a <em>uidNumber</em> and the <em>gidNumber</em>.</p>
+<pre><code>root@himmelblau:~# aad-tool group set-posix-attrs --schema-client-id
+6eda7046-fff5-491e-b70a-915257cd6bd1 --name stkania@0pndv.onmicros  
+oft.com --group-id bb845f7f-8f6a-4101-b4c7-8db3cb94c9e6 --gid 23456  
+stkania@0pndv.onmicrosoft.com password:    
+Open your Authenticator app, and enter the number '13' to sign in.
+
+
+root@himmelblau:~# aad-tool user set-posix-attrs --schema-client-id
+6eda7046-fff5-491e-b70a-915257cd6bd1 --name stkania@0pndv.onmicroso  
+ft.com --user-id stkania@0pndv.onmicrosoft.com --uid 12345 --gid 23456  
+stkania@0pndv.onmicrosoft.com password:    
+Open your Authenticator app, and enter the number '64' to sign in.  
+</code></pre>
+<p>This time, the --schema-client-id option is the <em>appId</em> of the "Tenant
+Schema Extension App" application.  </p>
+<p>Now you need to adjust the configuration. To do this, add the following
+line to the file /etc/himmelblau/himmelblau.conf:</p>
+<pre><code>id_attr_map = rfc2307  
+</code></pre>
+<p>Afterwards, the cache must be cleared and the services restarted.</p>
+<pre><code>root@skyblue:~# aad-tool cache-clear --full  
+This will unjoin the host, clear all caches, and cannot be undone.
+Proceed? \[Y/N\]: y  
+success  
+
+root@skyblue:~# systemctl restart himmelblaud.service
+himmelblaud-tasks.service  
+</code></pre>
+<p>Since the new attributes cannot be read directly during the first login,
+joining the domain is not possible by logging in as a user, but must be
+done via a local user. The local user uses the command <em>aad-tool
+auth-test</em> together with a user ID from the domain, specifically with a
+user who has been granted the appropriate permissions to write to
+Microsoft Graph.</p>
+<p>The following listing shows how to join the domain using a local
+account.</p>
+<pre><code>**stka@himmelblau**:**~**\$ aad-tool auth-test --name stkania  
+Use the password for your Office 365 or Microsoft online login.  
+Entra Id Password:    
+Open your Authenticator app, and enter the number '37' to sign in.  
+No push? Check your mobile device's internet connection.  
+Set up a PIN  
+A Hello PIN is a fast, secure way to sign in to your device, apps, and
+services.  
+The minimum PIN length is 6 characters.  
+New PIN:    
+Set up a PIN  
+A Hello PIN is a fast, secure way to sign in to your device, apps, and
+services.  
+The minimum PIN length is 6 characters.  
+Confirm PIN:    
+Enrolling the Hello PIN. Please wait...
+
+</code></pre>
+<p>Only now can the new attributes be displayed and used, as shown in the
+following listing:</p>
+<pre><code>**stka@himmelblau**:**~**\$ getent passwd stkania  
+stkania:x:12345:23456:stkania:/home/stkania:/bin/bash  
+</code></pre>
+<p>The new attributes can also be found via the "Microsoft Graph Explorer."
+But first, it is necessary to adjust the permissions for the application
+<em>grant-aad-tool-permission</em> as shown in the following figure:</p>
+<p><img alt="grant-aad-tool-permission permissions" src="../media/10000001000008A3000004FDED2EC3D2.png" /></p>
+<p>Now the attributes can also be displayed in Explorer. The URL for
+Explorer is
+<a href="https://developer.microsoft.com/en-us/graph/graph-explorer">https://developer.microsoft.com/en-us/graph/graph-explorer</a>. The
+following figure shows the new attributes of the user:</p>
+<p><img alt="Graph Explorer user attributes" src="../media/1000000100000491000004753C49A373.png" /></p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../intune/" class="btn btn-neutral float-left" title="Intune Policies for Linux Clients"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../installation/" class="btn btn-neutral float-right" title="Installation">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
+        </span>
+    
+    
+      <span><a href="../intune/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../installation/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

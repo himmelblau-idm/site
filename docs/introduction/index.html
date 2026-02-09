@@ -85,6 +85,10 @@
                 </li>
               </ul>
               <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../rfc2307-entra-id-posix-attributes/">RFC2307 Schema Attributes</a>
+                </li>
+              </ul>
+              <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
                 </li>
               </ul>
@@ -566,7 +570,7 @@ Debian-gdm@himmelblau-gui:~$systemctl restart gdm3
 ------------------------------
 </code></pre>
 <p>IMPORTANT: Under no circumstances should you use your own domain here, only the domain himmelblau-idm.org, otherwise no QR code will be generated when a new user logs in for the first time. If everything has been set up correctly, the following image will appear when a user logs in for the very first time after entering their username and initial password:</p>
-<p><img alt="Device Authorization Grant GDM Login" src="../image-20251106203521798.png" /></p>
+<p><img alt="Device Authorization Grant GDM Login" src="image-20251106203521798.png" /></p>
 <p>The user can then scan the QR code with their smartphone and will be taken to the website where they can complete the initial login.</p>
 <p>This only works if <em>gdm</em> is used as the login manager and a Gnome version &gt;=45 is used.</p>
 <p>After successful login, the sso can be tested immediately. Installing the <em>himmelblau-sso</em> package also installs and activates the required plugin for Firefox.</p>

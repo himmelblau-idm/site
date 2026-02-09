@@ -3,6 +3,7 @@ nav:
   - Quickstart: index.md
   - A Practical Introduction to Himmelblau: introduction.md
   - Intune Policies for Linux Clients: intune.md
+  - RFC2307 Schema Attributes: rfc2307-entra-id-posix-attributes.md
   - Installation: installation.md
   - Configuration: configuration.md
   - Device Registration: registration.md

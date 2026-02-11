@@ -6,7 +6,7 @@
 const REPO_SUPPORT = {
 	stable: {
 		include: [],
-		exclude: [],
+		exclude: ['amzn2023', 'ubuntu25.10'],
 	},
 	nightly: {
 		include: [],

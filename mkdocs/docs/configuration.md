@@ -174,6 +174,22 @@ enable_hello = false
 
 ---
 
+### Changing a Hello PIN
+
+To change an existing Hello PIN, run `passwd` as the user. When `pam_himmelblau.so` is present in the system password stack, `passwd` updates the Hello PIN instead of (or in addition to) a local password.
+
+```bash
+passwd
+```
+
+---
+
+### PIN lifetime and cache behavior
+
+A Hello PIN can last indefinitely. It is only constrained by the lifetime of the cached PRT or refresh token (depending on the environment). If the host is offline longer than the cached PRT validity (often around 14 days, but tenant policy can differ), the Hello credentials expire and an online sign-in is required. At present, that online sign-in results in creating a new PIN; a future update will allow re-associating refreshed credentials with the existing PIN.
+
+---
+
 ## Debug Logging
 
 Enable debug logs for troubleshooting:

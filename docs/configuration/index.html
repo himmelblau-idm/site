@@ -100,6 +100,12 @@
     <li class="toctree-l2"><a class="reference internal" href="#nss-configuration">NSS Configuration</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#disabling-linux-hello-pin">Disabling Linux Hello PIN</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#changing-a-hello-pin">Changing a Hello PIN</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#pin-lifetime-and-cache-behavior">PIN lifetime and cache behavior</a>
+    </li>
+        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#debug-logging">Debug Logging</a>
     </li>
@@ -345,6 +351,14 @@ group:      files himmelblau
 <pre><code class="language-ini">[global]
 enable_hello = false
 </code></pre>
+<hr />
+<h3 id="changing-a-hello-pin">Changing a Hello PIN</h3>
+<p>To change an existing Hello PIN, run <code>passwd</code> as the user. When <code>pam_himmelblau.so</code> is present in the system password stack, <code>passwd</code> updates the Hello PIN instead of (or in addition to) a local password.</p>
+<pre><code class="language-bash">passwd
+</code></pre>
+<hr />
+<h3 id="pin-lifetime-and-cache-behavior">PIN lifetime and cache behavior</h3>
+<p>A Hello PIN can last indefinitely. It is only constrained by the lifetime of the cached PRT or refresh token (depending on the environment). If the host is offline longer than the cached PRT validity (often around 14 days, but tenant policy can differ), the Hello credentials expire and an online sign-in is required. At present, that online sign-in results in creating a new PIN; a future update will allow re-associating refreshed credentials with the existing PIN.</p>
 <hr />
 <h2 id="debug-logging">Debug Logging</h2>
 <p>Enable debug logs for troubleshooting:</p>

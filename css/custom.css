@@ -327,6 +327,139 @@ svg #himmelblau { filter: invert(1) brightness(2); }
   line-height: 3.2rem;
 }
 
+body[data-home="true"] .hb-donate-banner {
+  position: static;
+  background: transparent;
+  color: #1f2d3d;
+  max-width: 22rem;
+}
+
+.hb-donate-banner[hidden],
+.hb-donate-banner-hidden .hb-donate-banner {
+  display: none;
+}
+
+.hb-donate-banner__inner {
+  margin: 0;
+  padding: 0.85rem 0.9rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: rgba(248, 250, 255, 0.78);
+  border: 1px solid rgba(24, 67, 117, 0.18);
+  border-radius: 0.85rem;
+  box-shadow: 0 12px 24px rgba(16, 38, 66, 0.18);
+  backdrop-filter: blur(12px);
+}
+
+.hb-donate-banner__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.hb-donate-banner__title {
+  font-weight: 700;
+  font-size: 0.98rem;
+  letter-spacing: 0.01em;
+}
+
+.hb-donate-banner__copy {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.hb-donate-banner__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.hb-donate-banner__cta,
+.hb-donate-banner__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.7rem;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  width: 100%;
+  min-width: 0;
+  color: #103a5c;
+  background: #ffe08a;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  flex: 1 1 auto;
+}
+
+.hb-donate-banner__link {
+  background: rgba(16, 58, 92, 0.08);
+  color: #103a5c;
+  border: 1px solid rgba(16, 58, 92, 0.25);
+}
+
+.hb-donate-banner__cta:hover,
+.hb-donate-banner__link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16, 38, 66, 0.18);
+}
+
+.hb-donate-banner__dismiss {
+  background: transparent;
+  border: 1px solid rgba(16, 58, 92, 0.25);
+  color: #103a5c;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.7rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  width: 100%;
+  min-width: 0;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  flex: 0 0 auto;
+}
+
+.hb-donate-banner__dismiss:hover {
+  background: rgba(16, 58, 92, 0.08);
+  border-color: rgba(16, 58, 92, 0.4);
+}
+
+@media (max-width: 900px) {
+  body[data-home="true"] .hero-floats {
+    position: static;
+    margin: 1rem 1rem 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  body[data-home="true"] .hb-donate-banner {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .hb-donate-banner__inner {
+    padding: 0.75rem 1rem 0.9rem;
+  }
+
+  .hb-donate-banner__actions {
+    gap: 0.5rem;
+  }
+
+  .hb-donate-banner__cta,
+  .hb-donate-banner__link,
+  .hb-donate-banner__dismiss {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 pre {
   overflow-x: auto;
   white-space: pre;
@@ -478,9 +611,7 @@ pre::-webkit-scrollbar-thumb {
 
 /* Floating Press Badge in Hero */
 body[data-home="true"] .press-float {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
+  position: static;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -491,6 +622,16 @@ body[data-home="true"] .press-float {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 10;
+}
+
+body[data-home="true"] .hero-floats {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
   z-index: 10;
 }
 
@@ -525,8 +666,6 @@ body[data-home="true"] .press-float-text {
 /* Responsive: smaller on mobile */
 @media (max-width: 768px) {
   body[data-home="true"] .press-float {
-    top: 0.75rem;
-    right: 0.75rem;
     padding: 0.5rem 0.75rem 0.75rem;
   }
 
@@ -537,5 +676,10 @@ body[data-home="true"] .press-float-text {
 
   body[data-home="true"] .press-float-text {
     font-size: 0.7rem;
+  }
+
+  body[data-home="true"] .hero-floats {
+    top: 0.75rem;
+    right: 0.75rem;
   }
 }

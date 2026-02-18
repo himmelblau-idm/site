@@ -12,11 +12,25 @@ hide:
 </script>
 
 <section class="home-hero">
-  <a href="https://www.heise.de/select/ix/2026/1/2528006422371218161" target="_blank" rel="noopener" class="press-float">
-    <span class="press-float-badge">Featured In</span>
-    <img src="assets/ix-logo.svg" alt="iX Magazine" class="press-float-logo">
-    <span class="press-float-text">iX Magazine</span>
-  </a>
+  <div class="hero-floats" aria-label="Highlights">
+    <a href="https://www.heise.de/select/ix/2026/1/2528006422371218161" target="_blank" rel="noopener" class="press-float">
+      <span class="press-float-badge">Featured In</span>
+      <img src="assets/ix-logo.svg" alt="iX Magazine" class="press-float-logo">
+      <span class="press-float-text">iX Magazine</span>
+    </a>
+    <aside class="hb-donate-banner" id="hb-donate-banner" role="region" aria-label="Support Himmelblau">
+      <div class="hb-donate-banner__inner">
+        <div class="hb-donate-banner__text">
+          <span class="hb-donate-banner__title">Help me keep the lights on.</span>
+          <span class="hb-donate-banner__copy">Contributions fund the hardware, travel, and support work behind the scenes.</span>
+        </div>
+        <div class="hb-donate-banner__actions">
+          <a class="hb-donate-banner__cta" href="https://opencollective.com/himmelblau/contribute/sponsors-84876/checkout" target="_blank" rel="noopener">Contribute</a>
+          <button class="hb-donate-banner__dismiss" type="button" aria-label="Dismiss donation banner">Maybe later</button>
+        </div>
+      </div>
+    </aside>
+  </div>
   <div class="hero-card">
     <h1>Seamless Azure Entra ID and Intune integration for Linux</h1>
     <p>SSO, MFA, Intune compliance and TPM-backed keys — with a cleaner experience than Windows.</p>

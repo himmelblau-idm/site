@@ -59,6 +59,57 @@
     
   
   <script type="text/javascript" data-cmp-ab="1" src="https://cdn.consentmanager.net/delivery/autoblocking/8bffa521a2c48.js" data-cmp-host="c.delivery.consentmanager.net" data-cmp-cdn="cdn.consentmanager.net" data-cmp-codesrc="16"></script>
+  <script>
+    (function () {
+      var bannerId = "hb-donate-banner";
+      var storageKey = "hb-donate-banner-dismissed";
+      var hiddenClass = "hb-donate-banner-hidden";
+      var dismissTtlMs = 30 * 24 * 60 * 60 * 1000;
+
+      function markHidden() {
+        document.documentElement.classList.add(hiddenClass);
+      }
+
+      try {
+        var stored = localStorage.getItem(storageKey);
+        if (stored) {
+          var dismissedAt = parseInt(stored, 10);
+          if (!Number.isNaN(dismissedAt) && Date.now() - dismissedAt < dismissTtlMs) {
+            markHidden();
+          }
+        }
+      } catch (err) {
+        // ignore storage failures
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var banner = document.getElementById(bannerId);
+        if (!banner) {
+          return;
+        }
+
+        if (document.documentElement.classList.contains(hiddenClass)) {
+          banner.setAttribute("hidden", "hidden");
+          return;
+        }
+
+        var dismiss = banner.querySelector(".hb-donate-banner__dismiss");
+        if (!dismiss) {
+          return;
+        }
+
+        dismiss.addEventListener("click", function () {
+          try {
+            localStorage.setItem(storageKey, String(Date.now()));
+          } catch (err) {
+            // ignore storage failures
+          }
+          markHidden();
+          banner.setAttribute("hidden", "hidden");
+        });
+      });
+    })();
+  </script>
 
   </head>
   

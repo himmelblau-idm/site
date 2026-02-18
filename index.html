@@ -59,6 +59,57 @@
     
   
   <script type="text/javascript" data-cmp-ab="1" src="https://cdn.consentmanager.net/delivery/autoblocking/8bffa521a2c48.js" data-cmp-host="c.delivery.consentmanager.net" data-cmp-cdn="cdn.consentmanager.net" data-cmp-codesrc="16"></script>
+  <script>
+    (function () {
+      var bannerId = "hb-donate-banner";
+      var storageKey = "hb-donate-banner-dismissed";
+      var hiddenClass = "hb-donate-banner-hidden";
+      var dismissTtlMs = 30 * 24 * 60 * 60 * 1000;
+
+      function markHidden() {
+        document.documentElement.classList.add(hiddenClass);
+      }
+
+      try {
+        var stored = localStorage.getItem(storageKey);
+        if (stored) {
+          var dismissedAt = parseInt(stored, 10);
+          if (!Number.isNaN(dismissedAt) && Date.now() - dismissedAt < dismissTtlMs) {
+            markHidden();
+          }
+        }
+      } catch (err) {
+        // ignore storage failures
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var banner = document.getElementById(bannerId);
+        if (!banner) {
+          return;
+        }
+
+        if (document.documentElement.classList.contains(hiddenClass)) {
+          banner.setAttribute("hidden", "hidden");
+          return;
+        }
+
+        var dismiss = banner.querySelector(".hb-donate-banner__dismiss");
+        if (!dismiss) {
+          return;
+        }
+
+        dismiss.addEventListener("click", function () {
+          try {
+            localStorage.setItem(storageKey, String(Date.now()));
+          } catch (err) {
+            // ignore storage failures
+          }
+          markHidden();
+          banner.setAttribute("hidden", "hidden");
+        });
+      });
+    })();
+  </script>
 
   </head>
   
@@ -575,11 +626,25 @@
 </script>
 
 <section class="home-hero">
-  <a href="https://www.heise.de/select/ix/2026/1/2528006422371218161" target="_blank" rel="noopener" class="press-float">
-    <span class="press-float-badge">Featured In</span>
-    <img src="assets/ix-logo.svg" alt="iX Magazine" class="press-float-logo">
-    <span class="press-float-text">iX Magazine</span>
-  </a>
+  <div class="hero-floats" aria-label="Highlights">
+    <a href="https://www.heise.de/select/ix/2026/1/2528006422371218161" target="_blank" rel="noopener" class="press-float">
+      <span class="press-float-badge">Featured In</span>
+      <img src="assets/ix-logo.svg" alt="iX Magazine" class="press-float-logo">
+      <span class="press-float-text">iX Magazine</span>
+    </a>
+    <aside class="hb-donate-banner" id="hb-donate-banner" role="region" aria-label="Support Himmelblau">
+      <div class="hb-donate-banner__inner">
+        <div class="hb-donate-banner__text">
+          <span class="hb-donate-banner__title">Help me keep the lights on.</span>
+          <span class="hb-donate-banner__copy">Contributions fund the hardware, travel, and support work behind the scenes.</span>
+        </div>
+        <div class="hb-donate-banner__actions">
+          <a class="hb-donate-banner__cta" href="https://opencollective.com/himmelblau/contribute/sponsors-84876/checkout" target="_blank" rel="noopener">Contribute</a>
+          <button class="hb-donate-banner__dismiss" type="button" aria-label="Dismiss donation banner">Maybe later</button>
+        </div>
+      </div>
+    </aside>
+  </div>
   <div class="hero-card">
     <h1>Seamless Azure Entra ID and Intune integration for Linux</h1>
     <p>SSO, MFA, Intune compliance and TPM-backed keys — with a cleaner experience than Windows.</p>

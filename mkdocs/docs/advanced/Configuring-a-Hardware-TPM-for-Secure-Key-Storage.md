@@ -1,6 +1,6 @@
 # Configuring a Hardware TPM for Secure Key Storage
 
-Himmelblau supports the use of a **hardware TPM (Trusted Platform Module)** to securely store cryptographic secrets, including Hello PIN keys, device credentials, and the Primary Refresh Token (PRT). By default, Himmelblau uses a **software HSM**, which provides no hardware-backed security. If your system includes a TPM, we strongly recommend configuring Himmelblau to use it **before enrolling the device**.
+Himmelblau supports the use of a **hardware TPM (Trusted Platform Module)** to securely store cryptographic secrets, including Hello PIN keys, device credentials, and the Primary Refresh Token (PRT). By default, Himmelblau uses **tpm_bound_soft_if_possible**, which means a software HSM is used but the top key is bound to the TPM when available. If your system includes a TPM and you want full TPM-backed storage, configure `hsm_type = tpm` **before enrolling the device**.
 
 > ⚠️ **Warning:** TPM support must be configured **before** authenticating to Entra ID or enrolling the device. If you've already enrolled, you'll need to **reset the local cache** and re-enroll in order to switch to TPM.
 
@@ -92,7 +92,7 @@ Once TPM is configured, proceed with Entra ID authentication and device enrollme
 
 ## Switching to TPM After Enrollment
 
-If you've already enrolled the device using `hsm_type = soft`, you can still switch to TPM, but you'll need to **reset the local key cache** and re-enroll:
+If you've already enrolled the device using `hsm_type = tpm_bound_soft_if_possible` or another non-TPM setting, you can still switch to full TPM storage, but you'll need to **reset the local key cache** and re-enroll:
 
 ```bash
 sudo aad-tool cache-clear --full
@@ -116,9 +116,9 @@ You should see messages indicating successful communication with the TPM and key
 
 ## Summary
 
-| Feature         | Default              | Recommended for TPM        |
-| --------------- | -------------------- | -------------------------- |
-| `hsm_type`      | `soft` (no TPM)      | `tpm` or `tpm_if_possible` |
+| Feature         | Default                          | Recommended for TPM        |
+| --------------- | -------------------------------- | -------------------------- |
+| `hsm_type`      | `tpm_bound_soft_if_possible`     | `tpm`                      |
 | `tpm_tcti_name` | `device:/dev/tpmrm0` | (usually don't change)     |
 
 **Remember:** TPM must be configured before enrollment. Switching afterward requires clearing the secure key cache.

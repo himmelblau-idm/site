@@ -35,7 +35,7 @@ apply_policy = true
 
 3. 🔐 **[Configure PAM](configuration.md#pam-configuration)**
 
-   On Debian based distros, pam configuration happened automatically when you installed Himmelblau.
+   On Debian based distros, PAM configuration happens automatically when you install Himmelblau.
 
    On openSUSE or SUSE Linux Enterprise:
 

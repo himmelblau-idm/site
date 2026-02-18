@@ -340,7 +340,7 @@ o365_&lt;version&gt;&lt;distribution&gt;
 <li><code>himmelblau-sshd-config_&lt;version&gt;&lt;distribution&gt;</code></li>
 </ul>
 <p>are installed for this purpose. The himmelblau-sshd-config package is only required if login via SSH on the client is to be possible.</p>
-<p>After installing the packages, distributions based on Red Hat and SUSE require some manual work for integration into PAM. For all supported distributions based on Debian, all necessary PAM entries are made automatically. On Debian systems, the Himmelblau entries are made in the <em>common-</em><em> files in the /etc/pam.d/</em> directory. On Suse systems, it is necessary to customize the PAM system with the command <em>sudo pam-config --add --himmelblau</em>. For all other distributions, the command <em>aad-tool configure-pam</em> can be used. The <em>aad-tool</em> command is part of the Himmelblau packages. </p>
+<p>After installing the packages, distributions based on Red Hat and SUSE require some manual work for integration into PAM. For all supported distributions based on Debian, all necessary PAM entries are made automatically. On Debian systems, the Himmelblau entries are made in the <em>common-</em> files in the /etc/pam.d/ directory. On Suse systems, it is necessary to customize the PAM system with the command <em>sudo pam-config --add --himmelblau</em>. For all other distributions, the command <em>aad-tool configure-pam</em> can be used. The <em>aad-tool</em> command is part of the Himmelblau packages.</p>
 <p>To also allow users to access via SSH using the PIN, it is necessary to adjust the line from Listing 1 in the file /etc/pam.d/common-auth:</p>
 <pre><code>--------- Listing 1-------
 auth    [success=2 default=ignore]    pam_himmelblau.so ignore_unknown_user mfa_poll_prompt
@@ -529,7 +529,7 @@ Connection closed by 192.168.56.81 port 22
 <h2 id="domain-parameters">Domain parameters</h2>
 <p>In addition to the local and global parameters, it is also possible to configure specific settings for individual domains. The settings for a domain always begin with the name of the domain in square brackets.</p>
 <h2 id="adjusting-the-idmap-range">Adjusting the idmap range</h2>
-<p>No individual ID mapping has been performed up to this point. If no individual ID mapping is configured, the range from 200000 to 2000200000 is always used as default. Since multiple domains separated by commas can be specified in the configuration file for the <em>domains</em> variable, it is necessary to define a separate range for each domain at this point at the latest. To do this, the file <em>/etc/himmelblau/himmelblau.conf</em> is adjusted as shown in Listing 18:</p>
+<p>No individual ID mapping has been performed up to this point. If no individual ID mapping is configured, the range from 200000 to 2000200000 is always used by default. Since multiple domains separated by commas can be specified in the configuration file for the <em>domain</em> variable, it is necessary to define a separate range for each domain at this point at the latest. To do this, the file <em>/etc/himmelblau/himmelblau.conf</em> is adjusted as shown in Listing 18:</p>
 <pre><code>------ Listing 18 ------
 [example.onmicrosoft.com] 
 idmap_range = 1000000-1999999

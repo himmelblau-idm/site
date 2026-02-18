@@ -193,7 +193,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="configuring-a-hardware-tpm-for-secure-key-storage">Configuring a Hardware TPM for Secure Key Storage</h1>
-<p>Himmelblau supports the use of a <strong>hardware TPM (Trusted Platform Module)</strong> to securely store cryptographic secrets, including Hello PIN keys, device credentials, and the Primary Refresh Token (PRT). By default, Himmelblau uses a <strong>software HSM</strong>, which provides no hardware-backed security. If your system includes a TPM, we strongly recommend configuring Himmelblau to use it <strong>before enrolling the device</strong>.</p>
+<p>Himmelblau supports the use of a <strong>hardware TPM (Trusted Platform Module)</strong> to securely store cryptographic secrets, including Hello PIN keys, device credentials, and the Primary Refresh Token (PRT). By default, Himmelblau uses <strong>tpm_bound_soft_if_possible</strong>, which means a software HSM is used but the top key is bound to the TPM when available. If your system includes a TPM and you want full TPM-backed storage, configure <code>hsm_type = tpm</code> <strong>before enrolling the device</strong>.</p>
 <blockquote>
 <p>⚠️ <strong>Warning:</strong> TPM support must be configured <strong>before</strong> authenticating to Entra ID or enrolling the device. If you've already enrolled, you'll need to <strong>reset the local cache</strong> and re-enroll in order to switch to TPM.</p>
 </blockquote>
@@ -252,7 +252,7 @@ sudo systemctl restart himmelblaud-tasks
 <p>Once TPM is configured, proceed with Entra ID authentication and device enrollment. All future key material will be generated and bound to the TPM.</p>
 <hr />
 <h2 id="switching-to-tpm-after-enrollment">Switching to TPM After Enrollment</h2>
-<p>If you've already enrolled the device using <code>hsm_type = soft</code>, you can still switch to TPM, but you'll need to <strong>reset the local key cache</strong> and re-enroll:</p>
+<p>If you've already enrolled the device using <code>hsm_type = tpm_bound_soft_if_possible</code> or another non-TPM setting, you can still switch to full TPM storage, but you'll need to <strong>reset the local key cache</strong> and re-enroll:</p>
 <pre><code class="language-bash">sudo aad-tool cache-clear --full
 </code></pre>
 <p>Then update <code>himmelblau.conf</code> to use <code>hsm_type = tpm</code>, restart services, and begin re-enrollment.</p>
@@ -275,8 +275,8 @@ sudo systemctl restart himmelblaud-tasks
 <tbody>
 <tr>
 <td><code>hsm_type</code></td>
-<td><code>soft</code> (no TPM)</td>
-<td><code>tpm</code> or <code>tpm_if_possible</code></td>
+<td><code>tpm_bound_soft_if_possible</code></td>
+<td><code>tpm</code></td>
 </tr>
 <tr>
 <td><code>tpm_tcti_name</code></td>

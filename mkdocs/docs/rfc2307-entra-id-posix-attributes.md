@@ -62,7 +62,7 @@ The default value for *id_attr_map* is the UPN of the object. Other
 possible options are UUID or rfc2307. To use the rfc2307 option, it is
 necessary to extend the schema.
 
-The default value for idmap_range is 5000000-5999999.
+The default value for idmap_range is 200000-2000200000.
 
 But where do the default values come from when the UPN of the user is
 used as *id_attr_map*? In Active Directory, together with Winbind, the

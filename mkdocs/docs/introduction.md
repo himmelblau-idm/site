@@ -103,7 +103,7 @@ To test the login for the first time, a Linux client without a graphical user in
 
 are installed for this purpose. The himmelblau-sshd-config package is only required if login via SSH on the client is to be possible.
 
-After installing the packages, distributions based on Red Hat and SUSE require some manual work for integration into PAM. For all supported distributions based on Debian, all necessary PAM entries are made automatically. On Debian systems, the Himmelblau entries are made in the *common-** files in the /etc/pam.d/* directory. On Suse systems, it is necessary to customize the PAM system with the command *sudo pam-config --add --himmelblau*. For all other distributions, the command *aad-tool configure-pam* can be used. The *aad-tool* command is part of the Himmelblau packages. 
+After installing the packages, distributions based on Red Hat and SUSE require some manual work for integration into PAM. For all supported distributions based on Debian, all necessary PAM entries are made automatically. On Debian systems, the Himmelblau entries are made in the *common-* files in the /etc/pam.d/ directory. On Suse systems, it is necessary to customize the PAM system with the command *sudo pam-config --add --himmelblau*. For all other distributions, the command *aad-tool configure-pam* can be used. The *aad-tool* command is part of the Himmelblau packages.
 
 To also allow users to access via SSH using the PIN, it is necessary to adjust the line from Listing 1 in the file /etc/pam.d/common-auth:
 
@@ -391,7 +391,7 @@ In addition to the local and global parameters, it is also possible to configure
 
 ## Adjusting the idmap range
 
-No individual ID mapping has been performed up to this point. If no individual ID mapping is configured, the range from 200000 to 2000200000 is always used as default. Since multiple domains separated by commas can be specified in the configuration file for the *domains* variable, it is necessary to define a separate range for each domain at this point at the latest. To do this, the file */etc/himmelblau/himmelblau.conf* is adjusted as shown in Listing 18:
+No individual ID mapping has been performed up to this point. If no individual ID mapping is configured, the range from 200000 to 2000200000 is always used by default. Since multiple domains separated by commas can be specified in the configuration file for the *domain* variable, it is necessary to define a separate range for each domain at this point at the latest. To do this, the file */etc/himmelblau/himmelblau.conf* is adjusted as shown in Listing 18:
 
 ```
 ------ Listing 18 ------

@@ -46,7 +46,7 @@ use_etc_skel = true
 
 Refer to the [himmelblau.conf](reference/himmelblau-conf.md) man page for a full list of options.
 
-> ⚠️**Important**: To enable hardware-backed security, you must configure TPM support **before authenticating or enrolling this device**. It is disabled by default. [Learn how to configure TPM »](advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage.md).
+> ⚠️**Important**: To require full TPM-backed security, set `hsm_type = tpm` **before authenticating or enrolling this device**. By default, Himmelblau uses `tpm_bound_soft_if_possible` (software HSM with a TPM-bound top key when available). [Learn how to configure TPM »](advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage.md).
 
 ---
 
@@ -62,11 +62,7 @@ Use one of the following automated tools to insert Himmelblau into the appropria
 
 * **Ubuntu / Debian:**
 
-```bash
-sudo pam-auth-update
-```
-
-  Then check the box labeled **Azure authentication**.
+  PAM configuration is handled automatically by the packages. No manual steps are required.
 
 * **openSUSE / Tumbleweed:**
 
@@ -94,8 +90,7 @@ If the above tools don’t produce the desired result or you require precise con
 
 **Guidelines:**
 
-* Place `pam_himmelblau.so` after `pam_localuser.so`
-* If using Linux Hello or Passwordless, place Himmelblau *before* `pam_unix.so` to avoid password prompts
+* Place `pam_himmelblau.so` after `pam_localuser.so` and before `pam_unix.so`
 * Always include `ignore_unknown_user`
 * Ensure `pam_deny.so` is placed last
 
@@ -106,12 +101,12 @@ If the above tools don’t produce the desired result or you require precise con
 ```pam
 auth        required      pam_env.so
 auth        [default=1 ignore=ignore success=ok] pam_localuser.so
-auth        sufficient    pam_unix.so nullok try_first_pass
 auth        sufficient    pam_himmelblau.so ignore_unknown_user
+auth        sufficient    pam_unix.so nullok try_first_pass
 auth        required      pam_deny.so
 ```
 
-> 💡 For Passwordless login, move pam_himmelblau.so **above** `pam_unix.so`in the pam **auth** stack to avoid fallback password prompts.
+> 💡 To avoid fallback password prompts, keep `pam_himmelblau.so` above `pam_unix.so` in the pam **auth** stack.
 
 ---
 

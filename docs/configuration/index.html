@@ -259,7 +259,7 @@ use_etc_skel = true
 </code></pre>
 <p>Refer to the <a href="../reference/himmelblau-conf/">himmelblau.conf</a> man page for a full list of options.</p>
 <blockquote>
-<p>⚠️<strong>Important</strong>: To enable hardware-backed security, you must configure TPM support <strong>before authenticating or enrolling this device</strong>. It is disabled by default. <a href="../advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage/">Learn how to configure TPM »</a>.</p>
+<p>⚠️<strong>Important</strong>: To require full TPM-backed security, set <code>hsm_type = tpm</code> <strong>before authenticating or enrolling this device</strong>. By default, Himmelblau uses <code>tpm_bound_soft_if_possible</code> (software HSM with a TPM-bound top key when available). <a href="../advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage/">Learn how to configure TPM »</a>.</p>
 </blockquote>
 <hr />
 <h2 id="pam-configuration">PAM Configuration</h2>
@@ -270,9 +270,7 @@ use_etc_skel = true
 <ul>
 <li><strong>Ubuntu / Debian:</strong></li>
 </ul>
-<pre><code class="language-bash">sudo pam-auth-update
-</code></pre>
-<p>Then check the box labeled <strong>Azure authentication</strong>.</p>
+<p>PAM configuration is handled automatically by the packages. No manual steps are required.</p>
 <ul>
 <li><strong>openSUSE / Tumbleweed:</strong></li>
 </ul>
@@ -295,8 +293,7 @@ use_etc_skel = true
 <p>If the above tools don’t produce the desired result or you require precise control over module ordering and behavior, you may manually edit your PAM stack.</p>
 <p><strong>Guidelines:</strong></p>
 <ul>
-<li>Place <code>pam_himmelblau.so</code> after <code>pam_localuser.so</code></li>
-<li>If using Linux Hello or Passwordless, place Himmelblau <em>before</em> <code>pam_unix.so</code> to avoid password prompts</li>
+<li>Place <code>pam_himmelblau.so</code> after <code>pam_localuser.so</code> and before <code>pam_unix.so</code></li>
 <li>Always include <code>ignore_unknown_user</code></li>
 <li>Ensure <code>pam_deny.so</code> is placed last</li>
 </ul>
@@ -304,12 +301,12 @@ use_etc_skel = true
 <h4 id="example-etcpamdcommon-auth">Example: <code>/etc/pam.d/common-auth</code></h4>
 <pre><code class="language-pam">auth        required      pam_env.so
 auth        [default=1 ignore=ignore success=ok] pam_localuser.so
-auth        sufficient    pam_unix.so nullok try_first_pass
 auth        sufficient    pam_himmelblau.so ignore_unknown_user
+auth        sufficient    pam_unix.so nullok try_first_pass
 auth        required      pam_deny.so
 </code></pre>
 <blockquote>
-<p>💡 For Passwordless login, move pam_himmelblau.so <strong>above</strong> <code>pam_unix.so</code>in the pam <strong>auth</strong> stack to avoid fallback password prompts.</p>
+<p>💡 To avoid fallback password prompts, keep <code>pam_himmelblau.so</code> above <code>pam_unix.so</code> in the pam <strong>auth</strong> stack.</p>
 </blockquote>
 <hr />
 <h4 id="example-etcpamdcommon-account">Example: <code>/etc/pam.d/common-account</code></h4>

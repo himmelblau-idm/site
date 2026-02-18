@@ -219,7 +219,7 @@ the <em>idmap config * : \&lt;range&gt;</em> option.</p>
 <p>The default value for <em>id_attr_map</em> is the UPN of the object. Other
 possible options are UUID or rfc2307. To use the rfc2307 option, it is
 necessary to extend the schema.</p>
-<p>The default value for idmap_range is 5000000-5999999.</p>
+<p>The default value for idmap_range is 200000-2000200000.</p>
 <p>But where do the default values come from when the UPN of the user is
 used as <em>id_attr_map</em>? In Active Directory, together with Winbind, the
 RID is used as a factor. In Himmelblau, the mapping function of <em>sssd</em>

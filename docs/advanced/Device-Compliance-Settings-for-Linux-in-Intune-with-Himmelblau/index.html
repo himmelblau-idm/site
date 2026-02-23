@@ -190,12 +190,6 @@
               
                 <h1 id="device-compliance-settings-for-linux-in-intune-with-himmelblau">Device Compliance Settings for Linux in Intune with Himmelblau</h1>
 <p>Himmelblau supports Microsoft Intune compliance policies for Linux by interpreting and enforcing policy settings locally—without requiring the Microsoft Intune app. This enables Linux systems to participate in compliance workflows while maintaining digital sovereignty and compatibility with a wide variety of distributions.</p>
-<blockquote>
-<p>⚠️ <strong>Critical Behavior Difference:</strong>
-In Himmelblau, <strong>non-compliance results in immediate authentication failure</strong>.
-If a device does not meet compliance requirements, login is denied.
-This is different from Microsoft Intune, where non-compliance typically results in a policy flag or limited access. Plan and test your policies accordingly.</p>
-</blockquote>
 <p>Himmelblau policies are configured using the Microsoft Intune Settings Catalog. When creating a compliance policy, select the desired settings as you would for other platforms.</p>
 <hr />
 <h2 id="policy-enforcement-in-himmelblau">Policy Enforcement in Himmelblau</h2>

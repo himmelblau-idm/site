@@ -180,12 +180,16 @@
 <p>Changes to the configuration file <strong>/etc/himmelblau/himmelblau.conf</strong> only take effect after restarting the Himmelblau daemons. This includes the <strong>himmelblaud</strong> daemon, which handles authentication, and the <strong>himmelblaud-tasks</strong> daemon, which processes related tasks. </p>
 <h4 id="restarting-the-daemons">Restarting the Daemons</h4>
 <p>To apply changes, restart the Himmelblau services using the following systemd commands: </p>
-<h5 id="examples">EXAMPLES</h5>
-<p>sudo systemctl restart himmelblaud </p>
-<pre><code>sudo systemctl restart himmelblaud-tasks
+<pre><code>
+sudo systemctl restart himmelblaud
+
+sudo systemctl restart himmelblaud-tasks
+
 </code></pre>
 <h2 id="description">DESCRIPTION</h2>
 <p>The <strong>himmelblau.conf</strong> file is the primary configuration file for the Himmelblau authentication module. It defines global and optional settings required for Azure Entra ID-based authentication and device management. </p>
+<p>While Himmelblau is designed to be highly configurable, it can normally be used without any custom configuration. For desktop authentication with Azure Entra ID, all that is required is for Himmelblau to be installed and for a user to log in. The domain will be automatically extracted from the first user's UPN and looked up in Entra ID. </p>
+<p>Himmelblau has many capabilities, but most are enabled by default and configured automatically at install time. The options documented below allow administrators to customize behavior for specific environments or requirements. </p>
 <h2 id="file-format">FILE FORMAT</h2>
 <p>The file consists of sections headed by a name enclosed in square brackets. Each section contains parameters and their values in the format: </p>
 <pre><code>parameter = value Lines beginning with a '#' are comments and are ignored by the parser.
@@ -194,95 +198,149 @@
 <h3 id="global">[global]</h3>
 <p>This section contains settings that apply globally to all operations of Himmelblau. </p>
 <h4 id="domain">domain</h4>
-<p>The primary Azure Entra ID domain name used for authentication. This value <strong>SHOULD</strong> match the domain name that users enter when signing in (for example, the domain portion of their UPN). In most cases, this will be the primary domain of your Azure Entra ID tenant. If your organization uses multiple verified domains or aliases, choose the one that your users actually use to sign in. This parameter is <strong>REQUIRED</strong> for successful authentication. If it is not specified, no users will be permitted to authenticate. </p>
-<h5 id="examples_1">EXAMPLES</h5>
-<p>domain = example.com </p>
+<p>The primary Azure Entra ID domain name used for authentication. This value <strong>SHOULD</strong> match the domain name that users enter when signing in (for example, the domain portion of their UPN). In most cases, this will be the primary domain of your Azure Entra ID tenant. If your organization uses multiple verified domains or aliases, choose the one that your users actually use to sign in. If not specified, the domain is extracted from the UPN of the first user to authenticate and looked up in Entra ID. </p>
+<p>Default: Extracted from first user's UPN </p>
+<p>Example: domain = example.com </p>
+<h4 id="oidc_issuer_url">oidc_issuer_url</h4>
+<p>Specifies the OpenID Connect (OIDC) issuer URL used by Himmelblau to discover OIDC provider metadata and endpoints. This option enables generic OIDC authentication support and allows Himmelblau to authenticate against any standards-compliant OIDC provider, rather than using the built-in Microsoft Entra ID defaults. </p>
+<p>If <strong>enable_hello</strong> is set to true (the default), the client application must allow refresh tokens and include the <strong>offline_access</strong> scope for Hello enrollment to function with OIDC providers. When this option is set, the following option is <strong>REQUIRED</strong> and must be configured consistently: </p>
+<ul>
+<li><strong>app_id</strong> (en Used as the OIDC client identifier The issuer URL <strong>MUST</strong> exactly match the issuer value advertised by the OIDC provider, including any required path components. Incorrect issuer URLs will cause provider discovery to fail. If this option is not set, Himmelblau defaults to its native Microsoft Entra ID authentication flow. </li>
+</ul>
+<p>Example: oidc_issuer_url = https://login.microsoftonline.com/0656e57d-a8fc-4aa4-8366-8045787115ca/v2.0 </p>
 <h4 id="debug">debug</h4>
 <p>A boolean option that enables debug-level logging. When set to <strong>true,</strong> debug messages are output to the system journal. </p>
-<h5 id="examples_2">EXAMPLES</h5>
-<p>debug = true </p>
+<p>Default: false </p>
+<p>Example: debug = true </p>
 <h4 id="pam_allow_groups">pam_allow_groups</h4>
-<p>A comma-separated list of Entra Id Users and Groups permitted to access the system. Users should be specified by UPN. Groups MUST be specified using their Object ID GUID. Group names may not be used because these names are not guaranteed to be unique in Entra Id. </p>
-<h5 id="examples_3">EXAMPLES</h5>
-<p>pam_allow_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12,5ba4ef1d-e454-4f43-ba7c-6fe6f1601915,admin@himmelblau-idm.org </p>
+<p>A comma-separated list of Entra Id Users and Groups permitted to access the system. Users should be specified by UPN. Groups MUST be specified using their Object ID GUID. Group names may not be used because these names are not guaranteed to be unique in Entra Id. If not set, all Entra ID users are permitted to authenticate. </p>
+<p>Default: All users permitted </p>
+<p>Example: pam_allow_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12,5ba4ef1d-e454-4f43-ba7c-6fe6f1601915,admin@himmelblau-idm.org </p>
 <h4 id="id_attr_map">id_attr_map</h4>
-<p>Specify whether to map uid/gid based on the object name, the object uuid, or based on the rfc2307 schema extension attributes synchronized from an on-prem Active Directory instance. Mapping by name or by rfc2307 is recommeneded. By name mapping is the default. </p>
-<h5 id="examples_4">EXAMPLES</h5>
-<p>id_attr_map = &lt;name|uuid|rfc2307&gt; </p>
+<p>Specify whether to map uid/gid based on the object name, the object uuid, or based on the rfc2307 schema extension attributes synchronized from an on-prem Active Directory instance. Mapping by name or by rfc2307 is recommended. </p>
+<p>Default: name </p>
+<p>Example: id_attr_map = &lt;name|uuid|rfc2307&gt; </p>
 <h4 id="rfc2307_group_fallback_map">rfc2307_group_fallback_map</h4>
 <p>Specify whether to map group IDs (GIDs) based on the object name or object UUID when no <strong>gidNumber</strong> attribute is found in an on-prem Active Directory instance synchronized to Azure Entra ID. This option is only applicable if <strong>id_attr_map</strong> is set to <strong>rfc2307.</strong> If <strong>id_attr_map = rfc2307</strong> and a group does not have a <strong>gidNumber</strong> defined in the directory, this setting determines the fallback method for mapping the group ID. If this option is not set, groups without a <strong>gidNumber</strong> will not be available to NSS. </p>
-<h5 id="examples_5">EXAMPLES</h5>
-<p>rfc2307_group_fallback_map = &lt;name|uuid&gt; </p>
+<p>Example: rfc2307_group_fallback_map = &lt;name|uuid&gt; </p>
 <h4 id="enable_hello">enable_hello</h4>
 <p>Enables or disables user enrollment in Windows Hello authentication. If disabled, users will need to provide MFA for each login. </p>
-<h5 id="examples_6">EXAMPLES</h5>
-<p>enable_hello = false </p>
+<p>For OIDC providers (when <strong>oidc_issuer_url</strong> is set), Hello enrollment requires the client application to allow refresh tokens and include the <strong>offline_access</strong> scope. </p>
+<p>Default: true </p>
+<p>Example: enable_hello = false </p>
+<h4 id="allow_remote_hello">allow_remote_hello</h4>
+<p>Allows Windows Hello PIN authentication for remote services without requiring Hello TOTP. When enabled, remote logins may use Hello PIN alone, restoring the legacy behavior for SSH and similar services. This weakens remote authentication and is not recommended unless you explicitly accept the risk. Prefer enabling Hello TOTP instead. </p>
+<p>Default: false </p>
+<p>Example: allow_remote_hello = true </p>
+<h4 id="enable_hello_totp">enable_hello_totp</h4>
+<p>Enables or disables the use of a local Time-based One-Time Password (TOTP) in combination with Windows Hello authentication. When enabled, users are required to authenticate using both their Hello PIN and a TOTP generated by a standard authenticator application. The TOTP secret is enrolled and enforced locally on the host and is independent of any cloud-based MFA or identity provider. Users who have not yet enrolled a TOTP secret will be prompted to complete TOTP enrollment. Hello PIN alone is not permitted for remote authentication unless allow_remote_hello is enabled. When Hello TOTP is enabled, Hello + TOTP is accepted for remote services; otherwise remote logins skip Hello and require MFA. </p>
+<p>Default: false </p>
+<p>Example: enable_hello_totp = true </p>
 <h4 id="hello_pin_min_length">hello_pin_min_length</h4>
 <p>The minimum length of the PIN for Windows Hello authentication. The value must be between 6 and 32 characters. </p>
-<h5 id="examples_7">EXAMPLES</h5>
-<p>hello_pin_min_length = 8 </p>
+<p>Default: 6 </p>
+<p>Example: hello_pin_min_length = 8 </p>
 <h4 id="hello_pin_retry_count">hello_pin_retry_count</h4>
 <p>The number of invalid Hello PIN attempts allowed before the user is required to perform MFA. After successful MFA, the user will be prompted to set a new PIN. The value must be a non-negative integer. </p>
-<h5 id="examples_8">EXAMPLES</h5>
-<p>hello_pin_retry_count = 3 </p>
+<p>Default: 3 </p>
+<p>Example: hello_pin_retry_count = 5 </p>
 <h4 id="hello_pin_prompt">hello_pin_prompt</h4>
-<p>Customizes the prompt text shown when requesting the user’s Linux Hello PIN. If not set, the default prompt is: </p>
-<p>Use the Linux Hello PIN for this device. </p>
-<h5 id="examples_9">EXAMPLES</h5>
-<p>hello_pin_prompt = Enter your device unlock PIN </p>
+<p>Customizes the prompt text shown when requesting the user's Linux Hello PIN. </p>
+<p>Default: Use the Linux Hello PIN for this device. </p>
+<p>Example: hello_pin_prompt = Enter your device unlock PIN </p>
 <h4 id="entra_id_password_prompt">entra_id_password_prompt</h4>
-<p>Customizes the prompt text shown when requesting the user’s Entra ID password. If not set, the default prompt is: </p>
-<p>Use the password for your Office 365 or Microsoft online login. </p>
-<h5 id="examples_10">EXAMPLES</h5>
-<p>entra_id_password_prompt = Enter your Microsoft 365 password </p>
+<p>Customizes the prompt text shown when requesting the user's Entra ID password. </p>
+<p>Default: Use the password for your Office 365 or Microsoft online login. </p>
+<p>Example: entra_id_password_prompt = Enter your Microsoft 365 password </p>
 <h4 id="enable_sfa_fallback">enable_sfa_fallback</h4>
-<p>Determines whether password-only (single-factor) authentication is permitted when MFA is unavailable. Disabled by default. </p>
-<h5 id="examples_11">EXAMPLES</h5>
-<p>enable_sfa_fallback = true </p>
+<p>Determines whether password-only (single-factor) authentication is permitted when MFA is unavailable. </p>
+<p>Default: false </p>
+<p>Example: enable_sfa_fallback = true </p>
+<h4 id="allow_console_password_only">allow_console_password_only</h4>
+<p>Enables password-only (single-factor) authentication for local console logins (e.g., TTY, GDM, SDDM, LightDM). When enabled, Himmelblau will attempt to authenticate using only the user's password for local sessions. If Microsoft Entra ID requires MFA (based on Conditional Access policies), the user will be prompted for MFA automatically. This option does <strong>NOT</strong> affect remote authentication methods such as SSH, which always require MFA (unless the user has Hello + TOTP configured or allow_remote_hello is enabled). Remote connections are detected using multiple signals: </p>
+<ul>
+<li>
+<p>PAM_RHOST - If the remote host is set to a non-localhost value </p>
+</li>
+<li>
+<p>PAM_SERVICE - If the service name matches entries in <strong>password_only_remote_services_deny_list</strong> </p>
+</li>
+<li>
+<p>PAM_TTY - If the terminal name contains "ssh" (fallback check) This option requires the device to be domain-joined, matching the behavior of Microsoft-managed devices. Users can still use Hello PIN authentication if it is configured. To require MFA for all logins (including local console), set this option to <strong>false.</strong> </p>
+</li>
+</ul>
+<p>Default: true </p>
+<p>Example: allow_console_password_only = false </p>
+<h4 id="password_only_remote_services_deny_list">password_only_remote_services_deny_list</h4>
+<p>A comma-separated list of PAM service names that should always require MFA, regardless of the <strong>allow_console_password_only</strong> setting. These are typically remote access services where password-only authentication should never be permitted. The PAM service name is the name passed by the application when calling <strong>pam_start()</strong> (e.g., "sshd", "login", "gdm-password"). Entries are matched as substrings, so "ssh" will match "ssh", "sshd", "openssh", etc. </p>
+<p>Default: ssh,telnet,ftp,rsh,rlogin,rexec,vnc,xrdp,cockpit,mosh </p>
+<p>Example: password_only_remote_services_deny_list = ssh,telnet,vnc,xrdp </p>
+<h4 id="mfa_method">mfa_method</h4>
+<p>Specifies a preferred MFA (Multi-Factor Authentication) method to use during authentication. When set, Himmelblau will attempt to use this specific MFA method instead of the default method configured in the user's Entra ID profile. If not set or if the specified method is not available for the user, the default MFA method will be used. Valid values include: </p>
+<ul>
+<li>
+<p>PhoneAppNotification - Authenticator app push notification </p>
+</li>
+<li>
+<p>CompanionAppsNotification - MFA via Outlook app/Authenticator Lite </p>
+</li>
+<li>
+<p>PhoneAppOTP - Authenticator app verification code </p>
+</li>
+<li>
+<p>OneWaySMS - Text message code </p>
+</li>
+<li>
+<p>TwoWayVoiceMobile - Phone call to mobile </p>
+</li>
+<li>
+<p>TwoWayVoiceAlternateMobile - Phone call to alternate mobile number </p>
+</li>
+<li>
+<p>TwoWayVoiceOffice - Phone call to office </p>
+</li>
+<li>
+<p>ConsolidatedTelephony - Call or text message </p>
+</li>
+</ul>
+<p>Example: mfa_method = TwoWayVoiceMobile </p>
 <h4 id="cn_name_mapping">cn_name_mapping</h4>
 <p>Allows users to enter the short form of their username (e.g., 'dave') instead of the full UPN. </p>
-<h5 id="examples_12">EXAMPLES</h5>
-<p>cn_name_mapping = true </p>
+<p>Default: true </p>
+<p>Example: cn_name_mapping = false </p>
 <h4 id="local_groups">local_groups</h4>
 <p>A comma-separated list of local groups that every Entra ID user should be a member of. For example, you may wish for all Entra ID users to be a member of the sudo group. WARNING: This setting will not REMOVE group member entries when groups are removed from this list. You must remove them manually. </p>
-<h5 id="examples_13">EXAMPLES</h5>
-<p>local_groups = sudo,admin </p>
+<p>Example: local_groups = sudo,admin </p>
 <h4 id="sudo_groups">sudo_groups</h4>
 <p>A comma-separated list of Azure Entra ID group object IDs whose members should be granted <strong>sudo</strong> access on this system. If <strong>local_sudo_group</strong> is not defined, the local group <strong>sudo</strong> will be used. </p>
-<h5 id="examples_14">EXAMPLES</h5>
-<p>sudo_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12,5ba4ef1d-e454-4f43-ba7c-6fe6f1601915 </p>
+<p>Example: sudo_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12,5ba4ef1d-e454-4f43-ba7c-6fe6f1601915 </p>
 <h4 id="local_sudo_group">local_sudo_group</h4>
-<p>The local group that should be given to users in any of the groups specified in sudo_groups. Only has an affect if sudo_groups is set. Removes group from user if they are no longer a member of the specified entra group. </p>
+<p>The local group that should be given to users in any of the groups specified in sudo_groups. Only has an effect if sudo_groups is set. Removes group from user if they are no longer a member of the specified entra group. </p>
+<p>Default: sudo </p>
 <h4 id="logon_script">logon_script</h4>
 <p>A script that will execute every time a user logs on. Two environment variables are set: USERNAME, and ACCESS_TOKEN. The ACCESS_TOKEN environment variable is an access token for the MS Graph. The token scope config option sets the comma-separated scopes that should be requested for the ACCESS_TOKEN. ACCESS_TOKEN will be empty during offline logon. The return code of the script determines how authentication proceeds. 0 is success, 1 is a soft failure and authentication will proceed, while 2 is a hard failure causing authentication to fail. </p>
-<h5 id="examples_15">EXAMPLES</h5>
-<p>logon_script = /etc/himmelblau/logon.sh </p>
+<p>Example: logon_script = /etc/himmelblau/logon.sh </p>
 <h4 id="logon_token_scopes">logon_token_scopes</h4>
 <p>A comma-separated list of the scopes to be requested for the ACCESS_TOKEN during logon. These scopes <strong>MUST</strong> correspond to the API permissions assigned to the Entra Id Application specified by the <strong>app_id</strong> option. </p>
-<h5 id="examples_16">EXAMPLES</h5>
-<p>logon_token_scopes = user.read,mail.read </p>
+<p>Example: logon_token_scopes = user.read,mail.read </p>
 <h4 id="app_id">app_id</h4>
 <p>Specifies the Azure Entra ID application (client) ID used by Himmelblau for directory operations such as reading extended attributes (for example, the <strong>gidNumber</strong> attribute used in RFC 2307 idmapping). If <strong>logon_token_app_id</strong> is not set, this application ID is also used when requesting access tokens for the user logon script. </p>
-<p><strong>Note:</strong> In the Azure Portal for the application corresponding to <strong>app_id</strong>, ensure that the redirect URI <em>himmelblau://Himmelblau.EntraId.BrokerPlugin</em> is enabled under “Mobile and desktop applications” in the Authentication section. This allows Himmelblau to correctly handle interactive token redirection. </p>
-<h5 id="examples_17">EXAMPLES</h5>
-<p>app_id = d023f7aa-d214-4b59-911d-6074de623765 </p>
+<p><strong>Note:</strong> In the Azure Portal for the application corresponding to <strong>app_id</strong>, ensure that the redirect URI <em>himmelblau://Himmelblau.EntraId.BrokerPlugin</em> is enabled under "Mobile and desktop applications" in the Authentication section. This allows Himmelblau to correctly handle interactive token redirection. </p>
+<p>Example: app_id = d023f7aa-d214-4b59-911d-6074de623765 </p>
 <h4 id="logon_token_app_id">logon_token_app_id</h4>
 <p>Specifies an alternate Azure Entra ID application (client) ID to be used exclusively for acquiring <strong>ACCESS_TOKEN</strong> values on behalf of the user during logon script execution. If not set, the value of <strong>app_id</strong> will be used instead. This option allows using a separate application registration that carries the specific API permissions required by logon scripts. </p>
-<p><strong>Note:</strong> In the Azure Portal for the application corresponding to <strong>logon_token_app_id</strong>, ensure that the redirect URI <em>https://login.microsoftonline.com/common/oauth2/nativeclient</em> is enabled under “Mobile and desktop applications” in the Authentication section. This is required for Himmelblau to obtain tokens via the public client flow. </p>
-<h5 id="examples_18">EXAMPLES</h5>
-<p>logon_token_app_id = 544e695f-5d78-442e-b14e-e114e95e640c </p>
+<p><strong>Note:</strong> In the Azure Portal for the application corresponding to <strong>logon_token_app_id</strong>, ensure that the redirect URI <em>https://login.microsoftonline.com/common/oauth2/nativeclient</em> is enabled under "Mobile and desktop applications" in the Authentication section. This is required for Himmelblau to obtain tokens via the public client flow. </p>
+<p>Example: logon_token_app_id = 544e695f-5d78-442e-b14e-e114e95e640c </p>
 <h4 id="enable_experimental_mfa">enable_experimental_mfa</h4>
-<p>A boolean option that enables the experimental multi-factor authentication (MFA) flow, which permits Hello authentication. This experimental flow may encounter failures in certain edge cases. If disabled, the system enforces the Device Authorization Grant (DAG) flow for MFA, which is more robust but does not support Hello authentication. By default, this option is enabled. </p>
-<h5 id="examples_19">EXAMPLES</h5>
-<p>enable_experimental_mfa = true </p>
+<p>A boolean option that enables the experimental multi-factor authentication (MFA) flow, which permits Hello authentication. This experimental flow may encounter failures in certain edge cases. If disabled, the system enforces the Device Authorization Grant (DAG) flow for MFA, which is more robust but does not support Hello authentication. </p>
+<p>Default: true </p>
+<p>Example: enable_experimental_mfa = false </p>
 <h4 id="enable_experimental_passwordless_fido">enable_experimental_passwordless_fido</h4>
-<p>A boolean option that enables the experimental passwordless FIDO flow for Azure Entra ID authentication. When enabled, Himmelblau will attempt to authenticate with Entra ID using a FIDO2 security key without requiring a password. By default, this option is disabled. </p>
-<h5 id="examples_20">EXAMPLES</h5>
-<p>enable_experimental_passwordless_fido = true </p>
+<p>A boolean option that enables the experimental passwordless FIDO flow for Azure Entra ID authentication. When enabled, Himmelblau will attempt to authenticate with Entra ID using a FIDO2 security key without requiring a password. </p>
+<p>Default: false </p>
+<p>Example: enable_experimental_passwordless_fido = true </p>
 <h4 id="name_mapping_script">name_mapping_script</h4>
-<p>Specifies the path to an executable script used for mapping custom names to UPN names. The script MUST accept a single argument, which will always be a mapped name. The script MUST print the corresponding UPN (User Principal Name) to stdout. If the script does not recognize the input name, it MUST simply return the input name unchanged. This option is particularly useful in environments where direct UPN-to-CN mappings are impractical or where custom transformations are required. The script must handle the input gracefully and return the correct UPN or the input name if unrecognized. Errors must be handled to avoid authentication failures. </p>
-<h5 id="examples_21">EXAMPLES</h5>
-<p>name_mapping_script = /path/to/mapping_script.sh Example Script: </p>
+<p>Specifies the path to an executable script used for mapping custom names to UPN names. The script MUST accept a single argument, which will always be a mapped name. The script MUST print the corresponding UPN (User Principal Name) to stdout. If the script does not recognize the input name, it MUST simply return the input name unchanged. This option is particularly useful in environments where direct UPN-to-CN mappings are impractical or where custom transformations are required. The script must handle the input gracefully and return the correct UPN or the input name if unrecognized. Errors must be handled to avoid authentication failures. Example Script: </p>
 <pre><code>#!/bin/bash
 # Convert CN to UPN, or return the input name if unrecognized
 if [[ &quot;$1&quot; =~ ^[a-zA-Z0-9._-]+$ ]]; then
@@ -291,71 +349,52 @@ else
     echo &quot;$1&quot;
 fi
 </code></pre>
-<ul>
-<li><strong>apply_policy</strong> </li>
-</ul>
-<p>A boolean option that enables the application and enforcement of Intune policies to the authenticated user. By default, this option is disabled. </p>
-<h5 id="examples_22">EXAMPLES</h5>
-<p>apply_policy = false </p>
-<h4 id="enable_experimental_intune_custom_compliance">enable_experimental_intune_custom_compliance</h4>
-<p>A boolean option that enables support for Linux Intune Custom Compliance policies. This feature is experimental and not yet fully functional. While policy settings should be applied locally, the compliance status is not reliably reported to Intune, and failed policies do not currently block authentication. By default, this option is disabled. This option requires <code>apply_policy = true</code>. </p>
-<h5 id="examples_23">EXAMPLES</h5>
-<p>enable_experimental_intune_custom_compliance = true </p>
+<p>Example: name_mapping_script = /path/to/mapping_script.sh </p>
+<h4 id="apply_policy">apply_policy</h4>
+<p>A boolean option that enables the application and enforcement of Intune policies to the authenticated user. </p>
+<p>Default: false </p>
+<p>Example: apply_policy = true </p>
 <h4 id="authority_host">authority_host</h4>
-<p>Specifies the hostname for Microsoft authentication. The default value is <strong>login.microsoftonline.com.</strong> </p>
-<h5 id="examples_24">EXAMPLES</h5>
-<p>authority_host = login.microsoftonline.com </p>
+<p>Specifies the hostname for Microsoft authentication. </p>
+<p>Default: login.microsoftonline.com </p>
+<p>Example: authority_host = login.microsoftonline.us </p>
 <h4 id="db_path">db_path</h4>
 <p>The location of the cache database. This file is used to store cached authentication data and device state. </p>
-<h5 id="examples_25">EXAMPLES</h5>
-<p>db_path = /var/cache/himmelblau/himmelblau.cache.db </p>
+<p>Default: /var/cache/himmelblaud/himmelblau.cache.db </p>
+<p>Example: db_path = /var/cache/himmelblau/himmelblau.cache.db </p>
 <h4 id="hsm_type">hsm_type</h4>
-<p>Specifies how Himmelblau should handle secure key storage. This option determines whether to use a TPM (Trusted Platform Module) bound software-based HSM, a TPM, or a hybrid approach. The available options are:</p>
-<ul>
-<li>
-<p><strong>tpm_bound_soft_if_possible</strong> – Use a software-based HSM that encrypts key material locally on the system, but binds the parent AuthCode to the TPM, if available.</p>
-</li>
-<li>
-<p><strong>tpm</strong> – Use a hardware TPM exclusively for storing and binding cryptographic keys.</p>
-</li>
-<li>
-<p><strong>tpm_if_possible</strong> – Attempt to use a hardware TPM if available; if not, fall back to the software HSM. If the TPM has previously been used for key storage, the system will not fall back to the software HSM. The default is <strong>tpm_bound_soft_if_possible</strong> his setting is important for protecting sensitive cryptographic keys in a secure environment, reducing the risk of compromise if the system is breached.Note that the old <strong>soft</strong> option has been deprecated. Environments currently enrolled using <strong>soft</strong> will be automatically migrated to <strong>tpm_bound_soft_if_possible.</strong> To validate whether Himmelblau is utilizing the hardware TPM, run the command <code>sudo aad-tool tpm</code> for a status report. </p>
-</li>
-</ul>
-<h5 id="examples_26">EXAMPLES</h5>
-<p>hsm_type = tpm_bound_soft_if_possible </p>
+<p>Specifies how Himmelblau should handle secure key storage. This option determines whether to use a TPM (Trusted Platform Module) bound software-based HSM, a TPM, or a hybrid approach. The available options are: <strong>tpm_bound_soft_if_possible</strong> (en Use a software-based HSM that encrypts key material locally on the system, but binds the parent AuthCode to the TPM, if available. <strong>tpm</strong> (en Use a hardware TPM exclusively for storing and binding cryptographic keys. <strong>tpm_if_possible</strong> (en Attempt to use a hardware TPM if available; if not, fall back to the software HSM. If the TPM has previously been used for key storage, the system will not fall back to the software HSM. This setting is important for protecting sensitive cryptographic keys in a secure environment, reducing the risk of compromise if the system is breached. Note that the old <strong>soft</strong> option has been deprecated. Environments currently enrolled using <strong>soft</strong> will be automatically migrated to <strong>tpm_bound_soft_if_possible.</strong> To validate whether Himmelblau is utilizing the hardware TPM, run the command <code>sudo aad-tool tpm</code> for a status report. </p>
+<p>Default: tpm_bound_soft_if_possible </p>
+<p>Example: hsm_type = tpm </p>
 <h4 id="tpm_tcti_name">tpm_tcti_name</h4>
-<p>Specifies the TCTI (Trusted Computing Technology Interface) to use when communicating with a Trusted Platform Module (TPM) for secure key operations. This setting is only relevant when <strong>hsm_type</strong> is set to <strong>tpm</strong> or <strong>tpm_if_possible.</strong> Common values include:</p>
-<ul>
-<li><strong>device:/dev/tpmrm0</strong> – This uses the kernel TPM resource manager device, which is the recommended default for most Linux systems. Other TCTI strings may be required depending on your system’s TPM driver or configuration. This option allows advanced control over how Himmelblau connects to the TPM for performing cryptographic operations. </li>
-</ul>
-<h5 id="examples_27">EXAMPLES</h5>
-<p>tpm_tcti_name = device:/dev/tpmrm0 </p>
+<p>Specifies the TCTI (Trusted Computing Technology Interface) to use when communicating with a Trusted Platform Module (TPM) for secure key operations. This setting is only relevant when <strong>hsm_type</strong> is set to <strong>tpm</strong> or <strong>tpm_if_possible.</strong> Common values include: <strong>device:/dev/tpmrm0</strong> (en This uses the kernel TPM resource manager device, which is the recommended default for most Linux systems. Other TCTI strings may be required depending on your system's TPM driver or configuration. This option allows advanced control over how Himmelblau connects to the TPM for performing cryptographic operations. </p>
+<p>Default: device:/dev/tpmrm0 </p>
+<p>Example: tpm_tcti_name = device:/dev/tpm0 </p>
 <h4 id="hsm_pin_path">hsm_pin_path</h4>
 <p>The location where the HSM (Hardware Security Module) PIN will be stored. This PIN is used to protect sensitive cryptographic operations. </p>
-<h5 id="examples_28">EXAMPLES</h5>
-<p>hsm_pin_path = /var/lib/himmelblaud/hsm-pin </p>
+<p>Default: /var/lib/himmelblaud/hsm-pin </p>
+<p>Example: hsm_pin_path = /etc/himmelblau/hsm-pin </p>
 <h4 id="socket_path">socket_path</h4>
 <p>The path to the socket file for communication between the pam and nss modules and the Himmelblau daemon. </p>
-<h5 id="examples_29">EXAMPLES</h5>
-<p>socket_path = /var/run/himmelblaud/socket </p>
+<p>Default: /var/run/himmelblaud/socket </p>
+<p>Example: socket_path = /tmp/himmelblaud.sock </p>
 <h4 id="task_socket_path">task_socket_path</h4>
 <p>The path to the socket file for communication with the task daemon. </p>
-<h5 id="examples_30">EXAMPLES</h5>
-<p>task_socket_path = /var/run/himmelblaud/task_sock </p>
+<p>Default: /var/run/himmelblaud/task_sock </p>
+<p>Example: task_socket_path = /tmp/task.sock </p>
 <h4 id="broker_socket_path">broker_socket_path</h4>
 <p>The path to the socket file for communication with the broker DBus service. </p>
-<h5 id="examples_31">EXAMPLES</h5>
-<p>broker_socket_path = /var/run/himmelblaud/broker_sock </p>
+<p>Default: /var/run/himmelblaud/broker_sock </p>
+<p>Example: broker_socket_path = /tmp/broker.sock </p>
 <h4 id="home_prefix">home_prefix</h4>
 <p>The prefix to use for user home directories. </p>
-<h5 id="examples_32">EXAMPLES</h5>
-<p>home_prefix = /home/ </p>
+<p>Default: /home/ </p>
+<p>Example: home_prefix = /home/entra/ </p>
 <h4 id="home_attr">home_attr</h4>
 <p>The attribute used to create a home directory for a user. Available options include: </p>
 <ul>
 <li>
-<p>UUID (default) </p>
+<p>UUID </p>
 </li>
 <li>
 <p>SPN </p>
@@ -364,8 +403,8 @@ fi
 <p>CN </p>
 </li>
 </ul>
-<h5 id="examples_33">EXAMPLES</h5>
-<p>home_attr = UUID </p>
+<p>Default: uuid </p>
+<p>Example: home_attr = UUID </p>
 <h4 id="home_alias">home_alias</h4>
 <p>The symlinked alias for the user's home directory. Available options include: </p>
 <ul>
@@ -373,57 +412,60 @@ fi
 <p>UUID </p>
 </li>
 <li>
-<p>SPN (default) </p>
+<p>SPN </p>
 </li>
 <li>
 <p>CN </p>
 </li>
 </ul>
-<h5 id="examples_34">EXAMPLES</h5>
-<p>home_alias = SPN </p>
+<p>Default: spn </p>
+<p>Example: home_alias = SPN </p>
 <h4 id="shell">shell</h4>
 <p>The default shell for users. This will be assigned when the user logs in. </p>
-<h5 id="examples_35">EXAMPLES</h5>
-<p>shell = /bin/bash </p>
+<p>Default: /bin/bash </p>
+<p>Example: shell = /bin/zsh </p>
 <h4 id="idmap_range">idmap_range</h4>
 <p>Specifies the range of IDs to be used for the user and group mappings. When this option is modified, you <strong>SHOULD</strong> run: </p>
 <p>sudo aad-tool cache-clear --full To ensure that old cached ID mappings are cleared, preventing potential UID overlaps caused by stale cache data. Afterwards, restart himmelblaud. </p>
-<h5 id="examples_36">EXAMPLES</h5>
-<p>idmap_range = 5000000-5999999 </p>
+<p>Default: 200000-2000200000 </p>
+<p>Example: idmap_range = 10000000-10999999 </p>
 <h4 id="connection_timeout">connection_timeout</h4>
-<p>The timeout for connections to the authentication server. Default is 2 seconds. </p>
-<h5 id="examples_37">EXAMPLES</h5>
-<p>connection_timeout = 5 </p>
+<p>The timeout in seconds for connections to the authentication server. </p>
+<p>Default: 30 </p>
+<p>Example: connection_timeout = 5 </p>
+<h4 id="subid_range">subid_range</h4>
+<p>Specifies the range of subordinate IDs (subuid/subgid) to be allocated for container support (podman, rootless containers, etc.). Himmelblau will automatically add entries to /etc/subuid and /etc/subgid for each user at login. Each user receives a 65536-ID slice from this range, allocated deterministically based on a hash of their username. This feature is enabled by default with the default range shown below. </p>
+<p>Default: 2100000000-4200000000 </p>
+<p>Example: subid_range = 2100000000-4200000000 </p>
 <h4 id="cache_timeout">cache_timeout</h4>
-<p>The timeout for caching authentication data. Default is 300 seconds (5 minutes). </p>
-<h5 id="examples_38">EXAMPLES</h5>
-<p>cache_timeout = 10 </p>
+<p>The timeout in seconds for caching authentication data. </p>
+<p>Default: 300 </p>
+<p>Example: cache_timeout = 10 </p>
 <h4 id="use_etc_skel">use_etc_skel</h4>
 <p>If set to <strong>true,</strong> Himmelblau will use the contents of /etc/skel when creating new user directories. </p>
-<h5 id="examples_39">EXAMPLES</h5>
-<p>use_etc_skel = false </p>
+<p>Default: false </p>
+<p>Example: use_etc_skel = true </p>
 <h4 id="selinux">selinux</h4>
 <p>Whether SELinux security labels should be applied to users' home directories. Set to <strong>true</strong> to enable. </p>
-<h5 id="examples_40">EXAMPLES</h5>
-<p>selinux = true </p>
+<p>Default: true </p>
+<p>Example: selinux = false </p>
 <h4 id="join_type">join_type</h4>
 <p>Specifies whether the system should join or register with Microsoft Entra ID. </p>
-<h5 id="examples_41">EXAMPLES</h5>
-<p>join_type = register </p>
+<p>Default: join </p>
+<p>Example: join_type = register </p>
 <h4 id="user_map_file">user_map_file</h4>
 <p>Specifies the path to a user-mapping file used to map local user accounts to Azure Entra ID user accounts, allowing them to authenticate using Entra ID credentials. Each line of the file must contain a single mapping entry in the format: </p>
 <p>local_username:name@domain </p>
-<p>Blank lines and lines beginning with ‘#’ are ignored. If this option is not set, the default path <em>/etc/himmelblau/user-map</em> is used. </p>
-<h5 id="examples_42">EXAMPLES</h5>
-<p>user_map_file = /path/to/user_map </p>
-<h5 id="examples_43">EXAMPLES</h5>
-<h1 id="example-user-map-file-entries">Example user-map file entries:</h1>
-<h1 id="local_usernamesamaccountnamedomain">local_username:samaccountname@domain</h1>
-<p>alice:alice@contoso.com 
-bob:bob.smith@example.org 
-svcuser:service.account@tenant.local </p>
+<p>Blank lines and lines beginning with '#' are ignored. Example user-map file entries: </p>
+<pre><code># local_username:samaccountname@domain
+alice:alice@contoso.com
+bob:bob.smith@example.org
+svcuser:service.account@tenant.local
+</code></pre>
+<p>Default: /etc/himmelblau/user-map </p>
+<p>Example: user_map_file = /path/to/user_map </p>
 <h2 id="offline-breakglass-configuration">OFFLINE BREAKGLASS CONFIGURATION</h2>
-<p>The <strong>[offline_breakglass]</strong> section configures Himmelblau’s emergency offline authentication mechanism, used when Azure Entra ID is unavailable. </p>
+<p>The <strong>[offline_breakglass]</strong> section configures Himmelblau's emergency offline authentication mechanism, used when Azure Entra ID is unavailable. </p>
 <p>Offline breakglass allows Entra ID users who normally require multi-factor authentication (MFA) to authenticate with their cached password when the host is offline. This feature provides a controlled fallback for MFA-only users who would otherwise be unable to sign in during an outage. </p>
 <p>Single-factor authentication (SFA-only) users and Hello-PIN users already have offline sign-in capability, and are unaffected by this setting. This option exists solely to extend limited offline access to MFA-enabled users when network connectivity to Entra ID cannot be established. </p>
 <h3 id="offline_breakglass">[offline_breakglass]</h3>
@@ -431,19 +473,19 @@ svcuser:service.account@tenant.local </p>
 <h4 id="enabled">enabled</h4>
 <p>Boolean value specifying whether offline breakglass mode is permitted. </p>
 <p>When set to <strong>true,</strong> Himmelblau will cache secure, salted password verifiers for <strong>MFA-enabled</strong> Entra ID users who successfully authenticate online. These verifiers can then be used to authenticate the same users when Entra ID is unreachable, allowing MFA users to log in using their cached password. </p>
-<p>If this option is set to <strong>false</strong> (the default), Himmelblau will continue to cache password verifiers only for SFA-only users, and MFA-enabled users will <strong>not</strong> be able to authenticate when offline. The <strong>aad-tool</strong>(1) command <strong>aad-tool offline-breakglass</strong> will also have no effect. </p>
+<p>If this option is set to <strong>false,</strong> Himmelblau will continue to cache password verifiers only for SFA-only users, and MFA-enabled users will <strong>not</strong> be able to authenticate when offline. The <strong>aad-tool</strong>(1) command <strong>aad-tool offline-breakglass</strong> will also have no effect. </p>
 <p>Administrators must enable this option well in advance of an outage, as password verifiers for MFA users are only stored following a successful online authentication. It is too late to enable this feature once Entra ID is already unreachable. </p>
-<p>Enabling offline breakglass mode carries significant risk. If a device is stolen or compromised, and network access to Entra ID is blocked, attackers could effectively disable MFA protection by forcing the system into a simple password-only (SFA) authentication state. Administrators should enable this mode <strong>only after careful consideration</strong> of their organization’s security posture and offline access requirements. </p>
+<p>Enabling offline breakglass mode carries significant risk. If a device is stolen or compromised, and network access to Entra ID is blocked, attackers could effectively disable MFA protection by forcing the system into a simple password-only (SFA) authentication state. Administrators should enable this mode <strong>only after careful consideration</strong> of their organization's security posture and offline access requirements. </p>
 <p>This feature does not apply to passwordless accounts. If an MFA user signs in using a passwordless method, no password hash exists to cache, and offline breakglass cannot function for that user. </p>
-<h5 id="examples_44">EXAMPLES</h5>
-<p>[offline_breakglass] 
+<p>Default: false </p>
+<p>Example: [offline_breakglass] 
 enabled = true 
 ttl = 2h </p>
 <h1 id="allow-mfa-users-to-authenticate-offline-for-up-to-2-hours">Allow MFA users to authenticate offline for up to 2 hours</h1>
 <h4 id="ttl">ttl</h4>
 <p>Specifies how long breakglass mode should remain active once triggered. The value may include a suffix to indicate the unit of time: <strong>m</strong> for minutes, <strong>h</strong> for hours, or <strong>d</strong> for days. If no suffix is provided, the value is interpreted as seconds. After the specified period, offline breakglass mode automatically expires and normal authentication resumes. </p>
-<h5 id="examples_45">EXAMPLES</h5>
-<p>[offline_breakglass] 
+<p>Default: 7200 </p>
+<p>Example: [offline_breakglass] 
 enabled = true 
 ttl = 1d </p>
 <h1 id="permit-offline-mfa-logins-for-up-to-24-hours-after-activation">Permit offline MFA logins for up to 24 hours after activation</h1>

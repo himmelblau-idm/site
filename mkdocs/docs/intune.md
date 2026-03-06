@@ -20,12 +20,12 @@ to Himmelblau, but rather to Microsoft's restrictions. Linux clients are
 supported, but not very extensively.
 
 There is another major limitation when setting up policies for Linux
-clients. Regardless of the type of policies set up for a Linux client,
-logging in to a Linux client is then only possible with one user, namely
-the user who integrated the machine into Entra Id. This limitation does
-not come from Himmelblau, but is also a Microsoft requirement. This
-means that the use of policies on Linux clients only makes sense for
-machines that are used by a single user.
+clients. In Himmelblau 2.x, Intune policies are applied only to the
+first user who signs in to the Linux client. Other users can still sign
+in, but Intune policies are not applied to them.
+
+This means policy enforcement currently makes the most sense on devices
+that are assigned to a single primary user.
 
 The policies can be managed via the URL https://intune.microsoft.com/.
 If you have already logged in to the Entra Id portal, the same user will
@@ -52,6 +52,20 @@ by a user without a license are not listed here. Only the device
 overview of the Entra Id portal displays all devices.
 
 Now policies can be set up and assigned.
+
+Before Linux compliance policies can be enforced on the client, policy
+processing must be enabled in `/etc/himmelblau/himmelblau.conf`. Add the
+following setting in the `[global]` section and restart both Himmelblau
+services:
+
+```ini
+[global]
+apply_policy = true
+```
+
+```bash
+sudo systemctl restart himmelblaud himmelblaud-tasks
+```
 
 First, a policy for passwords should be created and assigned. To avoid
 having to add each client individually to the policy, a group can be

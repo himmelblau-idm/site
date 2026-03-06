@@ -194,9 +194,14 @@
 <hr />
 <h2 id="policy-enforcement-in-himmelblau">Policy Enforcement in Himmelblau</h2>
 <p>To enable policy enforcement, you must set the following global configuration in <code>himmelblau.conf</code>:</p>
-<pre><code class="language-ini">apply_policy = true
+<pre><code class="language-ini">[global]
+apply_policy = true
+</code></pre>
+<p>Then restart the daemons:</p>
+<pre><code class="language-bash">sudo systemctl restart himmelblaud himmelblaud-tasks
 </code></pre>
 <p>Without this setting, compliance policies will not be evaluated or enforced.</p>
+<p>In Himmelblau 2.x, policy evaluation is applied only to the first user who signs in on a Linux client. Other users can still authenticate, but policy settings are not applied to them.</p>
 <hr />
 <h2 id="linux-settings-categories">Linux Settings Categories</h2>
 <h3 id="allowed-distributions">Allowed Distributions</h3>

@@ -11,10 +11,19 @@ Himmelblau policies are configured using the Microsoft Intune Settings Catalog. 
 To enable policy enforcement, you must set the following global configuration in `himmelblau.conf`:
 
 ```ini
+[global]
 apply_policy = true
 ```
 
+Then restart the daemons:
+
+```bash
+sudo systemctl restart himmelblaud himmelblaud-tasks
+```
+
 Without this setting, compliance policies will not be evaluated or enforced.
+
+In Himmelblau 2.x, policy evaluation is applied only to the first user who signs in on a Linux client. Other users can still authenticate, but policy settings are not applied to them.
 
 ---
 

@@ -318,43 +318,37 @@ on Grant administrator approval for ...</p>
 permission:</p>
 <p><img alt="Application permissions overview" src="../media/1000000100000B770000047576AD32C4.png" /></p>
 <p>Only now can a second application be created, which then extends the
-schema with the rfc2307 attributes. The second application is now
-created via the command line of a Linux client that is already a member
-of the domain. All of the following commands are always executed as the
-<em>root</em> user.</p>
-<p>The schema extension is also entered via an application. Since certain
-users or groups have already been granted permission to create
-applications, the additional application can now be created using one of
-the users in Entra ID. The following listing shows how to create the
-application:</p>
-<pre><code>root@skyblue:~# aad-tool application create --client-id
-e2bec932-5338-4c72-ae14-8ff5143eae2d --name
-stkania@0pndv.onmicrosoft.com --  
-display-name &quot;Tenant Schema Extension App&quot; --user-read-write
---group-read-write  
-stkania@0pndv.onmicrosoft.com password:    
-Open your Authenticator app, and enter the number '45' to sign in.  
-</code></pre>
-<p>The <em>--client-id</em> option is the application ID for the application used
-to access Microsoft Graph.</p>
-<p>The --name option is used to enter one of the authorized users who is
-permitted to use the application, along with their full UPN.</p>
-<p>The <em>--display-name</em> option assigns the name for the new application.
-Although the name can be freely chosen, the Microsoft default here is
-<em>Tenant Schema Extension App</em>.</p>
-<p>The <em>--user-read-write</em> and <em>--group-read-write</em> options assign the
-required permissions:</p>
-<ul>
+schema with the rfc2307 attributes. In current Himmelblau 2.x guidance,
+create this second app in the Entra admin portal (App registrations), not
+with the CLI.</p>
+<p>Follow this order:</p>
+<ol>
+<li>
+<p>Create a new app registration (for example, "Tenant Schema Extension
+   App").</p>
+</li>
+<li>
+<p>Open <strong>Enterprise applications</strong>, select the new app, and set
+   <strong>Assignment required</strong> to <strong>Yes</strong>.</p>
+</li>
+<li>
+<p>Under <strong>Users and groups</strong>, assign only the users/groups allowed to
+   use this app.</p>
+</li>
+<li>
+<p>Return to <strong>App registrations</strong> and then assign only the required
+   delegated permissions:</p>
+</li>
 <li>
 <p>Group.ReadWrite.All</p>
 </li>
 <li>
 <p>User.ReadWrite.All</p>
 </li>
-</ul>
-<p>After the command has been executed without errors, the application is
-now displayed in the portal in the "App Registration" overview, as shown
-in the following figure:</p>
+</ol>
+<p>This order is important. Restricting Enterprise Application access before
+assigning schema-write permissions prevents unintended broad access.</p>
+<p>The following figure shows the app registration:</p>
 <p><img alt="Tenant Schema Extension App registration" src="../media/1000000100000B7C0000033865BA4F84.png" /></p>
 <p>Only now can all configured applications be listed on the command line
 of the Linux client. The following listing shows all applications</p>
@@ -461,14 +455,23 @@ following listing:</p>
 <pre><code>**stka@himmelblau**:**~**\$ getent passwd stkania  
 stkania:x:12345:23456:stkania:/home/stkania:/bin/bash  
 </code></pre>
-<p>The new attributes can also be found via the "Microsoft Graph Explorer."
+<p>The new attributes can also be found via Microsoft Graph Explorer.
 But first, it is necessary to adjust the permissions for the application
 <em>grant-aad-tool-permission</em> as shown in the following figure:</p>
 <p><img alt="grant-aad-tool-permission permissions" src="../media/10000001000008A3000004FDED2EC3D2.png" /></p>
-<p>Now the attributes can also be displayed in Explorer. The URL for
-Explorer is
-<a href="https://developer.microsoft.com/en-us/graph/graph-explorer">https://developer.microsoft.com/en-us/graph/graph-explorer</a>. The
-following figure shows the new attributes of the user:</p>
+<p>Now the attributes can also be displayed in Graph Explorer:</p>
+<ol>
+<li>
+<p>Open <a href="https://developer.microsoft.com/en-us/graph/graph-explorer">https://developer.microsoft.com/en-us/graph/graph-explorer</a>.</p>
+</li>
+<li>
+<p>Sign in with the updated test account.</p>
+</li>
+<li>
+<p>Run the query <code>https://graph.microsoft.com/beta/me</code>.</p>
+</li>
+</ol>
+<p>The following figure shows the new attributes of the user:</p>
 <p><img alt="Graph Explorer user attributes" src="../media/1000000100000491000004753C49A373.png" /></p>
               
             </div>

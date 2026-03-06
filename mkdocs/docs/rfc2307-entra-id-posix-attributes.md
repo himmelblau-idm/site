@@ -185,47 +185,32 @@ permission:
 ![Application permissions overview](./media/1000000100000B770000047576AD32C4.png)
 
 Only now can a second application be created, which then extends the
-schema with the rfc2307 attributes. The second application is now
-created via the command line of a Linux client that is already a member
-of the domain. All of the following commands are always executed as the
-*root* user.
+schema with the rfc2307 attributes. In current Himmelblau 2.x guidance,
+create this second app in the Entra admin portal (App registrations), not
+with the CLI.
 
-The schema extension is also entered via an application. Since certain
-users or groups have already been granted permission to create
-applications, the additional application can now be created using one of
-the users in Entra ID. The following listing shows how to create the
-application:
+Follow this order:
 
-```
-root@skyblue:~# aad-tool application create --client-id
-e2bec932-5338-4c72-ae14-8ff5143eae2d --name
-stkania@0pndv.onmicrosoft.com --  
-display-name "Tenant Schema Extension App" --user-read-write
---group-read-write  
-stkania@0pndv.onmicrosoft.com password:    
-Open your Authenticator app, and enter the number '45' to sign in.  
-```
+1. Create a new app registration (for example, "Tenant Schema Extension
+   App").
 
-The *--client-id* option is the application ID for the application used
-to access Microsoft Graph.
+2. Open **Enterprise applications**, select the new app, and set
+   **Assignment required** to **Yes**.
 
-The --name option is used to enter one of the authorized users who is
-permitted to use the application, along with their full UPN.
+3. Under **Users and groups**, assign only the users/groups allowed to
+   use this app.
 
-The *--display-name* option assigns the name for the new application.
-Although the name can be freely chosen, the Microsoft default here is
-*Tenant Schema Extension App*.
-
-The *--user-read-write* and *--group-read-write* options assign the
-required permissions:
+4. Return to **App registrations** and then assign only the required
+   delegated permissions:
 
 - Group.ReadWrite.All
 
 - User.ReadWrite.All
 
-After the command has been executed without errors, the application is
-now displayed in the portal in the "App Registration" overview, as shown
-in the following figure:
+This order is important. Restricting Enterprise Application access before
+assigning schema-write permissions prevents unintended broad access.
+
+The following figure shows the app registration:
 
 ![Tenant Schema Extension App registration](./media/1000000100000B7C0000033865BA4F84.png)
 
@@ -361,15 +346,20 @@ following listing:
 stkania:x:12345:23456:stkania:/home/stkania:/bin/bash  
 ```
 
-The new attributes can also be found via the "Microsoft Graph Explorer."
+The new attributes can also be found via Microsoft Graph Explorer.
 But first, it is necessary to adjust the permissions for the application
 *grant-aad-tool-permission* as shown in the following figure:
 
 ![grant-aad-tool-permission permissions](./media/10000001000008A3000004FDED2EC3D2.png)
 
-Now the attributes can also be displayed in Explorer. The URL for
-Explorer is
-<https://developer.microsoft.com/en-us/graph/graph-explorer>. The
-following figure shows the new attributes of the user:
+Now the attributes can also be displayed in Graph Explorer:
+
+1. Open <https://developer.microsoft.com/en-us/graph/graph-explorer>.
+
+2. Sign in with the updated test account.
+
+3. Run the query `https://graph.microsoft.com/beta/me`.
+
+The following figure shows the new attributes of the user:
 
 ![Graph Explorer user attributes](./media/1000000100000491000004753C49A373.png)

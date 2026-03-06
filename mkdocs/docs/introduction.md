@@ -391,20 +391,22 @@ In addition to the local and global parameters, it is also possible to configure
 
 ## Adjusting the idmap range
 
-No individual ID mapping has been performed up to this point. If no individual ID mapping is configured, the range from 200000 to 2000200000 is always used by default. Since multiple domains separated by commas can be specified in the configuration file for the *domain* variable, it is necessary to define a separate range for each domain at this point at the latest. To do this, the file */etc/himmelblau/himmelblau.conf* is adjusted as shown in Listing 18:
+No individual ID mapping has been performed up to this point. If no individual ID mapping is configured, the range from 200000 to 2000200000 is always used by default.
+
+In Himmelblau 2.x, *idmap_range* must be configured globally in the *[global]* section. Domain-specific *idmap_range* settings are deprecated and no longer supported. To do this, adjust */etc/himmelblau/himmelblau.conf* as shown in Listing 18:
 
 ```
 ------ Listing 18 ------
-[example.onmicrosoft.com] 
+[global]
 idmap_range = 1000000-1999999
 --------------------------
 ```
 
-It is important to enter the adjustment at the end of the file, otherwise the parameters of the [global] section below the entry will no longer be evaluated.  Even if the lines are commented out, they must not be located in the middle of the [global] section. After changing the idmap range and restarting the two Himmelblau services, the users and groups can be displayed with a new ID. 
+After changing the idmap range and restarting the two Himmelblau services, the users and groups can be displayed with a new ID.
 
 It is important to make the change on all clients, otherwise the same user (and also the groups) will have different IDs.  
 
-In addition to adjusting the *idmap_range*, it is possible to set additional parameters. Here, it is also possible to override certain local settings. For example, if a different target directory for the home directories is to be created for each domain, the additional variable *home_prefix=/domainname/* ensures that the home directory for all users of this domain is created in a corresponding directory. The variable entry must be placed below the domain name in square brackets. 
+In addition to adjusting the *idmap_range*, it is possible to set additional parameters in the *[global]* section.
 
 Further variables that can be set up specifically for domains are described in the man page for the *himmelblau.conf* file.
 
@@ -435,29 +437,26 @@ In the first step, the following two packages must also be installed:
 
 After installing all packages and setting up the configuration, a user can log in to the system with their Azure ID. The login process involves the same steps as described for the first login to the system without a GUI.
 
-If you also want to enable the very first login of a completely new user, you will need to set up qr-greeter. This requires the machinectl program. The program is part of the Debian package systemd-container and must be installed first. After installation, you will need to perform all the steps listed in Listing 20:
+If you also want to enable the very first login of a completely new user, install the `himmelblau-qr-greeter` package. The extension is enabled automatically during installation.
+
+After installing `himmelblau-qr-greeter`, you must restart GDM once. Otherwise, QR login may not appear on first use.
+
+Listing 20 shows the required restart step:
 
 ```
 -------- Listing 20 --------
-root@skyblue-gui:~# machinectl shell Debian-gdm@bibash 
-Connected to the local host. Press ^] three times within 1s to exit session. 
-
-Debian-gdm@himmelblau-gui:~$ gsettings set org.gnome.shell enabled-extensions "['qr-greeter@himmelblau-idm.org']"
-
-Debian-gdm@himmelblau-gui:~$ exit 
-
-Debian-gdm@himmelblau-gui:~$systemctl restart gdm3
+root@skyblue-gui:~# systemctl restart gdm3
 ------------------------------
 ```
 
-IMPORTANT: Under no circumstances should you use your own domain here, only the domain himmelblau-idm.org, otherwise no QR code will be generated when a new user logs in for the first time. If everything has been set up correctly, the following image will appear when a user logs in for the very first time after entering their username and initial password:
+If everything has been set up correctly, the following image will appear when a user logs in for the very first time after entering their username and initial password:
 
 ![Device Authorization Grant GDM Login](image-20251106203521798.png)
 
 The user can then scan the QR code with their smartphone and will be taken to the website where they can complete the initial login.
 
 
-This only works if *gdm* is used as the login manager and a Gnome version >=45 is used.
+This only works if *gdm* is used as the login manager and a GNOME version >=40 is used.
 
 After successful login, the sso can be tested immediately. Installing the *himmelblau-sso* package also installs and activates the required plugin for Firefox.
 

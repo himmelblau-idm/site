@@ -64,6 +64,23 @@
     gtag('js', new Date());
 
     gtag('config', 'AW-970745524');
+
+    function gtag_report_conversion(url) {
+      var callback = function () {
+        if (typeof url !== 'undefined') {
+          window.location = url;
+        }
+      };
+
+      gtag('event', 'conversion', {
+        send_to: 'AW-970745524/haXpCK3x9aAaELTN8c4D',
+        value: 1.0,
+        currency: 'USD',
+        event_callback: callback
+      });
+
+      return false;
+    }
   </script>
   <script>
     (function () {
@@ -660,7 +677,7 @@
 <h1 id="join-the-himmelblau-workshop-at-sambaxp-2026">Join the Himmelblau Workshop at sambaXP 2026</h1>
 <p>Learn how to integrate Linux clients with Microsoft Entra ID and manage them in Intune in a practical, guided session.</p>
 <p>The <strong>Himmelblau Workshop</strong> is part of the sambaXP 2026 side events and takes place on <strong>April 22, 2026</strong>.</p>
-<p><a class="button" href="https://pretix.eu/sernet/sXP26/" target="_blank">Register Now</a>
+<p><a class="button" href="https://pretix.eu/sernet/sXP26/" target="_blank" onclick="return gtag_report_conversion(this.href);">Register Now</a>
 <a class="button secondary" href="https://sambaxp.org/#Program" target="_blank">View Program</a></p>
 <hr />
 <h2 id="why-attend">Why attend</h2>
@@ -679,7 +696,7 @@
 </ul>
 <h2 id="is-this-for-me">Is this for me?</h2>
 <p>This workshop is for Linux administrators, platform engineers, and IT teams who want a clear path to Entra ID + Intune integration on Linux, with practical examples and expert guidance.</p>
-<p><a class="button" href="https://pretix.eu/sernet/sXP26/" target="_blank">Get Your Ticket</a></p>
+<p><a class="button" href="https://pretix.eu/sernet/sXP26/" target="_blank" onclick="return gtag_report_conversion(this.href);">Get Your Ticket</a></p>
 
 
 

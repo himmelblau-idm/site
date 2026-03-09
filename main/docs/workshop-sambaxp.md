@@ -10,7 +10,7 @@ Learn how to integrate Linux clients with Microsoft Entra ID and manage them in 
 
 The **Himmelblau Workshop** is part of the sambaXP 2026 side events and takes place on **April 22, 2026**.
 
-<a class="button" href="https://pretix.eu/sernet/sXP26/" target="_blank">Register Now</a>
+<a class="button" href="https://pretix.eu/sernet/sXP26/" target="_blank" onclick="return gtag_report_conversion(this.href);">Register Now</a>
 <a class="button secondary" href="https://sambaxp.org/#Program" target="_blank">View Program</a>
 
 ---
@@ -33,4 +33,4 @@ The **Himmelblau Workshop** is part of the sambaXP 2026 side events and takes pl
 
 This workshop is for Linux administrators, platform engineers, and IT teams who want a clear path to Entra ID + Intune integration on Linux, with practical examples and expert guidance.
 
-<a class="button" href="https://pretix.eu/sernet/sXP26/" target="_blank">Get Your Ticket</a>
+<a class="button" href="https://pretix.eu/sernet/sXP26/" target="_blank" onclick="return gtag_report_conversion(this.href);">Get Your Ticket</a>

@@ -10,6 +10,23 @@
     gtag('js', new Date());
 
     gtag('config', 'AW-970745524');
+
+    function gtag_report_conversion(url) {
+      var callback = function () {
+        if (typeof url !== 'undefined') {
+          window.location = url;
+        }
+      };
+
+      gtag('event', 'conversion', {
+        send_to: 'AW-970745524/haXpCK3x9aAaELTN8c4D',
+        value: 1.0,
+        currency: 'USD',
+        event_callback: callback
+      });
+
+      return false;
+    }
   </script>
   <script>
     (function () {

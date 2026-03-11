@@ -313,6 +313,71 @@ def rename_subcommand_headings(lines):
     return out
 
 
+# Map man page references to sibling doc page filenames
+SEE_ALSO_MAP = {
+    'himmelblau.conf': 'himmelblau-conf.md',
+    'himmelblaud': 'himmelblaud.md',
+    'himmelblaud-tasks': 'himmelblaud_tasks.md',
+    'aad-tool': 'aad-tool.md',
+    'pam_himmelblau': 'pam_himmelblau.md',
+}
+
+
+def convert_see_also_links(lines):
+    """Convert bold man page references to markdown links in SEE ALSO sections."""
+    out = []
+    in_see_also = False
+    for line in lines:
+        stripped = line.rstrip('\n')
+        if stripped == '## SEE ALSO':
+            in_see_also = True
+            out.append(line)
+            continue
+        if in_see_also and ANY_HEADING_RE.match(stripped):
+            in_see_also = False
+        if in_see_also:
+            for name, filename in SEE_ALSO_MAP.items():
+                # Match **name(N)** (section number inside bold)
+                pattern = re.compile(
+                    r'\*\*' + re.escape(name) + r'\((\d)\)\*\*'
+                )
+                line = pattern.sub(
+                    r'[' + name + r'(\1)](' + filename + ')', line
+                )
+                # Match **name(N),** (comma inside bold)
+                pattern2 = re.compile(
+                    r'\*\*' + re.escape(name) + r'\((\d)\),\*\*'
+                )
+                line = pattern2.sub(
+                    r'[' + name + r'(\1)](' + filename + '),', line
+                )
+                # Match **name**(N) (section number outside bold)
+                pattern3 = re.compile(
+                    r'\*\*' + re.escape(name) + r'\*\*\((\d)\)'
+                )
+                line = pattern3.sub(
+                    r'[' + name + r'(\1)](' + filename + ')', line
+                )
+        out.append(line)
+    return out
+
+
+def convert_admonitions(lines):
+    """Convert ### **Note:** headings to Material admonition syntax."""
+    out = []
+    for line in lines:
+        stripped = line.rstrip('\n')
+        # Match ### **Note:** followed by text on the same line
+        m = re.match(r'^###\s+\*\*Note:\*\*\s*(.*)', stripped)
+        if m:
+            out.append('!!! note\n')
+            if m.group(1):
+                out.append('    ' + m.group(1) + '\n')
+            continue
+        out.append(line)
+    return out
+
+
 def fix_author_links(lines):
     """Replace pandoc's empty email hyperlinks [](mailto:foo) with plain address."""
     out = []
@@ -333,6 +398,8 @@ def process(lines):
     lines = format_code_blocks(lines)
     lines = rename_subcommand_headings(lines)
     lines = fix_bold_punctuation(lines)
+    lines = convert_see_also_links(lines)
+    lines = convert_admonitions(lines)
     lines = fix_author_links(lines)
     return lines
 

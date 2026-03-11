@@ -250,6 +250,27 @@ def format_code_blocks(lines):
             out.append('```\n')
             continue
 
+        # Single-blockquote lines that look like scripts → code block
+        if stripped.startswith('> #!/') or stripped.startswith('> sudo '):
+            out.append('```text\n')
+            while i < len(lines) and lines[i].rstrip('\n').startswith('> '):
+                content = lines[i].rstrip('\n')[2:]  # strip "> " prefix
+                out.append(content + '\n')
+                i += 1
+            out.append('```\n')
+            continue
+
+        # Shell prompt lines (# command) after a bold label → code block.
+        # After shift_headings, real headings are ## or deeper, so # is always a prompt.
+        if stripped.startswith('# ') and not stripped.startswith('## '):
+            # shell prompts follow a bold label (ending with trailing spaces) or blank line
+            if out and (not out[-1].strip() or out[-1].rstrip('\n').endswith('  ')):
+                out.append('```text\n')
+                out.append(stripped + '\n')
+                i += 1
+                out.append('```\n')
+                continue
+
         out.append(line)
         i += 1
 

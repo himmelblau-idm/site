@@ -16,6 +16,9 @@ SINGLE_BLOCKQUOTE_RE = re.compile(r'^> ')
 HTML_COMMENT_RE = re.compile(r'^<!-- -->$')
 # Any markdown heading (for dedup section skipping)
 ANY_HEADING_RE = re.compile(r'^#{1,6}( |$)')
+# Config example lines: "Example: param = value" or standalone "param = value"
+# Value may be empty (continues on next line) or present
+CONFIG_EXAMPLE_RE = re.compile(r'^(?:Example: )?([a-z][a-z_]+ =[ ]?.*)')
 
 
 def shift_headings(lines):
@@ -233,7 +236,9 @@ def format_code_blocks(lines):
             out.append('```text\n')
             while i < len(lines):
                 if DOUBLE_BLOCKQUOTE_RE.match(lines[i]):
-                    out.append(DOUBLE_BLOCKQUOTE_RE.match(lines[i]).group(1) + '\n')
+                    content = DOUBLE_BLOCKQUOTE_RE.match(lines[i]).group(1)
+                    content = content.replace('\\-', '-')  # clean groff escaped dashes
+                    out.append(content + '\n')
                     i += 1
                 elif lines[i].rstrip('\n') == '>':
                     # Peek ahead: if the next non-empty line is another > >, keep going
@@ -270,6 +275,27 @@ def format_code_blocks(lines):
                 i += 1
                 out.append('```\n')
                 continue
+
+        # Config example lines: "Example: param = value" or "param = value"
+        # Only match standalone paragraphs (prev line blank).
+        m = CONFIG_EXAMPLE_RE.match(stripped)
+        if m and out and not out[-1].strip():
+            # Collect consecutive config lines into one code block
+            out.append('```text\n')
+            while i < len(lines):
+                cm = CONFIG_EXAMPLE_RE.match(lines[i].rstrip('\n'))
+                if cm:
+                    val = cm.group(1)
+                    i += 1
+                    # If value wraps to next line, collect continuation lines
+                    while i < len(lines) and lines[i].strip() and not CONFIG_EXAMPLE_RE.match(lines[i].rstrip('\n')):
+                        val += ' ' + lines[i].rstrip('\n')
+                        i += 1
+                    out.append(val + '\n')
+                else:
+                    break
+            out.append('```\n')
+            continue
 
         out.append(line)
         i += 1

@@ -3,3 +3,34 @@
   white-space: pre-wrap !important;
   word-break: break-word !important;
 }
+
+/* Give bold parameter/option names a subtle accent color to make them
+   visually distinct from body text. Targets direct-child <strong> inside
+   paragraphs — matches how pandoc outputs **param_name** lines. */
+.md-typeset > p > strong:first-child,
+.md-typeset > p > strong:only-child {
+  color: var(--md-primary-fg-color);
+  font-size: 1.05em;
+}
+
+/* Make ## headings (subcommand names, section headings) stand out */
+.md-typeset h2 {
+  border-bottom: 2px solid var(--md-primary-fg-color);
+  padding-bottom: 0.3em;
+}
+
+/* Slightly tinted background for code blocks to add visual depth */
+.md-typeset pre {
+  border-left: 3px solid var(--md-primary-fg-color);
+}
+
+/* Improve spacing between parameter entries */
+.md-typeset > p > strong:first-child {
+  display: inline-block;
+  margin-top: 0.5em;
+}
+
+/* Style list items in OPTIONS sections - give bullet items breathing room */
+.md-typeset li > p > strong:first-child {
+  color: var(--md-primary-fg-color);
+}

@@ -5,8 +5,9 @@ import sys
 
 # Matches any markdown heading
 HEADING_RE = re.compile(r'^(#{1,6}) (.+)')
-# Matches any bold line starting with **aad-tool (synopsis lines, possibly multi-line)
-SYNOPSIS_RE = re.compile(r'^\*\*aad-tool')
+# Matches bold synopsis lines at the start of a paragraph.
+# Matches **aad-tool, **pam_himmelblau.so**, **himmelblaud**, **/etc/himmelblau/...
+SYNOPSIS_RE = re.compile(r'^\*\*[\w/]')
 # Matches pandoc's double-blockquote lines used for command examples
 DOUBLE_BLOCKQUOTE_RE = re.compile(r'^> > (.+)')
 # Matches consecutive single-blockquote lines (used for code-like examples)
@@ -191,9 +192,15 @@ def format_code_blocks(lines):
     out = []
     i = 0
     in_fence = False
+    last_heading = ''
 
     while i < len(lines):
         line = lines[i]
+        stripped = line.rstrip('\n')
+
+        # Track current section heading
+        if ANY_HEADING_RE.match(stripped):
+            last_heading = stripped
 
         if line.startswith('```'):
             in_fence = not in_fence
@@ -206,8 +213,13 @@ def format_code_blocks(lines):
             i += 1
             continue
 
-        # Bold synopsis lines (single or multi-line) → code block
-        if SYNOPSIS_RE.match(line):
+        # Bold synopsis lines (single or multi-line) → code block.
+        # Only fire in SYNOPSIS or SUBCOMMAND sections to avoid
+        # swallowing bold text at the start of description paragraphs.
+        prev = out[-1].rstrip('\n') if out else ''
+        if (SYNOPSIS_RE.match(line)
+                and (not prev or ANY_HEADING_RE.match(prev))
+                and ('SYNOPSIS' in last_heading or 'SUBCOMMAND' in last_heading)):
             text, i = collect_synopsis_block(lines, i)
             out.append('```text\n')
             out.append(text + '\n')

@@ -1,584 +1,868 @@
-
 ## NAME
 
-aad-tool - Azure Entra ID (AAD) management utility for Himmelblau 
+aad-tool - Azure Entra ID (AAD) management utility for Himmelblau
 
 ## SYNOPSIS
 
-**aad-tool** _&lt;COMMAND&gt;_ [OPTIONS] 
+```text
+aad-tool <COMMAND> [OPTIONS]
+```
 
 ## DESCRIPTION
 
-The `aad-tool` utility is part of the Himmelblau project, designed to manage and interact with Azure Entra ID through various commands. It allows you to test authentication, manage caches, and check the status of services related to the `himmelblaud` resolver. 
-
-## SYNOPSIS
-
-**aad-tool _&lt;COMMAND&gt;_** 
-
-## DESCRIPTION
-
-Himmelblau Management Utility 
+The `aad-tool` utility is part of the Himmelblau project, designed to
+manage and interact with Azure Entra ID through various commands. It
+allows you to test authentication, manage caches, and check the status
+of services related to the `himmelblaud` resolver.
 
 ### Commands:
 
-* application 
+application  
+Manage Entra ID application registrations, including creation, listing,
+and extension schema configuration
 
-  Manage Entra ID application registrations, including creation, listing, and extension schema configuration 
+auth-test  
+Test authentication of a user via the himmelblaud resolver "pam"
+channel. This does not test that your pam configuration is correct -
+only that himmelblaud is correctly processing and validating
+authentications
 
+cache-clear  
+Clear or invalidate the himmelblaud resolver cache
 
-* auth-test 
+cache-invalidate  
+(Deprecated) Previously used to mark cache entries as stale for
+immediate refresh. Now behaves identically to `cache-clear` and will
+be removed in a future release
 
-  Test authentication of a user via the himmelblaud resolver "pam" channel. This does not test that your pam configuration is correct - only that himmelblaud is correctly processing and validating authentications 
+configure-pam  
+Configure PAM to use pam_himmelblau
 
+cred  
+Manage confidential client credentials for authenticating to Entra ID
 
-* cache-clear 
+enumerate  
+Enumerate all users and groups in Entra ID that have `rfc2307`
+attributes, and cache their values locally. This addresses the issue
+where UID/GID mappings are needed before authentication can succeed, but
+are normally only retrievable after login
 
-  Clear or invalidate the himmelblaud resolver cache 
+user  
+Manage Entra ID user accounts, including POSIX attribute assignment and
+UID mapping
 
+group  
+Manage Entra ID groups, including POSIX attribute assignment and GID
+mapping
 
-* cache-invalidate 
+idmap  
+Manage the static idmapping cache used to map Entra ID accounts to
+static UID/GID values. This is useful for migrations from on-prem AD to
+Entra ID, where existing UID/GID mappings need to be preserved
 
-  (Deprecated) Previously used to mark cache entries as stale for immediate refresh. Now behaves identically to `cache-clear` and will be removed in a future release 
+offline-breakglass  
+Activate or deactivate Himmelblau's offline breakglass mode
 
+status  
+Check that the himmelblaud daemon is online and able to connect
+correctly to the himmelblaud server
 
-* configure-pam 
+tpm  
+Check whether Himmelblau is utilizing the TPM
 
-  Configure PAM to use pam_himmelblau 
+version  
+Show the version of this tool
 
-
-* cred 
-
-  Manage confidential client credentials for authenticating to Entra ID 
-
-
-* enumerate 
-
-  Enumerate all users and groups in Entra ID that have `rfc2307` attributes, and cache their values locally. This addresses the issue where UID/GID mappings are needed before authentication can succeed, but are normally only retrievable after login 
-
-
-* user 
-
-  Manage Entra ID user accounts, including POSIX attribute assignment and UID mapping 
-
-
-* group 
-
-  Manage Entra ID groups, including POSIX attribute assignment and GID mapping 
-
-
-* idmap 
-
-  Manage the static idmapping cache used to map Entra ID accounts to static UID/GID values. This is useful for migrations from on-prem AD to Entra ID, where existing UID/GID mappings need to be preserved 
-
-
-* offline-breakglass 
-
-  Activate or deactivate Himmelblau's offline breakglass mode 
-
-
-* status 
-
-  Check that the himmelblaud daemon is online and able to connect correctly to the himmelblaud server 
-
-
-* tpm 
-
-  Check whether Himmelblau is utilizing the TPM 
-
-
-* version 
-
-  Show the version of this tool 
-
-
-* help 
-
-  Print this message or the help of the given subcommand(s) 
+help  
+Print this message or the help of the given subcommand(s)
 
 ## OPTIONS
 
-* **-h**, **--help** 
+**-h**, **--help**  
+Print help
 
-  Print help 
+## aad-tool application add-schema-extensions
 
-## SUBCOMMAND
-
-**aad-tool _application add-schema-extensions _[_OPTIONS_] _--client-id &lt;CLIENT_ID&gt; --schema-app-object-id &lt;SCHEMA_APP_OBJECT_ID&gt;_** 
-
-### DESCRIPTION
-
-Adds a standard set of POSIX-related schema extensions to an existing Entra ID application. 
-
-This command registers directory extension attributes (e.g., `uidNumber`, `gidNumber`, `unixHomeDirectory`, `loginShell`, `gecos`) on the application specified by `--schema-app-object-id`. These extensions will be usable on user and/or group objects, as appropriate. 
-
-The application specified by `--schema-app-object-id` must already exist in the tenant, and must be identified by its Object ID (not the Client ID). This value is labeled as "Object ID" in the Entra Admin Center and corresponds to the `id` field in Graph API responses. 
-
-You must also supply a separate `--client-id` that grants `Application.ReadWrite.All` permissions to perform the extension registration. 
-
-If the `--name` parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the `--name` parameter is provided, the command attempts to authenticate as the specified Entra ID user. In this case, the command must be run as `root` to impersonate another user. 
-
-This command must be run from a device that has already been joined to Entra ID. 
-
-### OPTIONS
-
-**-d**, **--debug** **-D**, **--name** &lt;ACCOUNT_ID&gt; **--client-id** &lt;CLIENT_ID&gt; **--schema-app-object-id** &lt;SCHEMA_APP_OBJECT_ID&gt; **-h**, **--help** 
-
-Print help (see a summary with '-h') 
-
-## SUBCOMMAND
-
-**aad-tool _application create _[_OPTIONS_] _--client-id &lt;CLIENT_ID&gt; --display-name &lt;DISPLAY_NAME&gt;_** 
+```text
+aad-tool application add-schema-extensions [OPTIONS] --client-id <CLIENT_ID> --schema-app-object-id <SCHEMA_APP_OBJECT_ID>
+```
 
 ### DESCRIPTION
 
-Creates a new Entra ID application registration in the current tenant. 
+Adds a standard set of POSIX-related schema extensions to an existing
+Entra ID application.
 
-This command performs a delegated Microsoft Graph API request using an access token acquired via the specified client application (`--client-id`), which must have `Application.ReadWrite.All` permissions in the tenant. 
+This command registers directory extension attributes (e.g.,
+`uidNumber`, `gidNumber`, `unixHomeDirectory`, `loginShell`,
+`gecos`) on the application specified by `--schema-app-object-id`.
+These extensions will be usable on user and/or group objects, as
+appropriate.
 
-The new application will be created with the provided `--display-name`. 
+The application specified by `--schema-app-object-id` must already
+exist in the tenant, and must be identified by its Object ID (not the
+Client ID). This value is labeled as "Object ID" in the Entra Admin
+Center and corresponds to the `id` field in Graph API responses.
 
-You may specify one or more `--redirect-uri` options to configure redirect URIs for the application (used for public client authentication). If no redirect URIs are provided, the application will not include any by default. 
+You must also supply a separate `--client-id` that grants
+`Application.ReadWrite.All` permissions to perform the extension
+registration.
 
-Use the `--user-read-write` and/or `--group-read-write` flags to grant the application additional Microsoft Graph API permissions at registration time, including `User.ReadWrite.All` and `Group.ReadWrite.All`. 
+If the `--name` parameter is omitted, the command authenticates as the
+currently logged-in user via the Himmelblau SSO broker. If the
+`--name` parameter is provided, the command attempts to authenticate
+as the specified Entra ID user. In this case, the command must be run as
+`root` to impersonate another user.
 
-NOTE: If you grant these permissions, it is strongly recommended that you restrict access to the application to specific administrators or groups: 
-
-1. In the Microsoft Entra admin portal, go to Entra???ID -> Enterprise applications and find your app's entry. 2. Under Properties, set "Assignment required?" to Yes. 3. Go to Users and groups, click Add, and assign only the specific users or groups you want to have access. 
-
-If the `--name` parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the `--name` parameter is provided, the command attempts to authenticate as the specified Entra ID user. In this case, the command must be run as `root` to impersonate another user. 
-
-This command must be run from a device that has already been joined to Entra ID. 
+This command must be run from a device that has already been joined to
+Entra ID.
 
 ### OPTIONS
 
-**-d**, **--debug** **-D**, **--name** &lt;ACCOUNT_ID&gt; **--client-id** &lt;CLIENT_ID&gt; **--display-name** &lt;DISPLAY_NAME&gt; **--redirect-uri** &lt;URI&gt; **--user-read-write** **--group-read-write** **-h**, **--help** 
+**-d**, **--debug**
 
-Print help (see a summary with '-h') 
+**-D**, **--name** <ACCOUNT_ID>
 
-## SUBCOMMAND
+**--client-id** <CLIENT_ID>
 
-**aad-tool _application list-schema-extensions _[_OPTIONS_] _--client-id &lt;CLIENT_ID&gt; --schema-app-object-id &lt;SCHEMA_APP_OBJECT_ID&gt;_** 
+**--schema-app-object-id** <SCHEMA_APP_OBJECT_ID>
+
+**-h**, **--help**
+
+> Print help (see a summary with '-h')
+
+## aad-tool application create
+
+```text
+aad-tool application create [OPTIONS] --client-id <CLIENT_ID> --display-name <DISPLAY_NAME>
+```
 
 ### DESCRIPTION
 
-Lists the schema extension attributes registered on an Entra ID application. 
+Creates a new Entra ID application registration in the current tenant.
 
-This command retrieves the directory extension attributes (e.g., `uidNumber`, `gidNumber`, etc.) that have been added to the application identified by `--schema-app-object-id`. 
+This command performs a delegated Microsoft Graph API request using an
+access token acquired via the specified client application
+(`--client-id`), which must have `Application.ReadWrite.All`
+permissions in the tenant.
 
-The `--schema-app-object-id` parameter must be the Object ID of the application (not the Client ID), as shown in the Entra Admin Center. This value corresponds to the `id` field in Microsoft Graph and is required to query extension properties. 
+The new application will be created with the provided
+`--display-name`.
 
-You must also supply a separate `--client-id` that grants `Application.Read.All` or `Application.ReadWrite.All` permissions in the tenant to perform this query. 
+You may specify one or more `--redirect-uri` options to configure
+redirect URIs for the application (used for public client
+authentication). If no redirect URIs are provided, the application will
+not include any by default.
 
-If the `--name` parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the `--name` parameter is provided, the command attempts to authenticate as the specified Entra ID user. In this case, the command must be run as `root` to impersonate another user. 
+Use the `--user-read-write` and/or `--group-read-write` flags to
+grant the application additional Microsoft Graph API permissions at
+registration time, including `User.ReadWrite.All` and
+`Group.ReadWrite.All`.
 
-This command must be run from a device that has already been joined to Entra ID. 
+NOTE: If you grant these permissions, it is strongly recommended that
+you restrict access to the application to specific administrators or
+groups:
+
+1. In the Microsoft Entra admin portal, go to Entra???ID -> Enterprise
+applications and find your app's entry. 2. Under Properties, set
+"Assignment required?" to Yes. 3. Go to Users and groups, click Add, and
+assign only the specific users or groups you want to have access.
+
+If the `--name` parameter is omitted, the command authenticates as the
+currently logged-in user via the Himmelblau SSO broker. If the
+`--name` parameter is provided, the command attempts to authenticate
+as the specified Entra ID user. In this case, the command must be run as
+`root` to impersonate another user.
+
+This command must be run from a device that has already been joined to
+Entra ID.
 
 ### OPTIONS
 
-**-d**, **--debug** **-D**, **--name** &lt;ACCOUNT_ID&gt; **--client-id** &lt;CLIENT_ID&gt; **--schema-app-object-id** &lt;SCHEMA_APP_OBJECT_ID&gt; **-h**, **--help** 
+**-d**, **--debug**
 
-Print help (see a summary with '-h') 
+**-D**, **--name** <ACCOUNT_ID>
 
-## SUBCOMMAND
+**--client-id** <CLIENT_ID>
 
-**aad-tool _application list _[_OPTIONS_] _--client-id &lt;CLIENT_ID&gt;_** 
+**--display-name** <DISPLAY_NAME>
+
+**--redirect-uri** <URI>
+
+**--user-read-write**
+
+**--group-read-write**
+
+**-h**, **--help**
+
+> Print help (see a summary with '-h')
+
+## aad-tool application list-schema-extensions
+
+```text
+aad-tool application list-schema-extensions [OPTIONS] --client-id <CLIENT_ID> --schema-app-object-id <SCHEMA_APP_OBJECT_ID>
+```
 
 ### DESCRIPTION
 
-Lists Entra ID application registrations in the current tenant. 
+Lists the schema extension attributes registered on an Entra ID
+application.
 
-This command performs a delegated Microsoft Graph API request using an access token acquired via the specified client application (`--client-id`), which must have `Application.Read.All` permissions in the tenant. 
+This command retrieves the directory extension attributes (e.g.,
+`uidNumber`, `gidNumber`, etc.) that have been added to the
+application identified by `--schema-app-object-id`.
 
-If the `--name` parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the `--name` parameter is provided, the command attempts to authenticate as the specified Entra ID user. In this case, the command must be run as `root` to impersonate another user. 
+The `--schema-app-object-id` parameter must be the Object ID of the
+application (not the Client ID), as shown in the Entra Admin Center.
+This value corresponds to the `id` field in Microsoft Graph and is
+required to query extension properties.
 
-This command must be run from a device that has already been joined to Entra ID. 
+You must also supply a separate `--client-id` that grants
+`Application.Read.All` or `Application.ReadWrite.All` permissions in
+the tenant to perform this query.
+
+If the `--name` parameter is omitted, the command authenticates as the
+currently logged-in user via the Himmelblau SSO broker. If the
+`--name` parameter is provided, the command attempts to authenticate
+as the specified Entra ID user. In this case, the command must be run as
+`root` to impersonate another user.
+
+This command must be run from a device that has already been joined to
+Entra ID.
 
 ### OPTIONS
 
-**-d**, **--debug** **-D**, **--name** &lt;ACCOUNT_ID&gt; **--client-id** &lt;CLIENT_ID&gt; **-h**, **--help** 
+**-d**, **--debug**
 
-Print help (see a summary with '-h') 
+**-D**, **--name** <ACCOUNT_ID>
 
-## SUBCOMMAND
+**--client-id** <CLIENT_ID>
 
-**aad-tool _auth-test _[_OPTIONS_] _--name &lt;ACCOUNT_ID&gt;_** 
+**--schema-app-object-id** <SCHEMA_APP_OBJECT_ID>
+
+**-h**, **--help**
+
+> Print help (see a summary with '-h')
+
+## aad-tool application list
+
+```text
+aad-tool application list [OPTIONS] --client-id <CLIENT_ID>
+```
 
 ### DESCRIPTION
 
-Test authentication of a user via the himmelblaud resolver "pam" channel. This does not test that your pam configuration is correct - only that himmelblaud is correctly processing and validating authentications 
+Lists Entra ID application registrations in the current tenant.
+
+This command performs a delegated Microsoft Graph API request using an
+access token acquired via the specified client application
+(`--client-id`), which must have `Application.Read.All` permissions
+in the tenant.
+
+If the `--name` parameter is omitted, the command authenticates as the
+currently logged-in user via the Himmelblau SSO broker. If the
+`--name` parameter is provided, the command attempts to authenticate
+as the specified Entra ID user. In this case, the command must be run as
+`root` to impersonate another user.
+
+This command must be run from a device that has already been joined to
+Entra ID.
 
 ### OPTIONS
 
-**-d**, **--debug** **-D**, **--name** &lt;ACCOUNT_ID&gt; 
+**-d**, **--debug**
 
+**-D**, **--name** <ACCOUNT_ID>
 
-#### -h**, **--help 
+**--client-id** <CLIENT_ID>
 
-  Print help 
+**-h**, **--help**
 
-## SUBCOMMAND
+> Print help (see a summary with '-h')
 
-**aad-tool _cache-clear _[_OPTIONS_]** 
+## aad-tool auth-test
+
+```text
+aad-tool auth-test [OPTIONS] --name <ACCOUNT_ID>
+```
 
 ### DESCRIPTION
 
-Clear or invalidate the himmelblaud resolver cache. 
-
-By default, this marks all cached user and group entries as stale, forcing them to refresh immediately when next used. 
-
-Specify **--nss** or **--mapped** to clear these individual caches as well. Omit both these to clear them all. 
-
-Use `--full` to completely purge the user and group cache entries and unjoin the host from Entra ID. This is irreversible. 
+Test authentication of a user via the himmelblaud resolver "pam"
+channel. This does not test that your pam configuration is correct -
+only that himmelblaud is correctly processing and validating
+authentications
 
 ### OPTIONS
 
-**-d**, **--debug** **--nss** 
+**-d**, **--debug**
 
-Only clear the nss cache **--mapped** 
+**-D**, **--name** <ACCOUNT_ID>
 
-Only clear the mapped name cache **--full** 
+**-h**, **--help**  
+Print help
 
-Force a full cache wipe and unjoin the host from Entra ID. This is probably not what you want **-h**, **--help** 
+## aad-tool cache-clear
 
-Print help (see a summary with '-h') 
-
-## SUBCOMMAND
-
-**aad-tool _cache-invalidate _[_OPTIONS_]** 
+```text
+aad-tool cache-clear [OPTIONS]
+```
 
 ### DESCRIPTION
 
-(Deprecated) Previously used to mark cache entries as stale for immediate refresh. Now behaves identically to `cache-clear` and will be removed in a future release 
+Clear or invalidate the himmelblaud resolver cache.
+
+By default, this marks all cached user and group entries as stale,
+forcing them to refresh immediately when next used.
+
+Specify **--nss** or **--mapped** to clear these individual caches as
+well. Omit both these to clear them all.
+
+Use `--full` to completely purge the user and group cache entries and
+unjoin the host from Entra ID. This is irreversible.
 
 ### OPTIONS
 
-**-d**, **--debug** **--nss** **--mapped** **--full** 
+**-d**, **--debug**
 
+**--nss**
 
-#### -h**, **--help 
+> Only clear the nss cache
 
-  Print help 
+**--mapped**
 
-## SUBCOMMAND
+> Only clear the mapped name cache
 
-**aad-tool _configure-pam _[_OPTIONS_]** 
+**--full**
+
+> Force a full cache wipe and unjoin the host from Entra ID. This is
+> probably not what you want
+
+**-h**, **--help**
+
+> Print help (see a summary with '-h')
+
+## aad-tool cache-invalidate
+
+```text
+aad-tool cache-invalidate [OPTIONS]
+```
 
 ### DESCRIPTION
 
-Configure PAM to use pam_himmelblau 
+(Deprecated) Previously used to mark cache entries as stale for
+immediate refresh. Now behaves identically to `cache-clear` and will
+be removed in a future release
 
 ### OPTIONS
 
-**-d**, **--debug** **--really** **--auth-file** &lt;AUTH_FILE&gt; **--account-file** &lt;ACCOUNT_FILE&gt; **--session-file** &lt;SESSION_FILE&gt; **--password-file** &lt;PASSWORD_FILE&gt; 
+**-d**, **--debug**
 
+**--nss**
 
-#### -h**, **--help 
+**--mapped**
 
-  Print help 
+**--full**
 
-## SUBCOMMAND
+**-h**, **--help**  
+Print help
 
-**aad-tool _cred cert _[_OPTIONS_] _--client-id &lt;CLIENT_ID&gt; --domain &lt;DOMAIN&gt; --valid-days &lt;VALID_DAYS&gt; --cert-out &lt;CERT_OUT&gt;_** 
+## aad-tool configure-pam
+
+```text
+aad-tool configure-pam [OPTIONS]
+```
 
 ### DESCRIPTION
 
-Generate an RS256 HSM-backed key pair with a self-signed certificate for confidential client authentication. 
-
-To set this up: 
-
-1. In the Entra ID portal, navigate to Azure Active Directory -> App registrations, then open (or create) your application. 
-
-2. Under Manage > Certificates & secrets, go to the Certificates tab. 
-
-3. Click Upload certificate and select the PEM file generated by this command. 
-
-4. Azure will store this cert for authenticating via public key. 
-
-The private key never leaves your TPM (or SoftHSM). 
-
-When this cred needs renewed in the future, simple run this command again to replace the expired certificate. 
-
-Example: aad-tool cred cert **--client-id** &lt;CLIENT_ID&gt; **--valid-days** 365 **--cert-out** _/tmp/my-cert.crt_ 
+Configure PAM to use pam_himmelblau
 
 ### OPTIONS
 
-**-d**, **--debug** **--client-id** &lt;CLIENT_ID&gt; 
+**-d**, **--debug**
 
-The Azure AD application (client) ID this certificate is associated with **--domain** &lt;DOMAIN&gt; 
+**--really**
 
-The tenant domain this certificate is associated with **--valid-days** &lt;VALID_DAYS&gt; 
+**--auth-file** <AUTH_FILE>
 
-Number of days the self-signed certificate will be valid **--cert-out** &lt;CERT_OUT&gt; 
+**--account-file** <ACCOUNT_FILE>
 
-Path to write the generated PEM certificate file. This is the file you will upload to Entra ID **-h**, **--help** 
+**--session-file** <SESSION_FILE>
 
-Print help (see a summary with '-h') 
+**--password-file** <PASSWORD_FILE>
 
-## SUBCOMMAND
+**-h**, **--help**  
+Print help
 
-**aad-tool _cred delete _[_OPTIONS_] _--domain &lt;DOMAIN&gt;_** 
+## aad-tool cred cert
+
+```text
+aad-tool cred cert [OPTIONS] --client-id <CLIENT_ID> --domain <DOMAIN> --valid-days <VALID_DAYS> --cert-out <CERT_OUT>
+```
 
 ### DESCRIPTION
 
-Delete confidential client credentials (secret, certificate, or both) 
+Generate an RS256 HSM-backed key pair with a self-signed certificate for
+confidential client authentication.
 
-This deletes stored confidential client credentials from Himmelblau's encrypted cache. If neither `--secret` nor `--cert` is specified, both will be deleted. 
+To set this up:
 
-Example: aad-tool cred delete **--domain** &lt;DOMAIN&gt; aad-tool cred delete **--domain** &lt;DOMAIN&gt; **--secret** aad-tool cred delete **--domain** &lt;DOMAIN&gt; **--cert** 
+1. In the Entra ID portal, navigate to Azure Active Directory -> App
+registrations, then open (or create) your application.
+
+2. Under Manage > Certificates & secrets, go to the Certificates tab.
+
+3. Click Upload certificate and select the PEM file generated by this
+command.
+
+4. Azure will store this cert for authenticating via public key.
+
+The private key never leaves your TPM (or SoftHSM).
+
+When this cred needs renewed in the future, simple run this command
+again to replace the expired certificate.
+
+Example: aad-tool cred cert **--client-id** <CLIENT_ID>
+**--valid-days** 365 **--cert-out** */tmp/my-cert.crt*
 
 ### OPTIONS
 
-**-d**, **--debug** **--domain** &lt;DOMAIN&gt; 
+**-d**, **--debug**
 
-The tenant domain whose creds will be deleted **--secret** 
+**--client-id** <CLIENT_ID>
 
-Delete only the client secret (not the certificate) **--cert** 
+> The Azure AD application (client) ID this certificate is associated
+> with
 
-Delete only the client certificate (not the secret) **-h**, **--help** 
+**--domain** <DOMAIN>
 
-Print help (see a summary with '-h') 
+> The tenant domain this certificate is associated with
 
-## SUBCOMMAND
+**--valid-days** <VALID_DAYS>
 
-**aad-tool _cred list _[_OPTIONS_] _--domain &lt;DOMAIN&gt;_** 
+> Number of days the self-signed certificate will be valid
+
+**--cert-out** <CERT_OUT>
+
+> Path to write the generated PEM certificate file. This is the file you
+> will upload to Entra ID
+
+**-h**, **--help**
+
+> Print help (see a summary with '-h')
+
+## aad-tool cred delete
+
+```text
+aad-tool cred delete [OPTIONS] --domain <DOMAIN>
+```
 
 ### DESCRIPTION
 
-List the presence of confidential client credentials 
+Delete confidential client credentials (secret, certificate, or both)
 
-This checks Himmelblau's encrypted cache to see whether a client secret and/or client certificate exists for the given domain. 
+This deletes stored confidential client credentials from Himmelblau's
+encrypted cache. If neither `--secret` nor `--cert` is specified,
+both will be deleted.
 
-Example: aad-tool cred list **--domain** &lt;DOMAIN&gt; 
+Example: aad-tool cred delete **--domain** <DOMAIN> aad-tool cred
+delete **--domain** <DOMAIN> **--secret** aad-tool cred delete
+**--domain** <DOMAIN> **--cert**
 
 ### OPTIONS
 
-**-d**, **--debug** **--domain** &lt;DOMAIN&gt; **-h**, **--help** 
+**-d**, **--debug**
 
-Print help (see a summary with '-h') 
+**--domain** <DOMAIN>
 
-## SUBCOMMAND
+> The tenant domain whose creds will be deleted
 
-**aad-tool _cred secret _[_OPTIONS_] _--client-id &lt;CLIENT_ID&gt; --domain &lt;DOMAIN&gt; --secret &lt;SECRET&gt;_** 
+**--secret**
+
+> Delete only the client secret (not the certificate)
+
+**--cert**
+
+> Delete only the client certificate (not the secret)
+
+**-h**, **--help**
+
+> Print help (see a summary with '-h')
+
+## aad-tool cred list
+
+```text
+aad-tool cred list [OPTIONS] --domain <DOMAIN>
+```
 
 ### DESCRIPTION
 
-Store a client secret for confidential client authentication. 
+List the presence of confidential client credentials
 
-To set this up: 
+This checks Himmelblau's encrypted cache to see whether a client secret
+and/or client certificate exists for the given domain.
 
-1. In the Entra ID portal, navigate to Azure Active Directory -> App registrations, then open (or create) your application. 
-
-2. Under Manage > Certificates & secrets, go to the Client secrets tab. 
-
-3. Click New client secret, choose an expiry, and click Add. 
-
-4. Copy the Value (not Secret ID) immediately. You won't be able to see it again. 
-
-5. Use that value with this command to store it in Himmelblau's encrypted cache. 
-
-When this cred needs renewed in the future, simple run this command again to replace the expired secret. 
-
-Example: aad-tool cred secret **--client-id** &lt;CLIENT_ID&gt; **--secret** &lt;SECRET_VALUE&gt; 
+Example: aad-tool cred list **--domain** <DOMAIN>
 
 ### OPTIONS
 
-**-d**, **--debug** **--client-id** &lt;CLIENT_ID&gt; 
+**-d**, **--debug**
 
-The Azure AD application (client) ID this secret is associated with **--domain** &lt;DOMAIN&gt; 
+**--domain** <DOMAIN>
 
-The tenant domain this secret is associated with **--secret** &lt;SECRET&gt; 
+**-h**, **--help**
 
-The client secret value copied from the Entra ID portal **-h**, **--help** 
+> Print help (see a summary with '-h')
 
-Print help (see a summary with '-h') 
+## aad-tool cred secret
 
-## SUBCOMMAND
-
-**aad-tool _enumerate _[_OPTIONS_]** 
+```text
+aad-tool cred secret [OPTIONS] --client-id <CLIENT_ID> --domain <DOMAIN> --secret <SECRET>
+```
 
 ### DESCRIPTION
 
-Enumerate all users and groups in Entra ID that have `rfc2307` attributes, and cache their values locally. This addresses the issue where UID/GID mappings are needed before authentication can succeed, but are normally only retrievable after login. 
+Store a client secret for confidential client authentication.
 
-The `--client-id` parameter is optional and must refer to a registered Entra ID application with `User.Read.All` and `Group.Read.All` permissions. 
+To set this up:
 
-The `--name` parameter specifies the Entra ID user on whose behalf the token is requested, enabling delegated access through the specified client application. 
+1. In the Entra ID portal, navigate to Azure Active Directory -> App
+registrations, then open (or create) your application.
 
-This command can only be executed from an Entra Id enrolled host. 
+2. Under Manage > Certificates & secrets, go to the Client secrets
+tab.
+
+3. Click New client secret, choose an expiry, and click Add.
+
+4. Copy the Value (not Secret ID) immediately. You won't be able to see
+it again.
+
+5. Use that value with this command to store it in Himmelblau's
+encrypted cache.
+
+When this cred needs renewed in the future, simple run this command
+again to replace the expired secret.
+
+Example: aad-tool cred secret **--client-id** <CLIENT_ID> **--secret**
+<SECRET_VALUE>
 
 ### OPTIONS
 
-**-d**, **--debug** **-D**, **--name** &lt;ACCOUNT_ID&gt; **--client-id** &lt;CLIENT_ID&gt; **-h**, **--help** 
+**-d**, **--debug**
 
-Print help (see a summary with '-h') 
+**--client-id** <CLIENT_ID>
 
-## SUBCOMMAND
+> The Azure AD application (client) ID this secret is associated with
 
-**aad-tool _group set-posix-attrs _[_OPTIONS_] _--schema-client-id &lt;SCHEMA_CLIENT_ID&gt; --group-id &lt;GROUP_ID&gt; --gid &lt;GID&gt;_** 
+**--domain** <DOMAIN>
+
+> The tenant domain this secret is associated with
+
+**--secret** <SECRET>
+
+> The client secret value copied from the Entra ID portal
+
+**-h**, **--help**
+
+> Print help (see a summary with '-h')
+
+## aad-tool enumerate
+
+```text
+aad-tool enumerate [OPTIONS]
+```
 
 ### DESCRIPTION
 
-Sets POSIX-related attributes on a specified Entra ID group object. 
+Enumerate all users and groups in Entra ID that have `rfc2307`
+attributes, and cache their values locally. This addresses the issue
+where UID/GID mappings are needed before authentication can succeed, but
+are normally only retrievable after login.
 
-This command updates the `gidNumber` attribute on the Entra ID group identified by `--group-id`, which must be a valid Object ID. 
+The `--client-id` parameter is optional and must refer to a registered
+Entra ID application with `User.Read.All` and `Group.Read.All`
+permissions.
 
-You must also provide the `--schema-client-id`, which identifies the application where the extension properties were registered. This value must be the Client ID of the application used for schema registration. The application associated with `--schema-client-id` must supply `Group.ReadWrite.All` permissions in the tenant. 
+The `--name` parameter specifies the Entra ID user on whose behalf the
+token is requested, enabling delegated access through the specified
+client application.
 
-If the `--name` parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the `--name` parameter is provided, the command must be run as `root` to impersonate another user. 
-
-This command must be run from a device that has already been joined to Entra ID. 
+This command can only be executed from an Entra Id enrolled host.
 
 ### OPTIONS
 
-**-d**, **--debug** **-D**, **--name** &lt;ACCOUNT_ID&gt; **--schema-client-id** &lt;SCHEMA_CLIENT_ID&gt; **--group-id** &lt;GROUP_ID&gt; **--gid** &lt;GID&gt; **-h**, **--help** 
+**-d**, **--debug**
 
-Print help (see a summary with '-h') 
+**-D**, **--name** <ACCOUNT_ID>
 
-## SUBCOMMAND
+**--client-id** <CLIENT_ID>
 
-**aad-tool _idmap clear _[_OPTIONS_]** 
+**-h**, **--help**
+
+> Print help (see a summary with '-h')
+
+## aad-tool group set-posix-attrs
+
+```text
+aad-tool group set-posix-attrs [OPTIONS] --schema-client-id <SCHEMA_CLIENT_ID> --group-id <GROUP_ID> --gid <GID>
+```
 
 ### DESCRIPTION
 
-Clear the contents of the idmap static cache 
+Sets POSIX-related attributes on a specified Entra ID group object.
+
+This command updates the `gidNumber` attribute on the Entra ID group
+identified by `--group-id`, which must be a valid Object ID.
+
+You must also provide the `--schema-client-id`, which identifies the
+application where the extension properties were registered. This value
+must be the Client ID of the application used for schema registration.
+The application associated with `--schema-client-id` must supply
+`Group.ReadWrite.All` permissions in the tenant.
+
+If the `--name` parameter is omitted, the command authenticates as the
+currently logged-in user via the Himmelblau SSO broker. If the
+`--name` parameter is provided, the command must be run as `root` to
+impersonate another user.
+
+This command must be run from a device that has already been joined to
+Entra ID.
 
 ### OPTIONS
 
-**-d**, **--debug** 
+**-d**, **--debug**
 
+**-D**, **--name** <ACCOUNT_ID>
 
-#### -h**, **--help 
+**--schema-client-id** <SCHEMA_CLIENT_ID>
 
-  Print help 
+**--group-id** <GROUP_ID>
 
-## SUBCOMMAND
+**--gid** <GID>
 
-**aad-tool _idmap group-add _[_OPTIONS_] _--object_id &lt;OBJECT_ID&gt; --gid &lt;GID&gt;_** 
+**-h**, **--help**
+
+> Print help (see a summary with '-h')
+
+## aad-tool idmap clear
+
+```text
+aad-tool idmap clear [OPTIONS]
+```
 
 ### DESCRIPTION
 
-Add a static group mapping to the idmap cache. This maps an Entra ID group (by Object Id GUID) to a fixed GID. This can be used to maintain group identity and membership compatibility after moving to Entra ID 
+Clear the contents of the idmap static cache
 
 ### OPTIONS
 
-**-d**, **--debug** **-D**, **--object_id** &lt;OBJECT_ID&gt; **-g**, **--gid** &lt;GID&gt; 
+**-d**, **--debug**
 
+**-h**, **--help**  
+Print help
 
-#### -h**, **--help 
+## aad-tool idmap group-add
 
-  Print help 
-
-## SUBCOMMAND
-
-**aad-tool _idmap user-add _[_OPTIONS_] _--name &lt;ACCOUNT_ID&gt; --uid &lt;UID&gt; --gid &lt;GID&gt;_** 
+```text
+aad-tool idmap group-add [OPTIONS] --object_id <OBJECT_ID> --gid <GID>
+```
 
 ### DESCRIPTION
 
-Add a static user mapping to the idmap cache. This maps an Entra ID user (by UPN or SAM-compatible name) to a fixed UID and primary group GID 
+Add a static group mapping to the idmap cache. This maps an Entra ID
+group (by Object Id GUID) to a fixed GID. This can be used to maintain
+group identity and membership compatibility after moving to Entra ID
 
 ### OPTIONS
 
-**-d**, **--debug** **-D**, **--name** &lt;ACCOUNT_ID&gt; **-u**, **--uid** &lt;UID&gt; **-g**, **--gid** &lt;GID&gt; 
+**-d**, **--debug**
 
+**-D**, **--object_id** <OBJECT_ID>
 
-#### -h**, **--help 
+**-g**, **--gid** <GID>
 
-  Print help 
+**-h**, **--help**  
+Print help
 
-## SUBCOMMAND
+## aad-tool idmap user-add
 
-**aad-tool _offline-breakglass _[_OPTIONS_]** 
+```text
+aad-tool idmap user-add [OPTIONS] --name <ACCOUNT_ID> --uid <UID> --gid <GID>
+```
 
 ### DESCRIPTION
 
-Activate or deactivate Himmelblau's offline breakglass mode. 
-
-This command enables temporary offline password authentication when Azure Entra ID is unreachable. When invoked, Himmelblau enters a controlled "breakglass" state, allowing cached Entra ID user passwords to be used for login until the TTL expires. 
-
-Breakglass mode can only be activated if it was previously enabled in `/etc/himmelblau/himmelblau.conf` under the `[offline_breakglass]` section. If the feature was disabled, calling this command will have no effect, and no password verifiers will have been cached. 
-
-Once activated, Himmelblau will: \* Allow cached Entra ID users to log in using their known password. \* Automatically exit breakglass mode after the TTL expires or once Entra ID connectivity has been restored. 
-
-Use `--ttl` to override the configured duration for this session. The TTL value accepts a time unit suffix (`m`, `h`, or `d`) and defaults to the value defined in `himmelblau.conf` if omitted. 
-
-To manually exit breakglass mode before TTL expiry, run: aad-tool offline-breakglass **--ttl** 0 
+Add a static user mapping to the idmap cache. This maps an Entra ID user
+(by UPN or SAM-compatible name) to a fixed UID and primary group GID
 
 ### OPTIONS
 
-**-d**, **--debug** **--ttl** &lt;TTL&gt; **-h**, **--help** 
+**-d**, **--debug**
 
-Print help (see a summary with '-h') 
+**-D**, **--name** <ACCOUNT_ID>
+
+**-u**, **--uid** <UID>
+
+**-g**, **--gid** <GID>
+
+**-h**, **--help**  
+Print help
+
+## aad-tool offline-breakglass
+
+```text
+aad-tool offline-breakglass [OPTIONS]
+```
+
+### DESCRIPTION
+
+Activate or deactivate Himmelblau's offline breakglass mode.
+
+This command enables temporary offline password authentication when
+Azure Entra ID is unreachable. When invoked, Himmelblau enters a
+controlled "breakglass" state, allowing cached Entra ID user passwords
+to be used for login until the TTL expires.
+
+Breakglass mode can only be activated if it was previously enabled in
+`/etc/himmelblau/himmelblau.conf` under the `[offline_breakglass]`
+section. If the feature was disabled, calling this command will have no
+effect, and no password verifiers will have been cached.
+
+Once activated, Himmelblau will: \* Allow cached Entra ID users to log
+in using their known password. \* Automatically exit breakglass mode
+after the TTL expires or once Entra ID connectivity has been restored.
+
+Use `--ttl` to override the configured duration for this session. The
+TTL value accepts a time unit suffix (`m`, `h`, or `d`) and
+defaults to the value defined in `himmelblau.conf` if omitted.
+
+To manually exit breakglass mode before TTL expiry, run: aad-tool
+offline-breakglass **--ttl** 0
+
+### OPTIONS
+
+**-d**, **--debug**
+
+**--ttl** <TTL>
+
+**-h**, **--help**
+
+> Print help (see a summary with '-h')
 
 ## EXAMPLES
 
-# Activate breakglass mode for 2 hours aad-tool offline-breakglass --ttl 2h 
+```text
+# Activate breakglass mode for 2 hours aad-tool offline-breakglass
+```
+--ttl 2h
 
-# Force disable breakglass mode immediately aad-tool offline-breakglass --ttl 0 
+```text
+# Force disable breakglass mode immediately aad-tool offline-breakglass
+```
+--ttl 0
 
-# Use the configured default TTL (from himmelblau.conf) aad-tool offline-breakglass 
+```text
+# Use the configured default TTL (from himmelblau.conf) aad-tool
+```
+offline-breakglass
 
-Notes: - If `[offline_breakglass] enabled = false` in himmelblau.conf, this command will do nothing. - Himmelblau will not cache Entra ID password hashes unless offline breakglass has been explicitly enabled in advance. - This feature should only be used for emergency access during verified outages. 
+Notes: - If `[offline_breakglass] enabled = false` in
+himmelblau.conf, this command will do nothing. - Himmelblau will not
+cache Entra ID password hashes unless offline breakglass has been
+explicitly enabled in advance. - This feature should only be used for
+emergency access during verified outages.
 
-## SUBCOMMAND
+## aad-tool status
 
-**aad-tool _status _[_OPTIONS_]** 
-
-### DESCRIPTION
-
-Check that the himmelblaud daemon is online and able to connect correctly to the himmelblaud server 
-
-### OPTIONS
-
-**-d**, **--debug** 
-
-
-#### -h**, **--help 
-
-  Print help 
-
-## SUBCOMMAND
-
-**aad-tool _tpm _[_OPTIONS_]** 
+```text
+aad-tool status [OPTIONS]
+```
 
 ### DESCRIPTION
 
-Check whether Himmelblau is utilizing the TPM 
+Check that the himmelblaud daemon is online and able to connect
+correctly to the himmelblaud server
 
 ### OPTIONS
 
-**-d**, **--debug** 
+**-d**, **--debug**
 
+**-h**, **--help**  
+Print help
 
-#### -h**, **--help 
+## aad-tool tpm
 
-  Print help 
-
-## SUBCOMMAND
-
-**aad-tool _user set-posix-attrs _[_OPTIONS_] _--schema-client-id &lt;SCHEMA_CLIENT_ID&gt; --user-id &lt;USER_ID&gt;_** 
+```text
+aad-tool tpm [OPTIONS]
+```
 
 ### DESCRIPTION
 
-Sets POSIX-related attributes on a specified Entra ID user object. 
-
-This command updates POSIX attributes (`uidNumber`, `gidNumber`, `unixHomeDirectory`, `loginShell`, and `gecos`) on the Entra ID user identified by `--user-id`, which must be a valid Object ID or UPN. 
-
-You must also provide the `--schema-client-id`, which identifies the application where the extension properties were registered. This value must be the Client ID of the application used for schema registration. The application associated with `--schema-client-id` must supply `User.ReadWrite.All` permissions in the tenant. 
-
-If the `--name` parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the `--name` parameter is provided, the command must be run as `root` to impersonate another user. 
-
-This command must be run from a device that has already been joined to Entra ID. 
+Check whether Himmelblau is utilizing the TPM
 
 ### OPTIONS
 
-**-d**, **--debug** **-D**, **--name** &lt;ACCOUNT_ID&gt; **--schema-client-id** &lt;SCHEMA_CLIENT_ID&gt; **--user-id** &lt;USER_ID&gt; **--uid** &lt;UID&gt; **--gid** &lt;GID&gt; **--home** &lt;HOME&gt; **--shell** &lt;SHELL&gt; **--gecos** &lt;GECOS&gt; **-h**, **--help** 
+**-d**, **--debug**
 
-Print help (see a summary with '-h') 
+**-h**, **--help**  
+Print help
+
+## aad-tool user set-posix-attrs
+
+```text
+aad-tool user set-posix-attrs [OPTIONS] --schema-client-id <SCHEMA_CLIENT_ID> --user-id <USER_ID>
+```
+
+### DESCRIPTION
+
+Sets POSIX-related attributes on a specified Entra ID user object.
+
+This command updates POSIX attributes (`uidNumber`, `gidNumber`,
+`unixHomeDirectory`, `loginShell`, and `gecos`) on the Entra ID
+user identified by `--user-id`, which must be a valid Object ID or
+UPN.
+
+You must also provide the `--schema-client-id`, which identifies the
+application where the extension properties were registered. This value
+must be the Client ID of the application used for schema registration.
+The application associated with `--schema-client-id` must supply
+`User.ReadWrite.All` permissions in the tenant.
+
+If the `--name` parameter is omitted, the command authenticates as the
+currently logged-in user via the Himmelblau SSO broker. If the
+`--name` parameter is provided, the command must be run as `root` to
+impersonate another user.
+
+This command must be run from a device that has already been joined to
+Entra ID.
+
+### OPTIONS
+
+**-d**, **--debug**
+
+**-D**, **--name** <ACCOUNT_ID>
+
+**--schema-client-id** <SCHEMA_CLIENT_ID>
+
+**--user-id** <USER_ID>
+
+**--uid** <UID>
+
+**--gid** <GID>
+
+**--home** <HOME>
+
+**--shell** <SHELL>
+
+**--gecos** <GECOS>
+
+**-h**, **--help**
+
+> Print help (see a summary with '-h')
 
 ## SEE ALSO
 
-**himmelblau.conf**(5), **himmelblaud**(8), **himmelblaud-tasks**(8) 
+[himmelblau.conf(5)](himmelblau-conf.md), [himmelblaud(8)](himmelblaud.md), [himmelblaud-tasks(8)](himmelblaud_tasks.md)
 
 ## AUTHOR
 
-David Mulder &lt;dmulder@himmelblau-idm.org&gt;, &lt;dmulder@samba.org&gt; 
+David Mulder <dmulder@himmelblau-idm.org>, <dmulder@samba.org>

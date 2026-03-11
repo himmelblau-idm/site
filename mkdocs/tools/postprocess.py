@@ -277,6 +277,42 @@ def format_code_blocks(lines):
     return out
 
 
+def rename_subcommand_headings(lines):
+    """Replace generic ## SUBCOMMAND headings with the subcommand name.
+
+    Looks for ## SUBCOMMAND followed (within a few lines) by a ```text
+    code block containing the synopsis, and extracts the command name.
+    """
+    out = []
+    i = 0
+    while i < len(lines):
+        if lines[i].rstrip('\n') == '## SUBCOMMAND':
+            # Look ahead for a ```text block within the next 3 lines
+            j = i + 1
+            found = False
+            while j < len(lines) and j <= i + 3:
+                if lines[j].startswith('```text'):
+                    # Next line is the synopsis command
+                    if j + 1 < len(lines):
+                        cmd = lines[j + 1].rstrip('\n')
+                        # Extract command name (everything before first [OPTIONS] or <)
+                        name = re.split(r'\s+[\[<-]', cmd)[0].strip()
+                        if name:
+                            out.append('## ' + name + '\n')
+                            found = True
+                    break
+                elif lines[j].strip():  # non-blank, non-code-fence line
+                    break
+                j += 1
+            if not found:
+                out.append(lines[i])
+            i += 1
+            continue
+        out.append(lines[i])
+        i += 1
+    return out
+
+
 def fix_author_links(lines):
     """Replace pandoc's empty email hyperlinks [](mailto:foo) with plain address."""
     out = []
@@ -295,6 +331,7 @@ def process(lines):
     lines = deduplicate_sections(lines)
     lines = clean_trailing_backslashes(lines)
     lines = format_code_blocks(lines)
+    lines = rename_subcommand_headings(lines)
     lines = fix_bold_punctuation(lines)
     lines = fix_author_links(lines)
     return lines

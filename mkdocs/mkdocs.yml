@@ -1,10 +1,34 @@
 site_name: Himmelblau Documentation
 theme:
-  name: readthedocs
+  name: material
+  palette:
+    scheme: default
+    primary: blue
+    accent: indigo
+  font:
+    text: Poppins
+    code: Courier Prime
+  logo: ../assets/himmelblau_logo.svg
+  favicon: ../assets/favicon.ico
   custom_dir: overrides
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+    - toc.follow
+extra_css:
+  - css/extra.css
 plugins:
   - search
   - awesome-pages
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
 repo_url: https://github.com/himmelblau-idm/site.git
 repo_name: Himmelblau Documentation
 edit_uri: https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs

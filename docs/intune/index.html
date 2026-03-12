@@ -1348,11 +1348,11 @@ overview of the Entra Id portal displays all devices.</p>
 processing must be enabled in <code>/etc/himmelblau/himmelblau.conf</code>. Add the
 following setting in the <code>[global]</code> section and restart both Himmelblau
 services:</p>
-<pre><code class="language-ini">[global]
-apply_policy = true
-</code></pre>
-<pre><code class="language-bash">sudo systemctl restart himmelblaud himmelblaud-tasks
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="k">[global]</span>
+<span class="na">apply_policy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>himmelblaud<span class="w"> </span>himmelblaud-tasks
+</code></pre></div>
 <p>First, a policy for passwords should be created and assigned. To avoid
 having to add each client individually to the policy, a group can be
 created either in the Entra Id portal or directly in Intune, in which

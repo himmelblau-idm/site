@@ -1188,38 +1188,17 @@
   <h1>Enabling the Himmelblau QR Greeter gnome‐shell Extension</h1>
 
 <ol>
-<li><strong>Download and Install the Extension Package</strong></li>
+<li><strong>Download and install the extension package</strong></li>
 </ol>
 <p><a href="https://himmelblau-idm.org/downloads.html">Download the appropriate package for your distribution</a></p>
-<p>The package is called <code>himmelblau-qr-greeter</code>. Follow your distribution’s instructions for installing system packages.</p>
+<p>The package is called <code>himmelblau-qr-greeter</code>. Follow your distribution's instructions for installing system packages.</p>
 <ol>
-<li><strong>Enable the Extension for the GDM User</strong></li>
+<li><strong>Restart GDM (required)</strong></li>
 </ol>
-<p>Since the extension runs on the GDM (login) screen, you must enable it as the gdm user. Run the following commands:</p>
-<ol>
-<li>
-<p><strong>Open a shell as the gdm user:</strong></p>
-<div class="highlight"><pre><span></span><code>sudo machinectl shell gdm@ /bin/bash
+<p>The extension is enabled automatically at install time. You must restart GDM once after installation, otherwise the QR login option may not appear on first use.</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>gdm3
 </code></pre></div>
-</li>
-<li>
-<p><strong>Enable the extension for GDM:</strong></p>
-<div class="highlight"><pre><span></span><code>gsettings set org.gnome.shell enabled-extensions &quot;[&#39;qr-greeter@himmelblau-idm.org&#39;]&quot;
-</code></pre></div>
-</li>
-<li>
-<p><strong>Exit the shell:</strong></p>
-<div class="highlight"><pre><span></span><code>exit
-</code></pre></div>
-</li>
-<li>
-<p><strong>Restart GDM</strong></p>
-</li>
-</ol>
-<p>To apply the changes, restart GDM:</p>
-<div class="highlight"><pre><span></span><code>sudo systemctl restart gdm3
-</code></pre></div>
-<p>After these steps, the Himmelblau QR Greeter extension will be active on your login and lock screens.</p>
+<p>After this restart, the Himmelblau QR Greeter extension will be active on your login and lock screens.</p>
 <p><img alt="Login Screen" src="https://github.com/user-attachments/assets/382cdf17-f6d7-44e8-aa7c-204bd37bad9c" />
 <img alt="Lock Screen" src="https://github.com/user-attachments/assets/676e4573-9c48-4122-9f68-c21cee1e1846" /></p>
 

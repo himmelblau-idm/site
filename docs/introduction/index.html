@@ -1785,15 +1785,16 @@ Connection closed by 192.168.56.81 port 22
 <h2 id="domain-parameters">Domain parameters</h2>
 <p>In addition to the local and global parameters, it is also possible to configure specific settings for individual domains. The settings for a domain always begin with the name of the domain in square brackets.</p>
 <h2 id="adjusting-the-idmap-range">Adjusting the idmap range</h2>
-<p>No individual ID mapping has been performed up to this point. If no individual ID mapping is configured, the range from 200000 to 2000200000 is always used by default. Since multiple domains separated by commas can be specified in the configuration file for the <em>domain</em> variable, it is necessary to define a separate range for each domain at this point at the latest. To do this, the file <em>/etc/himmelblau/himmelblau.conf</em> is adjusted as shown in Listing 18:</p>
+<p>No individual ID mapping has been performed up to this point. If no individual ID mapping is configured, the range from 200000 to 2000200000 is always used by default.</p>
+<p>In Himmelblau 2.x, <em>idmap_range</em> must be configured globally in the <em>[global]</em> section. Domain-specific <em>idmap_range</em> settings are deprecated and no longer supported. To do this, adjust <em>/etc/himmelblau/himmelblau.conf</em> as shown in Listing 18:</p>
 <div class="highlight"><pre><span></span><code>------ Listing 18 ------
-[example.onmicrosoft.com] 
+[global]
 idmap_range = 1000000-1999999
 --------------------------
 </code></pre></div>
-<p>It is important to enter the adjustment at the end of the file, otherwise the parameters of the [global] section below the entry will no longer be evaluated.  Even if the lines are commented out, they must not be located in the middle of the [global] section. After changing the idmap range and restarting the two Himmelblau services, the users and groups can be displayed with a new ID. </p>
+<p>After changing the idmap range and restarting the two Himmelblau services, the users and groups can be displayed with a new ID.</p>
 <p>It is important to make the change on all clients, otherwise the same user (and also the groups) will have different IDs.  </p>
-<p>In addition to adjusting the <em>idmap_range</em>, it is possible to set additional parameters. Here, it is also possible to override certain local settings. For example, if a different target directory for the home directories is to be created for each domain, the additional variable <em>home_prefix=/domainname/</em> ensures that the home directory for all users of this domain is created in a corresponding directory. The variable entry must be placed below the domain name in square brackets. </p>
+<p>In addition to adjusting the <em>idmap_range</em>, it is possible to set additional parameters in the <em>[global]</em> section.</p>
 <p>Further variables that can be set up specifically for domains are described in the man page for the <em>himmelblau.conf</em> file.</p>
 <h2 id="resetting-a-client">Resetting a client</h2>
 <p>All information about all users set up on this client is stored in an SQLite database in the file <em>/var/cache/himmelblaud/himmelblau.cache.db.</em> If a client is to be permanently removed from the domain, or if all users are to re-register their accounts on the client, the file can be deleted. This will invalidate all information about all users on this client. Before deleting, the two Himmelblau services should be stopped in any case. Once the file has been deleted and the services have been restarted, the database will be rebuilt.</p>
@@ -1813,22 +1814,17 @@ success
 <li>himmelblau-qr-greeter_<version><distribution>     </li>
 </ul>
 <p>After installing all packages and setting up the configuration, a user can log in to the system with their Azure ID. The login process involves the same steps as described for the first login to the system without a GUI.</p>
-<p>If you also want to enable the very first login of a completely new user, you will need to set up qr-greeter. This requires the machinectl program. The program is part of the Debian package systemd-container and must be installed first. After installation, you will need to perform all the steps listed in Listing 20:</p>
+<p>If you also want to enable the very first login of a completely new user, install the <code>himmelblau-qr-greeter</code> package. The extension is enabled automatically during installation.</p>
+<p>After installing <code>himmelblau-qr-greeter</code>, you must restart GDM once. Otherwise, QR login may not appear on first use.</p>
+<p>Listing 20 shows the required restart step:</p>
 <div class="highlight"><pre><span></span><code>-------- Listing 20 --------
-root@skyblue-gui:~# machinectl shell Debian-gdm@bibash 
-Connected to the local host. Press ^] three times within 1s to exit session. 
-
-Debian-gdm@himmelblau-gui:~$ gsettings set org.gnome.shell enabled-extensions &quot;[&#39;qr-greeter@himmelblau-idm.org&#39;]&quot;
-
-Debian-gdm@himmelblau-gui:~$ exit 
-
-Debian-gdm@himmelblau-gui:~$systemctl restart gdm3
+root@skyblue-gui:~# systemctl restart gdm3
 ------------------------------
 </code></pre></div>
-<p>IMPORTANT: Under no circumstances should you use your own domain here, only the domain himmelblau-idm.org, otherwise no QR code will be generated when a new user logs in for the first time. If everything has been set up correctly, the following image will appear when a user logs in for the very first time after entering their username and initial password:</p>
+<p>If everything has been set up correctly, the following image will appear when a user logs in for the very first time after entering their username and initial password:</p>
 <p><img alt="Device Authorization Grant GDM Login" src="../image-20251106203521798.png" /></p>
 <p>The user can then scan the QR code with their smartphone and will be taken to the website where they can complete the initial login.</p>
-<p>This only works if <em>gdm</em> is used as the login manager and a Gnome version &gt;=45 is used.</p>
+<p>This only works if <em>gdm</em> is used as the login manager and a GNOME version &gt;=40 is used.</p>
 <p>After successful login, the sso can be tested immediately. Installing the <em>himmelblau-sso</em> package also installs and activates the required plugin for Firefox.</p>
 <p><img alt="SSO Plugin" src="../ChatGPT%20Image%20Nov%206%2C%202025%2C%2008_38_00%20PM.png" /></p>
 <p>This allows an immediate connection to the Azure cloud and the booked applications. No further login is necessary. </p>

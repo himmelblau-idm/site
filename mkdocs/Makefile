@@ -15,7 +15,9 @@ LATEST_STABLE:= stable-3.x
 MAN_DIR      := $(HB_DIR)/man
 MAN_OUT_DIR  := docs/reference
 
-PANDOC       := pandoc
+# Use the venv-bundled pandoc from pypandoc_binary
+VENV_PKGS    := $(abspath $(MAKEFILE_DIR)/../.venv/lib/python*/site-packages)
+PANDOC       := $(wildcard $(VENV_PKGS)/pypandoc/files/pandoc)
 POSTPROCESS  := tools/postprocess.py
 
 # ---- Bootstrap local dirs ---------------------------------------------------

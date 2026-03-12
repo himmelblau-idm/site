@@ -6,6 +6,7 @@ MATERIAL_VERSION      ?= 9.6.15
 PYMDOWN_VERSION       ?= 10.11
 MINIFY_PLUGIN_VERSION ?= 0.8.0
 AWESOME_PAGES_VERSION ?= 2.9.3
+PYPANDOC_BIN_VERSION  ?= 1.16.2
 
 VENV_BIN := $(VENV)/bin
 PIP      := $(VENV_BIN)/pip
@@ -48,7 +49,8 @@ deps: venv
 		"mkdocs-material==$(MATERIAL_VERSION)" \
 		"pymdown-extensions==$(PYMDOWN_VERSION)" \
 		"mkdocs-minify-plugin==$(MINIFY_PLUGIN_VERSION)" \
-		"mkdocs-awesome-pages-plugin==$(AWESOME_PAGES_VERSION)"
+		"mkdocs-awesome-pages-plugin==$(AWESOME_PAGES_VERSION)" \
+		"pypandoc_binary==$(PYPANDOC_BIN_VERSION)"
 
 check-versions:
 	@$(PY) -c "import sys; \

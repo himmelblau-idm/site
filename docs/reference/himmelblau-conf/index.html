@@ -1,545 +1,2138 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/reference/himmelblau-conf/" />
-      <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Himmelblau conf - Himmelblau Documentation</title>
-    <link rel="stylesheet" href="../../css/theme.css" />
-    <link rel="stylesheet" href="../../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
     
-      <script>
-        // Current page data
-        var mkdocs_page_name = "Himmelblau conf";
-        var mkdocs_page_input_path = "reference/himmelblau-conf.md";
-        var mkdocs_page_url = "/docs/reference/himmelblau-conf/";
-      </script>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://himmelblau-idm.org/docs/reference/himmelblau-conf/">
+      
+      
+        <link rel="prev" href="../aad-tool/">
+      
+      
+        <link rel="next" href="../himmelblaud/">
+      
+      
+      <link rel="icon" href="../../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
-    <!--[if lt IE 9]>
-      <script src="../../js/html5shiv.min.js"></script>
-    <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-      <script>hljs.highlightAll();</script>
-   
+    
+      
+        <title>Himmelblau conf - Himmelblau Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,300i,400,400i,700,700i%7CCourier+Prime:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Poppins";--md-code-font:"Courier Prime"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  
   <script type="text/javascript" data-cmp-ab="1" src="https://cdn.consentmanager.net/delivery/autoblocking/8bffa521a2c48.js" data-cmp-host="c.delivery.consentmanager.net" data-cmp-cdn="cdn.consentmanager.net" data-cmp-codesrc="16"></script>
 
-</head>
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#name" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
 
-<body class="wy-body-for-nav" role="document">
+  
 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
-    <div class="wy-side-scroll">
-      <div class="wy-side-nav-search">
-          <a href="../.." class="icon icon-home"> Himmelblau Documentation
-        </a><div role="search">
-  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
-  </form>
-</div>
-      </div>
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Himmelblau Documentation" class="md-header__button md-logo" aria-label="Himmelblau Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/himmelblau_logo.svg" alt="logo">
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-                <li class="toctree-l1"><a class="" href="https://himmelblau-idm.org/">Home</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../..">Quickstart</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../introduction/">A Practical Introduction to Himmelblau</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../intune/">Intune Policies for Linux Clients</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../rfc2307-entra-id-posix-attributes/">RFC2307 Schema Attributes</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Configuration</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../registration/">Device Registration</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../integration/">Migration from On-Prem</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../mail_integration/">Evolution Mail Integration</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../ecosystem/">Ecosystem</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../architecture/">Architecture</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
-                </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Reference</span></p>
-              <ul class="current">
-                  <li class="toctree-l1"><a class="reference internal" href="../aad-tool/">Aad tool</a>
-                  </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Himmelblau conf</a>
-    <ul class="current">
-    </ul>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../himmelblaud/">Himmelblaud</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../himmelblaud_tasks/">Himmelblaud tasks</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../pam_himmelblau/">Pam himmelblau</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage/">Configuring a Hardware TPM for Secure Key Storage</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-and-User.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Design/">Design Principles</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Device-Compliance-Settings-for-Linux-in-Intune-with-Himmelblau/">Device Compliance Settings for Linux in Intune with Himmelblau</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Tray-Icons-for-o365-on-GNOME-Shell/">Tray Icons for o365 on GNOME Shell</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
-                  </li>
-              </ul>
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Himmelblau Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Himmelblau conf
+            
+          </span>
+        </div>
       </div>
     </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../..">Himmelblau Documentation</a>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
         
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
       </nav>
-      <div class="wy-nav-content">
-        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
-  <ul class="wy-breadcrumbs">
-    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">Reference</li>
-      <li class="breadcrumb-item active">Himmelblau conf</li>
-    <li class="wy-breadcrumbs-aside">
-          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/reference/himmelblau-conf.md">Edit on Himmelblau Documentation</a>
-    </li>
-  </ul>
-  <hr/>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-            <div class="section" itemprop="articleBody">
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/himmelblau-idm/site.git" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Himmelblau Documentation
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
               
-                <h2 id="name">NAME</h2>
-<p>himmelblau.conf - Configuration file for Himmelblau, enabling Azure Entra ID authentication on Linux. </p>
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Himmelblau Documentation" class="md-nav__button md-logo" aria-label="Himmelblau Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/himmelblau_logo.svg" alt="logo">
+
+    </a>
+    Himmelblau Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/himmelblau-idm/site.git" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Himmelblau Documentation
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://himmelblau-idm.org/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quickstart
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    A Practical Introduction to Himmelblau
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intune/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Intune Policies for Linux Clients
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rfc2307-entra-id-posix-attributes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    RFC2307 Schema Attributes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Device Registration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Migration from On-Prem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mail_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Evolution Mail Integration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_14" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../aad-tool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Aad tool
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Himmelblau conf
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Himmelblau conf
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#name" class="md-nav__link">
+    <span class="md-ellipsis">
+      NAME
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#synopsis" class="md-nav__link">
+    <span class="md-ellipsis">
+      SYNOPSIS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-configuration-changes-are-applied" class="md-nav__link">
+    <span class="md-ellipsis">
+      HOW CONFIGURATION CHANGES ARE APPLIED
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      FILE FORMAT
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      PARAMETERS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PARAMETERS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#global" class="md-nav__link">
+    <span class="md-ellipsis">
+      [global]
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local_usernamesamaccountnamedomain" class="md-nav__link">
+    <span class="md-ellipsis">
+      local_username:samaccountname@domain
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="local_username:samaccountname@domain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#offline-breakglass-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      OFFLINE BREAKGLASS CONFIGURATION
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OFFLINE BREAKGLASS CONFIGURATION">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#offline_breakglass" class="md-nav__link">
+    <span class="md-ellipsis">
+      [offline_breakglass]
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      SEE ALSO
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../himmelblaud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Himmelblaud
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../himmelblaud_tasks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Himmelblaud tasks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pam_himmelblau/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pam himmelblau
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced Topics
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Cloud-Kerberos-Trust-for-Linux/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Cloud Kerberos Trust for Linux
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuring a Hardware TPM for Secure Key Storage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-and-User.Read.All-Permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Design Principles
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Device-Compliance-Settings-for-Linux-in-Intune-with-Himmelblau/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Device Compliance Settings for Linux in Intune with Himmelblau
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Enabling the Himmelblau QR Greeter gnome‐shell Extension
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/MS-specs-which-Himmelblau-uses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MS specs which Himmelblau uses
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Syncing Active Directory with Azure Entra ID
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Tray-Icons-for-o365-on-GNOME-Shell/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tray Icons for o365 on GNOME Shell
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            Troubleshooting
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Capturing authentication traffic using cirrus‐scope
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Removing all Hello PINs & cached PRTs on a Himmelblau host
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing Himmelblau Developer Builds with Packet Capture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting: `The user '...' already exists` and fake users listed in NSS
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Write Permissions for the `logon script` Parameter in Himmelblau
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#name" class="md-nav__link">
+    <span class="md-ellipsis">
+      NAME
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#synopsis" class="md-nav__link">
+    <span class="md-ellipsis">
+      SYNOPSIS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-configuration-changes-are-applied" class="md-nav__link">
+    <span class="md-ellipsis">
+      HOW CONFIGURATION CHANGES ARE APPLIED
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      FILE FORMAT
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      PARAMETERS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PARAMETERS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#global" class="md-nav__link">
+    <span class="md-ellipsis">
+      [global]
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local_usernamesamaccountnamedomain" class="md-nav__link">
+    <span class="md-ellipsis">
+      local_username:samaccountname@domain
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="local_username:samaccountname@domain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#offline-breakglass-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      OFFLINE BREAKGLASS CONFIGURATION
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OFFLINE BREAKGLASS CONFIGURATION">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#offline_breakglass" class="md-nav__link">
+    <span class="md-ellipsis">
+      [offline_breakglass]
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      SEE ALSO
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h2 id="name">NAME</h2>
+<p>himmelblau.conf - Configuration file for Himmelblau, enabling Azure
+Entra ID authentication on Linux.</p>
 <h2 id="synopsis">SYNOPSIS</h2>
-<p><strong>/etc/himmelblau/himmelblau.conf</strong> </p>
+<div class="highlight"><pre><span></span><code>/etc/himmelblau/himmelblau.conf
+</code></pre></div>
 <h2 id="how-configuration-changes-are-applied">HOW CONFIGURATION CHANGES ARE APPLIED</h2>
-<p>Changes to the configuration file <strong>/etc/himmelblau/himmelblau.conf</strong> only take effect after restarting the Himmelblau daemons. This includes the <strong>himmelblaud</strong> daemon, which handles authentication, and the <strong>himmelblaud-tasks</strong> daemon, which processes related tasks. </p>
-<h4 id="restarting-the-daemons">Restarting the Daemons</h4>
-<p>To apply changes, restart the Himmelblau services using the following systemd commands: </p>
-<pre><code>
-sudo systemctl restart himmelblaud
-
+<p>Changes to the configuration file <strong>/etc/himmelblau/himmelblau.conf</strong>
+only take effect after restarting the Himmelblau daemons. This includes
+the <strong>himmelblaud</strong> daemon, which handles authentication, and the
+<strong>himmelblaud-tasks</strong> daemon, which processes related tasks.</p>
+<p><strong>Restarting the Daemons</strong><br />
+To apply changes, restart the Himmelblau services using the following
+systemd commands:</p>
+<pre><code>sudo systemctl restart himmelblaud
 sudo systemctl restart himmelblaud-tasks
-
 </code></pre>
 <h2 id="description">DESCRIPTION</h2>
-<p>The <strong>himmelblau.conf</strong> file is the primary configuration file for the Himmelblau authentication module. It defines global and optional settings required for Azure Entra ID-based authentication and device management. </p>
-<p>While Himmelblau is designed to be highly configurable, it can normally be used without any custom configuration. For desktop authentication with Azure Entra ID, all that is required is for Himmelblau to be installed and for a user to log in. The domain will be automatically extracted from the first user's UPN and looked up in Entra ID. </p>
-<p>Himmelblau has many capabilities, but most are enabled by default and configured automatically at install time. The options documented below allow administrators to customize behavior for specific environments or requirements. </p>
+<p>The <strong>himmelblau.conf</strong> file is the primary configuration file for the
+Himmelblau authentication module. It defines global and optional
+settings required for Azure Entra ID-based authentication and device
+management.</p>
+<p>While Himmelblau is designed to be highly configurable, it can normally
+be used without any custom configuration. For desktop authentication
+with Azure Entra ID, all that is required is for Himmelblau to be
+installed and for a user to log in. The domain will be automatically
+extracted from the first user's UPN and looked up in Entra ID.</p>
+<p>Himmelblau has many capabilities, but most are enabled by default and
+configured automatically at install time. The options documented below
+allow administrators to customize behavior for specific environments or
+requirements.</p>
 <h2 id="file-format">FILE FORMAT</h2>
-<p>The file consists of sections headed by a name enclosed in square brackets. Each section contains parameters and their values in the format: </p>
-<pre><code>parameter = value Lines beginning with a '#' are comments and are ignored by the parser.
-</code></pre>
+<p>The file consists of sections headed by a name enclosed in square
+brackets. Each section contains parameters and their values in the
+format:</p>
+<blockquote>
+<p>parameter = value</p>
+</blockquote>
+<p>Lines beginning with a '#' are comments and are ignored by the parser.</p>
 <h2 id="parameters">PARAMETERS</h2>
 <h3 id="global">[global]</h3>
-<p>This section contains settings that apply globally to all operations of Himmelblau. </p>
-<h4 id="domain">domain</h4>
-<p>The primary Azure Entra ID domain name used for authentication. This value <strong>SHOULD</strong> match the domain name that users enter when signing in (for example, the domain portion of their UPN). In most cases, this will be the primary domain of your Azure Entra ID tenant. If your organization uses multiple verified domains or aliases, choose the one that your users actually use to sign in. If not specified, the domain is extracted from the UPN of the first user to authenticate and looked up in Entra ID. </p>
-<p>Default: Extracted from first user's UPN </p>
-<p>Example: domain = example.com </p>
-<h4 id="oidc_issuer_url">oidc_issuer_url</h4>
-<p>Specifies the OpenID Connect (OIDC) issuer URL used by Himmelblau to discover OIDC provider metadata and endpoints. This option enables generic OIDC authentication support and allows Himmelblau to authenticate against any standards-compliant OIDC provider, rather than using the built-in Microsoft Entra ID defaults. </p>
-<p>If <strong>enable_hello</strong> is set to true (the default), the client application must allow refresh tokens and include the <strong>offline_access</strong> scope for Hello enrollment to function with OIDC providers. When this option is set, the following option is <strong>REQUIRED</strong> and must be configured consistently: </p>
+<p>This section contains settings that apply globally to all operations of
+Himmelblau.</p>
+<p><strong>domain</strong>  </p>
+<p>The primary Azure Entra ID domain name used for authentication. This
+value <strong>SHOULD</strong> match the domain name that users enter when signing in
+(for example, the domain portion of their UPN).</p>
+<p>In most cases, this will be the primary domain of your Azure Entra ID
+tenant. If your organization uses multiple verified domains or aliases,
+choose the one that your users actually use to sign in.</p>
+<p>If not specified, the domain is extracted from the UPN of the first user
+to authenticate and looked up in Entra ID.</p>
+<p>Default: Extracted from first user's UPN</p>
+<div class="highlight"><pre><span></span><code>domain = example.com
+</code></pre></div>
+<p><strong>oidc_issuer_url</strong>  </p>
+<p>Specifies the OpenID Connect (OIDC) issuer URL used by Himmelblau to
+discover OIDC provider metadata and endpoints.</p>
+<p>This option enables generic OIDC authentication support and allows
+Himmelblau to authenticate against any standards-compliant OIDC
+provider, rather than using the built-in Microsoft Entra ID defaults.</p>
+<p>If <strong>enable_hello</strong> is set to true (the default), the client application
+must allow refresh tokens and include the <strong>offline_access</strong> scope for
+Hello enrollment to function with OIDC providers.</p>
+<p>When this option is set, the following option is <strong>REQUIRED</strong> and must
+be configured consistently:</p>
+<blockquote>
 <ul>
-<li><strong>app_id</strong> (en Used as the OIDC client identifier The issuer URL <strong>MUST</strong> exactly match the issuer value advertised by the OIDC provider, including any required path components. Incorrect issuer URLs will cause provider discovery to fail. If this option is not set, Himmelblau defaults to its native Microsoft Entra ID authentication flow. </li>
+<li><strong>app_id</strong> – Used as the OIDC client identifier</li>
 </ul>
-<p>Example: oidc_issuer_url = https://login.microsoftonline.com/0656e57d-a8fc-4aa4-8366-8045787115ca/v2.0 </p>
-<h4 id="debug">debug</h4>
-<p>A boolean option that enables debug-level logging. When set to <strong>true,</strong> debug messages are output to the system journal. </p>
-<p>Default: false </p>
-<p>Example: debug = true </p>
-<h4 id="pam_allow_groups">pam_allow_groups</h4>
-<p>A comma-separated list of Entra Id Users and Groups permitted to access the system. Users should be specified by UPN. Groups MUST be specified using their Object ID GUID. Group names may not be used because these names are not guaranteed to be unique in Entra Id. If not set, all Entra ID users are permitted to authenticate. </p>
-<p>Default: All users permitted </p>
-<p>Example: pam_allow_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12,5ba4ef1d-e454-4f43-ba7c-6fe6f1601915,admin@himmelblau-idm.org </p>
-<h4 id="id_attr_map">id_attr_map</h4>
-<p>Specify whether to map uid/gid based on the object name, the object uuid, or based on the rfc2307 schema extension attributes synchronized from an on-prem Active Directory instance. Mapping by name or by rfc2307 is recommended. </p>
-<p>Default: name </p>
-<p>Example: id_attr_map = &lt;name|uuid|rfc2307&gt; </p>
-<h4 id="rfc2307_group_fallback_map">rfc2307_group_fallback_map</h4>
-<p>Specify whether to map group IDs (GIDs) based on the object name or object UUID when no <strong>gidNumber</strong> attribute is found in an on-prem Active Directory instance synchronized to Azure Entra ID. This option is only applicable if <strong>id_attr_map</strong> is set to <strong>rfc2307.</strong> If <strong>id_attr_map = rfc2307</strong> and a group does not have a <strong>gidNumber</strong> defined in the directory, this setting determines the fallback method for mapping the group ID. If this option is not set, groups without a <strong>gidNumber</strong> will not be available to NSS. </p>
-<p>Example: rfc2307_group_fallback_map = &lt;name|uuid&gt; </p>
-<h4 id="enable_hello">enable_hello</h4>
-<p>Enables or disables user enrollment in Windows Hello authentication. If disabled, users will need to provide MFA for each login. </p>
-<p>For OIDC providers (when <strong>oidc_issuer_url</strong> is set), Hello enrollment requires the client application to allow refresh tokens and include the <strong>offline_access</strong> scope. </p>
-<p>Default: true </p>
-<p>Example: enable_hello = false </p>
-<h4 id="allow_remote_hello">allow_remote_hello</h4>
-<p>Allows Windows Hello PIN authentication for remote services without requiring Hello TOTP. When enabled, remote logins may use Hello PIN alone, restoring the legacy behavior for SSH and similar services. This weakens remote authentication and is not recommended unless you explicitly accept the risk. Prefer enabling Hello TOTP instead. </p>
-<p>Default: false </p>
-<p>Example: allow_remote_hello = true </p>
-<h4 id="enable_hello_totp">enable_hello_totp</h4>
-<p>Enables or disables the use of a local Time-based One-Time Password (TOTP) in combination with Windows Hello authentication. When enabled, users are required to authenticate using both their Hello PIN and a TOTP generated by a standard authenticator application. The TOTP secret is enrolled and enforced locally on the host and is independent of any cloud-based MFA or identity provider. Users who have not yet enrolled a TOTP secret will be prompted to complete TOTP enrollment. Hello PIN alone is not permitted for remote authentication unless allow_remote_hello is enabled. When Hello TOTP is enabled, Hello + TOTP is accepted for remote services; otherwise remote logins skip Hello and require MFA. </p>
-<p>Default: false </p>
-<p>Example: enable_hello_totp = true </p>
-<h4 id="hello_pin_min_length">hello_pin_min_length</h4>
-<p>The minimum length of the PIN for Windows Hello authentication. The value must be between 6 and 32 characters. </p>
-<p>Default: 6 </p>
-<p>Example: hello_pin_min_length = 8 </p>
-<h4 id="hello_pin_retry_count">hello_pin_retry_count</h4>
-<p>The number of invalid Hello PIN attempts allowed before the user is required to perform MFA. After successful MFA, the user will be prompted to set a new PIN. The value must be a non-negative integer. </p>
-<p>Default: 3 </p>
-<p>Example: hello_pin_retry_count = 5 </p>
-<h4 id="hello_pin_prompt">hello_pin_prompt</h4>
-<p>Customizes the prompt text shown when requesting the user's Linux Hello PIN. </p>
-<p>Default: Use the Linux Hello PIN for this device. </p>
-<p>Example: hello_pin_prompt = Enter your device unlock PIN </p>
-<h4 id="entra_id_password_prompt">entra_id_password_prompt</h4>
-<p>Customizes the prompt text shown when requesting the user's Entra ID password. </p>
-<p>Default: Use the password for your Office 365 or Microsoft online login. </p>
-<p>Example: entra_id_password_prompt = Enter your Microsoft 365 password </p>
-<h4 id="enable_sfa_fallback">enable_sfa_fallback</h4>
-<p>Determines whether password-only (single-factor) authentication is permitted when MFA is unavailable. </p>
-<p>Default: false </p>
-<p>Example: enable_sfa_fallback = true </p>
-<h4 id="allow_console_password_only">allow_console_password_only</h4>
-<p>Enables password-only (single-factor) authentication for local console logins (e.g., TTY, GDM, SDDM, LightDM). When enabled, Himmelblau will attempt to authenticate using only the user's password for local sessions. If Microsoft Entra ID requires MFA (based on Conditional Access policies), the user will be prompted for MFA automatically. This option does <strong>NOT</strong> affect remote authentication methods such as SSH, which always require MFA (unless the user has Hello + TOTP configured or allow_remote_hello is enabled). Remote connections are detected using multiple signals: </p>
-<ul>
-<li>
-<p>PAM_RHOST - If the remote host is set to a non-localhost value </p>
-</li>
-<li>
-<p>PAM_SERVICE - If the service name matches entries in <strong>password_only_remote_services_deny_list</strong> </p>
-</li>
-<li>
-<p>PAM_TTY - If the terminal name contains "ssh" (fallback check) This option requires the device to be domain-joined, matching the behavior of Microsoft-managed devices. Users can still use Hello PIN authentication if it is configured. To require MFA for all logins (including local console), set this option to <strong>false.</strong> </p>
-</li>
-</ul>
-<p>Default: true </p>
-<p>Example: allow_console_password_only = false </p>
-<h4 id="password_only_remote_services_deny_list">password_only_remote_services_deny_list</h4>
-<p>A comma-separated list of PAM service names that should always require MFA, regardless of the <strong>allow_console_password_only</strong> setting. These are typically remote access services where password-only authentication should never be permitted. The PAM service name is the name passed by the application when calling <strong>pam_start()</strong> (e.g., "sshd", "login", "gdm-password"). Entries are matched as substrings, so "ssh" will match "ssh", "sshd", "openssh", etc. </p>
-<p>Default: ssh,telnet,ftp,rsh,rlogin,rexec,vnc,xrdp,cockpit,mosh </p>
-<p>Example: password_only_remote_services_deny_list = ssh,telnet,vnc,xrdp </p>
-<h4 id="mfa_method">mfa_method</h4>
-<p>Specifies a preferred MFA (Multi-Factor Authentication) method to use during authentication. When set, Himmelblau will attempt to use this specific MFA method instead of the default method configured in the user's Entra ID profile. If not set or if the specified method is not available for the user, the default MFA method will be used. Valid values include: </p>
-<ul>
-<li>
-<p>PhoneAppNotification - Authenticator app push notification </p>
-</li>
-<li>
-<p>CompanionAppsNotification - MFA via Outlook app/Authenticator Lite </p>
-</li>
-<li>
-<p>PhoneAppOTP - Authenticator app verification code </p>
-</li>
-<li>
-<p>OneWaySMS - Text message code </p>
-</li>
-<li>
-<p>TwoWayVoiceMobile - Phone call to mobile </p>
-</li>
-<li>
-<p>TwoWayVoiceAlternateMobile - Phone call to alternate mobile number </p>
-</li>
-<li>
-<p>TwoWayVoiceOffice - Phone call to office </p>
-</li>
-<li>
-<p>ConsolidatedTelephony - Call or text message </p>
-</li>
-</ul>
-<p>Example: mfa_method = TwoWayVoiceMobile </p>
-<h4 id="cn_name_mapping">cn_name_mapping</h4>
-<p>Allows users to enter the short form of their username (e.g., 'dave') instead of the full UPN. </p>
-<p>Default: true </p>
-<p>Example: cn_name_mapping = false </p>
-<h4 id="local_groups">local_groups</h4>
-<p>A comma-separated list of local groups that every Entra ID user should be a member of. For example, you may wish for all Entra ID users to be a member of the sudo group. WARNING: This setting will not REMOVE group member entries when groups are removed from this list. You must remove them manually. </p>
-<p>Example: local_groups = sudo,admin </p>
-<h4 id="sudo_groups">sudo_groups</h4>
-<p>A comma-separated list of Azure Entra ID group object IDs whose members should be granted <strong>sudo</strong> access on this system. If <strong>local_sudo_group</strong> is not defined, the local group <strong>sudo</strong> will be used. </p>
-<p>Example: sudo_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12,5ba4ef1d-e454-4f43-ba7c-6fe6f1601915 </p>
-<h4 id="local_sudo_group">local_sudo_group</h4>
-<p>The local group that should be given to users in any of the groups specified in sudo_groups. Only has an effect if sudo_groups is set. Removes group from user if they are no longer a member of the specified entra group. </p>
-<p>Default: sudo </p>
-<h4 id="logon_script">logon_script</h4>
-<p>A script that will execute every time a user logs on. Two environment variables are set: USERNAME, and ACCESS_TOKEN. The ACCESS_TOKEN environment variable is an access token for the MS Graph. The token scope config option sets the comma-separated scopes that should be requested for the ACCESS_TOKEN. ACCESS_TOKEN will be empty during offline logon. The return code of the script determines how authentication proceeds. 0 is success, 1 is a soft failure and authentication will proceed, while 2 is a hard failure causing authentication to fail. </p>
-<p>Example: logon_script = /etc/himmelblau/logon.sh </p>
-<h4 id="logon_token_scopes">logon_token_scopes</h4>
-<p>A comma-separated list of the scopes to be requested for the ACCESS_TOKEN during logon. These scopes <strong>MUST</strong> correspond to the API permissions assigned to the Entra Id Application specified by the <strong>app_id</strong> option. </p>
-<p>Example: logon_token_scopes = user.read,mail.read </p>
-<h4 id="app_id">app_id</h4>
-<p>Specifies the Azure Entra ID application (client) ID used by Himmelblau for directory operations such as reading extended attributes (for example, the <strong>gidNumber</strong> attribute used in RFC 2307 idmapping). If <strong>logon_token_app_id</strong> is not set, this application ID is also used when requesting access tokens for the user logon script. </p>
-<p><strong>Note:</strong> In the Azure Portal for the application corresponding to <strong>app_id</strong>, ensure that the redirect URI <em>himmelblau://Himmelblau.EntraId.BrokerPlugin</em> is enabled under "Mobile and desktop applications" in the Authentication section. This allows Himmelblau to correctly handle interactive token redirection. </p>
-<p>Example: app_id = d023f7aa-d214-4b59-911d-6074de623765 </p>
-<h4 id="logon_token_app_id">logon_token_app_id</h4>
-<p>Specifies an alternate Azure Entra ID application (client) ID to be used exclusively for acquiring <strong>ACCESS_TOKEN</strong> values on behalf of the user during logon script execution. If not set, the value of <strong>app_id</strong> will be used instead. This option allows using a separate application registration that carries the specific API permissions required by logon scripts. </p>
-<p><strong>Note:</strong> In the Azure Portal for the application corresponding to <strong>logon_token_app_id</strong>, ensure that the redirect URI <em>https://login.microsoftonline.com/common/oauth2/nativeclient</em> is enabled under "Mobile and desktop applications" in the Authentication section. This is required for Himmelblau to obtain tokens via the public client flow. </p>
-<p>Example: logon_token_app_id = 544e695f-5d78-442e-b14e-e114e95e640c </p>
-<h4 id="enable_experimental_mfa">enable_experimental_mfa</h4>
-<p>A boolean option that enables the experimental multi-factor authentication (MFA) flow, which permits Hello authentication. This experimental flow may encounter failures in certain edge cases. If disabled, the system enforces the Device Authorization Grant (DAG) flow for MFA, which is more robust but does not support Hello authentication. </p>
-<p>Default: true </p>
-<p>Example: enable_experimental_mfa = false </p>
-<h4 id="enable_experimental_passwordless_fido">enable_experimental_passwordless_fido</h4>
-<p>A boolean option that enables the experimental passwordless FIDO flow for Azure Entra ID authentication. When enabled, Himmelblau will attempt to authenticate with Entra ID using a FIDO2 security key without requiring a password. </p>
-<p>Default: false </p>
-<p>Example: enable_experimental_passwordless_fido = true </p>
-<h4 id="name_mapping_script">name_mapping_script</h4>
-<p>Specifies the path to an executable script used for mapping custom names to UPN names. The script MUST accept a single argument, which will always be a mapped name. The script MUST print the corresponding UPN (User Principal Name) to stdout. If the script does not recognize the input name, it MUST simply return the input name unchanged. This option is particularly useful in environments where direct UPN-to-CN mappings are impractical or where custom transformations are required. The script must handle the input gracefully and return the correct UPN or the input name if unrecognized. Errors must be handled to avoid authentication failures. Example Script: </p>
-<pre><code>#!/bin/bash
-# Convert CN to UPN, or return the input name if unrecognized
-if [[ &quot;$1&quot; =~ ^[a-zA-Z0-9._-]+$ ]]; then
-    echo &quot;$1@example.com&quot;
-else
-    echo &quot;$1&quot;
-fi
-</code></pre>
-<p>Example: name_mapping_script = /path/to/mapping_script.sh </p>
-<h4 id="apply_policy">apply_policy</h4>
-<p>A boolean option that enables the application and enforcement of Intune policies to the authenticated user. </p>
-<p>Default: false </p>
-<p>Example: apply_policy = true </p>
-<h4 id="authority_host">authority_host</h4>
-<p>Specifies the hostname for Microsoft authentication. </p>
-<p>Default: login.microsoftonline.com </p>
-<p>Example: authority_host = login.microsoftonline.us </p>
-<h4 id="db_path">db_path</h4>
-<p>The location of the cache database. This file is used to store cached authentication data and device state. </p>
-<p>Default: /var/cache/himmelblaud/himmelblau.cache.db </p>
-<p>Example: db_path = /var/cache/himmelblau/himmelblau.cache.db </p>
-<h4 id="hsm_type">hsm_type</h4>
-<p>Specifies how Himmelblau should handle secure key storage. This option determines whether to use a TPM (Trusted Platform Module) bound software-based HSM, a TPM, or a hybrid approach. The available options are: <strong>tpm_bound_soft_if_possible</strong> (en Use a software-based HSM that encrypts key material locally on the system, but binds the parent AuthCode to the TPM, if available. <strong>tpm</strong> (en Use a hardware TPM exclusively for storing and binding cryptographic keys. <strong>tpm_if_possible</strong> (en Attempt to use a hardware TPM if available; if not, fall back to the software HSM. If the TPM has previously been used for key storage, the system will not fall back to the software HSM. This setting is important for protecting sensitive cryptographic keys in a secure environment, reducing the risk of compromise if the system is breached. Note that the old <strong>soft</strong> option has been deprecated. Environments currently enrolled using <strong>soft</strong> will be automatically migrated to <strong>tpm_bound_soft_if_possible.</strong> To validate whether Himmelblau is utilizing the hardware TPM, run the command <code>sudo aad-tool tpm</code> for a status report. </p>
-<p>Default: tpm_bound_soft_if_possible </p>
-<p>Example: hsm_type = tpm </p>
-<h4 id="tpm_tcti_name">tpm_tcti_name</h4>
-<p>Specifies the TCTI (Trusted Computing Technology Interface) to use when communicating with a Trusted Platform Module (TPM) for secure key operations. This setting is only relevant when <strong>hsm_type</strong> is set to <strong>tpm</strong> or <strong>tpm_if_possible.</strong> Common values include: <strong>device:/dev/tpmrm0</strong> (en This uses the kernel TPM resource manager device, which is the recommended default for most Linux systems. Other TCTI strings may be required depending on your system's TPM driver or configuration. This option allows advanced control over how Himmelblau connects to the TPM for performing cryptographic operations. </p>
-<p>Default: device:/dev/tpmrm0 </p>
-<p>Example: tpm_tcti_name = device:/dev/tpm0 </p>
-<h4 id="hsm_pin_path">hsm_pin_path</h4>
-<p>The location where the HSM (Hardware Security Module) PIN will be stored. This PIN is used to protect sensitive cryptographic operations. </p>
-<p>Default: /var/lib/himmelblaud/hsm-pin </p>
-<p>Example: hsm_pin_path = /etc/himmelblau/hsm-pin </p>
-<h4 id="socket_path">socket_path</h4>
-<p>The path to the socket file for communication between the pam and nss modules and the Himmelblau daemon. </p>
-<p>Default: /var/run/himmelblaud/socket </p>
-<p>Example: socket_path = /tmp/himmelblaud.sock </p>
-<h4 id="task_socket_path">task_socket_path</h4>
-<p>The path to the socket file for communication with the task daemon. </p>
-<p>Default: /var/run/himmelblaud/task_sock </p>
-<p>Example: task_socket_path = /tmp/task.sock </p>
-<h4 id="broker_socket_path">broker_socket_path</h4>
-<p>The path to the socket file for communication with the broker DBus service. </p>
-<p>Default: /var/run/himmelblaud/broker_sock </p>
-<p>Example: broker_socket_path = /tmp/broker.sock </p>
-<h4 id="home_prefix">home_prefix</h4>
-<p>The prefix to use for user home directories. </p>
-<p>Default: /home/ </p>
-<p>Example: home_prefix = /home/entra/ </p>
-<h4 id="home_attr">home_attr</h4>
-<p>The attribute used to create a home directory for a user. Available options include: </p>
+</blockquote>
+<p>The issuer URL <strong>MUST</strong> exactly match the issuer value advertised by the
+OIDC provider, including any required path components. Incorrect issuer
+URLs will cause provider discovery to fail.</p>
+<p>If this option is not set, Himmelblau defaults to its native Microsoft
+Entra ID authentication flow.</p>
+<div class="highlight"><pre><span></span><code>oidc_issuer_url = https://login.microsoftonline.com/0656e57d-a8fc-4aa4-8366-8045787115ca/v2.0
+</code></pre></div>
+<p><strong>debug</strong>  </p>
+<p>A boolean option that enables debug-level logging. When set to <strong>true</strong>,
+debug messages are output to the system journal.</p>
+<p>Default: false</p>
+<div class="highlight"><pre><span></span><code>debug = true
+</code></pre></div>
+<p><strong>pam_allow_groups</strong>  </p>
+<p>A comma-separated list of Entra Id Users and Groups permitted to access
+the system. Users should be specified by UPN. Groups MUST be specified
+using their Object ID GUID. Group names may not be used because these
+names are not guaranteed to be unique in Entra Id.</p>
+<p>If not set, all Entra ID users are permitted to authenticate.</p>
+<p>Default: All users permitted</p>
+<div class="highlight"><pre><span></span><code>pam_allow_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12,5ba4ef1d-e454-4f43-ba7c-6fe6f1601915,admin@himmelblau-idm.org
+</code></pre></div>
+<p><strong>id_attr_map</strong>  </p>
+<p>Specify whether to map uid/gid based on the object name, the object
+uuid, or based on the rfc2307 schema extension attributes synchronized
+from an on-prem Active Directory instance. Mapping by name or by rfc2307
+is recommended.</p>
+<p>Default: name</p>
+<div class="highlight"><pre><span></span><code>id_attr_map = &lt;name\|uuid\|rfc2307&gt;
+</code></pre></div>
+<p><strong>rfc2307_group_fallback_map</strong>  </p>
+<p>Specify whether to map group IDs (GIDs) based on the object name or
+object UUID when no <strong>gidNumber</strong> attribute is found in an on-prem
+Active Directory instance synchronized to Azure Entra ID. This option is
+only applicable if <strong>id_attr_map</strong> is set to <strong>rfc2307</strong>. If
+<strong>id_attr_map = rfc2307</strong> and a group does not have a <strong>gidNumber</strong>
+defined in the directory, this setting determines the fallback method
+for mapping the group ID. If this option is not set, groups without a
+<strong>gidNumber</strong> will not be available to NSS.</p>
+<p>Example: rfc2307_group_fallback_map = <name\|uuid></p>
+<p><strong>enable_hello</strong>  </p>
+<p>Enables or disables user enrollment in Windows Hello authentication. If
+disabled, users will need to provide MFA for each login.</p>
+<p>For OIDC providers (when <strong>oidc_issuer_url</strong> is set), Hello enrollment
+requires the client application to allow refresh tokens and include the
+<strong>offline_access</strong> scope.</p>
+<p>Default: true</p>
+<div class="highlight"><pre><span></span><code>enable_hello = false
+</code></pre></div>
+<p><strong>allow_remote_hello</strong>  </p>
+<p>Allows Windows Hello PIN authentication for remote services without
+requiring Hello TOTP. When enabled, remote logins may use Hello PIN
+alone, restoring the legacy behavior for SSH and similar services.</p>
+<p>This weakens remote authentication and is not recommended unless you
+explicitly accept the risk. Prefer enabling Hello TOTP instead.</p>
+<p>Default: false</p>
+<div class="highlight"><pre><span></span><code>allow_remote_hello = true
+</code></pre></div>
+<p><strong>enable_hello_totp</strong>  </p>
+<p>Enables or disables the use of a local Time-based One-Time Password
+(TOTP) in combination with Windows Hello authentication. When enabled,
+users are required to authenticate using both their Hello PIN and a TOTP
+generated by a standard authenticator application.</p>
+<p>The TOTP secret is enrolled and enforced locally on the host and is
+independent of any cloud-based MFA or identity provider. Users who have
+not yet enrolled a TOTP secret will be prompted to complete TOTP
+enrollment.</p>
+<p>Hello PIN alone is not permitted for remote authentication unless
+allow_remote_hello is enabled. When Hello TOTP is enabled, Hello + TOTP
+is accepted for remote services; otherwise remote logins skip Hello and
+require MFA.</p>
+<p>Default: false</p>
+<div class="highlight"><pre><span></span><code>enable_hello_totp = true
+</code></pre></div>
+<p><strong>hello_pin_min_length</strong>  </p>
+<p>The minimum length of the PIN for Windows Hello authentication. The
+value must be between 6 and 32 characters.</p>
+<p>Default: 6</p>
+<div class="highlight"><pre><span></span><code>hello_pin_min_length = 8
+</code></pre></div>
+<p><strong>hello_pin_retry_count</strong>  </p>
+<p>The number of invalid Hello PIN attempts allowed before the user is
+required to perform MFA. After successful MFA, the user will be prompted
+to set a new PIN. The value must be a non-negative integer.</p>
+<p>Default: 3</p>
+<div class="highlight"><pre><span></span><code>hello_pin_retry_count = 5
+</code></pre></div>
+<p><strong>hello_pin_prompt</strong>  </p>
+<p>Customizes the prompt text shown when requesting the user's Linux Hello
+PIN.</p>
+<p>Default: Use the Linux Hello PIN for this device.</p>
+<div class="highlight"><pre><span></span><code>hello_pin_prompt = Enter your device unlock PIN
+</code></pre></div>
+<p><strong>entra_id_password_prompt</strong>  </p>
+<p>Customizes the prompt text shown when requesting the user's Entra ID
+password.</p>
+<p>Default: Use the password for your Office 365 or Microsoft online login.</p>
+<div class="highlight"><pre><span></span><code>entra_id_password_prompt = Enter your Microsoft 365 password
+</code></pre></div>
+<p><strong>enable_sfa_fallback</strong>  </p>
+<p>Determines whether password-only (single-factor) authentication is
+permitted when MFA is unavailable.</p>
+<p>Default: false</p>
+<div class="highlight"><pre><span></span><code>enable_sfa_fallback = true
+</code></pre></div>
+<p><strong>allow_console_password_only</strong>  </p>
+<p>Enables password-only (single-factor) authentication for local console
+logins (e.g., TTY, GDM, SDDM, LightDM). When enabled, Himmelblau will
+attempt to authenticate using only the user's password for local
+sessions. If Microsoft Entra ID requires MFA (based on Conditional
+Access policies), the user will be prompted for MFA automatically.</p>
+<p>This option does <strong>NOT</strong> affect remote authentication methods such as
+SSH, which always require MFA (unless the user has Hello + TOTP
+configured or allow_remote_hello is enabled).</p>
+<p>Remote connections are detected using multiple signals:</p>
+<blockquote>
 <ul>
 <li>
-<p>UUID </p>
+<p>PAM_RHOST - If the remote host is set to a non-localhost value</p>
 </li>
 <li>
-<p>SPN </p>
+<p>PAM_SERVICE - If the service name matches entries in
+  <strong>password_only_remote_services_deny_list</strong></p>
 </li>
 <li>
-<p>CN </p>
+<p>PAM_TTY - If the terminal name contains "ssh" (fallback check)</p>
 </li>
 </ul>
-<p>Default: uuid </p>
-<p>Example: home_attr = UUID </p>
-<h4 id="home_alias">home_alias</h4>
-<p>The symlinked alias for the user's home directory. Available options include: </p>
+</blockquote>
+<p>This option requires the device to be domain-joined, matching the
+behavior of Microsoft-managed devices. Users can still use Hello PIN
+authentication if it is configured. To require MFA for all logins
+(including local console), set this option to <strong>false</strong>.</p>
+<p>Default: true</p>
+<div class="highlight"><pre><span></span><code>allow_console_password_only = false
+</code></pre></div>
+<p><strong>password_only_remote_services_deny_list</strong>  </p>
+<p>A comma-separated list of PAM service names that should always require
+MFA, regardless of the <strong>allow_console_password_only</strong> setting. These
+are typically remote access services where password-only authentication
+should never be permitted.</p>
+<p>The PAM service name is the name passed by the application when calling
+<strong>pam_start()</strong> (e.g., "sshd", "login", "gdm-password").</p>
+<p>Entries are matched as substrings, so "ssh" will match "ssh", "sshd",
+"openssh", etc.</p>
+<p>Default: ssh,telnet,ftp,rsh,rlogin,rexec,vnc,xrdp,cockpit,mosh</p>
+<div class="highlight"><pre><span></span><code>password_only_remote_services_deny_list = ssh,telnet,vnc,xrdp
+</code></pre></div>
+<p><strong>mfa_method</strong>  </p>
+<p>Specifies a preferred MFA (Multi-Factor Authentication) method to use
+during authentication. When set, Himmelblau will attempt to use this
+specific MFA method instead of the default method configured in the
+user's Entra ID profile. If not set or if the specified method is not
+available for the user, the default MFA method will be used.</p>
+<p>Valid values include:</p>
+<blockquote>
 <ul>
 <li>
-<p>UUID </p>
+<p>PhoneAppNotification - Authenticator app push notification</p>
 </li>
 <li>
-<p>SPN </p>
+<p>CompanionAppsNotification - MFA via Outlook app/Authenticator Lite</p>
 </li>
 <li>
-<p>CN </p>
+<p>PhoneAppOTP - Authenticator app verification code</p>
+</li>
+<li>
+<p>OneWaySMS - Text message code</p>
+</li>
+<li>
+<p>TwoWayVoiceMobile - Phone call to mobile</p>
+</li>
+<li>
+<p>TwoWayVoiceAlternateMobile - Phone call to alternate mobile number</p>
+</li>
+<li>
+<p>TwoWayVoiceOffice - Phone call to office</p>
+</li>
+<li>
+<p>ConsolidatedTelephony - Call or text message</p>
 </li>
 </ul>
-<p>Default: spn </p>
-<p>Example: home_alias = SPN </p>
-<h4 id="shell">shell</h4>
-<p>The default shell for users. This will be assigned when the user logs in. </p>
-<p>Default: /bin/bash </p>
-<p>Example: shell = /bin/zsh </p>
-<h4 id="idmap_range">idmap_range</h4>
-<p>Specifies the range of IDs to be used for the user and group mappings. When this option is modified, you <strong>SHOULD</strong> run: </p>
-<p>sudo aad-tool cache-clear --full To ensure that old cached ID mappings are cleared, preventing potential UID overlaps caused by stale cache data. Afterwards, restart himmelblaud. </p>
-<p>Default: 200000-2000200000 </p>
-<p>Example: idmap_range = 10000000-10999999 </p>
-<h4 id="connection_timeout">connection_timeout</h4>
-<p>The timeout in seconds for connections to the authentication server. </p>
-<p>Default: 30 </p>
-<p>Example: connection_timeout = 5 </p>
-<h4 id="subid_range">subid_range</h4>
-<p>Specifies the range of subordinate IDs (subuid/subgid) to be allocated for container support (podman, rootless containers, etc.). Himmelblau will automatically add entries to /etc/subuid and /etc/subgid for each user at login. Each user receives a 65536-ID slice from this range, allocated deterministically based on a hash of their username. This feature is enabled by default with the default range shown below. </p>
-<p>Default: 2100000000-4200000000 </p>
-<p>Example: subid_range = 2100000000-4200000000 </p>
-<h4 id="cache_timeout">cache_timeout</h4>
-<p>The timeout in seconds for caching authentication data. </p>
-<p>Default: 300 </p>
-<p>Example: cache_timeout = 10 </p>
-<h4 id="use_etc_skel">use_etc_skel</h4>
-<p>If set to <strong>true,</strong> Himmelblau will use the contents of /etc/skel when creating new user directories. </p>
-<p>Default: false </p>
-<p>Example: use_etc_skel = true </p>
-<h4 id="selinux">selinux</h4>
-<p>Whether SELinux security labels should be applied to users' home directories. Set to <strong>true</strong> to enable. </p>
-<p>Default: true </p>
-<p>Example: selinux = false </p>
-<h4 id="join_type">join_type</h4>
-<p>Specifies whether the system should join or register with Microsoft Entra ID. </p>
-<p>Default: join </p>
-<p>Example: join_type = register </p>
-<h4 id="user_map_file">user_map_file</h4>
-<p>Specifies the path to a user-mapping file used to map local user accounts to Azure Entra ID user accounts, allowing them to authenticate using Entra ID credentials. Each line of the file must contain a single mapping entry in the format: </p>
-<p>local_username:name@domain </p>
-<p>Blank lines and lines beginning with '#' are ignored. Example user-map file entries: </p>
-<pre><code># local_username:samaccountname@domain
-alice:alice@contoso.com
+</blockquote>
+<div class="highlight"><pre><span></span><code>mfa_method = TwoWayVoiceMobile
+</code></pre></div>
+<p><strong>cn_name_mapping</strong>  </p>
+<p>Allows users to enter the short form of their username (e.g., 'dave')
+instead of the full UPN.</p>
+<p>Default: true</p>
+<div class="highlight"><pre><span></span><code>cn_name_mapping = false
+</code></pre></div>
+<p><strong>local_groups</strong>  </p>
+<p>A comma-separated list of local groups that every Entra ID user should
+be a member of. For example, you may wish for all Entra ID users to be a
+member of the sudo group. WARNING: This setting will not REMOVE group
+member entries when groups are removed from this list. You must remove
+them manually.</p>
+<div class="highlight"><pre><span></span><code>local_groups = sudo,admin
+</code></pre></div>
+<p><strong>sudo_groups</strong>  </p>
+<p>A comma-separated list of Azure Entra ID group object IDs whose members
+should be granted <strong>sudo</strong> access on this system. If
+<strong>local_sudo_group</strong> is not defined, the local group <strong>sudo</strong> will be
+used.</p>
+<div class="highlight"><pre><span></span><code>sudo_groups = f3c9a7e4-7d5a-47e8-832f-3d2d92abcd12,5ba4ef1d-e454-4f43-ba7c-6fe6f1601915
+</code></pre></div>
+<p><strong>local_sudo_group</strong>  </p>
+<p>The local group that should be given to users in any of the groups
+specified in sudo_groups. Only has an effect if sudo_groups is set.
+Removes group from user if they are no longer a member of the specified
+entra group.</p>
+<p>Default: sudo</p>
+<p><strong>logon_script</strong>  </p>
+<p>A script that will execute every time a user logs on. Two environment
+variables are set: USERNAME, and ACCESS_TOKEN. The ACCESS_TOKEN
+environment variable is an access token for the MS Graph. The token
+scope config option sets the comma-separated scopes that should be
+requested for the ACCESS_TOKEN. ACCESS_TOKEN will be empty during
+offline logon. The return code of the script determines how
+authentication proceeds. 0 is success, 1 is a soft failure and
+authentication will proceed, while 2 is a hard failure causing
+authentication to fail.</p>
+<div class="highlight"><pre><span></span><code>logon_script = /etc/himmelblau/logon.sh
+</code></pre></div>
+<p><strong>logon_token_scopes</strong>  </p>
+<p>A comma-separated list of the scopes to be requested for the
+ACCESS_TOKEN during logon. These scopes <strong>MUST</strong> correspond to the API
+permissions assigned to the Entra Id Application specified by the
+<strong>app_id</strong> option.</p>
+<div class="highlight"><pre><span></span><code>logon_token_scopes = user.read,mail.read
+</code></pre></div>
+<p><strong>app_id</strong>  </p>
+<p>Specifies the Azure Entra ID application (client) ID used by Himmelblau
+for directory operations such as reading extended attributes (for
+example, the <strong>gidNumber</strong> attribute used in RFC 2307 idmapping).</p>
+<p>If <strong>logon_token_app_id</strong> is not set, this application ID is also used
+when requesting access tokens for the user logon script.</p>
+<p><strong>Note:</strong> In the Azure Portal for the application corresponding to
+<strong>app_id</strong>, ensure that the redirect URI
+<em>himmelblau://Himmelblau.EntraId.BrokerPlugin</em> is enabled under "Mobile
+and desktop applications" in the Authentication section. This allows
+Himmelblau to correctly handle interactive token redirection.</p>
+<div class="highlight"><pre><span></span><code>app_id = d023f7aa-d214-4b59-911d-6074de623765
+</code></pre></div>
+<p><strong>logon_token_app_id</strong>  </p>
+<p>Specifies an alternate Azure Entra ID application (client) ID to be used
+exclusively for acquiring <strong>ACCESS_TOKEN</strong> values on behalf of the user
+during logon script execution. If not set, the value of <strong>app_id</strong> will
+be used instead.</p>
+<p>This option allows using a separate application registration that
+carries the specific API permissions required by logon scripts.</p>
+<p><strong>Note:</strong> In the Azure Portal for the application corresponding to
+<strong>logon_token_app_id</strong>, ensure that the redirect URI
+<em>https://login.microsoftonline.com/common/oauth2/nativeclient</em> is
+enabled under "Mobile and desktop applications" in the Authentication
+section. This is required for Himmelblau to obtain tokens via the public
+client flow.</p>
+<div class="highlight"><pre><span></span><code>logon_token_app_id = 544e695f-5d78-442e-b14e-e114e95e640c
+</code></pre></div>
+<p><strong>enable_experimental_mfa</strong>  </p>
+<p>A boolean option that enables the experimental multi-factor
+authentication (MFA) flow, which permits Hello authentication. This
+experimental flow may encounter failures in certain edge cases. If
+disabled, the system enforces the Device Authorization Grant (DAG) flow
+for MFA, which is more robust but does not support Hello authentication.</p>
+<p>Default: true</p>
+<div class="highlight"><pre><span></span><code>enable_experimental_mfa = false
+</code></pre></div>
+<p><strong>enable_experimental_passwordless_fido</strong>  </p>
+<p>A boolean option that enables the experimental passwordless FIDO flow
+for Azure Entra ID authentication. When enabled, Himmelblau will attempt
+to authenticate with Entra ID using a FIDO2 security key without
+requiring a password.</p>
+<p>Default: false</p>
+<div class="highlight"><pre><span></span><code>enable_experimental_passwordless_fido = true
+</code></pre></div>
+<p><strong>name_mapping_script</strong>  </p>
+<p>Specifies the path to an executable script used for mapping custom names
+to UPN names. The script MUST accept a single argument, which will
+always be a mapped name. The script MUST print the corresponding UPN
+(User Principal Name) to stdout. If the script does not recognize the
+input name, it MUST simply return the input name unchanged. This option
+is particularly useful in environments where direct UPN-to-CN mappings
+are impractical or where custom transformations are required.</p>
+<p>The script must handle the input gracefully and return the correct UPN
+or the input name if unrecognized. Errors must be handled to avoid
+authentication failures.</p>
+<p>Example Script:</p>
+<div class="highlight"><pre><span></span><code>#!/bin/bash
+    # Convert CN to UPN, or return the input name if unrecognized
+    if [[ &quot;$1&quot; =~ ^[a-zA-Z0-9._-]+$ ]]; then
+        echo &quot;$1@example.com&quot;
+    else
+        echo &quot;$1&quot;
+    fi
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>name_mapping_script = /path/to/mapping_script.sh
+</code></pre></div>
+<p><strong>apply_policy</strong>  </p>
+<p>A boolean option that enables the application and enforcement of Intune
+policies to the authenticated user.</p>
+<p>Default: false</p>
+<div class="highlight"><pre><span></span><code>apply_policy = true
+</code></pre></div>
+<p><strong>authority_host</strong>  </p>
+<p>Specifies the hostname for Microsoft authentication.</p>
+<p>Default: login.microsoftonline.com</p>
+<div class="highlight"><pre><span></span><code>authority_host = login.microsoftonline.us
+</code></pre></div>
+<p><strong>db_path</strong>  </p>
+<p>The location of the cache database. This file is used to store cached
+authentication data and device state.</p>
+<p>Default: /var/cache/himmelblaud/himmelblau.cache.db</p>
+<div class="highlight"><pre><span></span><code>db_path = /var/cache/himmelblau/himmelblau.cache.db
+</code></pre></div>
+<p><strong>hsm_type</strong>  </p>
+<p>Specifies how Himmelblau should handle secure key storage. This option
+determines whether to use a TPM (Trusted Platform Module) bound
+software-based HSM, a TPM, or a hybrid approach.</p>
+<p>The available options are:</p>
+<p>· <strong>tpm_bound_soft_if_possible</strong> – Use a software-based HSM that
+encrypts key material locally on the system, but binds the parent
+AuthCode to the TPM, if available.</p>
+<p>· <strong>tpm</strong> – Use a hardware TPM exclusively for storing and binding
+cryptographic keys.</p>
+<p>· <strong>tpm_if_possible</strong> – Attempt to use a hardware TPM if available; if
+not, fall back to the software HSM. If the TPM has previously been used
+for key storage, the system will not fall back to the software HSM.</p>
+<p>This setting is important for protecting sensitive cryptographic keys in
+a secure environment, reducing the risk of compromise if the system is
+breached.</p>
+<p>Note that the old <strong>soft</strong> option has been deprecated. Environments
+currently enrolled using <strong>soft</strong> will be automatically migrated to
+<strong>tpm_bound_soft_if_possible</strong>.</p>
+<p>To validate whether Himmelblau is utilizing the hardware TPM, run the
+command <code>sudo aad-tool tpm</code> for a status report.</p>
+<p>Default: tpm_bound_soft_if_possible</p>
+<div class="highlight"><pre><span></span><code>hsm_type = tpm
+</code></pre></div>
+<p><strong>tpm_tcti_name</strong>  </p>
+<p>Specifies the TCTI (Trusted Computing Technology Interface) to use when
+communicating with a Trusted Platform Module (TPM) for secure key
+operations. This setting is only relevant when <strong>hsm_type</strong> is set to
+<strong>tpm</strong> or <strong>tpm_if_possible</strong>.</p>
+<p>Common values include:</p>
+<p>· <strong>device:/dev/tpmrm0</strong> – This uses the kernel TPM resource manager
+device, which is the recommended default for most Linux systems.</p>
+<p>Other TCTI strings may be required depending on your system's TPM driver
+or configuration. This option allows advanced control over how
+Himmelblau connects to the TPM for performing cryptographic operations.</p>
+<p>Default: device:/dev/tpmrm0</p>
+<div class="highlight"><pre><span></span><code>tpm_tcti_name = device:/dev/tpm0
+</code></pre></div>
+<p><strong>hsm_pin_path</strong>  </p>
+<p>The location where the HSM (Hardware Security Module) PIN will be
+stored. This PIN is used to protect sensitive cryptographic operations.</p>
+<p>Default: /var/lib/himmelblaud/hsm-pin</p>
+<div class="highlight"><pre><span></span><code>hsm_pin_path = /etc/himmelblau/hsm-pin
+</code></pre></div>
+<p><strong>socket_path</strong>  </p>
+<p>The path to the socket file for communication between the pam and nss
+modules and the Himmelblau daemon.</p>
+<p>Default: /var/run/himmelblaud/socket</p>
+<div class="highlight"><pre><span></span><code>socket_path = /tmp/himmelblaud.sock
+</code></pre></div>
+<p><strong>task_socket_path</strong>  </p>
+<p>The path to the socket file for communication with the task daemon.</p>
+<p>Default: /var/run/himmelblaud/task_sock</p>
+<div class="highlight"><pre><span></span><code>task_socket_path = /tmp/task.sock
+</code></pre></div>
+<p><strong>broker_socket_path</strong>  </p>
+<p>The path to the socket file for communication with the broker DBus
+service.</p>
+<p>Default: /var/run/himmelblaud/broker_sock</p>
+<div class="highlight"><pre><span></span><code>broker_socket_path = /tmp/broker.sock
+</code></pre></div>
+<p><strong>home_prefix</strong>  </p>
+<p>The prefix to use for user home directories.</p>
+<p>Default: /home/</p>
+<div class="highlight"><pre><span></span><code>home_prefix = /home/entra/
+</code></pre></div>
+<p><strong>home_attr</strong>  </p>
+<p>The attribute used to create a home directory for a user. Available
+options include:</p>
+<div class="highlight"><pre><span></span><code>- UUID
+
+- SPN
+
+- CN
+</code></pre></div>
+<p>Default: uuid</p>
+<div class="highlight"><pre><span></span><code>home_attr = UUID
+</code></pre></div>
+<p><strong>home_alias</strong>  </p>
+<p>The symlinked alias for the user's home directory. Available options
+include:</p>
+<div class="highlight"><pre><span></span><code>- UUID
+
+- SPN
+
+- CN
+</code></pre></div>
+<p>Default: spn</p>
+<div class="highlight"><pre><span></span><code>home_alias = SPN
+</code></pre></div>
+<p><strong>shell</strong>  </p>
+<p>The default shell for users. This will be assigned when the user logs
+in.</p>
+<p>Default: /bin/bash</p>
+<div class="highlight"><pre><span></span><code>shell = /bin/zsh
+</code></pre></div>
+<p><strong>idmap_range</strong>  </p>
+<p>Specifies the range of IDs to be used for the user and group mappings.</p>
+<p>When this option is modified, you <strong>SHOULD</strong> run:</p>
+<div class="highlight"><pre><span></span><code>sudo aad-tool cache-clear --full
+</code></pre></div>
+<p>To ensure that old cached ID mappings are cleared, preventing potential
+UID overlaps caused by stale cache data. Afterwards, restart
+himmelblaud.</p>
+<p>Default: 200000-2000200000</p>
+<div class="highlight"><pre><span></span><code>idmap_range = 10000000-10999999
+</code></pre></div>
+<p><strong>connection_timeout</strong>  </p>
+<p>The timeout in seconds for connections to the authentication server.</p>
+<p>Default: 30</p>
+<div class="highlight"><pre><span></span><code>connection_timeout = 5
+</code></pre></div>
+<p><strong>subid_range</strong>  </p>
+<p>Specifies the range of subordinate IDs (subuid/subgid) to be allocated
+for container support (podman, rootless containers, etc.).</p>
+<p>Himmelblau will automatically add entries to /etc/subuid and /etc/subgid
+for each user at login. Each user receives a 65536-ID slice from this
+range, allocated deterministically based on a hash of their username.</p>
+<p>This feature is enabled by default with the default range shown below.</p>
+<p>Default: 2100000000-4200000000</p>
+<div class="highlight"><pre><span></span><code>subid_range = 2100000000-4200000000
+</code></pre></div>
+<p><strong>cache_timeout</strong>  </p>
+<p>The timeout in seconds for caching authentication data.</p>
+<p>Default: 300</p>
+<div class="highlight"><pre><span></span><code>cache_timeout = 10
+</code></pre></div>
+<p><strong>use_etc_skel</strong>  </p>
+<p>If set to <strong>true</strong>, Himmelblau will use the contents of /etc/skel when
+creating new user directories.</p>
+<p>Default: false</p>
+<div class="highlight"><pre><span></span><code>use_etc_skel = true
+</code></pre></div>
+<p><strong>selinux</strong>  </p>
+<p>Whether SELinux security labels should be applied to users' home
+directories. Set to <strong>true</strong> to enable.</p>
+<p>Default: true</p>
+<div class="highlight"><pre><span></span><code>selinux = false
+</code></pre></div>
+<p><strong>join_type</strong>  </p>
+<p>Specifies whether the system should join or register with Microsoft
+Entra ID.</p>
+<p>Default: join</p>
+<div class="highlight"><pre><span></span><code>join_type = register
+</code></pre></div>
+<p><strong>user_map_file</strong>  </p>
+<p>Specifies the path to a user-mapping file used to map local user
+accounts to Azure Entra ID user accounts, allowing them to authenticate
+using Entra ID credentials.</p>
+<p>Each line of the file must contain a single mapping entry in the format:</p>
+<blockquote>
+<p>local_username:name@domain</p>
+</blockquote>
+<p>Blank lines and lines beginning with '#' are ignored.</p>
+<p>Example user-map file entries:</p>
+<blockquote>
+<h1 id="local_usernamesamaccountnamedomain">local_username:samaccountname@domain</h1>
+<pre><code>alice:alice@contoso.com
 bob:bob.smith@example.org
 svcuser:service.account@tenant.local
 </code></pre>
-<p>Default: /etc/himmelblau/user-map </p>
-<p>Example: user_map_file = /path/to/user_map </p>
+</blockquote>
+<p>Default: /etc/himmelblau/user-map</p>
+<div class="highlight"><pre><span></span><code>user_map_file = /path/to/user_map
+</code></pre></div>
 <h2 id="offline-breakglass-configuration">OFFLINE BREAKGLASS CONFIGURATION</h2>
-<p>The <strong>[offline_breakglass]</strong> section configures Himmelblau's emergency offline authentication mechanism, used when Azure Entra ID is unavailable. </p>
-<p>Offline breakglass allows Entra ID users who normally require multi-factor authentication (MFA) to authenticate with their cached password when the host is offline. This feature provides a controlled fallback for MFA-only users who would otherwise be unable to sign in during an outage. </p>
-<p>Single-factor authentication (SFA-only) users and Hello-PIN users already have offline sign-in capability, and are unaffected by this setting. This option exists solely to extend limited offline access to MFA-enabled users when network connectivity to Entra ID cannot be established. </p>
+<p>The <strong>[offline_breakglass]</strong> section configures Himmelblau's emergency
+offline authentication mechanism, used when Azure Entra ID is
+unavailable.</p>
+<p>Offline breakglass allows Entra ID users who normally require
+multi-factor authentication (MFA) to authenticate with their cached
+password when the host is offline. This feature provides a controlled
+fallback for MFA-only users who would otherwise be unable to sign in
+during an outage.</p>
+<p>Single-factor authentication (SFA-only) users and Hello-PIN users
+already have offline sign-in capability, and are unaffected by this
+setting. This option exists solely to extend limited offline access to
+MFA-enabled users when network connectivity to Entra ID cannot be
+established.</p>
 <h3 id="offline_breakglass">[offline_breakglass]</h3>
-<p>This section controls whether and how Himmelblau may perform offline password authentication for MFA-enabled users in emergency conditions. </p>
-<h4 id="enabled">enabled</h4>
-<p>Boolean value specifying whether offline breakglass mode is permitted. </p>
-<p>When set to <strong>true,</strong> Himmelblau will cache secure, salted password verifiers for <strong>MFA-enabled</strong> Entra ID users who successfully authenticate online. These verifiers can then be used to authenticate the same users when Entra ID is unreachable, allowing MFA users to log in using their cached password. </p>
-<p>If this option is set to <strong>false,</strong> Himmelblau will continue to cache password verifiers only for SFA-only users, and MFA-enabled users will <strong>not</strong> be able to authenticate when offline. The <strong>aad-tool</strong>(1) command <strong>aad-tool offline-breakglass</strong> will also have no effect. </p>
-<p>Administrators must enable this option well in advance of an outage, as password verifiers for MFA users are only stored following a successful online authentication. It is too late to enable this feature once Entra ID is already unreachable. </p>
-<p>Enabling offline breakglass mode carries significant risk. If a device is stolen or compromised, and network access to Entra ID is blocked, attackers could effectively disable MFA protection by forcing the system into a simple password-only (SFA) authentication state. Administrators should enable this mode <strong>only after careful consideration</strong> of their organization's security posture and offline access requirements. </p>
-<p>This feature does not apply to passwordless accounts. If an MFA user signs in using a passwordless method, no password hash exists to cache, and offline breakglass cannot function for that user. </p>
-<p>Default: false </p>
-<p>Example: [offline_breakglass] 
-enabled = true 
-ttl = 2h </p>
-<h1 id="allow-mfa-users-to-authenticate-offline-for-up-to-2-hours">Allow MFA users to authenticate offline for up to 2 hours</h1>
-<h4 id="ttl">ttl</h4>
-<p>Specifies how long breakglass mode should remain active once triggered. The value may include a suffix to indicate the unit of time: <strong>m</strong> for minutes, <strong>h</strong> for hours, or <strong>d</strong> for days. If no suffix is provided, the value is interpreted as seconds. After the specified period, offline breakglass mode automatically expires and normal authentication resumes. </p>
-<p>Default: 7200 </p>
-<p>Example: [offline_breakglass] 
-enabled = true 
-ttl = 1d </p>
-<h1 id="permit-offline-mfa-logins-for-up-to-24-hours-after-activation">Permit offline MFA logins for up to 24 hours after activation</h1>
+<p>This section controls whether and how Himmelblau may perform offline
+password authentication for MFA-enabled users in emergency conditions.</p>
+<p><strong>enabled</strong>  </p>
+<p>Boolean value specifying whether offline breakglass mode is permitted.</p>
+<p>When set to <strong>true</strong>, Himmelblau will cache secure, salted password
+verifiers for <strong>MFA-enabled</strong> Entra ID users who successfully
+authenticate online. These verifiers can then be used to authenticate
+the same users when Entra ID is unreachable, allowing MFA users to log
+in using their cached password.</p>
+<p>If this option is set to <strong>false</strong>, Himmelblau will continue to cache
+password verifiers only for SFA-only users, and MFA-enabled users will
+<strong>not</strong> be able to authenticate when offline. The <strong>aad-tool</strong>(1)
+command <strong>aad-tool offline-breakglass</strong> will also have no effect.</p>
+<p>Administrators must enable this option well in advance of an outage, as
+password verifiers for MFA users are only stored following a successful
+online authentication. It is too late to enable this feature once Entra
+ID is already unreachable.</p>
+<p>Enabling offline breakglass mode carries significant risk. If a device
+is stolen or compromised, and network access to Entra ID is blocked,
+attackers could effectively disable MFA protection by forcing the system
+into a simple password-only (SFA) authentication state. Administrators
+should enable this mode <strong>only after careful consideration</strong> of their
+organization's security posture and offline access requirements.</p>
+<p>This feature does not apply to passwordless accounts. If an MFA user
+signs in using a passwordless method, no password hash exists to cache,
+and offline breakglass cannot function for that user.</p>
+<p>Default: false</p>
+<p>Example: [offline_breakglass]<br />
+enabled = true<br />
+ttl = 2h<br />
+<div class="highlight"><pre><span></span><code># Allow MFA users to authenticate offline for up to 2 hours
+</code></pre></div></p>
+<p><strong>ttl</strong>  </p>
+<p>Specifies how long breakglass mode should remain active once triggered.
+The value may include a suffix to indicate the unit of time: <strong>m</strong> for
+minutes, <strong>h</strong> for hours, or <strong>d</strong> for days. If no suffix is provided,
+the value is interpreted as seconds. After the specified period, offline
+breakglass mode automatically expires and normal authentication resumes.</p>
+<p>Default: 7200</p>
+<p>Example: [offline_breakglass]<br />
+enabled = true<br />
+ttl = 1d<br />
+<div class="highlight"><pre><span></span><code># Permit offline MFA logins for up to 24 hours after activation
+</code></pre></div></p>
 <h2 id="see-also">SEE ALSO</h2>
-<p><strong>himmelblaud(8),</strong> <strong>himmelblaud-tasks(8)</strong> </p>
-              
+<p><a href="../himmelblaud/">himmelblaud(8)</a>, <a href="../himmelblaud_tasks/">himmelblaud-tasks(8)</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
             </div>
-          </div><footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../aad-tool/" class="btn btn-neutral float-left" title="Aad tool"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../himmelblaud/" class="btn btn-neutral float-right" title="Himmelblaud">Next <span class="icon icon-circle-arrow-right"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <!-- Copyright etc -->
-  </div>
-
-  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
-</footer>
           
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
-      </div>
-
-    </section>
-
-  </div>
-
-  <div class="rst-versions" role="note" aria-label="Versions">
-  <span class="rst-current-version" data-toggle="rst-current-version">
-    
-        <span>
-          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
-        </span>
-    
-    
-      <span><a href="../aad-tool/" style="color: #fcfcfc">&laquo; Previous</a></span>
-    
-    
-      <span><a href="../himmelblaud/" style="color: #fcfcfc">Next &raquo;</a></span>
-    
-  </span>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
 </div>
-    <script src="../../js/jquery-3.6.0.min.js"></script>
-    <script>var base_url = "../..";</script>
-    <script src="../../js/theme_extra.js"></script>
-    <script src="../../js/theme.js"></script>
-      <script src="../../search/main.js"></script>
-    <script>
-        jQuery(function () {
-            SphinxRtdTheme.Navigation.enable(true);
-        });
-    </script>
-
-</body>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.top", "content.code.copy", "search.suggest", "search.highlight", "toc.follow"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      
+    
+  </body>
 </html>

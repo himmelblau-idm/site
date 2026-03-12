@@ -15,19 +15,14 @@ LATEST_STABLE:= stable-3.x
 MAN_DIR      := $(HB_DIR)/man
 MAN_OUT_DIR  := docs/reference
 
-MAN2MD_URL   := https://raw.githubusercontent.com/phillbush/man2md/refs/heads/master/man2md
-MAN2MD       := tools/man2md
+# Use the venv-bundled pandoc from pypandoc_binary
+VENV_PKGS    := $(wildcard $(abspath $(MAKEFILE_DIR)/../.venv)/lib/python*/site-packages)
+PANDOC       := $(wildcard $(VENV_PKGS)/pypandoc/files/pandoc)
+POSTPROCESS  := tools/postprocess.py
 
 # ---- Bootstrap local dirs ---------------------------------------------------
 
-$(shell mkdir -p tools $(MAN_OUT_DIR))
-
-# ---- Acquire man2md if missing ----------------------------------------------
-
-$(MAN2MD):
-	echo "Downloading man2md …"
-	curl -fsSL $(MAN2MD_URL) -o $@
-	chmod +x $@
+$(shell mkdir -p $(MAN_OUT_DIR))
 
 # ---- Acquire Himmelblau (shallow) and check out latest stable ---------------
 
@@ -38,10 +33,11 @@ man_repo:
 man_repo_clean:
 	rm -rf $(HB_DIR)
 
-man: $(MAN2MD) man_repo $(MAN_DIR)/man5/himmelblau.conf.5 $(MAN_DIR)/man1/aad-tool.1
-	$(MAN2MD) $(MAN_DIR)/man5/himmelblau.conf.5 | sed -E -f tools/clean-manpage.sed > $(MAN_OUT_DIR)/himmelblau-conf.md
-	$(MAN2MD) $(MAN_DIR)/man1/aad-tool.1 | sed -E -f tools/clean-manpage.sed > $(MAN_OUT_DIR)/aad-tool.md
-	$(MAN2MD) $(MAN_DIR)/man8/himmelblaud.8 | sed -E -f tools/clean-manpage.sed > $(MAN_OUT_DIR)/himmelblaud.md
-	$(MAN2MD) $(MAN_DIR)/man8/himmelblaud_tasks.8 | sed -E -f tools/clean-manpage.sed > $(MAN_OUT_DIR)/himmelblaud_tasks.md
-	$(MAN2MD) $(MAN_DIR)/man8/pam_himmelblau.8 | sed -E -f tools/clean-manpage.sed > $(MAN_OUT_DIR)/pam_himmelblau.md
+man: man_repo
+	@test -n "$(PANDOC)" || { echo "ERROR: pandoc not found in venv; run 'make deps' first"; exit 1; }
+	$(PANDOC) -f man -t gfm $(MAN_DIR)/man5/himmelblau.conf.5 | python3 $(POSTPROCESS) > $(MAN_OUT_DIR)/himmelblau-conf.md
+	$(PANDOC) -f man -t gfm $(MAN_DIR)/man1/aad-tool.1        | python3 $(POSTPROCESS) > $(MAN_OUT_DIR)/aad-tool.md
+	$(PANDOC) -f man -t gfm $(MAN_DIR)/man8/himmelblaud.8      | python3 $(POSTPROCESS) > $(MAN_OUT_DIR)/himmelblaud.md
+	$(PANDOC) -f man -t gfm $(MAN_DIR)/man8/himmelblaud_tasks.8 | python3 $(POSTPROCESS) > $(MAN_OUT_DIR)/himmelblaud_tasks.md
+	$(PANDOC) -f man -t gfm $(MAN_DIR)/man8/pam_himmelblau.8   | python3 $(POSTPROCESS) > $(MAN_OUT_DIR)/pam_himmelblau.md
 	make man_repo_clean

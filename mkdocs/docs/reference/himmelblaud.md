@@ -1,68 +1,80 @@
-
 ## NAME
 
-himmelblaud - Himmelblau Authentication Daemon for Azure Entra ID 
+himmelblaud - Himmelblau Authentication Daemon for Azure Entra ID
 
 ## SYNOPSIS
 
-**himmelblaud** [_OPTIONS_] 
+```text
+himmelblaud [OPTIONS]
+```
 
 ## DESCRIPTION
 
-The `himmelblaud` daemon is responsible for authenticating users against Azure Entra ID and managing group and user information. It operates as a background service, handling authentication requests and maintaining a cache of user and group data. 
+The `himmelblaud` daemon is responsible for authenticating users
+against Azure Entra ID and managing group and user information. It
+operates as a background service, handling authentication requests and
+maintaining a cache of user and group data.
 
 ## OPTIONS
 
-* **-r**, **--skip-root-check** 
-
-  Bypass the check that prevents running the daemon as the root user. This option is risky and should never be used in production environments due to potential security vulnerabilities. It can also be set through the environment variable **HIMMELBLAU_SKIP_ROOT_CHECK**. 
-
-
-#### -d**, **--debug 
-
-  Enable verbose debug output. This option will show detailed diagnostic information useful for troubleshooting and debugging. Can also be set via the environment variable **HIMMELBLAU_DEBUG**. 
+**-r**, **--skip-root-check**  
+Bypass the check that prevents running the daemon as the root user. This
+option is risky and should never be used in production environments due
+to potential security vulnerabilities. It can also be set through the
+environment variable **HIMMELBLAU_SKIP_ROOT_CHECK**.
 
 
-#### -t**, **--configtest 
-
-  Display the daemon’s current configuration and exit. This is useful for verifying that the configuration file is correctly formatted and contains valid options. 
-
-
-#### -c**, **--config &lt;config&gt; 
-
-  Specify the path to the configuration file for the daemon. The default configuration file is located at _/etc/himmelblau/himmelblaud.conf_. This option can also be set via the environment variable **HIMMELBLAU_CONFIG**. 
+**-d**, **--debug**  
+Enable verbose debug output. This option will show detailed diagnostic
+information useful for troubleshooting and debugging. Can also be set
+via the environment variable **HIMMELBLAU_DEBUG**.
 
 
-#### -h**, **--help 
+**-t**, **--configtest**  
+Display the daemon’s current configuration and exit. This is useful for
+verifying that the configuration file is correctly formatted and
+contains valid options.
 
-  Show the help message with information about available options. 
+
+**-c**, **--config** <config>  
+Specify the path to the configuration file for the daemon. The default
+configuration file is located at */etc/himmelblau/himmelblaud.conf*.
+This option can also be set via the environment variable
+**HIMMELBLAU_CONFIG**.
 
 
-#### -V**, **--version 
+**-h**, **--help**  
+Show the help message with information about available options.
 
-  Print the version of the `himmelblaud` daemon and exit. 
+
+**-V**, **--version**  
+Print the version of the `himmelblaud` daemon and exit.
 
 ## USAGE EXAMPLES
 
-* **Start the daemon:** 
-
-  # systemctl start himmelblaud 
-
-
-#### Run with a specific config file: 
-
-  # himmelblaud --config /custom/path/himmelblaud.conf 
+**Start the daemon:**  
+```text
+# systemctl start himmelblaud
+```
 
 
-#### Test the configuration: 
+**Run with a specific config file:**  
+```text
+# himmelblaud --config /custom/path/himmelblaud.conf
+```
 
-  # himmelblaud --configtest 
+
+**Test the configuration:**  
+```text
+# himmelblaud --configtest
+```
 
 
-#### Enable debug mode: 
-
-  # himmelblaud --debug 
+**Enable debug mode:**  
+```text
+# himmelblaud --debug
+```
 
 ## SEE ALSO
 
-**himmelblaud-tasks(8)** 
+[himmelblaud-tasks(8)](himmelblaud_tasks.md)

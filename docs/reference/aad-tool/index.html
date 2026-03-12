@@ -1,563 +1,3433 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://himmelblau-idm.org/docs/reference/aad-tool/" />
-      <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Aad tool - Himmelblau Documentation</title>
-    <link rel="stylesheet" href="../../css/theme.css" />
-    <link rel="stylesheet" href="../../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
     
-      <script>
-        // Current page data
-        var mkdocs_page_name = "Aad tool";
-        var mkdocs_page_input_path = "reference/aad-tool.md";
-        var mkdocs_page_url = "/docs/reference/aad-tool/";
-      </script>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://himmelblau-idm.org/docs/reference/aad-tool/">
+      
+      
+        <link rel="prev" href="../../about/">
+      
+      
+        <link rel="next" href="../himmelblau-conf/">
+      
+      
+      <link rel="icon" href="../../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
-    <!--[if lt IE 9]>
-      <script src="../../js/html5shiv.min.js"></script>
-    <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-      <script>hljs.highlightAll();</script>
-   
+    
+      
+        <title>Aad tool - Himmelblau Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,300i,400,400i,700,700i%7CCourier+Prime:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Poppins";--md-code-font:"Courier Prime"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  
   <script type="text/javascript" data-cmp-ab="1" src="https://cdn.consentmanager.net/delivery/autoblocking/8bffa521a2c48.js" data-cmp-host="c.delivery.consentmanager.net" data-cmp-cdn="cdn.consentmanager.net" data-cmp-codesrc="16"></script>
 
-</head>
-
-<body class="wy-body-for-nav" role="document">
-
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
-    <div class="wy-side-scroll">
-      <div class="wy-side-nav-search">
-          <a href="../.." class="icon icon-home"> Himmelblau Documentation
-        </a><div role="search">
-  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
-  </form>
-</div>
-      </div>
-
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-                <li class="toctree-l1"><a class="" href="https://himmelblau-idm.org/">Home</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../..">Quickstart</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../introduction/">A Practical Introduction to Himmelblau</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../intune/">Intune Policies for Linux Clients</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../rfc2307-entra-id-posix-attributes/">RFC2307 Schema Attributes</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Configuration</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../registration/">Device Registration</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../integration/">Migration from On-Prem</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../mail_integration/">Evolution Mail Integration</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../ecosystem/">Ecosystem</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../architecture/">Architecture</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
-                </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Reference</span></p>
-              <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Aad tool</a>
-    <ul class="current">
-    </ul>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../himmelblau-conf/">Himmelblau conf</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../himmelblaud/">Himmelblaud</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../himmelblaud_tasks/">Himmelblaud tasks</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../pam_himmelblau/">Pam himmelblau</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Cloud-Kerberos-Trust-for-Linux/">Cloud Kerberos Trust for Linux</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/">Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage/">Configuring a Hardware TPM for Secure Key Storage</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-and-User.Read.All-Permissions/">Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Design/">Design Principles</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Device-Compliance-Settings-for-Linux-in-Intune-with-Himmelblau/">Device Compliance Settings for Linux in Intune with Himmelblau</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/">Enabling the Himmelblau QR Greeter gnome‐shell Extension</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/MS-specs-which-Himmelblau-uses/">MS specs which Himmelblau uses</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/">Syncing Active Directory with Azure Entra ID</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../advanced/Tray-Icons-for-o365-on-GNOME-Shell/">Tray Icons for o365 on GNOME Shell</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Troubleshooting</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">Capturing authentication traffic using cirrus‐scope</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/">OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/">Removing all Hello PINs & cached PRTs on a Himmelblau host</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/">Testing Himmelblau Developer Builds with Packet Capture</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/">Troubleshooting: `The user '...' already exists` and fake users listed in NSS</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/">Write Permissions for the `logon script` Parameter in Himmelblau</a>
-                  </li>
-              </ul>
-      </div>
-    </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../..">Himmelblau Documentation</a>
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
         
-      </nav>
-      <div class="wy-nav-content">
-        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
-  <ul class="wy-breadcrumbs">
-    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">Reference</li>
-      <li class="breadcrumb-item active">Aad tool</li>
-    <li class="wy-breadcrumbs-aside">
-          <a href="https://github.com/himmelblau-idm/site/edit/main/mkdocs/docs/reference/aad-tool.md">Edit on Himmelblau Documentation</a>
-    </li>
-  </ul>
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-            <div class="section" itemprop="articleBody">
-              
-                <h2 id="name">NAME</h2>
-<p>aad-tool - Azure Entra ID (AAD) management utility for Himmelblau </p>
-<h2 id="synopsis">SYNOPSIS</h2>
-<p><strong>aad-tool</strong> <em>&lt;COMMAND&gt;</em> [OPTIONS] </p>
-<h2 id="description">DESCRIPTION</h2>
-<p>The <code>aad-tool</code> utility is part of the Himmelblau project, designed to manage and interact with Azure Entra ID through various commands. It allows you to test authentication, manage caches, and check the status of services related to the <code>himmelblaud</code> resolver. </p>
-<h2 id="synopsis_1">SYNOPSIS</h2>
-<p><strong>aad-tool <em>&lt;COMMAND&gt;</em></strong> </p>
-<h2 id="description_1">DESCRIPTION</h2>
-<p>Himmelblau Management Utility </p>
-<h3 id="commands">Commands:</h3>
-<ul>
-<li>application </li>
-</ul>
-<p>Manage Entra ID application registrations, including creation, listing, and extension schema configuration </p>
-<ul>
-<li>auth-test </li>
-</ul>
-<p>Test authentication of a user via the himmelblaud resolver "pam" channel. This does not test that your pam configuration is correct - only that himmelblaud is correctly processing and validating authentications </p>
-<ul>
-<li>cache-clear </li>
-</ul>
-<p>Clear or invalidate the himmelblaud resolver cache </p>
-<ul>
-<li>cache-invalidate </li>
-</ul>
-<p>(Deprecated) Previously used to mark cache entries as stale for immediate refresh. Now behaves identically to <code>cache-clear</code> and will be removed in a future release </p>
-<ul>
-<li>configure-pam </li>
-</ul>
-<p>Configure PAM to use pam_himmelblau </p>
-<ul>
-<li>cred </li>
-</ul>
-<p>Manage confidential client credentials for authenticating to Entra ID </p>
-<ul>
-<li>enumerate </li>
-</ul>
-<p>Enumerate all users and groups in Entra ID that have <code>rfc2307</code> attributes, and cache their values locally. This addresses the issue where UID/GID mappings are needed before authentication can succeed, but are normally only retrievable after login </p>
-<ul>
-<li>user </li>
-</ul>
-<p>Manage Entra ID user accounts, including POSIX attribute assignment and UID mapping </p>
-<ul>
-<li>group </li>
-</ul>
-<p>Manage Entra ID groups, including POSIX attribute assignment and GID mapping </p>
-<ul>
-<li>idmap </li>
-</ul>
-<p>Manage the static idmapping cache used to map Entra ID accounts to static UID/GID values. This is useful for migrations from on-prem AD to Entra ID, where existing UID/GID mappings need to be preserved </p>
-<ul>
-<li>offline-breakglass </li>
-</ul>
-<p>Activate or deactivate Himmelblau's offline breakglass mode </p>
-<ul>
-<li>status </li>
-</ul>
-<p>Check that the himmelblaud daemon is online and able to connect correctly to the himmelblaud server </p>
-<ul>
-<li>tpm </li>
-</ul>
-<p>Check whether Himmelblau is utilizing the TPM </p>
-<ul>
-<li>version </li>
-</ul>
-<p>Show the version of this tool </p>
-<ul>
-<li>help </li>
-</ul>
-<p>Print this message or the help of the given subcommand(s) </p>
-<h2 id="options">OPTIONS</h2>
-<ul>
-<li><strong>-h</strong>, <strong>--help</strong> </li>
-</ul>
-<p>Print help </p>
-<h2 id="subcommand">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>application add-schema-extensions </em>[<em>OPTIONS</em>] <em>--client-id &lt;CLIENT_ID&gt; --schema-app-object-id &lt;SCHEMA_APP_OBJECT_ID&gt;</em></strong> </p>
-<h3 id="description_2">DESCRIPTION</h3>
-<p>Adds a standard set of POSIX-related schema extensions to an existing Entra ID application. </p>
-<p>This command registers directory extension attributes (e.g., <code>uidNumber</code>, <code>gidNumber</code>, <code>unixHomeDirectory</code>, <code>loginShell</code>, <code>gecos</code>) on the application specified by <code>--schema-app-object-id</code>. These extensions will be usable on user and/or group objects, as appropriate. </p>
-<p>The application specified by <code>--schema-app-object-id</code> must already exist in the tenant, and must be identified by its Object ID (not the Client ID). This value is labeled as "Object ID" in the Entra Admin Center and corresponds to the <code>id</code> field in Graph API responses. </p>
-<p>You must also supply a separate <code>--client-id</code> that grants <code>Application.ReadWrite.All</code> permissions to perform the extension registration. </p>
-<p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command attempts to authenticate as the specified Entra ID user. In this case, the command must be run as <code>root</code> to impersonate another user. </p>
-<p>This command must be run from a device that has already been joined to Entra ID. </p>
-<h3 id="options_1">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>--schema-app-object-id</strong> &lt;SCHEMA_APP_OBJECT_ID&gt; <strong>-h</strong>, <strong>--help</strong> </p>
-<p>Print help (see a summary with '-h') </p>
-<h2 id="subcommand_1">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>application create </em>[<em>OPTIONS</em>] <em>--client-id &lt;CLIENT_ID&gt; --display-name &lt;DISPLAY_NAME&gt;</em></strong> </p>
-<h3 id="description_3">DESCRIPTION</h3>
-<p>Creates a new Entra ID application registration in the current tenant. </p>
-<p>This command performs a delegated Microsoft Graph API request using an access token acquired via the specified client application (<code>--client-id</code>), which must have <code>Application.ReadWrite.All</code> permissions in the tenant. </p>
-<p>The new application will be created with the provided <code>--display-name</code>. </p>
-<p>You may specify one or more <code>--redirect-uri</code> options to configure redirect URIs for the application (used for public client authentication). If no redirect URIs are provided, the application will not include any by default. </p>
-<p>Use the <code>--user-read-write</code> and/or <code>--group-read-write</code> flags to grant the application additional Microsoft Graph API permissions at registration time, including <code>User.ReadWrite.All</code> and <code>Group.ReadWrite.All</code>. </p>
-<p>NOTE: If you grant these permissions, it is strongly recommended that you restrict access to the application to specific administrators or groups: </p>
-<ol>
-<li>In the Microsoft Entra admin portal, go to Entra???ID -&gt; Enterprise applications and find your app's entry. 2. Under Properties, set "Assignment required?" to Yes. 3. Go to Users and groups, click Add, and assign only the specific users or groups you want to have access. </li>
-</ol>
-<p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command attempts to authenticate as the specified Entra ID user. In this case, the command must be run as <code>root</code> to impersonate another user. </p>
-<p>This command must be run from a device that has already been joined to Entra ID. </p>
-<h3 id="options_2">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>--display-name</strong> &lt;DISPLAY_NAME&gt; <strong>--redirect-uri</strong> &lt;URI&gt; <strong>--user-read-write</strong> <strong>--group-read-write</strong> <strong>-h</strong>, <strong>--help</strong> </p>
-<p>Print help (see a summary with '-h') </p>
-<h2 id="subcommand_2">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>application list-schema-extensions </em>[<em>OPTIONS</em>] <em>--client-id &lt;CLIENT_ID&gt; --schema-app-object-id &lt;SCHEMA_APP_OBJECT_ID&gt;</em></strong> </p>
-<h3 id="description_4">DESCRIPTION</h3>
-<p>Lists the schema extension attributes registered on an Entra ID application. </p>
-<p>This command retrieves the directory extension attributes (e.g., <code>uidNumber</code>, <code>gidNumber</code>, etc.) that have been added to the application identified by <code>--schema-app-object-id</code>. </p>
-<p>The <code>--schema-app-object-id</code> parameter must be the Object ID of the application (not the Client ID), as shown in the Entra Admin Center. This value corresponds to the <code>id</code> field in Microsoft Graph and is required to query extension properties. </p>
-<p>You must also supply a separate <code>--client-id</code> that grants <code>Application.Read.All</code> or <code>Application.ReadWrite.All</code> permissions in the tenant to perform this query. </p>
-<p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command attempts to authenticate as the specified Entra ID user. In this case, the command must be run as <code>root</code> to impersonate another user. </p>
-<p>This command must be run from a device that has already been joined to Entra ID. </p>
-<h3 id="options_3">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>--schema-app-object-id</strong> &lt;SCHEMA_APP_OBJECT_ID&gt; <strong>-h</strong>, <strong>--help</strong> </p>
-<p>Print help (see a summary with '-h') </p>
-<h2 id="subcommand_3">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>application list </em>[<em>OPTIONS</em>] <em>--client-id &lt;CLIENT_ID&gt;</em></strong> </p>
-<h3 id="description_5">DESCRIPTION</h3>
-<p>Lists Entra ID application registrations in the current tenant. </p>
-<p>This command performs a delegated Microsoft Graph API request using an access token acquired via the specified client application (<code>--client-id</code>), which must have <code>Application.Read.All</code> permissions in the tenant. </p>
-<p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command attempts to authenticate as the specified Entra ID user. In this case, the command must be run as <code>root</code> to impersonate another user. </p>
-<p>This command must be run from a device that has already been joined to Entra ID. </p>
-<h3 id="options_4">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>-h</strong>, <strong>--help</strong> </p>
-<p>Print help (see a summary with '-h') </p>
-<h2 id="subcommand_4">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>auth-test </em>[<em>OPTIONS</em>] <em>--name &lt;ACCOUNT_ID&gt;</em></strong> </p>
-<h3 id="description_6">DESCRIPTION</h3>
-<p>Test authentication of a user via the himmelblaud resolver "pam" channel. This does not test that your pam configuration is correct - only that himmelblaud is correctly processing and validating authentications </p>
-<h3 id="options_5">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; </p>
-<h4 id="-h-help">-h<strong>, </strong>--help</h4>
-<p>Print help </p>
-<h2 id="subcommand_5">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>cache-clear </em>[<em>OPTIONS</em>]</strong> </p>
-<h3 id="description_7">DESCRIPTION</h3>
-<p>Clear or invalidate the himmelblaud resolver cache. </p>
-<p>By default, this marks all cached user and group entries as stale, forcing them to refresh immediately when next used. </p>
-<p>Specify <strong>--nss</strong> or <strong>--mapped</strong> to clear these individual caches as well. Omit both these to clear them all. </p>
-<p>Use <code>--full</code> to completely purge the user and group cache entries and unjoin the host from Entra ID. This is irreversible. </p>
-<h3 id="options_6">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>--nss</strong> </p>
-<p>Only clear the nss cache <strong>--mapped</strong> </p>
-<p>Only clear the mapped name cache <strong>--full</strong> </p>
-<p>Force a full cache wipe and unjoin the host from Entra ID. This is probably not what you want <strong>-h</strong>, <strong>--help</strong> </p>
-<p>Print help (see a summary with '-h') </p>
-<h2 id="subcommand_6">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>cache-invalidate </em>[<em>OPTIONS</em>]</strong> </p>
-<h3 id="description_8">DESCRIPTION</h3>
-<p>(Deprecated) Previously used to mark cache entries as stale for immediate refresh. Now behaves identically to <code>cache-clear</code> and will be removed in a future release </p>
-<h3 id="options_7">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>--nss</strong> <strong>--mapped</strong> <strong>--full</strong> </p>
-<h4 id="-h-help_1">-h<strong>, </strong>--help</h4>
-<p>Print help </p>
-<h2 id="subcommand_7">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>configure-pam </em>[<em>OPTIONS</em>]</strong> </p>
-<h3 id="description_9">DESCRIPTION</h3>
-<p>Configure PAM to use pam_himmelblau </p>
-<h3 id="options_8">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>--really</strong> <strong>--auth-file</strong> &lt;AUTH_FILE&gt; <strong>--account-file</strong> &lt;ACCOUNT_FILE&gt; <strong>--session-file</strong> &lt;SESSION_FILE&gt; <strong>--password-file</strong> &lt;PASSWORD_FILE&gt; </p>
-<h4 id="-h-help_2">-h<strong>, </strong>--help</h4>
-<p>Print help </p>
-<h2 id="subcommand_8">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>cred cert </em>[<em>OPTIONS</em>] <em>--client-id &lt;CLIENT_ID&gt; --domain &lt;DOMAIN&gt; --valid-days &lt;VALID_DAYS&gt; --cert-out &lt;CERT_OUT&gt;</em></strong> </p>
-<h3 id="description_10">DESCRIPTION</h3>
-<p>Generate an RS256 HSM-backed key pair with a self-signed certificate for confidential client authentication. </p>
-<p>To set this up: </p>
-<ol>
-<li>
-<p>In the Entra ID portal, navigate to Azure Active Directory -&gt; App registrations, then open (or create) your application. </p>
-</li>
-<li>
-<p>Under Manage &gt; Certificates &amp; secrets, go to the Certificates tab. </p>
-</li>
-<li>
-<p>Click Upload certificate and select the PEM file generated by this command. </p>
-</li>
-<li>
-<p>Azure will store this cert for authenticating via public key. </p>
-</li>
-</ol>
-<p>The private key never leaves your TPM (or SoftHSM). </p>
-<p>When this cred needs renewed in the future, simple run this command again to replace the expired certificate. </p>
-<p>Example: aad-tool cred cert <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>--valid-days</strong> 365 <strong>--cert-out</strong> <em>/tmp/my-cert.crt</em> </p>
-<h3 id="options_9">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>--client-id</strong> &lt;CLIENT_ID&gt; </p>
-<p>The Azure AD application (client) ID this certificate is associated with <strong>--domain</strong> &lt;DOMAIN&gt; </p>
-<p>The tenant domain this certificate is associated with <strong>--valid-days</strong> &lt;VALID_DAYS&gt; </p>
-<p>Number of days the self-signed certificate will be valid <strong>--cert-out</strong> &lt;CERT_OUT&gt; </p>
-<p>Path to write the generated PEM certificate file. This is the file you will upload to Entra ID <strong>-h</strong>, <strong>--help</strong> </p>
-<p>Print help (see a summary with '-h') </p>
-<h2 id="subcommand_9">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>cred delete </em>[<em>OPTIONS</em>] <em>--domain &lt;DOMAIN&gt;</em></strong> </p>
-<h3 id="description_11">DESCRIPTION</h3>
-<p>Delete confidential client credentials (secret, certificate, or both) </p>
-<p>This deletes stored confidential client credentials from Himmelblau's encrypted cache. If neither <code>--secret</code> nor <code>--cert</code> is specified, both will be deleted. </p>
-<p>Example: aad-tool cred delete <strong>--domain</strong> &lt;DOMAIN&gt; aad-tool cred delete <strong>--domain</strong> &lt;DOMAIN&gt; <strong>--secret</strong> aad-tool cred delete <strong>--domain</strong> &lt;DOMAIN&gt; <strong>--cert</strong> </p>
-<h3 id="options_10">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>--domain</strong> &lt;DOMAIN&gt; </p>
-<p>The tenant domain whose creds will be deleted <strong>--secret</strong> </p>
-<p>Delete only the client secret (not the certificate) <strong>--cert</strong> </p>
-<p>Delete only the client certificate (not the secret) <strong>-h</strong>, <strong>--help</strong> </p>
-<p>Print help (see a summary with '-h') </p>
-<h2 id="subcommand_10">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>cred list </em>[<em>OPTIONS</em>] <em>--domain &lt;DOMAIN&gt;</em></strong> </p>
-<h3 id="description_12">DESCRIPTION</h3>
-<p>List the presence of confidential client credentials </p>
-<p>This checks Himmelblau's encrypted cache to see whether a client secret and/or client certificate exists for the given domain. </p>
-<p>Example: aad-tool cred list <strong>--domain</strong> &lt;DOMAIN&gt; </p>
-<h3 id="options_11">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>--domain</strong> &lt;DOMAIN&gt; <strong>-h</strong>, <strong>--help</strong> </p>
-<p>Print help (see a summary with '-h') </p>
-<h2 id="subcommand_11">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>cred secret </em>[<em>OPTIONS</em>] <em>--client-id &lt;CLIENT_ID&gt; --domain &lt;DOMAIN&gt; --secret &lt;SECRET&gt;</em></strong> </p>
-<h3 id="description_13">DESCRIPTION</h3>
-<p>Store a client secret for confidential client authentication. </p>
-<p>To set this up: </p>
-<ol>
-<li>
-<p>In the Entra ID portal, navigate to Azure Active Directory -&gt; App registrations, then open (or create) your application. </p>
-</li>
-<li>
-<p>Under Manage &gt; Certificates &amp; secrets, go to the Client secrets tab. </p>
-</li>
-<li>
-<p>Click New client secret, choose an expiry, and click Add. </p>
-</li>
-<li>
-<p>Copy the Value (not Secret ID) immediately. You won't be able to see it again. </p>
-</li>
-<li>
-<p>Use that value with this command to store it in Himmelblau's encrypted cache. </p>
-</li>
-</ol>
-<p>When this cred needs renewed in the future, simple run this command again to replace the expired secret. </p>
-<p>Example: aad-tool cred secret <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>--secret</strong> &lt;SECRET_VALUE&gt; </p>
-<h3 id="options_12">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>--client-id</strong> &lt;CLIENT_ID&gt; </p>
-<p>The Azure AD application (client) ID this secret is associated with <strong>--domain</strong> &lt;DOMAIN&gt; </p>
-<p>The tenant domain this secret is associated with <strong>--secret</strong> &lt;SECRET&gt; </p>
-<p>The client secret value copied from the Entra ID portal <strong>-h</strong>, <strong>--help</strong> </p>
-<p>Print help (see a summary with '-h') </p>
-<h2 id="subcommand_12">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>enumerate </em>[<em>OPTIONS</em>]</strong> </p>
-<h3 id="description_14">DESCRIPTION</h3>
-<p>Enumerate all users and groups in Entra ID that have <code>rfc2307</code> attributes, and cache their values locally. This addresses the issue where UID/GID mappings are needed before authentication can succeed, but are normally only retrievable after login. </p>
-<p>The <code>--client-id</code> parameter is optional and must refer to a registered Entra ID application with <code>User.Read.All</code> and <code>Group.Read.All</code> permissions. </p>
-<p>The <code>--name</code> parameter specifies the Entra ID user on whose behalf the token is requested, enabling delegated access through the specified client application. </p>
-<p>This command can only be executed from an Entra Id enrolled host. </p>
-<h3 id="options_13">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--client-id</strong> &lt;CLIENT_ID&gt; <strong>-h</strong>, <strong>--help</strong> </p>
-<p>Print help (see a summary with '-h') </p>
-<h2 id="subcommand_13">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>group set-posix-attrs </em>[<em>OPTIONS</em>] <em>--schema-client-id &lt;SCHEMA_CLIENT_ID&gt; --group-id &lt;GROUP_ID&gt; --gid &lt;GID&gt;</em></strong> </p>
-<h3 id="description_15">DESCRIPTION</h3>
-<p>Sets POSIX-related attributes on a specified Entra ID group object. </p>
-<p>This command updates the <code>gidNumber</code> attribute on the Entra ID group identified by <code>--group-id</code>, which must be a valid Object ID. </p>
-<p>You must also provide the <code>--schema-client-id</code>, which identifies the application where the extension properties were registered. This value must be the Client ID of the application used for schema registration. The application associated with <code>--schema-client-id</code> must supply <code>Group.ReadWrite.All</code> permissions in the tenant. </p>
-<p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command must be run as <code>root</code> to impersonate another user. </p>
-<p>This command must be run from a device that has already been joined to Entra ID. </p>
-<h3 id="options_14">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--schema-client-id</strong> &lt;SCHEMA_CLIENT_ID&gt; <strong>--group-id</strong> &lt;GROUP_ID&gt; <strong>--gid</strong> &lt;GID&gt; <strong>-h</strong>, <strong>--help</strong> </p>
-<p>Print help (see a summary with '-h') </p>
-<h2 id="subcommand_14">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>idmap clear </em>[<em>OPTIONS</em>]</strong> </p>
-<h3 id="description_16">DESCRIPTION</h3>
-<p>Clear the contents of the idmap static cache </p>
-<h3 id="options_15">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> </p>
-<h4 id="-h-help_3">-h<strong>, </strong>--help</h4>
-<p>Print help </p>
-<h2 id="subcommand_15">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>idmap group-add </em>[<em>OPTIONS</em>] <em>--object_id &lt;OBJECT_ID&gt; --gid &lt;GID&gt;</em></strong> </p>
-<h3 id="description_17">DESCRIPTION</h3>
-<p>Add a static group mapping to the idmap cache. This maps an Entra ID group (by Object Id GUID) to a fixed GID. This can be used to maintain group identity and membership compatibility after moving to Entra ID </p>
-<h3 id="options_16">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--object_id</strong> &lt;OBJECT_ID&gt; <strong>-g</strong>, <strong>--gid</strong> &lt;GID&gt; </p>
-<h4 id="-h-help_4">-h<strong>, </strong>--help</h4>
-<p>Print help </p>
-<h2 id="subcommand_16">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>idmap user-add </em>[<em>OPTIONS</em>] <em>--name &lt;ACCOUNT_ID&gt; --uid &lt;UID&gt; --gid &lt;GID&gt;</em></strong> </p>
-<h3 id="description_18">DESCRIPTION</h3>
-<p>Add a static user mapping to the idmap cache. This maps an Entra ID user (by UPN or SAM-compatible name) to a fixed UID and primary group GID </p>
-<h3 id="options_17">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>-u</strong>, <strong>--uid</strong> &lt;UID&gt; <strong>-g</strong>, <strong>--gid</strong> &lt;GID&gt; </p>
-<h4 id="-h-help_5">-h<strong>, </strong>--help</h4>
-<p>Print help </p>
-<h2 id="subcommand_17">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>offline-breakglass </em>[<em>OPTIONS</em>]</strong> </p>
-<h3 id="description_19">DESCRIPTION</h3>
-<p>Activate or deactivate Himmelblau's offline breakglass mode. </p>
-<p>This command enables temporary offline password authentication when Azure Entra ID is unreachable. When invoked, Himmelblau enters a controlled "breakglass" state, allowing cached Entra ID user passwords to be used for login until the TTL expires. </p>
-<p>Breakglass mode can only be activated if it was previously enabled in <code>/etc/himmelblau/himmelblau.conf</code> under the <code>[offline_breakglass]</code> section. If the feature was disabled, calling this command will have no effect, and no password verifiers will have been cached. </p>
-<p>Once activated, Himmelblau will: * Allow cached Entra ID users to log in using their known password. * Automatically exit breakglass mode after the TTL expires or once Entra ID connectivity has been restored. </p>
-<p>Use <code>--ttl</code> to override the configured duration for this session. The TTL value accepts a time unit suffix (<code>m</code>, <code>h</code>, or <code>d</code>) and defaults to the value defined in <code>himmelblau.conf</code> if omitted. </p>
-<p>To manually exit breakglass mode before TTL expiry, run: aad-tool offline-breakglass <strong>--ttl</strong> 0 </p>
-<h3 id="options_18">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>--ttl</strong> &lt;TTL&gt; <strong>-h</strong>, <strong>--help</strong> </p>
-<p>Print help (see a summary with '-h') </p>
-<h2 id="examples">EXAMPLES</h2>
-<h1 id="activate-breakglass-mode-for-2-hours-aad-tool-offline-breakglass-ttl-2h">Activate breakglass mode for 2 hours aad-tool offline-breakglass --ttl 2h</h1>
-<h1 id="force-disable-breakglass-mode-immediately-aad-tool-offline-breakglass-ttl-0">Force disable breakglass mode immediately aad-tool offline-breakglass --ttl 0</h1>
-<h1 id="use-the-configured-default-ttl-from-himmelblauconf-aad-tool-offline-breakglass">Use the configured default TTL (from himmelblau.conf) aad-tool offline-breakglass</h1>
-<p>Notes: - If <code>[offline_breakglass] enabled = false</code> in himmelblau.conf, this command will do nothing. - Himmelblau will not cache Entra ID password hashes unless offline breakglass has been explicitly enabled in advance. - This feature should only be used for emergency access during verified outages. </p>
-<h2 id="subcommand_18">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>status </em>[<em>OPTIONS</em>]</strong> </p>
-<h3 id="description_20">DESCRIPTION</h3>
-<p>Check that the himmelblaud daemon is online and able to connect correctly to the himmelblaud server </p>
-<h3 id="options_19">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> </p>
-<h4 id="-h-help_6">-h<strong>, </strong>--help</h4>
-<p>Print help </p>
-<h2 id="subcommand_19">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>tpm </em>[<em>OPTIONS</em>]</strong> </p>
-<h3 id="description_21">DESCRIPTION</h3>
-<p>Check whether Himmelblau is utilizing the TPM </p>
-<h3 id="options_20">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> </p>
-<h4 id="-h-help_7">-h<strong>, </strong>--help</h4>
-<p>Print help </p>
-<h2 id="subcommand_20">SUBCOMMAND</h2>
-<p><strong>aad-tool <em>user set-posix-attrs </em>[<em>OPTIONS</em>] <em>--schema-client-id &lt;SCHEMA_CLIENT_ID&gt; --user-id &lt;USER_ID&gt;</em></strong> </p>
-<h3 id="description_22">DESCRIPTION</h3>
-<p>Sets POSIX-related attributes on a specified Entra ID user object. </p>
-<p>This command updates POSIX attributes (<code>uidNumber</code>, <code>gidNumber</code>, <code>unixHomeDirectory</code>, <code>loginShell</code>, and <code>gecos</code>) on the Entra ID user identified by <code>--user-id</code>, which must be a valid Object ID or UPN. </p>
-<p>You must also provide the <code>--schema-client-id</code>, which identifies the application where the extension properties were registered. This value must be the Client ID of the application used for schema registration. The application associated with <code>--schema-client-id</code> must supply <code>User.ReadWrite.All</code> permissions in the tenant. </p>
-<p>If the <code>--name</code> parameter is omitted, the command authenticates as the currently logged-in user via the Himmelblau SSO broker. If the <code>--name</code> parameter is provided, the command must be run as <code>root</code> to impersonate another user. </p>
-<p>This command must be run from a device that has already been joined to Entra ID. </p>
-<h3 id="options_21">OPTIONS</h3>
-<p><strong>-d</strong>, <strong>--debug</strong> <strong>-D</strong>, <strong>--name</strong> &lt;ACCOUNT_ID&gt; <strong>--schema-client-id</strong> &lt;SCHEMA_CLIENT_ID&gt; <strong>--user-id</strong> &lt;USER_ID&gt; <strong>--uid</strong> &lt;UID&gt; <strong>--gid</strong> &lt;GID&gt; <strong>--home</strong> &lt;HOME&gt; <strong>--shell</strong> &lt;SHELL&gt; <strong>--gecos</strong> &lt;GECOS&gt; <strong>-h</strong>, <strong>--help</strong> </p>
-<p>Print help (see a summary with '-h') </p>
-<h2 id="see-also">SEE ALSO</h2>
-<p><strong>himmelblau.conf</strong>(5), <strong>himmelblaud</strong>(8), <strong>himmelblaud-tasks</strong>(8) </p>
-<h2 id="author">AUTHOR</h2>
-<p>David Mulder &lt;dmulder@himmelblau-idm.org&gt;, &lt;dmulder@samba.org&gt; </p>
-              
-            </div>
-          </div><footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../../about/" class="btn btn-neutral float-left" title="About"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../himmelblau-conf/" class="btn btn-neutral float-right" title="Himmelblau conf">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="#name" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
 
-  <hr/>
+  
 
-  <div role="contentinfo">
-    <!-- Copyright etc -->
-  </div>
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Himmelblau Documentation" class="md-header__button md-logo" aria-label="Himmelblau Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/himmelblau_logo.svg" alt="logo">
 
-  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
-</footer>
-          
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Himmelblau Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Aad tool
+            
+          </span>
         </div>
       </div>
-
-    </section>
-
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
   </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/himmelblau-idm/site.git" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Himmelblau Documentation
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
 
-  <div class="rst-versions" role="note" aria-label="Versions">
-  <span class="rst-current-version" data-toggle="rst-current-version">
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Himmelblau Documentation" class="md-nav__button md-logo" aria-label="Himmelblau Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/himmelblau_logo.svg" alt="logo">
+
+    </a>
+    Himmelblau Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/himmelblau-idm/site.git" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
     
-        <span>
-          <a href="https://github.com/himmelblau-idm/site.git" class="fa fa-code-fork" style="color: #fcfcfc"> Himmelblau Documentation</a>
-        </span>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Himmelblau Documentation
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
     
-    
-      <span><a href="../../about/" style="color: #fcfcfc">&laquo; Previous</a></span>
-    
-    
-      <span><a href="../himmelblau-conf/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://himmelblau-idm.org/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
     
   </span>
-</div>
-    <script src="../../js/jquery-3.6.0.min.js"></script>
-    <script>var base_url = "../..";</script>
-    <script src="../../js/theme_extra.js"></script>
-    <script src="../../js/theme.js"></script>
-      <script src="../../search/main.js"></script>
-    <script>
-        jQuery(function () {
-            SphinxRtdTheme.Navigation.enable(true);
-        });
-    </script>
+  
 
-</body>
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quickstart
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    A Practical Introduction to Himmelblau
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intune/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Intune Policies for Linux Clients
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rfc2307-entra-id-posix-attributes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    RFC2307 Schema Attributes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Device Registration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Migration from On-Prem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mail_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Evolution Mail Integration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ecosystem
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_14" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Aad tool
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Aad tool
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#name" class="md-nav__link">
+    <span class="md-ellipsis">
+      NAME
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#synopsis" class="md-nav__link">
+    <span class="md-ellipsis">
+      SYNOPSIS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DESCRIPTION">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Commands:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-application-add-schema-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool application add-schema-extensions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool application add-schema-extensions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-application-create" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool application create
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool application create">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-application-list-schema-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool application list-schema-extensions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool application list-schema-extensions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-application-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool application list
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool application list">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-auth-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool auth-test
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool auth-test">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-cache-clear" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool cache-clear
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool cache-clear">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-cache-invalidate" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool cache-invalidate
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool cache-invalidate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-configure-pam" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool configure-pam
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool configure-pam">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-cred-cert" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool cred cert
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool cred cert">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-cred-delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool cred delete
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool cred delete">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-cred-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool cred list
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool cred list">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-cred-secret" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool cred secret
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool cred secret">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-enumerate" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool enumerate
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool enumerate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-group-set-posix-attrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool group set-posix-attrs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool group set-posix-attrs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-idmap-clear" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool idmap clear
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool idmap clear">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-idmap-group-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool idmap group-add
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool idmap group-add">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-idmap-user-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool idmap user-add
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool idmap user-add">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-offline-breakglass" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool offline-breakglass
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool offline-breakglass">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      EXAMPLES
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool status
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool status">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-tpm" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool tpm
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool tpm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-user-set-posix-attrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool user set-posix-attrs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool user set-posix-attrs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      SEE ALSO
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#author" class="md-nav__link">
+    <span class="md-ellipsis">
+      AUTHOR
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../himmelblau-conf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Himmelblau conf
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../himmelblaud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Himmelblaud
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../himmelblaud_tasks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Himmelblaud tasks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pam_himmelblau/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pam himmelblau
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced Topics
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Cloud-Kerberos-Trust-for-Linux/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Cloud Kerberos Trust for Linux
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Configuring-Unix-Attribute-Synchronization-with-Azure-Entra-ID-Using-Microsoft-Entra-Connect-Sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuring Unix Attribute Synchronization with Azure Entra ID Using Microsoft Entra Connect Sync
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuring a Hardware TPM for Secure Key Storage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-and-User.Read.All-Permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Design Principles
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Device-Compliance-Settings-for-Linux-in-Intune-with-Himmelblau/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Device Compliance Settings for Linux in Intune with Himmelblau
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Enabling-the-Himmelblau-QR-Greeter-gnome%E2%80%90shell-Extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Enabling the Himmelblau QR Greeter gnome‐shell Extension
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/MS-specs-which-Himmelblau-uses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MS specs which Himmelblau uses
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Syncing-Active-Directory-with-Azure-Entra-ID/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Syncing Active Directory with Azure Entra ID
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/Tray-Icons-for-o365-on-GNOME-Shell/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tray Icons for o365 on GNOME Shell
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            Troubleshooting
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Capturing authentication traffic using cirrus‐scope
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    OpenSSH Bug 2876 ‐  Unable to use MFA over SSH ‐ Workaround
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/Removing-all-Hello-PINs-%26-cached-PRTs-on-a-Himmelblau-host/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Removing all Hello PINs & cached PRTs on a Himmelblau host
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/Testing-Himmelblau-Developer-Builds-with-Packet-Capture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing Himmelblau Developer Builds with Packet Capture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/Troubleshooting%3A-%60The-user-%27...%27-already-exists%60-and-fake-users-listed-in-NSS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting: `The user '...' already exists` and fake users listed in NSS
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/Write-Permissions-for-the-%60logon_script%60-Parameter-in-Himmelblau/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Write Permissions for the `logon script` Parameter in Himmelblau
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#name" class="md-nav__link">
+    <span class="md-ellipsis">
+      NAME
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#synopsis" class="md-nav__link">
+    <span class="md-ellipsis">
+      SYNOPSIS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DESCRIPTION">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Commands:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-application-add-schema-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool application add-schema-extensions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool application add-schema-extensions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-application-create" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool application create
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool application create">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-application-list-schema-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool application list-schema-extensions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool application list-schema-extensions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-application-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool application list
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool application list">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-auth-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool auth-test
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool auth-test">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-cache-clear" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool cache-clear
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool cache-clear">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-cache-invalidate" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool cache-invalidate
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool cache-invalidate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-configure-pam" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool configure-pam
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool configure-pam">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-cred-cert" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool cred cert
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool cred cert">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-cred-delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool cred delete
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool cred delete">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-cred-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool cred list
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool cred list">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-cred-secret" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool cred secret
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool cred secret">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-enumerate" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool enumerate
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool enumerate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-group-set-posix-attrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool group set-posix-attrs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool group set-posix-attrs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-idmap-clear" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool idmap clear
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool idmap clear">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-idmap-group-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool idmap group-add
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool idmap group-add">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-idmap-user-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool idmap user-add
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool idmap user-add">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-offline-breakglass" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool offline-breakglass
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool offline-breakglass">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      EXAMPLES
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool status
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool status">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-tpm" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool tpm
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool tpm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aad-tool-user-set-posix-attrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      aad-tool user set-posix-attrs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aad-tool user set-posix-attrs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      SEE ALSO
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#author" class="md-nav__link">
+    <span class="md-ellipsis">
+      AUTHOR
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Aad tool</h1>
+
+<h2 id="name">NAME</h2>
+<p>aad-tool - Azure Entra ID (AAD) management utility for Himmelblau</p>
+<h2 id="synopsis">SYNOPSIS</h2>
+<div class="highlight"><pre><span></span><code>aad-tool &lt;COMMAND&gt; [OPTIONS]
+</code></pre></div>
+<h2 id="description">DESCRIPTION</h2>
+<p>The <code>aad-tool</code> utility is part of the Himmelblau project, designed to
+manage and interact with Azure Entra ID through various commands. It
+allows you to test authentication, manage caches, and check the status
+of services related to the <code>himmelblaud</code> resolver.</p>
+<h3 id="commands">Commands:</h3>
+<p>application<br />
+Manage Entra ID application registrations, including creation, listing,
+and extension schema configuration</p>
+<p>auth-test<br />
+Test authentication of a user via the himmelblaud resolver "pam"
+channel. This does not test that your pam configuration is correct -
+only that himmelblaud is correctly processing and validating
+authentications</p>
+<p>cache-clear<br />
+Clear or invalidate the himmelblaud resolver cache</p>
+<p>cache-invalidate<br />
+(Deprecated) Previously used to mark cache entries as stale for
+immediate refresh. Now behaves identically to <code>cache-clear</code> and will
+be removed in a future release</p>
+<p>configure-pam<br />
+Configure PAM to use pam_himmelblau</p>
+<p>cred<br />
+Manage confidential client credentials for authenticating to Entra ID</p>
+<p>enumerate<br />
+Enumerate all users and groups in Entra ID that have <code>rfc2307</code>
+attributes, and cache their values locally. This addresses the issue
+where UID/GID mappings are needed before authentication can succeed, but
+are normally only retrievable after login</p>
+<p>user<br />
+Manage Entra ID user accounts, including POSIX attribute assignment and
+UID mapping</p>
+<p>group<br />
+Manage Entra ID groups, including POSIX attribute assignment and GID
+mapping</p>
+<p>idmap<br />
+Manage the static idmapping cache used to map Entra ID accounts to
+static UID/GID values. This is useful for migrations from on-prem AD to
+Entra ID, where existing UID/GID mappings need to be preserved</p>
+<p>offline-breakglass<br />
+Activate or deactivate Himmelblau's offline breakglass mode</p>
+<p>status<br />
+Check that the himmelblaud daemon is online and able to connect
+correctly to the himmelblaud server</p>
+<p>tpm<br />
+Check whether Himmelblau is utilizing the TPM</p>
+<p>version<br />
+Show the version of this tool</p>
+<p>help<br />
+Print this message or the help of the given subcommand(s)</p>
+<h2 id="options">OPTIONS</h2>
+<p><strong>-h</strong>, <strong>--help</strong><br />
+Print help</p>
+<h2 id="aad-tool-application-add-schema-extensions">aad-tool application add-schema-extensions</h2>
+<div class="highlight"><pre><span></span><code>aad-tool application add-schema-extensions [OPTIONS] --client-id &lt;CLIENT_ID&gt; --schema-app-object-id &lt;SCHEMA_APP_OBJECT_ID&gt;
+</code></pre></div>
+<h3 id="description_1">DESCRIPTION</h3>
+<p>Adds a standard set of POSIX-related schema extensions to an existing
+Entra ID application.</p>
+<p>This command registers directory extension attributes (e.g.,
+<code>uidNumber</code>, <code>gidNumber</code>, <code>unixHomeDirectory</code>, <code>loginShell</code>,
+<code>gecos</code>) on the application specified by <code>--schema-app-object-id</code>.
+These extensions will be usable on user and/or group objects, as
+appropriate.</p>
+<p>The application specified by <code>--schema-app-object-id</code> must already
+exist in the tenant, and must be identified by its Object ID (not the
+Client ID). This value is labeled as "Object ID" in the Entra Admin
+Center and corresponds to the <code>id</code> field in Graph API responses.</p>
+<p>You must also supply a separate <code>--client-id</code> that grants
+<code>Application.ReadWrite.All</code> permissions to perform the extension
+registration.</p>
+<p>If the <code>--name</code> parameter is omitted, the command authenticates as the
+currently logged-in user via the Himmelblau SSO broker. If the
+<code>--name</code> parameter is provided, the command attempts to authenticate
+as the specified Entra ID user. In this case, the command must be run as
+<code>root</code> to impersonate another user.</p>
+<p>This command must be run from a device that has already been joined to
+Entra ID.</p>
+<h3 id="options_1">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>-D</strong>, <strong>--name</strong> <ACCOUNT_ID></p>
+<p><strong>--client-id</strong> <CLIENT_ID></p>
+<p><strong>--schema-app-object-id</strong> <SCHEMA_APP_OBJECT_ID></p>
+<p><strong>-h</strong>, <strong>--help</strong></p>
+<blockquote>
+<p>Print help (see a summary with '-h')</p>
+</blockquote>
+<h2 id="aad-tool-application-create">aad-tool application create</h2>
+<div class="highlight"><pre><span></span><code>aad-tool application create [OPTIONS] --client-id &lt;CLIENT_ID&gt; --display-name &lt;DISPLAY_NAME&gt;
+</code></pre></div>
+<h3 id="description_2">DESCRIPTION</h3>
+<p>Creates a new Entra ID application registration in the current tenant.</p>
+<p>This command performs a delegated Microsoft Graph API request using an
+access token acquired via the specified client application
+(<code>--client-id</code>), which must have <code>Application.ReadWrite.All</code>
+permissions in the tenant.</p>
+<p>The new application will be created with the provided
+<code>--display-name</code>.</p>
+<p>You may specify one or more <code>--redirect-uri</code> options to configure
+redirect URIs for the application (used for public client
+authentication). If no redirect URIs are provided, the application will
+not include any by default.</p>
+<p>Use the <code>--user-read-write</code> and/or <code>--group-read-write</code> flags to
+grant the application additional Microsoft Graph API permissions at
+registration time, including <code>User.ReadWrite.All</code> and
+<code>Group.ReadWrite.All</code>.</p>
+<p>NOTE: If you grant these permissions, it is strongly recommended that
+you restrict access to the application to specific administrators or
+groups:</p>
+<ol>
+<li>In the Microsoft Entra admin portal, go to Entra???ID -&gt; Enterprise
+applications and find your app's entry. 2. Under Properties, set
+"Assignment required?" to Yes. 3. Go to Users and groups, click Add, and
+assign only the specific users or groups you want to have access.</li>
+</ol>
+<p>If the <code>--name</code> parameter is omitted, the command authenticates as the
+currently logged-in user via the Himmelblau SSO broker. If the
+<code>--name</code> parameter is provided, the command attempts to authenticate
+as the specified Entra ID user. In this case, the command must be run as
+<code>root</code> to impersonate another user.</p>
+<p>This command must be run from a device that has already been joined to
+Entra ID.</p>
+<h3 id="options_2">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>-D</strong>, <strong>--name</strong> <ACCOUNT_ID></p>
+<p><strong>--client-id</strong> <CLIENT_ID></p>
+<p><strong>--display-name</strong> <DISPLAY_NAME></p>
+<p><strong>--redirect-uri</strong> <URI></p>
+<p><strong>--user-read-write</strong></p>
+<p><strong>--group-read-write</strong></p>
+<p><strong>-h</strong>, <strong>--help</strong></p>
+<blockquote>
+<p>Print help (see a summary with '-h')</p>
+</blockquote>
+<h2 id="aad-tool-application-list-schema-extensions">aad-tool application list-schema-extensions</h2>
+<div class="highlight"><pre><span></span><code>aad-tool application list-schema-extensions [OPTIONS] --client-id &lt;CLIENT_ID&gt; --schema-app-object-id &lt;SCHEMA_APP_OBJECT_ID&gt;
+</code></pre></div>
+<h3 id="description_3">DESCRIPTION</h3>
+<p>Lists the schema extension attributes registered on an Entra ID
+application.</p>
+<p>This command retrieves the directory extension attributes (e.g.,
+<code>uidNumber</code>, <code>gidNumber</code>, etc.) that have been added to the
+application identified by <code>--schema-app-object-id</code>.</p>
+<p>The <code>--schema-app-object-id</code> parameter must be the Object ID of the
+application (not the Client ID), as shown in the Entra Admin Center.
+This value corresponds to the <code>id</code> field in Microsoft Graph and is
+required to query extension properties.</p>
+<p>You must also supply a separate <code>--client-id</code> that grants
+<code>Application.Read.All</code> or <code>Application.ReadWrite.All</code> permissions in
+the tenant to perform this query.</p>
+<p>If the <code>--name</code> parameter is omitted, the command authenticates as the
+currently logged-in user via the Himmelblau SSO broker. If the
+<code>--name</code> parameter is provided, the command attempts to authenticate
+as the specified Entra ID user. In this case, the command must be run as
+<code>root</code> to impersonate another user.</p>
+<p>This command must be run from a device that has already been joined to
+Entra ID.</p>
+<h3 id="options_3">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>-D</strong>, <strong>--name</strong> <ACCOUNT_ID></p>
+<p><strong>--client-id</strong> <CLIENT_ID></p>
+<p><strong>--schema-app-object-id</strong> <SCHEMA_APP_OBJECT_ID></p>
+<p><strong>-h</strong>, <strong>--help</strong></p>
+<blockquote>
+<p>Print help (see a summary with '-h')</p>
+</blockquote>
+<h2 id="aad-tool-application-list">aad-tool application list</h2>
+<div class="highlight"><pre><span></span><code>aad-tool application list [OPTIONS] --client-id &lt;CLIENT_ID&gt;
+</code></pre></div>
+<h3 id="description_4">DESCRIPTION</h3>
+<p>Lists Entra ID application registrations in the current tenant.</p>
+<p>This command performs a delegated Microsoft Graph API request using an
+access token acquired via the specified client application
+(<code>--client-id</code>), which must have <code>Application.Read.All</code> permissions
+in the tenant.</p>
+<p>If the <code>--name</code> parameter is omitted, the command authenticates as the
+currently logged-in user via the Himmelblau SSO broker. If the
+<code>--name</code> parameter is provided, the command attempts to authenticate
+as the specified Entra ID user. In this case, the command must be run as
+<code>root</code> to impersonate another user.</p>
+<p>This command must be run from a device that has already been joined to
+Entra ID.</p>
+<h3 id="options_4">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>-D</strong>, <strong>--name</strong> <ACCOUNT_ID></p>
+<p><strong>--client-id</strong> <CLIENT_ID></p>
+<p><strong>-h</strong>, <strong>--help</strong></p>
+<blockquote>
+<p>Print help (see a summary with '-h')</p>
+</blockquote>
+<h2 id="aad-tool-auth-test">aad-tool auth-test</h2>
+<div class="highlight"><pre><span></span><code>aad-tool auth-test [OPTIONS] --name &lt;ACCOUNT_ID&gt;
+</code></pre></div>
+<h3 id="description_5">DESCRIPTION</h3>
+<p>Test authentication of a user via the himmelblaud resolver "pam"
+channel. This does not test that your pam configuration is correct -
+only that himmelblaud is correctly processing and validating
+authentications</p>
+<h3 id="options_5">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>-D</strong>, <strong>--name</strong> <ACCOUNT_ID></p>
+<p><strong>-h</strong>, <strong>--help</strong><br />
+Print help</p>
+<h2 id="aad-tool-cache-clear">aad-tool cache-clear</h2>
+<div class="highlight"><pre><span></span><code>aad-tool cache-clear [OPTIONS]
+</code></pre></div>
+<h3 id="description_6">DESCRIPTION</h3>
+<p>Clear or invalidate the himmelblaud resolver cache.</p>
+<p>By default, this marks all cached user and group entries as stale,
+forcing them to refresh immediately when next used.</p>
+<p>Specify <strong>--nss</strong> or <strong>--mapped</strong> to clear these individual caches as
+well. Omit both these to clear them all.</p>
+<p>Use <code>--full</code> to completely purge the user and group cache entries and
+unjoin the host from Entra ID. This is irreversible.</p>
+<h3 id="options_6">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>--nss</strong></p>
+<blockquote>
+<p>Only clear the nss cache</p>
+</blockquote>
+<p><strong>--mapped</strong></p>
+<blockquote>
+<p>Only clear the mapped name cache</p>
+</blockquote>
+<p><strong>--full</strong></p>
+<blockquote>
+<p>Force a full cache wipe and unjoin the host from Entra ID. This is
+probably not what you want</p>
+</blockquote>
+<p><strong>-h</strong>, <strong>--help</strong></p>
+<blockquote>
+<p>Print help (see a summary with '-h')</p>
+</blockquote>
+<h2 id="aad-tool-cache-invalidate">aad-tool cache-invalidate</h2>
+<div class="highlight"><pre><span></span><code>aad-tool cache-invalidate [OPTIONS]
+</code></pre></div>
+<h3 id="description_7">DESCRIPTION</h3>
+<p>(Deprecated) Previously used to mark cache entries as stale for
+immediate refresh. Now behaves identically to <code>cache-clear</code> and will
+be removed in a future release</p>
+<h3 id="options_7">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>--nss</strong></p>
+<p><strong>--mapped</strong></p>
+<p><strong>--full</strong></p>
+<p><strong>-h</strong>, <strong>--help</strong><br />
+Print help</p>
+<h2 id="aad-tool-configure-pam">aad-tool configure-pam</h2>
+<div class="highlight"><pre><span></span><code>aad-tool configure-pam [OPTIONS]
+</code></pre></div>
+<h3 id="description_8">DESCRIPTION</h3>
+<p>Configure PAM to use pam_himmelblau</p>
+<h3 id="options_8">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>--really</strong></p>
+<p><strong>--auth-file</strong> <AUTH_FILE></p>
+<p><strong>--account-file</strong> <ACCOUNT_FILE></p>
+<p><strong>--session-file</strong> <SESSION_FILE></p>
+<p><strong>--password-file</strong> <PASSWORD_FILE></p>
+<p><strong>-h</strong>, <strong>--help</strong><br />
+Print help</p>
+<h2 id="aad-tool-cred-cert">aad-tool cred cert</h2>
+<div class="highlight"><pre><span></span><code>aad-tool cred cert [OPTIONS] --client-id &lt;CLIENT_ID&gt; --domain &lt;DOMAIN&gt; --valid-days &lt;VALID_DAYS&gt; --cert-out &lt;CERT_OUT&gt;
+</code></pre></div>
+<h3 id="description_9">DESCRIPTION</h3>
+<p>Generate an RS256 HSM-backed key pair with a self-signed certificate for
+confidential client authentication.</p>
+<p>To set this up:</p>
+<ol>
+<li>
+<p>In the Entra ID portal, navigate to Azure Active Directory -&gt; App
+registrations, then open (or create) your application.</p>
+</li>
+<li>
+<p>Under Manage &gt; Certificates &amp; secrets, go to the Certificates tab.</p>
+</li>
+<li>
+<p>Click Upload certificate and select the PEM file generated by this
+command.</p>
+</li>
+<li>
+<p>Azure will store this cert for authenticating via public key.</p>
+</li>
+</ol>
+<p>The private key never leaves your TPM (or SoftHSM).</p>
+<p>When this cred needs renewed in the future, simple run this command
+again to replace the expired certificate.</p>
+<p>Example: aad-tool cred cert <strong>--client-id</strong> <CLIENT_ID>
+<strong>--valid-days</strong> 365 <strong>--cert-out</strong> <em>/tmp/my-cert.crt</em></p>
+<h3 id="options_9">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>--client-id</strong> <CLIENT_ID></p>
+<blockquote>
+<p>The Azure AD application (client) ID this certificate is associated
+with</p>
+</blockquote>
+<p><strong>--domain</strong> <DOMAIN></p>
+<blockquote>
+<p>The tenant domain this certificate is associated with</p>
+</blockquote>
+<p><strong>--valid-days</strong> <VALID_DAYS></p>
+<blockquote>
+<p>Number of days the self-signed certificate will be valid</p>
+</blockquote>
+<p><strong>--cert-out</strong> <CERT_OUT></p>
+<blockquote>
+<p>Path to write the generated PEM certificate file. This is the file you
+will upload to Entra ID</p>
+</blockquote>
+<p><strong>-h</strong>, <strong>--help</strong></p>
+<blockquote>
+<p>Print help (see a summary with '-h')</p>
+</blockquote>
+<h2 id="aad-tool-cred-delete">aad-tool cred delete</h2>
+<div class="highlight"><pre><span></span><code>aad-tool cred delete [OPTIONS] --domain &lt;DOMAIN&gt;
+</code></pre></div>
+<h3 id="description_10">DESCRIPTION</h3>
+<p>Delete confidential client credentials (secret, certificate, or both)</p>
+<p>This deletes stored confidential client credentials from Himmelblau's
+encrypted cache. If neither <code>--secret</code> nor <code>--cert</code> is specified,
+both will be deleted.</p>
+<p>Example: aad-tool cred delete <strong>--domain</strong> <DOMAIN> aad-tool cred
+delete <strong>--domain</strong> <DOMAIN> <strong>--secret</strong> aad-tool cred delete
+<strong>--domain</strong> <DOMAIN> <strong>--cert</strong></p>
+<h3 id="options_10">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>--domain</strong> <DOMAIN></p>
+<blockquote>
+<p>The tenant domain whose creds will be deleted</p>
+</blockquote>
+<p><strong>--secret</strong></p>
+<blockquote>
+<p>Delete only the client secret (not the certificate)</p>
+</blockquote>
+<p><strong>--cert</strong></p>
+<blockquote>
+<p>Delete only the client certificate (not the secret)</p>
+</blockquote>
+<p><strong>-h</strong>, <strong>--help</strong></p>
+<blockquote>
+<p>Print help (see a summary with '-h')</p>
+</blockquote>
+<h2 id="aad-tool-cred-list">aad-tool cred list</h2>
+<div class="highlight"><pre><span></span><code>aad-tool cred list [OPTIONS] --domain &lt;DOMAIN&gt;
+</code></pre></div>
+<h3 id="description_11">DESCRIPTION</h3>
+<p>List the presence of confidential client credentials</p>
+<p>This checks Himmelblau's encrypted cache to see whether a client secret
+and/or client certificate exists for the given domain.</p>
+<p>Example: aad-tool cred list <strong>--domain</strong> <DOMAIN></p>
+<h3 id="options_11">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>--domain</strong> <DOMAIN></p>
+<p><strong>-h</strong>, <strong>--help</strong></p>
+<blockquote>
+<p>Print help (see a summary with '-h')</p>
+</blockquote>
+<h2 id="aad-tool-cred-secret">aad-tool cred secret</h2>
+<div class="highlight"><pre><span></span><code>aad-tool cred secret [OPTIONS] --client-id &lt;CLIENT_ID&gt; --domain &lt;DOMAIN&gt; --secret &lt;SECRET&gt;
+</code></pre></div>
+<h3 id="description_12">DESCRIPTION</h3>
+<p>Store a client secret for confidential client authentication.</p>
+<p>To set this up:</p>
+<ol>
+<li>
+<p>In the Entra ID portal, navigate to Azure Active Directory -&gt; App
+registrations, then open (or create) your application.</p>
+</li>
+<li>
+<p>Under Manage &gt; Certificates &amp; secrets, go to the Client secrets
+tab.</p>
+</li>
+<li>
+<p>Click New client secret, choose an expiry, and click Add.</p>
+</li>
+<li>
+<p>Copy the Value (not Secret ID) immediately. You won't be able to see
+it again.</p>
+</li>
+<li>
+<p>Use that value with this command to store it in Himmelblau's
+encrypted cache.</p>
+</li>
+</ol>
+<p>When this cred needs renewed in the future, simple run this command
+again to replace the expired secret.</p>
+<p>Example: aad-tool cred secret <strong>--client-id</strong> <CLIENT_ID> <strong>--secret</strong>
+<SECRET_VALUE></p>
+<h3 id="options_12">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>--client-id</strong> <CLIENT_ID></p>
+<blockquote>
+<p>The Azure AD application (client) ID this secret is associated with</p>
+</blockquote>
+<p><strong>--domain</strong> <DOMAIN></p>
+<blockquote>
+<p>The tenant domain this secret is associated with</p>
+</blockquote>
+<p><strong>--secret</strong> <SECRET></p>
+<blockquote>
+<p>The client secret value copied from the Entra ID portal</p>
+</blockquote>
+<p><strong>-h</strong>, <strong>--help</strong></p>
+<blockquote>
+<p>Print help (see a summary with '-h')</p>
+</blockquote>
+<h2 id="aad-tool-enumerate">aad-tool enumerate</h2>
+<div class="highlight"><pre><span></span><code>aad-tool enumerate [OPTIONS]
+</code></pre></div>
+<h3 id="description_13">DESCRIPTION</h3>
+<p>Enumerate all users and groups in Entra ID that have <code>rfc2307</code>
+attributes, and cache their values locally. This addresses the issue
+where UID/GID mappings are needed before authentication can succeed, but
+are normally only retrievable after login.</p>
+<p>The <code>--client-id</code> parameter is optional and must refer to a registered
+Entra ID application with <code>User.Read.All</code> and <code>Group.Read.All</code>
+permissions.</p>
+<p>The <code>--name</code> parameter specifies the Entra ID user on whose behalf the
+token is requested, enabling delegated access through the specified
+client application.</p>
+<p>This command can only be executed from an Entra Id enrolled host.</p>
+<h3 id="options_13">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>-D</strong>, <strong>--name</strong> <ACCOUNT_ID></p>
+<p><strong>--client-id</strong> <CLIENT_ID></p>
+<p><strong>-h</strong>, <strong>--help</strong></p>
+<blockquote>
+<p>Print help (see a summary with '-h')</p>
+</blockquote>
+<h2 id="aad-tool-group-set-posix-attrs">aad-tool group set-posix-attrs</h2>
+<div class="highlight"><pre><span></span><code>aad-tool group set-posix-attrs [OPTIONS] --schema-client-id &lt;SCHEMA_CLIENT_ID&gt; --group-id &lt;GROUP_ID&gt; --gid &lt;GID&gt;
+</code></pre></div>
+<h3 id="description_14">DESCRIPTION</h3>
+<p>Sets POSIX-related attributes on a specified Entra ID group object.</p>
+<p>This command updates the <code>gidNumber</code> attribute on the Entra ID group
+identified by <code>--group-id</code>, which must be a valid Object ID.</p>
+<p>You must also provide the <code>--schema-client-id</code>, which identifies the
+application where the extension properties were registered. This value
+must be the Client ID of the application used for schema registration.
+The application associated with <code>--schema-client-id</code> must supply
+<code>Group.ReadWrite.All</code> permissions in the tenant.</p>
+<p>If the <code>--name</code> parameter is omitted, the command authenticates as the
+currently logged-in user via the Himmelblau SSO broker. If the
+<code>--name</code> parameter is provided, the command must be run as <code>root</code> to
+impersonate another user.</p>
+<p>This command must be run from a device that has already been joined to
+Entra ID.</p>
+<h3 id="options_14">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>-D</strong>, <strong>--name</strong> <ACCOUNT_ID></p>
+<p><strong>--schema-client-id</strong> <SCHEMA_CLIENT_ID></p>
+<p><strong>--group-id</strong> <GROUP_ID></p>
+<p><strong>--gid</strong> <GID></p>
+<p><strong>-h</strong>, <strong>--help</strong></p>
+<blockquote>
+<p>Print help (see a summary with '-h')</p>
+</blockquote>
+<h2 id="aad-tool-idmap-clear">aad-tool idmap clear</h2>
+<div class="highlight"><pre><span></span><code>aad-tool idmap clear [OPTIONS]
+</code></pre></div>
+<h3 id="description_15">DESCRIPTION</h3>
+<p>Clear the contents of the idmap static cache</p>
+<h3 id="options_15">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>-h</strong>, <strong>--help</strong><br />
+Print help</p>
+<h2 id="aad-tool-idmap-group-add">aad-tool idmap group-add</h2>
+<div class="highlight"><pre><span></span><code>aad-tool idmap group-add [OPTIONS] --object_id &lt;OBJECT_ID&gt; --gid &lt;GID&gt;
+</code></pre></div>
+<h3 id="description_16">DESCRIPTION</h3>
+<p>Add a static group mapping to the idmap cache. This maps an Entra ID
+group (by Object Id GUID) to a fixed GID. This can be used to maintain
+group identity and membership compatibility after moving to Entra ID</p>
+<h3 id="options_16">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>-D</strong>, <strong>--object_id</strong> <OBJECT_ID></p>
+<p><strong>-g</strong>, <strong>--gid</strong> <GID></p>
+<p><strong>-h</strong>, <strong>--help</strong><br />
+Print help</p>
+<h2 id="aad-tool-idmap-user-add">aad-tool idmap user-add</h2>
+<div class="highlight"><pre><span></span><code>aad-tool idmap user-add [OPTIONS] --name &lt;ACCOUNT_ID&gt; --uid &lt;UID&gt; --gid &lt;GID&gt;
+</code></pre></div>
+<h3 id="description_17">DESCRIPTION</h3>
+<p>Add a static user mapping to the idmap cache. This maps an Entra ID user
+(by UPN or SAM-compatible name) to a fixed UID and primary group GID</p>
+<h3 id="options_17">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>-D</strong>, <strong>--name</strong> <ACCOUNT_ID></p>
+<p><strong>-u</strong>, <strong>--uid</strong> <UID></p>
+<p><strong>-g</strong>, <strong>--gid</strong> <GID></p>
+<p><strong>-h</strong>, <strong>--help</strong><br />
+Print help</p>
+<h2 id="aad-tool-offline-breakglass">aad-tool offline-breakglass</h2>
+<div class="highlight"><pre><span></span><code>aad-tool offline-breakglass [OPTIONS]
+</code></pre></div>
+<h3 id="description_18">DESCRIPTION</h3>
+<p>Activate or deactivate Himmelblau's offline breakglass mode.</p>
+<p>This command enables temporary offline password authentication when
+Azure Entra ID is unreachable. When invoked, Himmelblau enters a
+controlled "breakglass" state, allowing cached Entra ID user passwords
+to be used for login until the TTL expires.</p>
+<p>Breakglass mode can only be activated if it was previously enabled in
+<code>/etc/himmelblau/himmelblau.conf</code> under the <code>[offline_breakglass]</code>
+section. If the feature was disabled, calling this command will have no
+effect, and no password verifiers will have been cached.</p>
+<p>Once activated, Himmelblau will: * Allow cached Entra ID users to log
+in using their known password. * Automatically exit breakglass mode
+after the TTL expires or once Entra ID connectivity has been restored.</p>
+<p>Use <code>--ttl</code> to override the configured duration for this session. The
+TTL value accepts a time unit suffix (<code>m</code>, <code>h</code>, or <code>d</code>) and
+defaults to the value defined in <code>himmelblau.conf</code> if omitted.</p>
+<p>To manually exit breakglass mode before TTL expiry, run: aad-tool
+offline-breakglass <strong>--ttl</strong> 0</p>
+<h3 id="options_18">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>--ttl</strong> <TTL></p>
+<p><strong>-h</strong>, <strong>--help</strong></p>
+<blockquote>
+<p>Print help (see a summary with '-h')</p>
+</blockquote>
+<h2 id="examples">EXAMPLES</h2>
+<div class="highlight"><pre><span></span><code># Activate breakglass mode for 2 hours aad-tool offline-breakglass
+--ttl 2h
+</code></pre></div>
+<div class="highlight"><pre><span></span><code># Force disable breakglass mode immediately aad-tool offline-breakglass
+--ttl 0
+</code></pre></div>
+<div class="highlight"><pre><span></span><code># Use the configured default TTL (from himmelblau.conf) aad-tool
+offline-breakglass
+</code></pre></div>
+<p>Notes: - If <code>[offline_breakglass] enabled = false</code> in
+himmelblau.conf, this command will do nothing. - Himmelblau will not
+cache Entra ID password hashes unless offline breakglass has been
+explicitly enabled in advance. - This feature should only be used for
+emergency access during verified outages.</p>
+<h2 id="aad-tool-status">aad-tool status</h2>
+<div class="highlight"><pre><span></span><code>aad-tool status [OPTIONS]
+</code></pre></div>
+<h3 id="description_19">DESCRIPTION</h3>
+<p>Check that the himmelblaud daemon is online and able to connect
+correctly to the himmelblaud server</p>
+<h3 id="options_19">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>-h</strong>, <strong>--help</strong><br />
+Print help</p>
+<h2 id="aad-tool-tpm">aad-tool tpm</h2>
+<div class="highlight"><pre><span></span><code>aad-tool tpm [OPTIONS]
+</code></pre></div>
+<h3 id="description_20">DESCRIPTION</h3>
+<p>Check whether Himmelblau is utilizing the TPM</p>
+<h3 id="options_20">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>-h</strong>, <strong>--help</strong><br />
+Print help</p>
+<h2 id="aad-tool-user-set-posix-attrs">aad-tool user set-posix-attrs</h2>
+<div class="highlight"><pre><span></span><code>aad-tool user set-posix-attrs [OPTIONS] --schema-client-id &lt;SCHEMA_CLIENT_ID&gt; --user-id &lt;USER_ID&gt;
+</code></pre></div>
+<h3 id="description_21">DESCRIPTION</h3>
+<p>Sets POSIX-related attributes on a specified Entra ID user object.</p>
+<p>This command updates POSIX attributes (<code>uidNumber</code>, <code>gidNumber</code>,
+<code>unixHomeDirectory</code>, <code>loginShell</code>, and <code>gecos</code>) on the Entra ID
+user identified by <code>--user-id</code>, which must be a valid Object ID or
+UPN.</p>
+<p>You must also provide the <code>--schema-client-id</code>, which identifies the
+application where the extension properties were registered. This value
+must be the Client ID of the application used for schema registration.
+The application associated with <code>--schema-client-id</code> must supply
+<code>User.ReadWrite.All</code> permissions in the tenant.</p>
+<p>If the <code>--name</code> parameter is omitted, the command authenticates as the
+currently logged-in user via the Himmelblau SSO broker. If the
+<code>--name</code> parameter is provided, the command must be run as <code>root</code> to
+impersonate another user.</p>
+<p>This command must be run from a device that has already been joined to
+Entra ID.</p>
+<h3 id="options_21">OPTIONS</h3>
+<p><strong>-d</strong>, <strong>--debug</strong></p>
+<p><strong>-D</strong>, <strong>--name</strong> <ACCOUNT_ID></p>
+<p><strong>--schema-client-id</strong> <SCHEMA_CLIENT_ID></p>
+<p><strong>--user-id</strong> <USER_ID></p>
+<p><strong>--uid</strong> <UID></p>
+<p><strong>--gid</strong> <GID></p>
+<p><strong>--home</strong> <HOME></p>
+<p><strong>--shell</strong> <SHELL></p>
+<p><strong>--gecos</strong> <GECOS></p>
+<p><strong>-h</strong>, <strong>--help</strong></p>
+<blockquote>
+<p>Print help (see a summary with '-h')</p>
+</blockquote>
+<h2 id="see-also">SEE ALSO</h2>
+<p><a href="../himmelblau-conf/">himmelblau.conf(5)</a>, <a href="../himmelblaud/">himmelblaud(8)</a>, <a href="../himmelblaud_tasks/">himmelblaud-tasks(8)</a></p>
+<h2 id="author">AUTHOR</h2>
+<p>David Mulder <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#100;&#109;&#117;&#108;&#100;&#101;&#114;&#64;&#104;&#105;&#109;&#109;&#101;&#108;&#98;&#108;&#97;&#117;&#45;&#105;&#100;&#109;&#46;&#111;&#114;&#103;">&#100;&#109;&#117;&#108;&#100;&#101;&#114;&#64;&#104;&#105;&#109;&#109;&#101;&#108;&#98;&#108;&#97;&#117;&#45;&#105;&#100;&#109;&#46;&#111;&#114;&#103;</a>, <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#100;&#109;&#117;&#108;&#100;&#101;&#114;&#64;&#115;&#97;&#109;&#98;&#97;&#46;&#111;&#114;&#103;">&#100;&#109;&#117;&#108;&#100;&#101;&#114;&#64;&#115;&#97;&#109;&#98;&#97;&#46;&#111;&#114;&#103;</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.top", "content.code.copy", "search.suggest", "search.highlight", "toc.follow"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      
+    
+  </body>
 </html>

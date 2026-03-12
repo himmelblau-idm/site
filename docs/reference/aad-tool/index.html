@@ -3298,15 +3298,15 @@ offline-breakglass <strong>--ttl</strong> 0</p>
 <p>Print help (see a summary with '-h')</p>
 </blockquote>
 <h2 id="examples">EXAMPLES</h2>
-<p><div class="highlight"><pre><span></span><code># Activate breakglass mode for 2 hours aad-tool offline-breakglass
+<div class="highlight"><pre><span></span><code># Activate breakglass mode for 2 hours aad-tool offline-breakglass
+--ttl 2h
 </code></pre></div>
---ttl 2h</p>
-<p><div class="highlight"><pre><span></span><code># Force disable breakglass mode immediately aad-tool offline-breakglass
+<div class="highlight"><pre><span></span><code># Force disable breakglass mode immediately aad-tool offline-breakglass
+--ttl 0
 </code></pre></div>
---ttl 0</p>
-<p><div class="highlight"><pre><span></span><code># Use the configured default TTL (from himmelblau.conf) aad-tool
+<div class="highlight"><pre><span></span><code># Use the configured default TTL (from himmelblau.conf) aad-tool
+offline-breakglass
 </code></pre></div>
-offline-breakglass</p>
 <p>Notes: - If <code>[offline_breakglass] enabled = false</code> in
 himmelblau.conf, this command will do nothing. - Himmelblau will not
 cache Entra ID password hashes unless offline breakglass has been

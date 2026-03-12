@@ -702,16 +702,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#local_usernamesamaccountnamedomain" class="md-nav__link">
-    <span class="md-ellipsis">
-      local_username:samaccountname@domain
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="local_username:samaccountname@domain">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#offline-breakglass-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       OFFLINE BREAKGLASS CONFIGURATION
@@ -734,42 +724,13 @@
     </nav>
   
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
         <li class="md-nav__item">
-  <a href="#allow-mfa-users-to-authenticate-offline-for-up-to-2-hours" class="md-nav__link">
-    <span class="md-ellipsis">
-      Allow MFA users to authenticate offline for up to 2 hours
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#permit-offline-mfa-logins-for-up-to-24-hours-after-activation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Permit offline MFA logins for up to 24 hours after activation
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Permit offline MFA logins for up to 24 hours after activation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#see-also" class="md-nav__link">
     <span class="md-ellipsis">
       SEE ALSO
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1420,16 +1381,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#local_usernamesamaccountnamedomain" class="md-nav__link">
-    <span class="md-ellipsis">
-      local_username:samaccountname@domain
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="local_username:samaccountname@domain">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#offline-breakglass-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       OFFLINE BREAKGLASS CONFIGURATION
@@ -1452,42 +1403,13 @@
     </nav>
   
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
         <li class="md-nav__item">
-  <a href="#allow-mfa-users-to-authenticate-offline-for-up-to-2-hours" class="md-nav__link">
-    <span class="md-ellipsis">
-      Allow MFA users to authenticate offline for up to 2 hours
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#permit-offline-mfa-logins-for-up-to-24-hours-after-activation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Permit offline MFA logins for up to 24 hours after activation
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Permit offline MFA logins for up to 24 hours after activation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#see-also" class="md-nav__link">
     <span class="md-ellipsis">
       SEE ALSO
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1509,6 +1431,8 @@
   
   
 
+
+  <h1>Himmelblau conf</h1>
 
 <h2 id="name">NAME</h2>
 <p>himmelblau.conf - Configuration file for Himmelblau, enabling Azure
@@ -1880,12 +1804,12 @@ using Entra ID credentials.</p>
 is used.</p>
 <div class="highlight"><pre><span></span><code>user_map_file = /path/to/user_map
 </code></pre></div>
-<div class="highlight"><pre><span></span><code># Example user-map file entries:
+<div class="highlight"><pre><span></span><code># Example user-map file entries:  
+# local_username:samaccountname@domain  
+alice:alice@contoso.com  
+bob:bob.smith@example.org  
+svcuser:service.account@tenant.local
 </code></pre></div>
-<h1 id="local_usernamesamaccountnamedomain">local_username:samaccountname@domain</h1>
-<p>alice:alice@contoso.com
-bob:bob.smith@example.org
-svcuser:service.account@tenant.local</p>
 <h2 id="offline-breakglass-configuration">OFFLINE BREAKGLASS CONFIGURATION</h2>
 <p>The <strong>[offline_breakglass]</strong> section configures Himmelblau’s emergency
 offline authentication mechanism, used when Azure Entra ID is
@@ -1928,20 +1852,22 @@ organization’s security posture and offline access requirements.</p>
 <p>This feature does not apply to passwordless accounts. If an MFA user
 signs in using a passwordless method, no password hash exists to cache,
 and offline breakglass cannot function for that user.</p>
-<p>[offline_breakglass]
-enabled = true
-ttl = 2h</p>
-<h1 id="allow-mfa-users-to-authenticate-offline-for-up-to-2-hours">Allow MFA users to authenticate offline for up to 2 hours</h1>
+<div class="highlight"><pre><span></span><code>[offline_breakglass]  
+enabled = true  
+ttl = 2h  
+# Allow MFA users to authenticate offline for up to 2 hours
+</code></pre></div>
 <p><strong>ttl</strong>  </p>
 <p>Specifies how long breakglass mode should remain active once triggered.
 The value may include a suffix to indicate the unit of time: <strong>m</strong> for
 minutes, <strong>h</strong> for hours, or <strong>d</strong> for days. If no suffix is provided,
 the value is interpreted as seconds. After the specified period, offline
 breakglass mode automatically expires and normal authentication resumes.</p>
-<p>[offline_breakglass]
-enabled = true
-ttl = 1d</p>
-<h1 id="permit-offline-mfa-logins-for-up-to-24-hours-after-activation">Permit offline MFA logins for up to 24 hours after activation</h1>
+<div class="highlight"><pre><span></span><code>[offline_breakglass]  
+enabled = true  
+ttl = 1d  
+# Permit offline MFA logins for up to 24 hours after activation
+</code></pre></div>
 <h2 id="see-also">SEE ALSO</h2>
 <p><a href="../himmelblaud/">himmelblaud(8)</a>, <a href="../himmelblaud_tasks/">himmelblaud-tasks(8)</a></p>
 

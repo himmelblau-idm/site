@@ -16,7 +16,7 @@ MAN_DIR      := $(HB_DIR)/man
 MAN_OUT_DIR  := docs/reference
 
 # Use the venv-bundled pandoc from pypandoc_binary
-VENV_PKGS    := $(abspath $(MAKEFILE_DIR)/../.venv/lib/python*/site-packages)
+VENV_PKGS    := $(wildcard $(abspath $(MAKEFILE_DIR)/../.venv)/lib/python*/site-packages)
 PANDOC       := $(wildcard $(VENV_PKGS)/pypandoc/files/pandoc)
 POSTPROCESS  := tools/postprocess.py
 
@@ -34,6 +34,7 @@ man_repo_clean:
 	rm -rf $(HB_DIR)
 
 man: man_repo
+	@test -n "$(PANDOC)" || { echo "ERROR: pandoc not found in venv; run 'make deps' first"; exit 1; }
 	$(PANDOC) -f man -t gfm $(MAN_DIR)/man5/himmelblau.conf.5 | python3 $(POSTPROCESS) > $(MAN_OUT_DIR)/himmelblau-conf.md
 	$(PANDOC) -f man -t gfm $(MAN_DIR)/man1/aad-tool.1        | python3 $(POSTPROCESS) > $(MAN_OUT_DIR)/aad-tool.md
 	$(PANDOC) -f man -t gfm $(MAN_DIR)/man8/himmelblaud.8      | python3 $(POSTPROCESS) > $(MAN_OUT_DIR)/himmelblaud.md

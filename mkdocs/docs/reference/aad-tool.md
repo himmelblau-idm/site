@@ -752,18 +752,18 @@ offline-breakglass **--ttl** 0
 
 ```text
 # Activate breakglass mode for 2 hours aad-tool offline-breakglass
-```
 --ttl 2h
+```
 
 ```text
 # Force disable breakglass mode immediately aad-tool offline-breakglass
-```
 --ttl 0
+```
 
 ```text
 # Use the configured default TTL (from himmelblau.conf) aad-tool
-```
 offline-breakglass
+```
 
 Notes: - If `[offline_breakglass] enabled = false` in
 himmelblau.conf, this command will do nothing. - Himmelblau will not

@@ -580,12 +580,12 @@ user_map_file = /path/to/user_map
 ```
 
 ```text
-# Example user-map file entries:
-```
-# local_username:samaccountname@domain
-alice:alice@contoso.com
-bob:bob.smith@example.org
+# Example user-map file entries:  
+# local_username:samaccountname@domain  
+alice:alice@contoso.com  
+bob:bob.smith@example.org  
 svcuser:service.account@tenant.local
+```
 
 ## OFFLINE BREAKGLASS CONFIGURATION
 
@@ -642,10 +642,12 @@ This feature does not apply to passwordless accounts. If an MFA user
 signs in using a passwordless method, no password hash exists to cache,
 and offline breakglass cannot function for that user.
 
-[offline_breakglass]
-enabled = true
-ttl = 2h
+```text
+[offline_breakglass]  
+enabled = true  
+ttl = 2h  
 # Allow MFA users to authenticate offline for up to 2 hours
+```
 
 **ttl**  
 
@@ -655,10 +657,12 @@ minutes, **h** for hours, or **d** for days. If no suffix is provided,
 the value is interpreted as seconds. After the specified period, offline
 breakglass mode automatically expires and normal authentication resumes.
 
-[offline_breakglass]
-enabled = true
-ttl = 1d
+```text
+[offline_breakglass]  
+enabled = true  
+ttl = 1d  
 # Permit offline MFA logins for up to 24 hours after activation
+```
 
 ## SEE ALSO
 

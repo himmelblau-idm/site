@@ -19,6 +19,8 @@ ANY_HEADING_RE = re.compile(r'^#{1,6}( |$)')
 # Config example lines: "Example: param = value" or standalone "param = value"
 # Value may be empty (continues on next line) or present
 CONFIG_EXAMPLE_RE = re.compile(r'^(?:Example: )?([a-z][a-z_]+ =[ ]?.*)')
+# INI-style section header: [section_name]
+INI_SECTION_RE = re.compile(r'^\[\w+\]\s*$')
 
 
 def shift_headings(lines):
@@ -265,6 +267,27 @@ def format_code_blocks(lines):
             out.append('```\n')
             continue
 
+        # INI-style config blocks: [section_name] after a blank line,
+        # followed by param = value and/or # comment lines.
+        if INI_SECTION_RE.match(stripped) and out and not out[-1].strip():
+            out.append('```text\n')
+            out.append(stripped + '\n')
+            i += 1
+            while i < len(lines):
+                next_stripped = lines[i].rstrip('\n')
+                if CONFIG_EXAMPLE_RE.match(next_stripped) or (
+                    next_stripped.startswith('#')
+                    and not next_stripped.startswith('##')
+                ):
+                    out.append(next_stripped + '\n')
+                    i += 1
+                elif not next_stripped:
+                    break
+                else:
+                    break
+            out.append('```\n')
+            continue
+
         # Shell prompt lines (# command) after a bold label → code block.
         # After shift_headings, real headings are ## or deeper, so # is always a prompt.
         if stripped.startswith('# ') and not stripped.startswith('## '):
@@ -273,6 +296,14 @@ def format_code_blocks(lines):
                 out.append('```text\n')
                 out.append(stripped + '\n')
                 i += 1
+                # Collect continuation lines (non-blank, not a real heading).
+                # After shift_headings, real headings are ## or deeper.
+                while i < len(lines):
+                    next_stripped = lines[i].rstrip('\n')
+                    if not next_stripped or next_stripped.startswith('## '):
+                        break
+                    out.append(next_stripped + '\n')
+                    i += 1
                 out.append('```\n')
                 continue
 

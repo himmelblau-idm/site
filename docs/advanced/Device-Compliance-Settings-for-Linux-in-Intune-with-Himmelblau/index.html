@@ -1391,18 +1391,12 @@
 <h3 id="allowed-distributions">Allowed Distributions</h3>
 <p>Define minimum and maximum OS versions for specific distributions. Devices outside the allowed range will be marked non-compliant.</p>
 <blockquote>
-<p>⚠️ <strong>Warning:</strong> Enforcing this setting may prevent some Himmelblau systems from authenticating.
-While Intune only supports Ubuntu and RedHat, Himmelblau is compatible with many more Linux distributions. If a user attempts to log in from an unsupported or disallowed distro, authentication will fail.</p>
+<p>⚠️ <strong>Warning:</strong> Enforcing this setting may cause some Himmelblau systems to be reported as non-compliant.
+While Intune only supports Ubuntu and RedHat, Himmelblau is compatible with many more Linux distributions. If a device uses an unsupported or disallowed distro, it may be reported as non-compliant. If distro version compliance is necessary, use a <strong>Custom Compliance</strong> policy instead.</p>
 </blockquote>
 <h3 id="custom-compliance">Custom Compliance</h3>
-<p>Custom compliance settings are currently <strong>experimental</strong> in Himmelblau. You must explicitly enable them:</p>
-<div class="highlight"><pre><span></span><code><span class="na">enable_experimental_intune_custom_compliance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
-</code></pre></div>
-<p>Once enabled, Himmelblau will attempt to evaluate any custom compliance rules defined in your Intune policy. These are executed locally, and any failure results in blocked authentication.</p>
+<p>Himmelblau evaluates any custom compliance rules defined in your Intune policy locally and reports the resulting compliance state.</p>
 <p>See <a href="https://learn.microsoft.com/en-us/intune/intune-service/protect/compliance-use-custom-settings">Microsoft's documentation</a> for guidance on policy creation.</p>
-<blockquote>
-<p>⚠️ <strong>Note:</strong> The Custom Compliance status is <strong>not reliably reported to Intune</strong>.</p>
-</blockquote>
 <h3 id="device-encryption">Device Encryption</h3>
 <p>Enforce disk encryption using dm-crypt (typically via LUKS and <code>cryptsetup</code>). Himmelblau checks for encrypted fixed writable volumes.</p>
 <blockquote>

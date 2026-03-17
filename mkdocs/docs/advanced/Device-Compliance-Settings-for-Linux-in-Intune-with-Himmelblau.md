@@ -33,22 +33,14 @@ In Himmelblau 2.x, policy evaluation is applied only to the first user who signs
 
 Define minimum and maximum OS versions for specific distributions. Devices outside the allowed range will be marked non-compliant.
 
-> ⚠️ **Warning:** Enforcing this setting may prevent some Himmelblau systems from authenticating.
-> While Intune only supports Ubuntu and RedHat, Himmelblau is compatible with many more Linux distributions. If a user attempts to log in from an unsupported or disallowed distro, authentication will fail.
+> ⚠️ **Warning:** Enforcing this setting may cause some Himmelblau systems to be reported as non-compliant.
+> While Intune only supports Ubuntu and RedHat, Himmelblau is compatible with many more Linux distributions. If a device uses an unsupported or disallowed distro, it may be reported as non-compliant. If distro version compliance is necessary, use a **Custom Compliance** policy instead.
 
 ### Custom Compliance
 
-Custom compliance settings are currently **experimental** in Himmelblau. You must explicitly enable them:
-
-```ini
-enable_experimental_intune_custom_compliance = true
-```
-
-Once enabled, Himmelblau will attempt to evaluate any custom compliance rules defined in your Intune policy. These are executed locally, and any failure results in blocked authentication.
+Himmelblau evaluates any custom compliance rules defined in your Intune policy locally and reports the resulting compliance state.
 
 See [Microsoft's documentation](https://learn.microsoft.com/en-us/intune/intune-service/protect/compliance-use-custom-settings) for guidance on policy creation.
-
-> ⚠️ **Note:** The Custom Compliance status is **not reliably reported to Intune**.
 
 ### Device Encryption
 

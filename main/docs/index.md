@@ -30,7 +30,7 @@ hide:
         </div>
       </div>
     </aside>
-    <aside class="hb-workshop-banner" role="region" aria-label="Himmelblau Workshop at SambaXP">
+    <!-- <aside class="hb-workshop-banner" role="region" aria-label="Himmelblau Workshop at SambaXP">
       <div class="hb-workshop-banner__inner">
         <div class="hb-workshop-banner__text">
           <span class="hb-workshop-banner__title">Himmelblau Workshop at SambaXP</span>
@@ -41,7 +41,7 @@ hide:
           <a class="hb-workshop-banner__cta" href="https://sambaxp.org/#Get%20Your%20Ticket" target="_blank" rel="noopener">Register</a>
         </div>
       </div>
-    </aside>
+    </aside> -->
   </div>
   <div class="hero-card">
     <h1>Cloud identity and MFA integration for Linux</h1>

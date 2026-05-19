@@ -32,6 +32,9 @@ hide:
 	<option value="rocky8">Oracle Linux 8</option>
     <option value="rocky9">Oracle Linux 9</option>
 	<option value="rocky10">Oracle Linux 10</option>
+    <option value="rocky8">AlmaLinux 8</option>
+    <option value="rocky9">AlmaLinux 9</option>
+    <option value="rocky10">AlmaLinux 10</option>
     <option value="amzn2023">Amazon Linux 2023</option>
 	<option value="debian12">Debian 12</option>
     <option value="debian13">Debian 13</option>

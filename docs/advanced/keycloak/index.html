@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-and-User.Read.All-Permissions/">
+        <link rel="canonical" href="https://himmelblau-idm.org/docs/advanced/keycloak/">
       
       
-        <link rel="prev" href="../Configuring-a-Hardware-TPM-for-Secure-Key-Storage/">
+        <link rel="prev" href="../Tray-Icons-for-o365-on-GNOME-Shell/">
       
       
-        <link rel="next" href="../Design/">
+        <link rel="next" href="../../troubleshooting/Capturing-authentication-traffic-using-cirrus%E2%80%90scope/">
       
       
       <link rel="icon" href="../../../assets/favicon.ico">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions - Himmelblau Documentation</title>
+        <title>Using Keycloak with Himmelblau - Himmelblau Documentation</title>
       
     
     
@@ -77,7 +77,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#overview" class="md-skip">
+        <a href="#using-keycloak-with-himmelblau" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions
+              Using Keycloak with Himmelblau
             
           </span>
         </div>
@@ -795,30 +795,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../Creating-an-Entra-ID-Application-for-Himmelblau-GroupMember.Read.All-and-User.Read.All-Permissions/" class="md-nav__link">
         
   
   
@@ -829,159 +809,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#1-register-a-new-application-in-azure-entra-id" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Register a New Application in Azure Entra ID
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-assign-api-permissions" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Assign API Permissions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="2. Assign API Permissions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#3-obtain-the-application-id" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Obtain the Application ID
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-configure-authentication-in-himmelblau" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Configure Authentication in Himmelblau
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="4. Configure Authentication in Himmelblau">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#option-a-using-confidential-client-credentials-recommended" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option A: Using Confidential Client Credentials (Recommended)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Option A: Using Confidential Client Credentials (Recommended)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#store-a-client-secret" class="md-nav__link">
-    <span class="md-ellipsis">
-      Store a client secret
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#or-set-up-a-client-certificate" class="md-nav__link">
-    <span class="md-ellipsis">
-      Or set up a client certificate
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-b-using-delegated-authentication" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option B: Using Delegated Authentication
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-restart-himmelblau-services" class="md-nav__link">
-    <span class="md-ellipsis">
-      5. Restart Himmelblau Services
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#6-option-a-only-pre-cache-uidgid-mappings" class="md-nav__link">
-    <span class="md-ellipsis">
-      6. (Option A Only) Pre-cache UID/GID Mappings
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#7-option-a-only-managing-credentials" class="md-nav__link">
-    <span class="md-ellipsis">
-      7. (Option A Only) Managing Credentials
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#conclusion" class="md-nav__link">
-    <span class="md-ellipsis">
-      Conclusion
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1129,10 +956,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../keycloak/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Using Keycloak with Himmelblau
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1143,6 +992,104 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-flows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication Flows
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication Flows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#classic-device-authorization-grant" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classic Device Authorization Grant
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orchestrated-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      Orchestrated Login
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-the-keycloak-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create the Keycloak Client
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-himmelblau" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure Himmelblau
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#apply-the-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Apply the Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1360,6 +1307,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1368,37 +1317,37 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
+      Prerequisites
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-register-a-new-application-in-azure-entra-id" class="md-nav__link">
+  <a href="#authentication-flows" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Register a New Application in Azure Entra ID
+      Authentication Flows
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-assign-api-permissions" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Assign API Permissions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="2. Assign API Permissions">
+    <nav class="md-nav" aria-label="Authentication Flows">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#3-obtain-the-application-id" class="md-nav__link">
+  <a href="#classic-device-authorization-grant" class="md-nav__link">
     <span class="md-ellipsis">
-      3. Obtain the Application ID
+      Classic Device Authorization Grant
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orchestrated-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      Orchestrated Login
     </span>
   </a>
   
@@ -1410,93 +1359,36 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-configure-authentication-in-himmelblau" class="md-nav__link">
+  <a href="#create-the-keycloak-client" class="md-nav__link">
     <span class="md-ellipsis">
-      4. Configure Authentication in Himmelblau
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="4. Configure Authentication in Himmelblau">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#option-a-using-confidential-client-credentials-recommended" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option A: Using Confidential Client Credentials (Recommended)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Option A: Using Confidential Client Credentials (Recommended)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#store-a-client-secret" class="md-nav__link">
-    <span class="md-ellipsis">
-      Store a client secret
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#or-set-up-a-client-certificate" class="md-nav__link">
-    <span class="md-ellipsis">
-      Or set up a client certificate
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-b-using-delegated-authentication" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option B: Using Delegated Authentication
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-restart-himmelblau-services" class="md-nav__link">
-    <span class="md-ellipsis">
-      5. Restart Himmelblau Services
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#6-option-a-only-pre-cache-uidgid-mappings" class="md-nav__link">
-    <span class="md-ellipsis">
-      6. (Option A Only) Pre-cache UID/GID Mappings
+      Create the Keycloak Client
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#7-option-a-only-managing-credentials" class="md-nav__link">
+  <a href="#configure-himmelblau" class="md-nav__link">
     <span class="md-ellipsis">
-      7. (Option A Only) Managing Credentials
+      Configure Himmelblau
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#conclusion" class="md-nav__link">
+  <a href="#apply-the-configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      Conclusion
+      Apply the Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
     </span>
   </a>
   
@@ -1521,110 +1413,134 @@
   
 
 
-  <h1>Creating an Entra ID Application for Himmelblau GroupMember.Read.All and User.Read.All Permissions</h1>
-
-<h2 id="overview">Overview</h2>
-<p>Himmelblau requires additional API permissions to read group names and extended attributes such as a groups' <code>gidNumber</code> or users' <code>uidNumber</code> (which is essential for RFC2307 attribute ID mapping). The following instructions guide you through registering an Azure Entra ID application, assigning it permissions, and configuring Himmelblau to use either <em>delegated</em> or <em>confidential client</em> authentication.</p>
-<p>With the default configuration, Himmelblau will attempt to resolve group memberships by masquerading as the Edge browser with <strong>delegated access</strong>, but this doesn't work in every tenant, and has the limitation of only resolving group memberships <em>after</em> each user has authenticated.</p>
-<blockquote>
-<p><strong>Note:</strong><br />
-- If you set up <strong>confidential client credentials</strong> (client secret or certificate) using <code>aad-tool cred</code>, you do <strong>not</strong> need to specify an <code>app_id</code> in <code>himmelblau.conf</code>.<br />
-- If you choose <strong>delegated access</strong>, you must set an <code>app_id</code> in your configuration.</p>
-</blockquote>
-<h2 id="1-register-a-new-application-in-azure-entra-id">1. Register a New Application in Azure Entra ID</h2>
-<ol>
-<li>Navigate to the <a href="https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/Overview">Azure Entra ID portal</a>.</li>
-<li>In the left-hand menu, select <strong>App registrations</strong>.</li>
-<li>Click <strong>New registration</strong>.</li>
-<li>Enter a <strong>Name</strong> for the application (e.g., <code>Himmelblau</code>).</li>
-<li>Under <strong>Supported account types</strong>, choose <strong>Accounts in this organizational directory only</strong>.</li>
-<li>Under <strong>Redirect URI</strong>, choose <strong>Public client/native (mobile &amp; desktop)</strong> for the <strong>platform</strong> and enter <code>himmelblau://Himmelblau.EntraId.BrokerPlugin</code> for the URI.</li>
-<li>Click <strong>Register</strong>.</li>
-</ol>
-<p><img alt="Register a New Application in Azure Entra ID" src="../app-reg1.png" /></p>
-<h2 id="2-assign-api-permissions">2. Assign API Permissions</h2>
-<ol>
-<li>In the newly created application, navigate to <strong>API permissions</strong>.</li>
-<li>Click <strong>Add a permission</strong>.</li>
-<li>Select <strong>Microsoft Graph</strong>.</li>
-<li>If utilizing Confidential Client Credentials (Option A below) choose <strong>Application permissions</strong>, otherwise choose <strong>Delegated permissions</strong> (Option B).</li>
-<li>Search for <code>GroupMember.Read.All</code> and select it. Also search for <code>User.Read.All</code> and add this permission.</li>
-<li>Click <strong>Add permissions</strong>.</li>
-</ol>
-<p><img alt="Assign API Permissions" src="../app-reg2.png" /></p>
-<ol>
-<li>Click <strong>Grant admin consent</strong> to approve these permissions for your tenant.</li>
-<li>Continue with the same procedure for the User.Read.All permission.</li>
-</ol>
-<blockquote>
-<p><strong>Warning!:</strong>
-Never use Group.Read.All instead of the GroupMember.Read.All permission, because for Microsoft 365 groups, Group.* permissions <a href="https://learn.microsoft.com/en-us/graph/permissions-reference">grant the app access to the contents of the group</a>; for example, conversations, files, notes, and so on.</p>
-</blockquote>
-<p><img alt="Grant Admin Consent" src="../app-reg3.png" /></p>
-<h3 id="3-obtain-the-application-id">3. Obtain the Application ID</h3>
-<ol>
-<li>Go to <strong>Overview</strong> in the application’s page.</li>
-<li>Copy the <strong>Application (client) ID</strong>. This value will be used in Himmelblau’s configuration.</li>
-</ol>
-<h2 id="4-configure-authentication-in-himmelblau">4. Configure Authentication in Himmelblau</h2>
-<p>You have two main options for enumerating users and group memberships:</p>
-<hr />
-<h3 id="option-a-using-confidential-client-credentials-recommended">Option A: Using Confidential Client Credentials (Recommended)</h3>
-<p>This method stores a <strong>client secret</strong> or <strong>client certificate</strong> securely in Himmelblau’s encrypted cache and removes the need to specify an <code>app_id</code> in <code>himmelblau.conf</code>.</p>
-<h4 id="store-a-client-secret">Store a client secret</h4>
-<div class="highlight"><pre><span></span><code>aad-tool<span class="w"> </span>cred<span class="w"> </span>secret<span class="w"> </span>--client-id<span class="w"> </span>&lt;CLIENT_ID&gt;<span class="w"> </span>--domain<span class="w"> </span>&lt;DOMAIN&gt;<span class="w"> </span>--secret<span class="w"> </span>&lt;SECRET_VALUE&gt;
-</code></pre></div>
-<ol>
-<li>In the Entra ID portal, under <strong>Certificates &amp; secrets</strong>, create a new <strong>Client secret</strong>.</li>
-<li>Copy the <strong>Value</strong> immediately (you won’t see it again) and use it with the above command.</li>
-</ol>
-<h4 id="or-set-up-a-client-certificate">Or set up a client certificate</h4>
-<div class="highlight"><pre><span></span><code>aad-tool<span class="w"> </span>cred<span class="w"> </span>cert<span class="w"> </span>--client-id<span class="w"> </span>&lt;CLIENT_ID&gt;<span class="w"> </span>--domain<span class="w"> </span>&lt;DOMAIN&gt;<span class="w"> </span>--valid-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>--cert-out<span class="w"> </span>/tmp/my-cert.crt
-</code></pre></div>
-<ol>
-<li>Upload <code>/tmp/my-cert.crt</code> in the Entra ID portal under <strong>Certificates &amp; secrets &gt; Certificates</strong>.</li>
-</ol>
-<p>The private key never leaves your TPM or software HSM.</p>
-<blockquote>
-<p><strong>Note:</strong> 
-These credentials expire, and you'll need to repeat these steps <em>each</em> time the credentials expire.</p>
-</blockquote>
-<hr />
-<h3 id="option-b-using-delegated-authentication">Option B: Using Delegated Authentication</h3>
-<p>If you do <strong>not</strong> configure confidential client credentials, add your application ID to <code>himmelblau.conf</code> for delegated authentication.</p>
-<div class="highlight"><pre><span></span><code><span class="k">[example.com]</span>
-<span class="na">app_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">98fa618b-e5d2-4697-b0fd-fe3ec5eecdd3</span>
-</code></pre></div>
-<p>Replace with your actual <strong>Application (client) ID</strong> found in the app’s <strong>Overview</strong> page.</p>
-<blockquote>
-<p><strong>Note:</strong> 
-This method prevents the enumeration of rfc2307 attributes and group memberships until <em>after</em> each user authenticates. Utilizing the <code>aad-tool enumerate</code> command can improve attribute resolution, but will need to be performed each time a new user is added to the directory (or whenever their posix attributes are added/modified).</p>
-</blockquote>
-<hr />
-<h3 id="5-restart-himmelblau-services">5. Restart Himmelblau Services</h3>
-<p>To apply changes, restart Himmelblau:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>himmelblaud
-sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>himmelblaud-tasks
-</code></pre></div>
-<h2 id="6-option-a-only-pre-cache-uidgid-mappings">6. (<strong>Option A Only</strong>) Pre-cache UID/GID Mappings</h2>
-<p>You can optionally pre-fetch all users and groups with RFC2307 attributes:</p>
-<div class="highlight"><pre><span></span><code>aad-tool<span class="w"> </span>enumerate
-</code></pre></div>
-<p>This avoids lookups being triggered on first login.</p>
-<p>User and group enumeration is <strong>only</strong> available when Confidential Client Credentials are configured (<strong>Option A</strong> above).</p>
-<h2 id="7-option-a-only-managing-credentials">7. (<strong>Option A Only</strong>) Managing Credentials</h2>
+<h1 id="using-keycloak-with-himmelblau">Using Keycloak with Himmelblau</h1>
+<p>This guide shows how to configure a Keycloak OpenID Connect client for Himmelblau. Keycloak acts as the OIDC issuer, and Himmelblau uses the Keycloak client ID as its <code>app_id</code>.</p>
+<p>The Keycloak client must allow <strong>OAuth 2.0 Device Authorization Grant</strong>. This is required for the classic Device Authorization Grant login flow, and it is still required when using the Himmelblau orchestrator.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before you begin, make sure you have:</p>
 <ul>
-<li>List stored credentials:</li>
+<li>A working Keycloak instance.</li>
+<li>Administrator access to the Keycloak realm that should authenticate Linux users.</li>
+<li>Himmelblau installed on the Linux client.</li>
+<li>Network connectivity from the Linux client to the Keycloak issuer URL.</li>
 </ul>
-<div class="highlight"><pre><span></span><code>aad-tool<span class="w"> </span>cred<span class="w"> </span>list<span class="w"> </span>--domain<span class="w"> </span>&lt;DOMAIN&gt;
+<p>The examples below use these values:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Keycloak base URL</td>
+<td><code>https://keycloak.example.com</code></td>
+</tr>
+<tr>
+<td>Realm</td>
+<td><code>himmelblau</code></td>
+</tr>
+<tr>
+<td>Client ID</td>
+<td><code>himmelblau-login</code></td>
+</tr>
+<tr>
+<td>Issuer URL</td>
+<td><code>https://keycloak.example.com/realms/himmelblau</code></td>
+</tr>
+</tbody>
+</table>
+<p>Replace these examples with values from your own Keycloak environment.</p>
+<h2 id="authentication-flows">Authentication Flows</h2>
+<p>Himmelblau can authenticate against Keycloak in two user-facing ways.</p>
+<h3 id="classic-device-authorization-grant">Classic Device Authorization Grant</h3>
+<p>Without the orchestrator, Himmelblau uses the Device Authorization Grant directly. During login, the Linux system displays a URL and code, or a QR code. The user opens the URL in a browser, often on another device such as a phone, and completes the Keycloak login there.</p>
+<p>This flow is useful because it does not require the Linux login screen to host a full browser interaction. The tradeoff is that first login is not completed entirely at the Linux login prompt.</p>
+<h3 id="orchestrated-login">Orchestrated Login</h3>
+<p>With <code>orchestrator_enabled = true</code>, available in Himmelblau 4.x and newer, Himmelblau orchestrates the login through the native Linux PAM flow. The user enters their Keycloak credentials through the local Linux login prompt, and the sign-in is completed on the same device.</p>
+<p>The orchestrator changes the login experience. It does not remove the requirement to enable <strong>OAuth 2.0 Device Authorization Grant</strong> on the Keycloak client.</p>
+<h2 id="create-the-keycloak-client">Create the Keycloak Client</h2>
+<p>Log in to the Keycloak Admin Console and select the realm that should authenticate Himmelblau users. In this guide, the realm is <code>himmelblau</code>.</p>
+<p>In the left navigation, open <strong>Clients</strong>, then select <strong>Create client</strong>.</p>
+<p><img alt="Create a Keycloak client" src="01_create_client.png" /></p>
+<p>For <strong>Client type</strong>, select <strong>OpenID Connect</strong>. Set <strong>Client ID</strong> to the value that Himmelblau will use as <code>app_id</code>.</p>
+<p>For example:</p>
+<div class="highlight"><pre><span></span><code>himmelblau-login
 </code></pre></div>
+<p>Then click <strong>Next</strong>.</p>
+<p><img alt="Set the Keycloak client ID" src="02_set_client_id_and_next.png" /></p>
+<p>On the capability configuration page, enable <strong>OAuth 2.0 Device Authorization Grant</strong>.</p>
+<p>Leave the other authentication flow settings at their defaults unless your environment has a specific reason to change them. The important setting for Himmelblau is that <strong>OAuth 2.0 Device Authorization Grant</strong> is enabled.</p>
+<p><img alt="Enable OAuth 2.0 Device Authorization Grant" src="03_device_authorization_grant.png" /></p>
+<p>Click <strong>Next</strong>.</p>
+<p>On the login settings page, leave the URL fields blank. Himmelblau does not need a web redirect URL for this client setup.</p>
+<p><img alt="Leave Keycloak client URLs blank" src="04_leave_urls_blank.png" /></p>
+<p>Click <strong>Save</strong>.</p>
+<p>Keycloak opens the newly created client. Confirm that the client exists and that the client ID matches the value you plan to configure in Himmelblau.</p>
+<p><img alt="The created Keycloak client" src="05_the_created_client.png" /></p>
+<h2 id="configure-himmelblau">Configure Himmelblau</h2>
+<p>Edit <code>/etc/himmelblau/himmelblau.conf</code> on the Linux client.</p>
+<p>For the classic Device Authorization Grant flow, use:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[global]</span>
+<span class="na">oidc_issuer_url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">https://keycloak.example.com/realms/himmelblau</span>
+<span class="na">app_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">himmelblau-login</span>
+</code></pre></div>
+<p>For Himmelblau 4.x and newer, you may optionally enable the orchestrator:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[global]</span>
+<span class="na">oidc_issuer_url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">https://keycloak.example.com/realms/himmelblau</span>
+<span class="na">app_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">himmelblau-login</span>
+<span class="na">orchestrator_enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+</code></pre></div>
+<p>The configuration values are:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>oidc_issuer_url</code></td>
+<td>The Keycloak realm issuer URL. For a realm named <code>himmelblau</code>, this is <code>https://keycloak.example.com/realms/himmelblau</code>.</td>
+</tr>
+<tr>
+<td><code>app_id</code></td>
+<td>The Keycloak client ID. This must exactly match the client ID created in Keycloak.</td>
+</tr>
+<tr>
+<td><code>orchestrator_enabled</code></td>
+<td>Optional. Only relevant for Himmelblau 4.x and newer. When set to <code>true</code>, Himmelblau uses the native PAM-oriented orchestrated login flow on the same device.</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>oidc_issuer_url</code> must match the issuer advertised by Keycloak for the selected realm. The <code>app_id</code> must match the Keycloak client ID, not the realm name or the display name.</p>
+<h2 id="apply-the-configuration">Apply the Configuration</h2>
+<p>Restart the Himmelblau services after changing <code>/etc/himmelblau/himmelblau.conf</code>:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>himmelblaud<span class="w"> </span>himmelblaud-tasks<span class="w"> </span>himmelblaud-orchestrator
+</code></pre></div>
+<p>Then test authentication with a Keycloak user:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>aad-tool<span class="w"> </span>auth-test<span class="w"> </span>--name<span class="w"> </span>user@example.com
+</code></pre></div>
+<p>Replace <code>user@example.com</code> with the account identifier your Keycloak realm expects.</p>
+<p>With the classic Device Authorization Grant flow, the test or login flow should show a URL and code, or a QR code, and the user completes authentication in a browser.</p>
+<p>With <code>orchestrator_enabled = true</code> on Himmelblau 4.x or newer, login should use the native Linux PAM flow and complete on the same device.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p>If authentication fails, check the following items first:</p>
 <ul>
-<li>Remove credentials if needed:</li>
+<li>Confirm that the Linux client can reach the Keycloak issuer URL over HTTPS.</li>
+<li>Confirm that you selected the correct Keycloak realm before creating the client.</li>
+<li>Confirm that <code>app_id</code> exactly matches the Keycloak client ID.</li>
+<li>Confirm that <code>oidc_issuer_url</code> points to the realm issuer URL, for example <code>https://keycloak.example.com/realms/himmelblau</code>.</li>
+<li>Confirm that <strong>OAuth 2.0 Device Authorization Grant</strong> is enabled on the Keycloak client.</li>
+<li>Do not disable Device Authorization Grant just because the orchestrator is enabled. The Keycloak client still requires it.</li>
+<li>If you set <code>orchestrator_enabled = true</code>, confirm that the client is running Himmelblau 4.x or newer and that the <code>himmelblau-orchestrator</code> package is installed.</li>
 </ul>
-<div class="highlight"><pre><span></span><code>aad-tool<span class="w"> </span>cred<span class="w"> </span>delete<span class="w"> </span>--domain<span class="w"> </span>&lt;DOMAIN&gt;
+<p>Use the system journal for detailed logs:</p>
+<div class="highlight"><pre><span></span><code>journalctl<span class="w"> </span>-u<span class="w"> </span>himmelblaud<span class="w"> </span>-u<span class="w"> </span>himmelblaud-orchestrator
 </code></pre></div>
-<h2 id="conclusion">Conclusion</h2>
-<p>By following these steps, Himmelblau will be able to retrieve group information necessary for accurate ID mapping using Entra ID. Ensure that the application has the necessary permissions and is correctly configured in <code>himmelblau.conf</code> for seamless integration.</p>
+<p>If you enable <code>debug = true</code> in your himmelblau.conf, the logs will include additional detail about provider discovery, token requests, and authentication flow selection.</p>
 
 
 

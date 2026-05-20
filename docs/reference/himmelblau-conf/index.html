@@ -1107,6 +1107,29 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/keycloak/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Using Keycloak with Himmelblau
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1956,7 +1979,10 @@ himmelblaud.</p>
 <div class="highlight"><pre><span></span><code>idmap_range = 10000000-10999999
 </code></pre></div>
 <p><strong>connection_timeout</strong>  </p>
-<p>The timeout in seconds for connections to the authentication server.</p>
+<p>The timeout in seconds for local Himmelblau daemon socket operations.
+This setting controls how long clients wait when communicating with
+local Himmelblau services; HTTP requests to authentication servers are
+controlled by request_timeout.</p>
 <p>Default: 30</p>
 <div class="highlight"><pre><span></span><code>connection_timeout = 5
 </code></pre></div>
@@ -1992,6 +2018,17 @@ directories. Set to <strong>true</strong> to enable.</p>
 Entra ID.</p>
 <p>Default: join</p>
 <div class="highlight"><pre><span></span><code>join_type = register
+</code></pre></div>
+<p><strong>request_timeout</strong>  </p>
+<p>The timeout in seconds for HTTP requests to authentication servers. This
+includes DNS resolution, connection attempts across all resolved IP
+addresses, TLS handshake, and HTTP request/response. Increase this value
+if authentication fails in environments where DNS returns many IP
+addresses for the same hostname (e.g., 7+ addresses). Default is 10
+seconds to accommodate Happy Eyeballs connection attempts across
+multiple addresses.</p>
+<p>Default: 10</p>
+<div class="highlight"><pre><span></span><code>request_timeout = 15
 </code></pre></div>
 <p><strong>user_map_file</strong>  </p>
 <p>Specifies the path to a user-mapping file used to map local user

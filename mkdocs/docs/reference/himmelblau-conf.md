@@ -729,7 +729,10 @@ idmap_range = 10000000-10999999
 
 **connection_timeout**  
 
-The timeout in seconds for connections to the authentication server.
+The timeout in seconds for local Himmelblau daemon socket operations.
+This setting controls how long clients wait when communicating with
+local Himmelblau services; HTTP requests to authentication servers are
+controlled by request_timeout.
 
 Default: 30
 
@@ -795,6 +798,22 @@ Default: join
 
 ```text
 join_type = register
+```
+
+**request_timeout**  
+
+The timeout in seconds for HTTP requests to authentication servers. This
+includes DNS resolution, connection attempts across all resolved IP
+addresses, TLS handshake, and HTTP request/response. Increase this value
+if authentication fails in environments where DNS returns many IP
+addresses for the same hostname (e.g., 7+ addresses). Default is 10
+seconds to accommodate Happy Eyeballs connection attempts across
+multiple addresses.
+
+Default: 10
+
+```text
+request_timeout = 15
 ```
 
 **user_map_file**  

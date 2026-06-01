@@ -29,9 +29,9 @@ If you'd like to make a US tax-exempt contribution, you can make contributions v
 
 ---
 
-## The Backer's Bounty – Fund a Specific Bug Fix or Feature
+## The Backer's Program – Fund a Specific Bug Fix or Feature
 
-Want to see a particular bug fixed or a new feature added to Himmelblau? Contribute to the Backer’s Bounty and help drive development forward!
+Want to see a particular bug fixed or a new feature added to Himmelblau? Contribute to the Backer’s Program and help drive development forward!
 Your financial contribution influences the priority of implementation of specific issues that matter to you and the community.
 
 ### How it works:

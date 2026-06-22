@@ -53,6 +53,25 @@ hide:
   </div>
 </section>
 
+<section class="compare-section">
+  <div class="compare-content">
+    <div class="compare-text">
+      <h2>Choosing an Identity Solution?</h2>
+      <p>
+        Compare Himmelblau with Authd, SSSD, and Microsoft's Intune for Linux to determine
+        which solution best fits your environment.
+      </p>
+    </div>
+
+    <div class="compare-action">
+      <a href="/alternatives/index.html"
+         class="md-button md-button--primary">
+        Compare Solutions →
+      </a>
+    </div>
+  </div>
+</section>
+
 <section class="capabilities">
 
   <div class="hb-slider" aria-roledescription="carousel">
@@ -109,7 +128,7 @@ hide:
 </div>
     <nav class="hb-dots" aria-label="Choose slide">
       <a href="#gif-login"   aria-label="Join & Hello Enroll">•</a>
-      <a href="#gif-display-manager" aria-label="Display Manager">•</a>
+      <!-- <a href="#gif-display-manager" aria-label="Display Manager">•</a> -->
       <a href="#gif-nss"     aria-label="Identity Lookup">•</a>
       <a href="#gif-firefox" aria-label="Browser SSO">•</a>
       <a href="#gif-o365"    aria-label="O365 Web Apps">•</a>

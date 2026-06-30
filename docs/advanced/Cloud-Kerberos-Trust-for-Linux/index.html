@@ -803,18 +803,36 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-2-configure-kerberos-on-the-linux-client" class="md-nav__link">
+  <a href="#step-2-confirm-linux-client-readiness" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 2: Configure Kerberos on the Linux Client
+      Step 2: Confirm Linux Client Readiness
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-3-validate-the-configuration-on-linux-devices" class="md-nav__link">
+  <a href="#step-3-validate-the-cloud-tgt-on-linux-devices" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 3: Validate the Configuration on Linux Devices
+      Step 3: Validate the Cloud TGT on Linux Devices
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-mount-azure-files-with-kerberos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4: Mount Azure Files with Kerberos
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-azure-files-mounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting Azure Files Mounts
     </span>
   </a>
   
@@ -1312,18 +1330,36 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-2-configure-kerberos-on-the-linux-client" class="md-nav__link">
+  <a href="#step-2-confirm-linux-client-readiness" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 2: Configure Kerberos on the Linux Client
+      Step 2: Confirm Linux Client Readiness
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-3-validate-the-configuration-on-linux-devices" class="md-nav__link">
+  <a href="#step-3-validate-the-cloud-tgt-on-linux-devices" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 3: Validate the Configuration on Linux Devices
+      Step 3: Validate the Cloud TGT on Linux Devices
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-mount-azure-files-with-kerberos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4: Mount Azure Files with Kerberos
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-azure-files-mounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting Azure Files Mounts
     </span>
   </a>
   
@@ -1355,18 +1391,23 @@
 
   <h1>Cloud Kerberos Trust for Linux</h1>
 
-<p>⚠️ <strong>Warning: This document is a work in progress. Cloud Kerberos Trust for Linux is also a work in progress and likely requires additional configuration and bug fixes to Himmelblau.</strong></p>
+<p>⚠️ <strong>Warning: This document is a work in progress. Cloud Kerberos Trust for Linux is also a work in progress and may require additional configuration and bug fixes in Himmelblau, cifs-utils, or the Linux CIFS kernel client.</strong></p>
 <h2 id="cloud-kerberos-trust-setup-for-entra-id-joined-linux-devices">Cloud Kerberos Trust Setup for Entra ID Joined Linux Devices</h2>
 <p>This guide outlines the steps to configure Cloud Kerberos Trust between Microsoft Entra ID (formerly Azure AD) and an on-premises Active Directory (AD) for Linux devices joined to Entra ID using Himmelblau.</p>
+<p>The main supported test case today is obtaining an Entra Kerberos cloud TGT at login and using that TGT to request a <code>cifs</code> service ticket for Azure Files.</p>
 <h3 id="prerequisites">Prerequisites</h3>
 <ul>
 <li>Microsoft Entra ID is configured.</li>
 <li>On-premises Active Directory is operational.</li>
-<li>Entra Id Connect is installed and synchronizing users from on-premises AD to Entra ID.</li>
+<li>Entra ID Connect is installed and synchronizing users from on-premises AD to Entra ID.</li>
 <li>Linux client is joined to Entra ID via Himmelblau.</li>
 <li>Kerberos utilities (e.g., <code>mit-krb5</code>) are installed on the Linux client.</li>
+<li><code>cifs-utils</code> 7.6 or newer is installed when mounting Azure Files with Kerberos.</li>
+<li><code>keyutils</code> is installed and the system has the standard CIFS request-key configuration for <code>cifs.spnego</code> upcalls.</li>
 <li>Network connectivity between the Linux client and on-prem AD domain controllers.</li>
 <li>Administrative privileges in both on-prem AD and Entra ID.</li>
+<li>For Azure Files, the storage account is configured for Microsoft Entra Kerberos authentication for hybrid identities. Follow Microsoft's Azure Files guide first: <a href="https://learn.microsoft.com/en-us/azure/storage/files/storage-files-identity-auth-hybrid-identities-enable">Enable Microsoft Entra Kerberos authentication for hybrid identities on Azure Files</a>.</li>
+<li>The user has the required Azure RBAC role assignment on the storage account or file share. For example, assign the appropriate Storage File Data SMB role for the access level the user needs.</li>
 </ul>
 <h3 id="step-1-configure-microsoft-entra-kerberos-server-object">Step 1: Configure Microsoft Entra Kerberos Server Object</h3>
 <ol>
@@ -1397,38 +1438,11 @@
 </ol>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-AzureADKerberosServer</span> <span class="n">-Domain</span> <span class="nv">$domain</span> <span class="n">-UserPrincipalName</span> <span class="nv">$userPrincipalName</span>
 </code></pre></div>
-<h3 id="step-2-configure-kerberos-on-the-linux-client">Step 2: Configure Kerberos on the Linux Client</h3>
-<ol>
-<li>Edit the Kerberos configuration file (<code>/etc/krb5.conf</code>):</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="w">   </span><span class="k">[libdefaults]</span>
-<span class="w">       </span><span class="na">default_realm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">EXAMPLE.COM</span>
-<span class="w">       </span><span class="na">dns_lookup_realm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
-<span class="w">       </span><span class="na">dns_lookup_kdc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
-
-<span class="w">   </span><span class="k">[realms]</span>
-<span class="w">       </span><span class="na">EXAMPLE.COM</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">{</span>
-<span class="w">           </span><span class="na">kdc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">dc1.example.com</span>
-<span class="w">           </span><span class="na">kdc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">dc2.example.com</span>
-<span class="w">           </span><span class="na">admin_server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">dc1.example.com</span>
-<span class="w">       </span><span class="na">}</span>
-
-<span class="w">   </span><span class="k">[domain_realm]</span>
-<span class="w">       </span><span class="na">.example.com</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">EXAMPLE.COM</span>
-<span class="w">       </span><span class="na">example.com</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">EXAMPLE.COM</span>
-</code></pre></div>
-<ul>
-<li>Replace <code>EXAMPLE.COM</code> with your AD domain in uppercase.</li>
-<li>Replace <code>example.com</code> with your AD domain in lowercase.</li>
-<li>
-<p>Replace <code>dc1.example.com</code> and <code>dc2.example.com</code> with FQDNs of your domain controllers.</p>
-</li>
-<li>
-<p>Verify that time synchronization between the Linux client and the domain controllers is accurate.</p>
-</li>
-</ul>
-<h3 id="step-3-validate-the-configuration-on-linux-devices">Step 3: Validate the Configuration on Linux Devices</h3>
-<p>After configuring the policies, validate that Linux devices can obtain Kerberos tickets:</p>
+<h3 id="step-2-confirm-linux-client-readiness">Step 2: Confirm Linux Client Readiness</h3>
+<p>Himmelblau configures the Kerberos client configuration automatically. Do not manually edit <code>/etc/krb5.conf</code> for the Entra Kerberos cloud TGT path unless you are debugging a specific local override.</p>
+<p>Before testing, verify that time synchronization between the Linux client and the domain controllers is accurate.</p>
+<h3 id="step-3-validate-the-cloud-tgt-on-linux-devices">Step 3: Validate the Cloud TGT on Linux Devices</h3>
+<p>After configuring the policies, validate that Linux devices can obtain an Entra Kerberos cloud TGT:</p>
 <ol>
 <li><strong>Log Out and Log In</strong>:</li>
 </ol>
@@ -1439,7 +1453,54 @@
 <p>Open a terminal and run:</p>
 <div class="highlight"><pre><span></span><code>klist
 </code></pre></div>
-<p>You should see a valid Kerberos ticket listed, indicating successful authentication.</p>
+<p>You should see a valid Kerberos ticket similar to:</p>
+<div class="highlight"><pre><span></span><code>Ticket cache: KEYRING:persistent:&lt;uid&gt;
+Default principal: user@KERBEROS.MICROSOFTONLINE.COM
+
+Valid starting       Expires              Service principal
+...                  ...                  krbtgt/KERBEROS.MICROSOFTONLINE.COM@KERBEROS.MICROSOFTONLINE.COM
+</code></pre></div>
+<p>Himmelblau currently issues Kerberos tickets into a keyring credential cache. File-based credential caches such as <code>FILE:/tmp/krb5cc_&lt;uid&gt;</code> are not supported by Himmelblau.</p>
+<h3 id="step-4-mount-azure-files-with-kerberos">Step 4: Mount Azure Files with Kerberos</h3>
+<p>After the user has logged in and <code>klist</code> shows the cloud TGT, mount the Azure Files share with <code>sec=krb5</code>, the user's numeric UID as <code>cruid</code>, and the same numeric UID as <code>username</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">uid</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span><span class="s2">&quot;</span>
+sudo<span class="w"> </span>mount.cifs<span class="w"> </span>//&lt;storage-account&gt;.file.core.windows.net/&lt;share&gt;<span class="w"> </span>&lt;mount-point&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span><span class="nv">sec</span><span class="o">=</span>krb5,cruid<span class="o">=</span><span class="s2">&quot;</span><span class="nv">$uid</span><span class="s2">&quot;</span>,username<span class="o">=</span><span class="s2">&quot;</span><span class="nv">$uid</span><span class="s2">&quot;</span>
+</code></pre></div>
+<p>For example:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">uid</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span><span class="s2">&quot;</span>
+sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/mnt/azfiles
+sudo<span class="w"> </span>mount.cifs<span class="w"> </span>//contosostorage.file.core.windows.net/files<span class="w"> </span>/mnt/azfiles<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span><span class="nv">sec</span><span class="o">=</span>krb5,cruid<span class="o">=</span><span class="s2">&quot;</span><span class="nv">$uid</span><span class="s2">&quot;</span>,username<span class="o">=</span><span class="s2">&quot;</span><span class="nv">$uid</span><span class="s2">&quot;</span>
+</code></pre></div>
+<p>Important details:</p>
+<ul>
+<li>Use the storage account FQDN exactly as <code>&lt;storage-account&gt;.file.core.windows.net</code>.</li>
+<li>Run the mount after the Himmelblau user has logged in and has a cloud TGT in the keyring cache.</li>
+<li>Keep <code>cruid</code> set to the UID of the logged-in Himmelblau user. This tells the CIFS upcall which user's credential cache should be used.</li>
+<li>Do not switch Himmelblau to a file credential cache to work around CIFS failures. Himmelblau does not currently support issuing file-based ccaches.</li>
+<li>If your distribution provides <code>cifs-utils</code> older than 7.6, upgrade it before testing Azure Files Kerberos mounts.</li>
+</ul>
+<h3 id="troubleshooting-azure-files-mounts">Troubleshooting Azure Files Mounts</h3>
+<p>If the mount fails with <code>mount error(126): Required key not available</code>, inspect the CIFS logs:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>journalctl<span class="w"> </span>-xe<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>cifs
+</code></pre></div>
+<p>A failure like this means <code>cifs.upcall</code> did not find a usable TGT for the requested user:</p>
+<div class="highlight"><pre><span></span><code>cifs.upcall: main: valid TGT is not present in credential cache
+cifs.upcall: Unable to obtain service ticket
+CIFS: VFS: \\&lt;storage-account&gt;.file.core.windows.net failed to create a new SMB session with Kerberos: -126
+</code></pre></div>
+<p>Check the following before assuming the storage account is misconfigured:</p>
+<ul>
+<li><code>klist</code> for the logged-in user shows <code>KEYRING:</code> as the ticket cache type and contains <code>krbtgt/KERBEROS.MICROSOFTONLINE.COM@KERBEROS.MICROSOFTONLINE.COM</code>.</li>
+<li>The mount command uses <code>cruid="$(id -u)"</code> for the logged-in user who owns the TGT.</li>
+<li>The mount command includes <code>username="$(id -u)"</code>.</li>
+<li>The installed <code>cifs-utils</code> package is version 7.6 or newer.</li>
+<li><code>keyutils</code> is installed and <code>/etc/request-key.conf</code> or <code>/etc/request-key.d/</code> contains a <code>cifs.spnego</code> rule that invokes <code>cifs.upcall</code>.</li>
+<li>The Azure Files share works from a Windows client with the same identity.</li>
+<li>The user has the required Storage File Data SMB role assignment on the storage account or share.</li>
+</ul>
+<p>If these checks pass and <code>cifs.upcall</code> still reports that a valid TGT is not present, collect the <code>klist</code> output, the exact <code>mount.cifs</code> command, the <code>cifs-utils</code> version, and the relevant <code>journalctl</code> CIFS lines when reporting the issue.</p>
 
 
 

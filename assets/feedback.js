@@ -1,6 +1,6 @@
 (function () {
   const FEEDBACK_URL =
-    "https://sambaxp.org/#Registration";
+    "https://www.snia.org/sniadeveloper/SDCUS";
   const STORAGE_KEY = "hb_hide_feedback_fab_v2";
 
   // Respect prior dismissal
@@ -12,7 +12,7 @@
     <a class="hb-fab__link"
        href="${FEEDBACK_URL}"
        target="_blank" rel="noopener noreferrer">
-      <span class="hb-fab__text">📢 Register to join us at sambaXP April 2026!
+      <span class="hb-fab__text">📢 Join us at SNIA Developer Conference 2026!
     </a>
     <button class="hb-fab__close" type="button" aria-label="Hide this message">×</button>
   `;

@@ -18,6 +18,11 @@ hide:
       <img src="assets/ix-logo.svg" alt="iX Magazine" class="press-float-logo">
       <span class="press-float-text">iX Magazine</span>
     </a>
+    <a href="https://github.blog/open-source/maintainers/securing-the-ai-software-supply-chain-security-results-across-67-open-source-projects/" target="_blank" rel="noopener" class="security-fund-float" aria-label="Read about Himmelblau in the GitHub Secure Open Source Fund">
+      <span class="security-fund-float__badge">Security Program</span>
+      <span class="security-fund-float__title">GitHub Secure Open Source Fund</span>
+      <span class="security-fund-float__copy">Himmelblau participated in GitHub's project security initiative.</span>
+    </a>
     <aside class="hb-donate-banner" id="hb-donate-banner" role="region" aria-label="Support Himmelblau">
       <div class="hb-donate-banner__inner">
         <div class="hb-donate-banner__text">

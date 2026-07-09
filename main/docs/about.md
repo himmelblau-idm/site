@@ -28,6 +28,12 @@ Himmelblau supports multiple enterprise and community Linux distributions such a
 
 Himmelblau exists to make Linux work cleanly with Entra ID and Intune - open, auditable, and production-ready - so admins get Windows-grade login, MFA, and device management without vendor lock-in.
 
+## Security Investment
+
+Himmelblau participated in the [GitHub Secure Open Source Fund](https://github.blog/open-source/maintainers/securing-the-ai-software-supply-chain-security-results-across-67-open-source-projects/), a security-focused program for open source projects.
+
+The program supports maintainers with funding, security training, and resources for strengthening open-source supply-chain practices. For Himmelblau, that fits the project's core goal: auditable identity integration for Linux systems that organizations can trust and improve in the open.
+
 ## Get Involved
 
 Contribute to Himmelblau's development by visiting our [GitHub page](https://github.com/himmelblau-idm/himmelblau).

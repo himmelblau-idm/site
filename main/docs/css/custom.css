@@ -658,6 +658,50 @@ body[data-home="true"] .press-float:hover {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.22);
 }
 
+body[data-home="true"] .security-fund-float {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  max-width: 18rem;
+  padding: 0.8rem 0.95rem 0.95rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 10;
+}
+
+body[data-home="true"] .security-fund-float:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.22);
+}
+
+body[data-home="true"] .security-fund-float__badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+  background: #1f6feb;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.25rem;
+}
+
+body[data-home="true"] .security-fund-float__title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+body[data-home="true"] .security-fund-float__copy {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: #41556f;
+}
+
 body[data-home="true"] .hb-workshop-banner {
   position: static;
   background: transparent;
@@ -761,10 +805,39 @@ body[data-home="true"] .press-float-text {
   color: #333;
 }
 
+@media (max-width: 900px) {
+  body[data-home="true"] .hero-floats {
+    position: static;
+    margin: 1rem 1rem 0;
+    max-width: none;
+    justify-content: flex-end;
+  }
+
+  body[data-home="true"] .security-fund-float,
+  body[data-home="true"] .hb-donate-banner,
+  body[data-home="true"] .hb-workshop-banner {
+    max-width: none;
+    width: 100%;
+  }
+}
+
 /* Responsive: smaller on mobile */
 @media (max-width: 768px) {
   body[data-home="true"] .press-float {
     padding: 0.5rem 0.75rem 0.75rem;
+  }
+
+  body[data-home="true"] .security-fund-float {
+    max-width: none;
+    padding: 0.65rem 0.75rem 0.75rem;
+  }
+
+  body[data-home="true"] .security-fund-float__title {
+    font-size: 0.8rem;
+  }
+
+  body[data-home="true"] .security-fund-float__copy {
+    font-size: 0.7rem;
   }
 
   body[data-home="true"] .press-float-logo {

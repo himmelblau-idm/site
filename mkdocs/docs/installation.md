@@ -51,18 +51,37 @@ This page covers how to install Himmelblau on Ubuntu, Debian, RHEL, Rocky, SUSE,
 
 ## Installation
 
-### Prebuilt Packages (Recommended)
+### Bootstrap Installer (Recommended)
 
-Himmelblau provides prebuilt packages for all major Linux distributions — including Debian, Ubuntu, Fedora, Rocky Linux, RHEL, openSUSE Leap, SLE, and NixOS — via our official build server.
+For most users, install Himmelblau with the bootstrap installer:
 
-➡️ **[Visit the Downloads page](https://himmelblau-idm.org/downloads)** to:
+```sh
+curl -fsSL https://himmelblau-idm.org/install | sh
+```
 
-- Select your distribution and release channel (Stable / Nightly)
-- View the correct repository setup commands for your system
-- Copy one-click install instructions for your package manager (`apt`, `dnf`, or `zypper`)
+The bootstrapper detects your distribution, offers the supported package sources, adds the trusted Himmelblau repository when needed, installs packages with your native package manager, and asks whether to configure Microsoft Entra ID or a generic OIDC provider such as Google Workspace, Okta, or Keycloak.
+
+For Entra ID, it writes a `domain` setting. For generic OIDC, it writes `oidc_issuer_url` and `app_id`. If `/etc/himmelblau/himmelblau.conf` already contains a complete identity provider configuration, the bootstrapper treats it as an upgrade or repair install and leaves the file unchanged.
+
+After package installation and configuration, the bootstrapper enables and starts both `himmelblaud` and `himmelblaud-tasks`.
+
+The bootstrapper does **not** download or install Himmelblau binaries directly. It delegates installation to `apt`, `dnf`, or `zypper`, and relies on package repositories and package signatures.
 
 > This is the **recommended** installation method for production systems and most users.
-> The downloads page is always kept in sync with the latest release metadata on [packages.himmelblau-idm.org](https://packages.himmelblau-idm.org/).
+
+---
+
+### Manual Repository Setup (Advanced)
+
+Use the manual repository instructions if you manage repositories with configuration management, need to audit each command before running it, want to install optional packages explicitly, or need vendor-supported distribution packages.
+
+➡️ **[Visit the Downloads page](https://himmelblau-idm.org/downloads)** and expand **Advanced manual package repository instructions** to:
+
+- Select your distribution and release channel
+- View the correct repository setup commands for your system
+- Copy package-manager commands for `apt`, `dnf`, or `zypper`
+
+The downloads page is kept in sync with the latest release metadata and support matrix used by the bootstrap installer.
 
 ---
 

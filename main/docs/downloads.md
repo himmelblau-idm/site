@@ -4,7 +4,24 @@ hide:
   - toc
 ---
 
-# Download Himmelblau for Linux
+# Linux Cloud Authentication
+
+<div class="hb-install-page">
+
+<div class="hb-install-panel">
+  <p>Run this in your terminal, then follow the onscreen instructions.</p>
+
+  <pre>curl -fsSL https://himmelblau-idm.org/install | sh</pre>
+
+  <p class="hb-install-note">Uses your native package manager and signed Himmelblau packages. <a href="https://himmelblau-idm.org/install">Review the installer</a>.</p>
+</div>
+
+<p class="hb-install-help">Need manual repository commands? Use the advanced section below.</p>
+
+<details class="hb-advanced-install">
+<summary>Advanced manual package repository instructions</summary>
+
+Use these instructions if you manage repositories with configuration management, need to review every command before running it, want to install optional packages manually, or prefer vendor-supported distribution packages where available.
 
 <div class="download-selector">
 <div id="channel-buttons" class="channel-buttons">
@@ -56,10 +73,13 @@ hide:
 </select>
 <div id="download-links" style="margin-top: 20px;"></div>
 <div id="configuration" style="display: none;"></div>
-Refer to [the documentation](../docs/index.html) for configuration.
 <script src="../js/install.js"></script>
 
 <p class="footnote">
   <span class="footnote-mark">*</span>
   Vendor-supported packages are installed using your distribution’s subscription channels (e.g. SLE, Rocky Linux).
 </p>
+
+</details>
+
+</div>

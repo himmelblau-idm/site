@@ -1,0 +1,2580 @@
+#!/bin/sh
+# Himmelblau bootstrap installer.
+#
+# This endpoint is intended for:
+#
+#   curl -fsSL https://himmelblau-idm.org/install | sh
+#
+# The shell portion only finds Python 3 and passes control to the Python
+# bootstrapper below. The Python code adds trusted package repositories and
+# installs Himmelblau with the native package manager. It does not download or
+# install Himmelblau binaries directly.
+
+set -u
+
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "error: python3 is required to run the Himmelblau installer." >&2
+    echo "Install Python 3 with your distribution package manager, then rerun this command." >&2
+    exit 1
+fi
+
+exec python3 - "$@" <<'PYTHON_PAYLOAD'
+#!/usr/bin/env python3
+import configparser
+import json
+import locale
+import os
+import re
+import shlex
+import shutil
+import subprocess
+import sys
+import tempfile
+import textwrap
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+
+
+VERSION = "2026.07.13"
+PLAN_VERSION = 1
+SUPPORT_JS_URL = "https://himmelblau-idm.org/js/install.js"
+GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
+APT_KEYRING_DIR = "/etc/apt/keyrings"
+APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
+BASE_STABLE_URL = "https://packages.himmelblau-idm.org/stable/latest"
+BASE_NIGHTLY_URL = "https://packages.himmelblau-idm.org/nightly/latest"
+CONFIG_PATH = "/etc/himmelblau/himmelblau.conf"
+LOG_PATH = os.path.expanduser("~/.cache/himmelblau-installer/install.log")
+CONFIG_BOOLEAN_DEFAULTS = {
+    "enable_hello": True,
+    "allow_console_password_only": True,
+    "apply_policy": True,
+}
+CONFIG_OPTION_KEYS = set(CONFIG_BOOLEAN_DEFAULTS) | {"pam_allow_groups"}
+
+FALLBACK_REPO_SUPPORT = {
+    "stable": {"include": [], "exclude": ["fedora44"]},
+    "nightly": {"include": [], "exclude": ["fedora42"]},
+    "subscription": {"include": ["sle15sp7", "sle16", "tumbleweed"], "exclude": []},
+}
+
+DISTRO_LABELS = {
+    "sle15sp6": "SUSE Linux Enterprise 15 SP6 / openSUSE Leap 15.6",
+    "sle15sp7": "SUSE Linux Enterprise 15 SP7",
+    "sle16": "SUSE Linux Enterprise 16 / openSUSE Leap 16",
+    "tumbleweed": "openSUSE Tumbleweed",
+    "rocky8": "RHEL/Rocky/Alma/Oracle Linux 8",
+    "rocky9": "RHEL/Rocky/Alma/Oracle Linux 9",
+    "rocky10": "RHEL/Rocky/Alma/Oracle Linux 10",
+    "fedora42": "Fedora 42",
+    "fedora43": "Fedora 43",
+    "fedora44": "Fedora 44",
+    "rawhide": "Fedora Rawhide",
+    "amzn2023": "Amazon Linux 2023",
+    "debian12": "Debian 12",
+    "debian13": "Debian 13",
+    "ubuntu22.04": "Ubuntu 22.04 / Linux Mint 21.3",
+    "ubuntu24.04": "Ubuntu 24.04 / Linux Mint 22",
+    "ubuntu25.10": "Ubuntu 25.10",
+    "ubuntu26.04": "Ubuntu 26.04 / Linux Mint 23",
+}
+
+COMMUNITY_PACKAGES = ["himmelblau", "pam-himmelblau", "nss-himmelblau"]
+SUSE_SUBSCRIPTION_PACKAGES = ["himmelblau", "pam-himmelblau", "libnss_himmelblau2"]
+
+
+class InstallError(Exception):
+    pass
+
+
+class ElevationError(InstallError):
+    pass
+
+
+class Ui:
+    def info(self, message):
+        raise NotImplementedError
+
+    def warn(self, message):
+        raise NotImplementedError
+
+    def error(self, message):
+        raise NotImplementedError
+
+    def confirm(self, message, default=False):
+        raise NotImplementedError
+
+    def choose(self, title, choices):
+        raise NotImplementedError
+
+    def ask(self, prompt, default=None, validator=None):
+        raise NotImplementedError
+
+
+class CliUi(Ui):
+    def __init__(self):
+        self.tty = None
+        try:
+            self.tty = open("/dev/tty", "r+", encoding="utf-8")
+        except OSError:
+            if not sys.stdin.isatty():
+                raise InstallError("No interactive terminal is available. Rerun this installer from a terminal.")
+
+    def _in(self):
+        return self.tty if self.tty else sys.stdin
+
+    def _out(self):
+        return self.tty if self.tty else sys.stdout
+
+    def info(self, message):
+        print(message, file=self._out(), flush=True)
+
+    def warn(self, message):
+        print("warning: " + message, file=self._out(), flush=True)
+
+    def error(self, message):
+        print("error: " + message, file=self._out(), flush=True)
+
+    def confirm(self, message, default=False):
+        suffix = " [Y/n] " if default else " [y/N] "
+        while True:
+            print(message + suffix, end="", file=self._out(), flush=True)
+            answer = self._in().readline()
+            if answer == "":
+                raise InstallError("Input closed before confirmation.")
+            answer = answer.strip().lower()
+            if not answer:
+                return default
+            if answer in ("y", "yes"):
+                return True
+            if answer in ("n", "no"):
+                return False
+            self.warn("Please answer yes or no.")
+
+    def choose(self, title, choices):
+        self.info("")
+        self.info(title)
+        for index, choice in enumerate(choices, 1):
+            self.info(f"  {index}. {choice['label']}")
+        while True:
+            print("Select an option [1]: ", end="", file=self._out(), flush=True)
+            answer = self._in().readline()
+            if answer == "":
+                raise InstallError("Input closed before selection.")
+            answer = answer.strip()
+            if not answer:
+                return choices[0]["value"]
+            if answer.isdigit() and 1 <= int(answer) <= len(choices):
+                return choices[int(answer) - 1]["value"]
+            self.warn(f"Choose a number from 1 to {len(choices)}.")
+
+    def ask(self, prompt, default=None, validator=None):
+        suffix = f" [{default}]: " if default else ": "
+        while True:
+            print(prompt + suffix, end="", file=self._out(), flush=True)
+            answer = self._in().readline()
+            if answer == "":
+                raise InstallError("Input closed before prompt completed.")
+            answer = answer.strip() or default
+            if validator:
+                ok, message = validator(answer)
+                if not ok:
+                    self.warn(message)
+                    continue
+            return answer
+
+
+class CollectUi(Ui):
+    def __init__(self):
+        self.messages = []
+        self.warnings = []
+
+    def info(self, message):
+        self.messages.append(message)
+
+    def warn(self, message):
+        self.warnings.append(message)
+
+    def error(self, message):
+        self.warnings.append(message)
+
+
+class LogUi(Ui):
+    def info(self, message):
+        print(message, flush=True)
+
+    def warn(self, message):
+        print("warning: " + message, file=sys.stderr, flush=True)
+
+    def error(self, message):
+        print("error: " + message, file=sys.stderr, flush=True)
+
+
+def log(message):
+    try:
+        os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+        with open(LOG_PATH, "a", encoding="utf-8") as handle:
+            handle.write(time.strftime("%Y-%m-%d %H:%M:%S ") + message + "\n")
+    except OSError:
+        pass
+
+
+def worker_event_log_message(event):
+    etype = event.get("type")
+    if etype == "step":
+        return "Step %s of %s: %s" % (event.get("index"), event.get("total"), event.get("kind"))
+    if etype == "done":
+        return "Finishing..."
+    if etype in ("command", "output", "warning", "info", "error"):
+        return event.get("text") or None
+    return None
+
+
+def log_worker_event(event):
+    message = worker_event_log_message(event)
+    if message:
+        log(message)
+
+
+def shell_join(argv):
+    return " ".join(shlex.quote(str(part)) for part in argv)
+
+
+def has_interactive_terminal():
+    if sys.stdin.isatty():
+        return True
+    try:
+        handle = open("/dev/tty", "r+", encoding="utf-8")
+    except OSError:
+        return False
+    handle.close()
+    return True
+
+
+def run(argv, ui, check=True, input_text=None):
+    log("$ " + shell_join(argv))
+    ui.info("Running: " + shell_join(argv))
+    try:
+        proc = subprocess.run(
+            argv,
+            input=input_text,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+        )
+    except FileNotFoundError:
+        raise InstallError(f"Required command not found: {argv[0]}")
+    output = proc.stdout or ""
+    if output:
+        for line in output.splitlines()[-80:]:
+            log(line)
+    if check and proc.returncode != 0:
+        tail = "\n".join(output.splitlines()[-20:])
+        detail = f"\n\nLast command output:\n{tail}" if tail else ""
+        raise InstallError(f"Command failed with exit code {proc.returncode}: {shell_join(argv)}{detail}")
+    return proc
+
+
+def install_text(path, text, mode, ui):
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
+        handle.write(text)
+        temp_path = handle.name
+    try:
+        run(sudo_prefix() + ["install", "-m", mode, temp_path, path], ui)
+    finally:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+
+
+def install_bytes(path, data, mode, ui):
+    with tempfile.NamedTemporaryFile("wb", delete=False) as handle:
+        handle.write(data)
+        temp_path = handle.name
+    try:
+        run(sudo_prefix() + ["install", "-m", mode, temp_path, path], ui)
+    finally:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+
+
+def sudo_prefix():
+    return [] if os.geteuid() == 0 else ["sudo"]
+
+
+def read_os_release(path="/etc/os-release"):
+    data = {}
+    try:
+        with open(path, encoding="utf-8") as handle:
+            for raw in handle:
+                raw = raw.strip()
+                if not raw or raw.startswith("#") or "=" not in raw:
+                    continue
+                key, value = raw.split("=", 1)
+                data[key] = value.strip().strip('"')
+    except OSError as err:
+        raise InstallError(f"Unable to read {path}: {err}")
+    return data
+
+
+def major_version(info):
+    version = info.get("VERSION_ID", "")
+    match = re.match(r"(\d+)", version)
+    return match.group(1) if match else ""
+
+
+def distro_target(info):
+    distro_id = info.get("ID", "").lower()
+    like = set(info.get("ID_LIKE", "").lower().split())
+    version = info.get("VERSION_ID", "")
+    version_codename = info.get("VERSION_CODENAME", "").lower()
+
+    if distro_id == "opensuse-tumbleweed" or version_codename == "tumbleweed":
+        return "tumbleweed"
+    if distro_id in ("opensuse-leap", "sles", "sle", "sled"):
+        if version.startswith("15.6") or version.startswith("15-SP6"):
+            return "sle15sp6"
+        if version.startswith("15.7") or version.startswith("15-SP7"):
+            return "sle15sp7"
+        if version.startswith("16"):
+            return "sle16"
+    if distro_id == "fedora":
+        if version.lower() == "rawhide":
+            return "rawhide"
+        return "fedora" + major_version(info)
+    if distro_id in ("rhel", "rocky", "almalinux", "ol", "oracle") or "rhel" in like:
+        major = major_version(info)
+        if major in ("8", "9", "10"):
+            return "rocky" + major
+    if distro_id == "amzn" and version.startswith("2023"):
+        return "amzn2023"
+    if distro_id == "debian":
+        major = major_version(info)
+        if major in ("12", "13"):
+            return "debian" + major
+    if distro_id == "ubuntu":
+        return "ubuntu" + version
+    if distro_id == "linuxmint":
+        if version.startswith("21."):
+            return "ubuntu22.04"
+        if version.startswith("22"):
+            return "ubuntu24.04"
+        if version.startswith("23"):
+            return "ubuntu26.04"
+    if distro_id == "nixos":
+        return "nixos"
+    return None
+
+
+def package_manager(target):
+    if target.startswith("ubuntu") or target.startswith("debian"):
+        return "apt"
+    if target.startswith("sle") or target == "tumbleweed":
+        return "zypper"
+    if target == "nixos":
+        return "nix"
+    return "dnf"
+
+
+def required_manager_command(target):
+    if target.startswith("ubuntu") or target.startswith("debian"):
+        return "apt-get"
+    return package_manager(target)
+
+
+def is_deb(target):
+    return target.startswith("ubuntu") or target.startswith("debian")
+
+
+def is_suse(target):
+    return target.startswith("sle") or target == "tumbleweed"
+
+
+def is_supported(matrix, channel, target):
+    cfg = matrix.get(channel, {"include": [], "exclude": []})
+    include = cfg.get("include") or []
+    exclude = cfg.get("exclude") or []
+    if include:
+        return target in include
+    return target not in exclude
+
+
+def base_url(channel):
+    return BASE_NIGHTLY_URL if channel == "nightly" else BASE_STABLE_URL
+
+
+def extract_repo_support(js_text):
+    match = re.search(r"const\s+REPO_SUPPORT\s*=\s*(\{.*?\});", js_text, re.S)
+    if not match:
+        raise ValueError("REPO_SUPPORT object not found")
+    text = match.group(1)
+    text = re.sub(r"//.*", "", text)
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    for key in ("stable", "nightly", "subscription", "include", "exclude"):
+        text = re.sub(rf"(?<![\"'])\b{key}\b\s*:", f'"{key}":', text)
+    text = text.replace("'", '"')
+    text = re.sub(r",\s*([}\]])", r"\1", text)
+    data = json.loads(text)
+    validate_repo_support(data)
+    return data
+
+
+def validate_repo_support(data):
+    if not isinstance(data, dict):
+        raise ValueError("support matrix is not an object")
+    for channel in ("stable", "nightly", "subscription"):
+        value = data.get(channel)
+        if not isinstance(value, dict):
+            raise ValueError(f"support matrix missing {channel}")
+        for key in ("include", "exclude"):
+            entries = value.get(key)
+            if not isinstance(entries, list) or not all(isinstance(item, str) for item in entries):
+                raise ValueError(f"support matrix {channel}.{key} must be a string list")
+
+
+def load_repo_support(ui):
+    try:
+        with urllib.request.urlopen(SUPPORT_JS_URL, timeout=8) as response:
+            text = response.read(128 * 1024).decode("utf-8")
+        matrix = extract_repo_support(text)
+        log("Loaded support matrix from " + SUPPORT_JS_URL)
+        return matrix
+    except (OSError, urllib.error.URLError, ValueError) as err:
+        ui.warn(f"Could not load current support matrix; using embedded fallback. Details: {err}")
+        return FALLBACK_REPO_SUPPORT
+
+
+def channel_choices(matrix, target):
+    choices = []
+    if is_supported(matrix, "stable", target):
+        choices.append({"label": "Community Stable repository", "value": "stable"})
+    if is_supported(matrix, "nightly", target):
+        choices.append({"label": "Community Nightly repository", "value": "nightly"})
+    return choices
+
+
+def default_community_channel(matrix, target):
+    if is_supported(matrix, "stable", target):
+        return "stable", None
+    if is_supported(matrix, "nightly", target):
+        return "nightly", "Community Stable packages are not available for this distribution; using Community Nightly packages."
+    raise InstallError("Himmelblau community packages are not available for this distribution. Use the downloads page for manual repository options.")
+
+
+def validate_domain(domain):
+    if not domain:
+        return False, "Enter an Entra ID domain."
+    if len(domain) > 253:
+        return False, "Domain is too long."
+    if not re.match(r"^[A-Za-z0-9][A-Za-z0-9.-]*[A-Za-z0-9]$", domain):
+        return False, "Use a DNS-style domain such as example.onmicrosoft.com."
+    if "." not in domain:
+        return False, "Use the full domain, for example example.onmicrosoft.com."
+    return True, ""
+
+
+def validate_oidc_issuer_url(url):
+    if not url:
+        return False, "Enter the OIDC issuer URL."
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme != "https" or not parsed.netloc:
+        return False, "Use a full HTTPS issuer URL such as https://keycloak.example.com/realms/example."
+    if parsed.query or parsed.fragment:
+        return False, "Use the issuer URL without query strings or fragments."
+    return True, ""
+
+
+def validate_app_id(app_id):
+    if not app_id:
+        return False, "Enter the OIDC application/client ID."
+    if re.search(r"\s", app_id):
+        return False, "The application/client ID must not contain whitespace."
+    return True, ""
+
+
+def parse_config_bool(value, default=True):
+    text = str(value).strip().lower()
+    if text in ("1", "yes", "true", "on"):
+        return True
+    if text in ("0", "no", "false", "off"):
+        return False
+    return default
+
+
+def existing_options_config(path=CONFIG_PATH):
+    parser = configparser.RawConfigParser()
+    try:
+        parser.read(path)
+    except configparser.Error:
+        return {
+            "pam_allow_groups": "",
+            "enable_hello": True,
+            "allow_console_password_only": True,
+            "apply_policy": True,
+        }
+    values = {
+        "pam_allow_groups": "",
+        "enable_hello": True,
+        "allow_console_password_only": True,
+        "apply_policy": True,
+    }
+    if not parser.has_section("global"):
+        return values
+    values["pam_allow_groups"] = parser.get("global", "pam_allow_groups", fallback="").strip()
+    for key, default in CONFIG_BOOLEAN_DEFAULTS.items():
+        values[key] = parse_config_bool(parser.get("global", key, fallback=str(default)), default)
+    return values
+
+
+def existing_idp_config(path=CONFIG_PATH):
+    parser = configparser.RawConfigParser()
+    try:
+        parser.read(path)
+    except configparser.Error:
+        return None
+    if not parser.has_section("global"):
+        return None
+    domain = parser.get("global", "domain", fallback="").strip()
+    if domain:
+        return {"mode": "entra", "domain": domain}
+    oidc_issuer_url = parser.get("global", "oidc_issuer_url", fallback="").strip()
+    app_id = parser.get("global", "app_id", fallback="").strip()
+    if oidc_issuer_url and app_id:
+        return {"mode": "oidc", "oidc_issuer_url": oidc_issuer_url, "app_id": app_id}
+    return None
+
+
+def config_summary(config):
+    if config["mode"] == "entra":
+        return f"Entra ID domain: {config['domain']}"
+    return f"OIDC issuer: {config['oidc_issuer_url']} / app_id: {config['app_id']}"
+
+
+def prompt_idp_config(ui):
+    mode = ui.choose("Choose authentication provider", [
+        {"label": "Microsoft Entra ID", "value": "entra"},
+        {"label": "Generic OIDC provider (Google Workspace, Okta, Keycloak, etc.)", "value": "oidc"},
+    ])
+    if mode == "entra":
+        domain = ui.ask("Enter your Entra ID domain", validator=validate_domain)
+        return {"mode": "entra", "domain": domain}
+    oidc_issuer_url = ui.ask("Enter the OIDC issuer URL", validator=validate_oidc_issuer_url)
+    app_id = ui.ask("Enter the OIDC application/client ID", validator=validate_app_id)
+    return {"mode": "oidc", "oidc_issuer_url": oidc_issuer_url, "app_id": app_id}
+
+
+def validate_pam_allow_groups(value):
+    text = value.strip()
+    if not text:
+        return True, ""
+    guid = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+    for item in text.split(","):
+        entry = item.strip()
+        if not entry:
+            return False, "Remove empty entries from the permitted users and groups list."
+        if guid.match(entry):
+            continue
+        if "@" in entry and not re.search(r"[\s,]", entry):
+            continue
+        return False, "Use user UPNs or group Object ID GUIDs; group names are not valid."
+    return True, ""
+
+
+def option_entries(config, provider_mode):
+    entries = []
+    groups = config.get("pam_allow_groups", "").strip()
+    if groups:
+        entries.append(("pam_allow_groups", groups))
+    else:
+        entries.append(("pam_allow_groups", None))
+    for key in ("enable_hello", "allow_console_password_only"):
+        entries.append((key, "false" if not config.get(key, True) else None))
+    if provider_mode != "oidc":
+        entries.append(("apply_policy", "false" if not config.get("apply_policy", True) else None))
+    return entries
+
+
+def render_global_config(existing, idp_config=None, write_idp=True, options_config=None):
+    entries = []
+    if write_idp and idp_config:
+        if idp_config["mode"] == "entra":
+            entries.append(("domain", idp_config["domain"]))
+        else:
+            entries.extend([("oidc_issuer_url", idp_config["oidc_issuer_url"]), ("app_id", idp_config["app_id"])])
+    if options_config is not None:
+        provider_mode = idp_config.get("mode") if idp_config else "entra"
+        entries.extend(option_entries(options_config, provider_mode))
+    if not existing:
+        body = "".join(f"{key} = {value}\n" for key, value in entries if value is not None)
+        return f"[global]\n{body}"
+
+    lines = existing.splitlines(keepends=True)
+    global_header = None
+    global_end = len(lines)
+
+    for index, line in enumerate(lines):
+        if re.match(r"^\s*\[global\]\s*(?:[#;].*)?$", line):
+            global_header = index
+            continue
+        if global_header is not None and index > global_header and re.match(r"^\s*\[[^]]+\]\s*(?:[#;].*)?$", line):
+            global_end = index
+            break
+
+    if global_header is None:
+        separator = "" if existing.endswith("\n") else "\n"
+        body = "".join(f"{key} = {value}\n" for key, value in entries if value is not None)
+        return existing + separator + f"\n[global]\n{body}"
+
+    insert_at = global_header + 1
+    for key, value in reversed(entries):
+        key_line = re.compile(rf"^(\s*){re.escape(key)}\s*=.*$", re.I)
+        for index in range(global_header + 1, global_end):
+            match = key_line.match(lines[index].rstrip("\n"))
+            if match:
+                if value is None:
+                    del lines[index]
+                    global_end -= 1
+                else:
+                    newline = "\n" if lines[index].endswith("\n") else ""
+                    lines[index] = f"{match.group(1)}{key} = {value}{newline}"
+                break
+        else:
+            if value is not None:
+                lines.insert(insert_at, f"{key} = {value}\n")
+
+    return "".join(lines)
+
+
+def render_idp_config(existing, config):
+    return render_global_config(existing, config, True, None)
+
+
+def write_global_config(config, ui):
+    prefix = sudo_prefix()
+    existing = ""
+    try:
+        with open(CONFIG_PATH, encoding="utf-8") as handle:
+            existing = handle.read()
+    except OSError:
+        pass
+
+    if existing:
+        backup = f"{CONFIG_PATH}.bak.{int(time.time())}"
+        run(prefix + ["cp", CONFIG_PATH, backup], ui)
+
+    rendered = render_global_config(existing, config.get("idp"), config.get("write_idp", True), config.get("options"))
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
+        handle.write(rendered)
+        temp_path = handle.name
+    try:
+        run(prefix + ["mkdir", "-p", os.path.dirname(CONFIG_PATH)], ui)
+        run(prefix + ["install", "-m", "0644", temp_path, CONFIG_PATH], ui)
+    finally:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+
+
+def write_idp_config(config, ui):
+    write_global_config({"idp": config, "write_idp": True, "options": None}, ui)
+
+
+def himmelblau_installed(target):
+    if is_deb(target):
+        return subprocess.run(["dpkg-query", "-W", "-f=${Status}", "himmelblau"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True).stdout.startswith("install ok installed")
+    return subprocess.run(["rpm", "-q", "himmelblau"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+
+
+def apt_install_prereqs(ui):
+    run(sudo_prefix() + ["apt-get", "update"], ui)
+    run(sudo_prefix() + ["apt-get", "install", "-y", "ca-certificates", "curl", "gnupg"], ui)
+
+
+def apt_architecture(ui):
+    proc = run(["dpkg", "--print-architecture"], ui)
+    architecture = (proc.stdout or "").strip()
+    if not re.match(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$", architecture):
+        raise InstallError("Unable to determine the Debian package architecture.")
+    return architecture
+
+
+def apt_source_line(repo_url, architecture):
+    return f"deb [arch={architecture} signed-by={APT_KEYRING_PATH}] {repo_url} ./\n"
+
+
+def dearmor_apt_key(key_data):
+    proc = subprocess.run(["gpg", "--dearmor"], input=key_data, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    if proc.returncode != 0:
+        raise InstallError("Unable to dearmor the Himmelblau package signing key.")
+    return proc.stdout
+
+
+def apt_repo_setup(channel, target, ui):
+    repo_url = f"{base_url(channel)}/deb/{target}"
+    apt_install_prereqs(ui)
+    architecture = apt_architecture(ui)
+    run(sudo_prefix() + ["install", "-d", "-m", "0755", APT_KEYRING_DIR], ui)
+    key_proc = subprocess.run(["curl", "-fsSL", GPG_KEY_URL], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    if key_proc.returncode != 0:
+        raise InstallError("Unable to download the Himmelblau package signing key.")
+    install_bytes(APT_KEYRING_PATH, dearmor_apt_key(key_proc.stdout), "0644", ui)
+    source = apt_source_line(repo_url, architecture)
+    install_text("/etc/apt/sources.list.d/himmelblau.list", source, "0644", ui)
+    run(sudo_prefix() + ["apt-get", "update"], ui)
+
+
+def zypper_repo_setup(channel, target, ui):
+    repo_url = f"{base_url(channel)}/rpm/{target}"
+    run(sudo_prefix() + ["rpm", "--import", GPG_KEY_URL], ui)
+    run(sudo_prefix() + ["zypper", "--non-interactive", "addrepo", "--check", "--gpgcheck", repo_url, f"himmelblau-{channel}"], ui, check=False)
+    run(sudo_prefix() + ["zypper", "--non-interactive", "--gpg-auto-import-keys", "refresh", f"himmelblau-{channel}"], ui)
+
+
+def dnf_repo_setup(channel, target, ui):
+    repo_url = f"{base_url(channel)}/rpm/{target}"
+    name = f"himmelblau-{channel}"
+    repo = f"""[{name}]
+name=Himmelblau {channel}
+baseurl={repo_url}
+enabled=1
+gpgcheck=1
+gpgkey={GPG_KEY_URL}
+"""
+    run(sudo_prefix() + ["rpm", "--import", GPG_KEY_URL], ui)
+    install_text(f"/etc/yum.repos.d/{name}.repo", repo, "0644", ui)
+    run(sudo_prefix() + ["dnf", "makecache", "--refresh", "-y"], ui)
+
+
+def install_packages(channel, target, ui):
+    manager = package_manager(target)
+    if channel != "subscription":
+        if manager == "apt":
+            apt_repo_setup(channel, target, ui)
+        elif manager == "zypper":
+            zypper_repo_setup(channel, target, ui)
+        elif manager == "dnf":
+            dnf_repo_setup(channel, target, ui)
+
+    packages = SUSE_SUBSCRIPTION_PACKAGES if channel == "subscription" and is_suse(target) else COMMUNITY_PACKAGES
+    if manager == "apt":
+        run(sudo_prefix() + ["apt-get", "install", "-y"] + packages, ui)
+    elif manager == "zypper":
+        run(sudo_prefix() + ["zypper", "--non-interactive", "install", "-y"] + packages, ui)
+    elif manager == "dnf":
+        run(sudo_prefix() + ["dnf", "install", "-y"] + packages, ui)
+    else:
+        raise InstallError("NixOS is not supported by this bootstrap installer. Use the advanced manual instructions.")
+
+
+def configure_distro_provided(target, ui):
+    if is_deb(target):
+        return
+    if is_suse(target):
+        if shutil.which("pam-config"):
+            run(sudo_prefix() + ["pam-config", "--add", "--himmelblau"], ui)
+        else:
+            ui.warn("pam-config was not found; review the manual PAM configuration documentation.")
+        return
+    if shutil.which("aad-tool"):
+        run(sudo_prefix() + ["aad-tool", "configure-pam"], ui)
+    else:
+        ui.warn("aad-tool was not found; review the manual PAM configuration documentation.")
+
+
+def enable_services(ui):
+    if shutil.which("systemctl"):
+        run(sudo_prefix() + ["systemctl", "enable", "--now", "himmelblaud", "himmelblaud-tasks"], ui)
+    else:
+        ui.warn("systemctl was not found; start himmelblaud and himmelblaud-tasks with your init system.")
+
+
+def maybe_status(ui):
+    if shutil.which("aad-tool"):
+        run(sudo_prefix() + ["aad-tool", "status"], ui, check=False)
+
+
+def require_commands(commands):
+    missing = [cmd for cmd in commands if not shutil.which(cmd)]
+    if missing:
+        raise InstallError("Required commands are missing: " + ", ".join(missing))
+
+
+def build_install_plan(channel, target, idp_config, write_idp, options_config=None):
+    manager = package_manager(target)
+    steps = []
+    if channel != "subscription":
+        if manager == "apt":
+            steps.extend([{"kind": "apt_prereqs"}, {"kind": "apt_repo", "channel": channel, "target": target}])
+        elif manager == "zypper":
+            steps.append({"kind": "zypper_repo", "channel": channel, "target": target})
+        elif manager == "dnf":
+            steps.append({"kind": "dnf_repo", "channel": channel, "target": target})
+    steps.append({"kind": "install_packages", "channel": channel, "target": target})
+    if idp_config or options_config is not None:
+        steps.append({
+            "kind": "write_global_config",
+            "config": {"idp": idp_config, "write_idp": write_idp, "options": options_config},
+        })
+    if channel == "subscription":
+        steps.append({"kind": "configure_distro_provided", "target": target})
+    else:
+        steps.append({"kind": "note", "message": "Community packages configure PAM/NSS integration during package installation."})
+    steps.extend([{"kind": "enable_services"}, {"kind": "maybe_status"}])
+    return {
+        "version": PLAN_VERSION,
+        "channel": channel,
+        "target": target,
+        "manager": manager,
+        "config_path": CONFIG_PATH,
+        "steps": steps,
+    }
+
+
+def build_package_only_plan(channel, target):
+    return build_install_plan(channel, target, None, False, None)
+
+
+def validate_install_plan(plan):
+    if not isinstance(plan, dict) or plan.get("version") != PLAN_VERSION:
+        raise InstallError("Invalid install plan version.")
+    target = plan.get("target")
+    channel = plan.get("channel")
+    if target not in DISTRO_LABELS:
+        raise InstallError("Invalid install plan target.")
+    if channel not in ("subscription", "stable", "nightly"):
+        raise InstallError("Invalid install plan channel.")
+    allowed = {
+        "apt_prereqs",
+        "apt_repo",
+        "zypper_repo",
+        "dnf_repo",
+        "install_packages",
+        "write_global_config",
+        "write_idp_config",
+        "configure_distro_provided",
+        "enable_services",
+        "maybe_status",
+        "note",
+    }
+    for step in plan.get("steps", []):
+        if not isinstance(step, dict) or step.get("kind") not in allowed:
+            raise InstallError("Invalid install plan step.")
+    return True
+
+
+def summary_lines(target, manager, channel, idp_config, write_config, options_config=None):
+    lines = [
+        "Ready to install Himmelblau.",
+        f"Distribution: {DISTRO_LABELS[target]}",
+        f"Package manager: {manager}",
+        f"Source: {channel}",
+        f"Identity provider: {config_summary(idp_config)}",
+        f"Config: {CONFIG_PATH}" + (" (unchanged)" if options_config is None and not write_config else ""),
+    ]
+    if options_config:
+        lines.extend([
+            "Permitted users/groups: " + (options_config.get("pam_allow_groups") or "All users"),
+            "Linux Hello PIN: " + ("Enabled" if options_config.get("enable_hello", True) else "Disabled"),
+            "Console password-only: " + ("Enabled" if options_config.get("allow_console_password_only", True) else "Disabled"),
+        ])
+        if idp_config.get("mode") != "oidc":
+            lines.append("Intune policy: " + ("Applied" if options_config.get("apply_policy", True) else "Not applied"))
+    if channel != "subscription":
+        lines.append(f"Repository base: {base_url(channel)}")
+    return lines
+
+
+ROOT_WORKER_SOURCE = r'''#!/usr/bin/env python3
+import configparser
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+import urllib.request
+
+PLAN_VERSION = 1
+GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
+APT_KEYRING_DIR = "/etc/apt/keyrings"
+APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
+BASE_STABLE_URL = "https://packages.himmelblau-idm.org/stable/latest"
+BASE_NIGHTLY_URL = "https://packages.himmelblau-idm.org/nightly/latest"
+CONFIG_PATH = "/etc/himmelblau/himmelblau.conf"
+CONFIG_BOOLEAN_DEFAULTS = {
+    "enable_hello": True,
+    "allow_console_password_only": True,
+    "apply_policy": True,
+}
+COMMUNITY_PACKAGES = ["himmelblau", "pam-himmelblau", "nss-himmelblau"]
+SUSE_SUBSCRIPTION_PACKAGES = ["himmelblau", "pam-himmelblau", "libnss_himmelblau2"]
+DISTRO_LABELS = {
+    "sle15sp6": "SUSE Linux Enterprise 15 SP6 / openSUSE Leap 15.6",
+    "sle15sp7": "SUSE Linux Enterprise 15 SP7",
+    "sle16": "SUSE Linux Enterprise 16 / openSUSE Leap 16",
+    "tumbleweed": "openSUSE Tumbleweed",
+    "rocky8": "RHEL/Rocky/Alma/Oracle Linux 8",
+    "rocky9": "RHEL/Rocky/Alma/Oracle Linux 9",
+    "rocky10": "RHEL/Rocky/Alma/Oracle Linux 10",
+    "fedora42": "Fedora 42",
+    "fedora43": "Fedora 43",
+    "fedora44": "Fedora 44",
+    "rawhide": "Fedora Rawhide",
+    "amzn2023": "Amazon Linux 2023",
+    "debian12": "Debian 12",
+    "debian13": "Debian 13",
+    "ubuntu22.04": "Ubuntu 22.04 / Linux Mint 21.3",
+    "ubuntu24.04": "Ubuntu 24.04 / Linux Mint 22",
+    "ubuntu25.10": "Ubuntu 25.10",
+    "ubuntu26.04": "Ubuntu 26.04 / Linux Mint 23",
+}
+
+
+class WorkerError(Exception):
+    pass
+
+
+def emit(event_log, event):
+    event["time"] = time.time()
+    with open(event_log, "a", encoding="utf-8") as handle:
+        handle.write(json.dumps(event, sort_keys=True) + "\n")
+
+
+def shell_join(argv):
+    import shlex
+    return " ".join(shlex.quote(str(part)) for part in argv)
+
+
+def run(argv, event_log, check=True):
+    emit(event_log, {"type": "command", "argv": argv, "text": "Running: " + shell_join(argv)})
+    try:
+        proc = subprocess.run(argv, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False)
+    except FileNotFoundError:
+        raise WorkerError("Required command not found: " + argv[0])
+    output = proc.stdout or ""
+    for line in output.splitlines():
+        emit(event_log, {"type": "output", "text": line})
+    if check and proc.returncode != 0:
+        tail = "\n".join(output.splitlines()[-20:])
+        detail = "\n\nLast command output:\n" + tail if tail else ""
+        raise WorkerError("Command failed with exit code %s: %s%s" % (proc.returncode, shell_join(argv), detail))
+    return proc
+
+
+def package_manager(target):
+    if target.startswith("ubuntu") or target.startswith("debian"):
+        return "apt"
+    if target.startswith("sle") or target == "tumbleweed":
+        return "zypper"
+    if target == "nixos":
+        return "nix"
+    return "dnf"
+
+
+def is_deb(target):
+    return target.startswith("ubuntu") or target.startswith("debian")
+
+
+def is_suse(target):
+    return target.startswith("sle") or target == "tumbleweed"
+
+
+def base_url(channel):
+    return BASE_NIGHTLY_URL if channel == "nightly" else BASE_STABLE_URL
+
+
+def install_text(path, text, mode, event_log):
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
+        handle.write(text)
+        temp_path = handle.name
+    try:
+        run(["install", "-m", mode, temp_path, path], event_log)
+    finally:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+
+
+def install_bytes(path, data, mode, event_log):
+    with tempfile.NamedTemporaryFile("wb", delete=False) as handle:
+        handle.write(data)
+        temp_path = handle.name
+    try:
+        run(["install", "-m", mode, temp_path, path], event_log)
+    finally:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+
+
+def option_entries(config, provider_mode):
+    entries = []
+    groups = config.get("pam_allow_groups", "").strip()
+    if groups:
+        entries.append(("pam_allow_groups", groups))
+    else:
+        entries.append(("pam_allow_groups", None))
+    for key in ("enable_hello", "allow_console_password_only"):
+        entries.append((key, "false" if not config.get(key, True) else None))
+    if provider_mode != "oidc":
+        entries.append(("apply_policy", "false" if not config.get("apply_policy", True) else None))
+    return entries
+
+
+def render_global_config(existing, idp_config=None, write_idp=True, options_config=None):
+    entries = []
+    if write_idp and idp_config:
+        if idp_config["mode"] == "entra":
+            entries.append(("domain", idp_config["domain"]))
+        else:
+            entries.extend([("oidc_issuer_url", idp_config["oidc_issuer_url"]), ("app_id", idp_config["app_id"])])
+    if options_config is not None:
+        provider_mode = idp_config.get("mode") if idp_config else "entra"
+        entries.extend(option_entries(options_config, provider_mode))
+    if not existing:
+        body = "".join("%s = %s\n" % (key, value) for key, value in entries if value is not None)
+        return "[global]\n%s" % body
+    lines = existing.splitlines(keepends=True)
+    global_header = None
+    global_end = len(lines)
+    for index, line in enumerate(lines):
+        if re.match(r"^\s*\[global\]\s*(?:[#;].*)?$", line):
+            global_header = index
+            continue
+        if global_header is not None and index > global_header and re.match(r"^\s*\[[^]]+\]\s*(?:[#;].*)?$", line):
+            global_end = index
+            break
+    if global_header is None:
+        separator = "" if existing.endswith("\n") else "\n"
+        body = "".join("%s = %s\n" % (key, value) for key, value in entries if value is not None)
+        return existing + separator + "\n[global]\n" + body
+    insert_at = global_header + 1
+    for key, value in reversed(entries):
+        key_line = re.compile(r"^(\s*)%s\s*=.*$" % re.escape(key), re.I)
+        for index in range(global_header + 1, global_end):
+            match = key_line.match(lines[index].rstrip("\n"))
+            if match:
+                if value is None:
+                    del lines[index]
+                    global_end -= 1
+                else:
+                    newline = "\n" if lines[index].endswith("\n") else ""
+                    lines[index] = "%s%s = %s%s" % (match.group(1), key, value, newline)
+                break
+        else:
+            if value is not None:
+                lines.insert(insert_at, "%s = %s\n" % (key, value))
+    return "".join(lines)
+
+
+def write_global_config(config, event_log):
+    existing = ""
+    try:
+        with open(CONFIG_PATH, encoding="utf-8") as handle:
+            existing = handle.read()
+    except OSError:
+        pass
+    if existing:
+        backup = "%s.bak.%d" % (CONFIG_PATH, int(time.time()))
+        run(["cp", CONFIG_PATH, backup], event_log)
+    rendered = render_global_config(existing, config.get("idp"), config.get("write_idp", True), config.get("options"))
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
+        handle.write(rendered)
+        temp_path = handle.name
+    try:
+        run(["mkdir", "-p", os.path.dirname(CONFIG_PATH)], event_log)
+        run(["install", "-m", "0644", temp_path, CONFIG_PATH], event_log)
+    finally:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+
+
+def validate_plan(plan):
+    if not isinstance(plan, dict) or plan.get("version") != PLAN_VERSION:
+        raise WorkerError("Invalid install plan version.")
+    if plan.get("target") not in DISTRO_LABELS:
+        raise WorkerError("Invalid install plan target.")
+    if plan.get("channel") not in ("subscription", "stable", "nightly"):
+        raise WorkerError("Invalid install plan channel.")
+    allowed = set([
+        "apt_prereqs", "apt_repo", "zypper_repo", "dnf_repo", "install_packages",
+        "write_global_config", "write_idp_config", "configure_distro_provided", "enable_services", "maybe_status", "note"
+    ])
+    for step in plan.get("steps", []):
+        if not isinstance(step, dict) or step.get("kind") not in allowed:
+            raise WorkerError("Invalid install plan step.")
+
+
+def apt_architecture(event_log):
+    proc = run(["dpkg", "--print-architecture"], event_log)
+    architecture = (proc.stdout or "").strip()
+    if not re.match(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$", architecture):
+        raise WorkerError("Unable to determine the Debian package architecture.")
+    return architecture
+
+
+def apt_source_line(repo_url, architecture):
+    return "deb [arch=%s signed-by=%s] %s ./\n" % (architecture, APT_KEYRING_PATH, repo_url)
+
+
+def dearmor_apt_key(key_data):
+    proc = subprocess.run(["gpg", "--dearmor"], input=key_data, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    if proc.returncode != 0:
+        raise WorkerError("Unable to dearmor the Himmelblau package signing key.")
+    return proc.stdout
+
+
+def apt_repo_setup(channel, target, event_log):
+    repo_url = "%s/deb/%s" % (base_url(channel), target)
+    architecture = apt_architecture(event_log)
+    run(["install", "-d", "-m", "0755", APT_KEYRING_DIR], event_log)
+    with urllib.request.urlopen(GPG_KEY_URL, timeout=30) as response:
+        key_data = response.read(128 * 1024)
+    install_bytes(APT_KEYRING_PATH, dearmor_apt_key(key_data), "0644", event_log)
+    source = apt_source_line(repo_url, architecture)
+    install_text("/etc/apt/sources.list.d/himmelblau.list", source, "0644", event_log)
+    run(["apt-get", "update"], event_log)
+
+
+def zypper_repo_setup(channel, target, event_log):
+    repo_url = "%s/rpm/%s" % (base_url(channel), target)
+    run(["rpm", "--import", GPG_KEY_URL], event_log)
+    run(["zypper", "--non-interactive", "addrepo", "--check", "--gpgcheck", repo_url, "himmelblau-%s" % channel], event_log, check=False)
+    run(["zypper", "--non-interactive", "--gpg-auto-import-keys", "refresh", "himmelblau-%s" % channel], event_log)
+
+
+def dnf_repo_setup(channel, target, event_log):
+    repo_url = "%s/rpm/%s" % (base_url(channel), target)
+    name = "himmelblau-%s" % channel
+    repo = "[%s]\nname=Himmelblau %s\nbaseurl=%s\nenabled=1\ngpgcheck=1\ngpgkey=%s\n" % (name, channel, repo_url, GPG_KEY_URL)
+    run(["rpm", "--import", GPG_KEY_URL], event_log)
+    install_text("/etc/yum.repos.d/%s.repo" % name, repo, "0644", event_log)
+    run(["dnf", "makecache", "--refresh", "-y"], event_log)
+
+
+def install_packages(channel, target, event_log):
+    manager = package_manager(target)
+    packages = SUSE_SUBSCRIPTION_PACKAGES if channel == "subscription" and is_suse(target) else COMMUNITY_PACKAGES
+    if manager == "apt":
+        run(["apt-get", "install", "-y"] + packages, event_log)
+    elif manager == "zypper":
+        run(["zypper", "--non-interactive", "install", "-y"] + packages, event_log)
+    elif manager == "dnf":
+        run(["dnf", "install", "-y"] + packages, event_log)
+    else:
+        raise WorkerError("NixOS is not supported by this bootstrap installer.")
+
+
+def execute_step(step, event_log):
+    kind = step["kind"]
+    if kind == "apt_prereqs":
+        run(["apt-get", "update"], event_log)
+        run(["apt-get", "install", "-y", "ca-certificates", "curl", "gnupg"], event_log)
+    elif kind == "apt_repo":
+        apt_repo_setup(step["channel"], step["target"], event_log)
+    elif kind == "zypper_repo":
+        zypper_repo_setup(step["channel"], step["target"], event_log)
+    elif kind == "dnf_repo":
+        dnf_repo_setup(step["channel"], step["target"], event_log)
+    elif kind == "install_packages":
+        install_packages(step["channel"], step["target"], event_log)
+    elif kind == "write_global_config":
+        write_global_config(step["config"], event_log)
+    elif kind == "write_idp_config":
+        write_global_config({"idp": step["config"], "write_idp": True, "options": None}, event_log)
+    elif kind == "configure_distro_provided":
+        target = step["target"]
+        if is_deb(target):
+            return
+        if is_suse(target):
+            if shutil.which("pam-config"):
+                run(["pam-config", "--add", "--himmelblau"], event_log)
+            else:
+                emit(event_log, {"type": "warning", "text": "pam-config was not found; review manual PAM configuration."})
+        elif shutil.which("aad-tool"):
+            run(["aad-tool", "configure-pam"], event_log)
+        else:
+            emit(event_log, {"type": "warning", "text": "aad-tool was not found; review manual PAM configuration."})
+    elif kind == "enable_services":
+        if shutil.which("systemctl"):
+            run(["systemctl", "enable", "--now", "himmelblaud", "himmelblaud-tasks"], event_log)
+        else:
+            emit(event_log, {"type": "warning", "text": "systemctl was not found; start services with your init system."})
+    elif kind == "maybe_status":
+        if shutil.which("aad-tool"):
+            run(["aad-tool", "status"], event_log, check=False)
+    elif kind == "note":
+        emit(event_log, {"type": "info", "text": step.get("message", "")})
+
+
+def main():
+    if len(sys.argv) != 3:
+        print("usage: root-worker PLAN EVENT_LOG", file=sys.stderr)
+        return 2
+    plan_path, event_log = sys.argv[1:3]
+    try:
+        with open(plan_path, encoding="utf-8") as handle:
+            plan = json.load(handle)
+        validate_plan(plan)
+        steps = plan.get("steps", [])
+        emit(event_log, {"type": "started", "total": len(steps)})
+        for index, step in enumerate(steps, 1):
+            emit(event_log, {"type": "step", "index": index, "total": len(steps), "kind": step["kind"]})
+            execute_step(step, event_log)
+        emit(event_log, {"type": "done"})
+        return 0
+    except Exception as err:
+        emit(event_log, {"type": "error", "text": str(err)})
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+'''
+
+
+def write_root_worker():
+    return write_root_worker_in_dir(None)
+
+
+def write_root_worker_in_dir(directory):
+    handle = tempfile.NamedTemporaryFile("w", encoding="utf-8", prefix="himmelblau-worker-", suffix=".py", dir=directory, delete=False)
+    try:
+        handle.write(ROOT_WORKER_SOURCE)
+        path = handle.name
+    finally:
+        handle.close()
+    os.chmod(path, 0o700)
+    return path
+
+
+def write_plan_file(plan):
+    return write_plan_file_in_dir(plan, None)
+
+
+def write_plan_file_in_dir(plan, directory):
+    validate_install_plan(plan)
+    handle = tempfile.NamedTemporaryFile("w", encoding="utf-8", prefix="himmelblau-plan-", suffix=".json", dir=directory, delete=False)
+    try:
+        json.dump(plan, handle, sort_keys=True)
+        path = handle.name
+    finally:
+        handle.close()
+    os.chmod(path, 0o600)
+    return path
+
+
+def terminal_launcher_command(worker_cmd, which=shutil.which):
+    if which("xdg-terminal-exec"):
+        return ["xdg-terminal-exec"] + worker_cmd
+    if which("x-terminal-emulator"):
+        return ["x-terminal-emulator", "-e"] + worker_cmd
+    candidates = [
+        ("gnome-terminal", ["gnome-terminal", "--"] + worker_cmd),
+        ("kgx", ["kgx", "--"] + worker_cmd),
+        ("konsole", ["konsole", "-e"] + worker_cmd),
+        ("xfce4-terminal", ["xfce4-terminal", "--command", shell_join(worker_cmd)]),
+        ("mate-terminal", ["mate-terminal", "-e", shell_join(worker_cmd)]),
+        ("lxterminal", ["lxterminal", "-e"] + worker_cmd),
+        ("xterm", ["xterm", "-e"] + worker_cmd),
+        ("kitty", ["kitty", "-e"] + worker_cmd),
+        ("alacritty", ["alacritty", "-e"] + worker_cmd),
+    ]
+    for command, argv in candidates:
+        if which(command):
+            return argv
+    return None
+
+
+def read_event_log(event_log, offset, on_event):
+    try:
+        with open(event_log, encoding="utf-8") as handle:
+            handle.seek(offset)
+            for raw in handle:
+                raw = raw.strip()
+                if not raw:
+                    continue
+                try:
+                    event = json.loads(raw)
+                except ValueError:
+                    event = {"type": "output", "text": raw}
+                on_event(event)
+            return handle.tell()
+    except OSError:
+        return offset
+
+
+def make_work_dir():
+    try:
+        work_dir = tempfile.mkdtemp(prefix=".himmelblau-installer-", dir=os.getcwd())
+    except OSError:
+        work_dir = tempfile.mkdtemp(prefix="himmelblau-installer-")
+    os.chmod(work_dir, 0o700)
+    return work_dir
+
+
+def wait_with_events(proc, event_log, on_event):
+    offset = 0
+    while proc.poll() is None:
+        offset = read_event_log(event_log, offset, on_event)
+        time.sleep(0.2)
+    offset = read_event_log(event_log, offset, on_event)
+    return proc.returncode
+
+
+def run_elevated_plan(plan, on_event=None, prefer_gui=True, non_interactive=False):
+    on_event = on_event or (lambda event: None)
+    work_dir = make_work_dir()
+    plan_path = write_plan_file_in_dir(plan, work_dir)
+    worker_path = write_root_worker_in_dir(work_dir)
+    event_log = os.path.join(work_dir, "events.jsonl")
+    worker_cmd = [sys.executable or "python3", worker_path, plan_path, event_log]
+    try:
+        if os.geteuid() == 0:
+            proc = subprocess.Popen(worker_cmd)
+            rc = wait_with_events(proc, event_log, on_event)
+            if rc != 0:
+                raise ElevationError("Privileged installation failed.")
+            return
+
+        if non_interactive:
+            if not shutil.which("sudo"):
+                raise ElevationError("This non-interactive install requires root or passwordless sudo.")
+            on_event({"type": "info", "text": "Requesting non-interactive sudo authorization."})
+            proc = subprocess.Popen(["sudo", "-n"] + worker_cmd)
+            rc = wait_with_events(proc, event_log, on_event)
+            if rc != 0:
+                raise ElevationError("This non-interactive install requires root or passwordless sudo.\nRe-run as root, configure passwordless sudo, or run from an interactive terminal for guided setup.")
+            return
+
+        if prefer_gui and shutil.which("pkexec"):
+            pkexec_cmd = ["pkexec", "--disable-internal-agent"] + worker_cmd
+            proc = subprocess.Popen(pkexec_cmd)
+            rc = wait_with_events(proc, event_log, on_event)
+            if rc == 0:
+                return
+            on_event({"type": "warning", "text": "Graphical authorization was cancelled or unavailable; trying a terminal prompt."})
+
+        terminal_cmd = terminal_launcher_command(["sudo"] + worker_cmd)
+        if terminal_cmd:
+            proc = subprocess.Popen(terminal_cmd)
+            rc = wait_with_events(proc, event_log, on_event)
+            if rc == 0:
+                return
+            raise ElevationError("Privileged installation failed or was cancelled.")
+
+        manual = shell_join(["sudo"] + worker_cmd)
+        raise ElevationError("No graphical authorization agent or terminal emulator was available.\nRun this command in a terminal:\n" + manual)
+    finally:
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+
+def run_cli():
+    ui = CliUi()
+    ui.info(f"Himmelblau bootstrap installer {VERSION}")
+    ui.info("This installer adds the trusted Himmelblau repository and installs packages with your native package manager.")
+
+    info = read_os_release()
+    target = distro_target(info)
+    if target == "nixos":
+        raise InstallError("NixOS is not supported by this bootstrap installer. Use the advanced NixOS instructions on the downloads page.")
+    if not target or target not in DISTRO_LABELS:
+        pretty = info.get("PRETTY_NAME", "this Linux distribution")
+        raise InstallError(f"{pretty} is not supported by this installer yet.")
+
+    manager = package_manager(target)
+    require_commands([required_manager_command(target)])
+
+    matrix = load_repo_support(ui)
+    choices = channel_choices(matrix, target)
+    if not choices:
+        raise InstallError(f"Himmelblau does not currently publish packages for {DISTRO_LABELS[target]}.")
+
+    ui.info(f"Detected: {DISTRO_LABELS[target]}")
+    if himmelblau_installed(target):
+        ui.info("Himmelblau appears to already be installed; this will update or repair the installation.")
+
+    channel = ui.choose("Choose installation source", choices)
+    existing_config = existing_idp_config()
+    if existing_config:
+        ui.info(f"Existing identity provider configuration detected; leaving {CONFIG_PATH} unchanged.")
+        idp_config = existing_config
+        write_config = False
+    else:
+        idp_config = prompt_idp_config(ui)
+        write_config = True
+
+    summary = summary_lines(target, manager, channel, idp_config, write_config)
+    if not ui.confirm("\n".join(summary) + "\n\nContinue?", default=False):
+        raise InstallError("Installation cancelled.")
+
+    if os.geteuid() != 0:
+        require_commands(["sudo"])
+        run(["sudo", "-v"], ui)
+
+    install_packages(channel, target, ui)
+    if write_config:
+        write_idp_config(idp_config, ui)
+
+    if channel == "subscription":
+        configure_distro_provided(target, ui)
+    else:
+        ui.info("Skipping explicit PAM/NSS setup; Himmelblau community packages configure integration at install time.")
+
+    enable_services(ui)
+    maybe_status(ui)
+
+    ui.info("Himmelblau installation completed.")
+    ui.info("Optional packages such as himmelblau-sso, himmelblau-qr-greeter, and himmelblau-sshd-config are documented at https://himmelblau-idm.org/downloads/")
+
+
+def print_headless_event(event):
+    log_worker_event(event)
+    etype = event.get("type")
+    text = event.get("text")
+    if etype == "step":
+        print("Step %s of %s: %s" % (event.get("index"), event.get("total"), event.get("kind")), flush=True)
+    elif text:
+        print(text, flush=True)
+
+
+def run_headless_install():
+    ui = LogUi()
+    ui.info(f"Himmelblau bootstrap installer {VERSION}")
+    ui.info("No interactive terminal detected; running package-only install.")
+    ui.info("Identity provider configuration will not be changed.")
+
+    info = read_os_release()
+    target = distro_target(info)
+    if target == "nixos":
+        raise InstallError("NixOS is not supported by this bootstrap installer. Use the advanced NixOS instructions on the downloads page.")
+    if not target or target not in DISTRO_LABELS:
+        pretty = info.get("PRETTY_NAME", "this Linux distribution")
+        raise InstallError(f"{pretty} is not supported by this installer yet.")
+
+    manager = package_manager(target)
+    require_commands([required_manager_command(target)])
+
+    matrix = load_repo_support(ui)
+    channel, fallback_message = default_community_channel(matrix, target)
+    ui.info(f"Detected: {DISTRO_LABELS[target]}")
+    ui.info(f"Package manager: {manager}")
+    if fallback_message:
+        ui.warn(fallback_message)
+    elif channel == "stable":
+        ui.info("Using Community Stable packages.")
+    else:
+        ui.info("Using Community Nightly packages.")
+    ui.info(f"Repository base: {base_url(channel)}")
+    ui.info(f"Config: {CONFIG_PATH} (unchanged)")
+
+    plan = build_package_only_plan(channel, target)
+    run_elevated_plan(plan, on_event=print_headless_event, prefer_gui=False, non_interactive=True)
+
+    ui.info("Himmelblau package installation completed.")
+    ui.info("Configure identity provider settings in /etc/himmelblau/himmelblau.conf when ready.")
+
+
+CURSES_STARTUP_EXIT = 75
+
+
+def acquire_terminal_fd():
+    candidates = ["/dev/tty"]
+    for fd in (0, 1, 2):
+        try:
+            if not os.isatty(fd):
+                continue
+        except OSError:
+            continue
+        candidates.extend([f"/proc/self/fd/{fd}", f"/dev/fd/{fd}"])
+    errors = []
+    for path in candidates:
+        try:
+            fd = os.open(path, os.O_RDWR)
+        except OSError as err:
+            errors.append(f"{path}: {err}")
+            continue
+        if os.isatty(fd):
+            return fd
+        os.close(fd)
+        errors.append(f"{path}: not a terminal")
+    raise InstallError("Unable to find an interactive terminal for the curses installer.\n" + "\n".join(errors[-6:]))
+
+
+def attach_terminal_stdio(terminal_fd):
+    for fd in (0, 1, 2):
+        os.dup2(terminal_fd, fd)
+
+
+def validate_sudo_on_terminal():
+    if os.geteuid() == 0:
+        return
+    require_commands(["sudo"])
+    proc = subprocess.run(["sudo", "-S", "-v"], check=False)
+    if proc.returncode != 0:
+        raise ElevationError("Administrative authorization was cancelled or failed.")
+
+
+def authorize_sudo_for_curses(curses_mod):
+    if os.geteuid() == 0:
+        return
+    try:
+        curses_mod.def_prog_mode()
+        curses_mod.endwin()
+    except Exception:
+        pass
+    try:
+        validate_sudo_on_terminal()
+    finally:
+        try:
+            curses_mod.reset_prog_mode()
+            curses_mod.curs_set(0)
+        except Exception:
+            pass
+
+
+class WizardCursesUi:
+    STEPS = [
+        ("preflight", "Preflight"),
+        ("source", "Source"),
+        ("identity", "Identity"),
+        ("options", "Options"),
+        ("review", "Review"),
+        ("install", "Install"),
+        ("done", "Done"),
+    ]
+
+    def __init__(self, stdscr, curses_mod):
+        self.stdscr = stdscr
+        self.curses = curses_mod
+        self.page = "preflight"
+        self.exit_code = 130
+        self.blockers = []
+        self.warnings = []
+        self.info = {}
+        self.target = None
+        self.manager = None
+        self.choices = []
+        self.choice_index = 0
+        self.existing_config = None
+        self.installed = False
+        self.channel = None
+        self.config_action = "keep"
+        self.mode = "entra"
+        self.domain = ""
+        self.issuer = ""
+        self.appid = ""
+        self.pam_allow_groups = ""
+        self.enable_hello = True
+        self.allow_console_password_only = True
+        self.apply_policy = True
+        self.input_cursor = {"domain": 0, "issuer": 0, "appid": 0, "pam_allow_groups": 0}
+        self.message = ""
+        self.progress_text = "Requesting administrative authorization..."
+        self.progress_percent = 0
+        self.transcript = []
+        self.install_ok = False
+        self.final_message = ""
+        self.focusables = []
+        self.mouse_targets = []
+        self.focus_index = 0
+        self.focus_key = None
+        self.cursor_position = None
+        self.colors = {}
+        self.glyphs = self._glyphs()
+        self.mouse_enabled = False
+        self._configure()
+        self._preflight()
+
+    def _supports_unicode(self):
+        try:
+            encoding = locale.getpreferredencoding(False) or ""
+        except Exception:
+            encoding = ""
+        env_text = " ".join(os.environ.get(name, "") for name in ("LC_ALL", "LC_CTYPE", "LANG", "TERM"))
+        return "UTF-8" in encoding.upper() or "UTF-8" in env_text.upper() or "UTF8" in env_text.upper()
+
+    def _glyphs(self):
+        if self._supports_unicode():
+            return {
+                "tl": "╭", "tr": "╮", "bl": "╰", "br": "╯", "h": "─", "v": "│",
+                "tee_l": "├", "tee_r": "┤", "current": "▶", "done": "●", "pending": "○",
+                "radio_on": "◉", "radio_off": "○", "check_on": "☑", "check_off": "☐",
+                "focus_l": "▶", "focus_r": "◀", "back": "‹", "next": "›",
+                "ok": "✓", "cancel": "✕", "warning": "⚠", "error": "✗", "info": "ℹ",
+                "bar_full": "█", "bar_empty": "░",
+                "input_l": "▏", "input_r": "▕",
+            }
+        return {
+            "tl": "+", "tr": "+", "bl": "+", "br": "+", "h": "-", "v": "|",
+            "tee_l": "+", "tee_r": "+", "current": ">", "done": "*", "pending": "o",
+            "radio_on": "(*)", "radio_off": "( )", "check_on": "[x]", "check_off": "[ ]",
+            "focus_l": ">", "focus_r": "<", "back": "<", "next": ">",
+            "ok": "v", "cancel": "x", "warning": "!", "error": "x", "info": "i",
+            "bar_full": "#", "bar_empty": " ",
+            "input_l": "|", "input_r": "|",
+        }
+
+    def _configure(self):
+        self._hide_cursor()
+        self.stdscr.keypad(True)
+        self._configure_colors()
+        self._enable_mouse()
+
+    def _configure_colors(self):
+        self.colors = {
+            "window": 0,
+            "panel": 0,
+            "title": self.curses.A_BOLD,
+            "muted": 0,
+            "accent": self.curses.A_BOLD,
+            "button": 0,
+            "button_focus": self.curses.A_REVERSE,
+            "primary": self.curses.A_BOLD,
+            "primary_focus": self.curses.A_REVERSE | self.curses.A_BOLD,
+            "disabled": 0,
+            "warning": self.curses.A_BOLD,
+            "error": self.curses.A_BOLD,
+            "input": 0,
+            "input_focus": self.curses.A_REVERSE,
+            "selected": self.curses.A_BOLD,
+        }
+        try:
+            if not self.curses.has_colors():
+                return
+            self.curses.start_color()
+            self.curses.use_default_colors()
+            palette = self._theme_palette()
+            pairs = {
+                "window": (1, palette["text"], palette["window_bg"]),
+                "panel": (2, palette["text"], palette["window_bg"]),
+                "title": (3, palette["text"], palette["title_bg"]),
+                "muted": (4, palette["muted"], palette["window_bg"]),
+                "accent": (5, palette["accent"], palette["window_bg"]),
+                "button": (6, palette["text"], palette["title_bg"]),
+                "button_focus": (7, palette["focus_text"], palette["focus_bg"]),
+                "primary": (8, palette["focus_text"], palette["accent"]),
+                "primary_focus": (9, palette["focus_text"], palette["focus_bg"]),
+                "disabled": (10, palette["muted"], palette["title_bg"]),
+                "warning": (11, palette["warning"], palette["window_bg"]),
+                "error": (12, palette["error"], palette["window_bg"]),
+                "input": (13, palette["text"], palette["input_bg"]),
+                "input_focus": (14, palette["focus_text"], palette["focus_bg"]),
+                "selected": (15, palette["accent"], palette["window_bg"]),
+            }
+            for name, (number, fg, bg) in pairs.items():
+                self.curses.init_pair(number, fg, bg)
+                self.colors[name] = self.curses.color_pair(number)
+            self.colors["title"] |= self.curses.A_BOLD
+            self.colors["primary"] |= self.curses.A_BOLD
+            self.colors["primary_focus"] |= self.curses.A_BOLD
+            self.colors["selected"] |= self.curses.A_BOLD
+        except Exception:
+            pass
+
+    def _rgb_to_curses(self, red, green, blue):
+        return (round(red * 1000 / 255), round(green * 1000 / 255), round(blue * 1000 / 255))
+
+    def _define_color(self, number, red, green, blue, fallback):
+        try:
+            if self.curses.can_change_color() and number < self.curses.COLORS:
+                self.curses.init_color(number, *self._rgb_to_curses(red, green, blue))
+                return number
+        except Exception:
+            pass
+        return fallback
+
+    def _theme_palette(self):
+        window_bg = self._define_color(240, 0xFA, 0xFA, 0xFB, self.curses.COLOR_WHITE)
+        title_bg = self._define_color(241, 0xDE, 0xDA, 0xD7, self.curses.COLOR_WHITE)
+        input_bg = self._define_color(242, 0xF0, 0xF0, 0xF0, self.curses.COLOR_WHITE)
+        text = self._define_color(243, 0x24, 0x24, 0x24, self.curses.COLOR_BLACK)
+        muted = self._define_color(244, 0x5F, 0x63, 0x68, self.curses.COLOR_BLUE)
+        accent = self._define_color(245, 0x35, 0x68, 0xA6, self.curses.COLOR_BLUE)
+        focus_bg = self._define_color(246, 0x35, 0x68, 0xA6, self.curses.COLOR_BLUE)
+        warning = self._define_color(247, 0x9A, 0x67, 0x00, self.curses.COLOR_YELLOW)
+        error = self._define_color(248, 0xB0, 0x00, 0x20, self.curses.COLOR_RED)
+        return {
+            "window_bg": window_bg,
+            "title_bg": title_bg,
+            "input_bg": input_bg,
+            "text": text,
+            "muted": muted,
+            "accent": accent,
+            "focus_bg": focus_bg,
+            "focus_text": self.curses.COLOR_WHITE,
+            "warning": warning,
+            "error": error,
+        }
+
+    def _enable_mouse(self):
+        try:
+            mask = self.curses.ALL_MOUSE_EVENTS
+            if hasattr(self.curses, "REPORT_MOUSE_POSITION"):
+                mask |= self.curses.REPORT_MOUSE_POSITION
+            self.curses.mousemask(mask)
+            sys.stdout.write("\033[?1000h\033[?1002h")
+            sys.stdout.flush()
+            self.mouse_enabled = True
+        except Exception:
+            self.mouse_enabled = False
+
+    def _disable_mouse(self):
+        if not getattr(self, "mouse_enabled", False):
+            return
+        try:
+            sys.stdout.write("\033[?1002l\033[?1000l")
+            sys.stdout.flush()
+        except Exception:
+            pass
+        self.mouse_enabled = False
+
+    def _hide_cursor(self):
+        try:
+            self.curses.curs_set(0)
+        except Exception:
+            pass
+
+    def _show_cursor(self):
+        try:
+            self.curses.curs_set(1)
+        except Exception:
+            pass
+
+    def _preflight(self):
+        collector = CollectUi()
+        try:
+            self.info = read_os_release()
+            self.target = distro_target(self.info)
+            if self.target == "nixos":
+                self.blockers.append("NixOS is not supported by this bootstrap installer. Use the advanced NixOS instructions.")
+            elif not self.target or self.target not in DISTRO_LABELS:
+                pretty = self.info.get("PRETTY_NAME", "this Linux distribution")
+                self.blockers.append(f"{pretty} is not supported by this installer yet.")
+            else:
+                self.manager = package_manager(self.target)
+                required_command = required_manager_command(self.target)
+                if not shutil.which(required_command):
+                    self.blockers.append(f"Required command not found: {required_command}")
+                matrix = load_repo_support(collector)
+                self.warnings.extend(collector.warnings)
+                self.choices = channel_choices(matrix, self.target)
+                if not self.choices:
+                    self.blockers.append(f"Himmelblau does not currently publish packages for {DISTRO_LABELS[self.target]}.")
+                if self.choices:
+                    self.channel = self.choices[0]["value"]
+                self.existing_config = existing_idp_config()
+                options = existing_options_config()
+                self.pam_allow_groups = options["pam_allow_groups"]
+                self.enable_hello = options["enable_hello"]
+                self.allow_console_password_only = options["allow_console_password_only"]
+                self.apply_policy = options["apply_policy"]
+                self.input_cursor["pam_allow_groups"] = len(self.pam_allow_groups)
+                self.installed = himmelblau_installed(self.target)
+                if self.existing_config:
+                    self.domain = self.existing_config.get("domain", "")
+                    self.issuer = self.existing_config.get("oidc_issuer_url", "")
+                    self.appid = self.existing_config.get("app_id", "")
+                    self.mode = self.existing_config.get("mode", "entra")
+                    self.input_cursor["domain"] = len(self.domain)
+                    self.input_cursor["issuer"] = len(self.issuer)
+                    self.input_cursor["appid"] = len(self.appid)
+        except Exception as err:
+            self.blockers.append(str(err))
+
+    def _attr(self, name, extra=0):
+        return self.colors.get(name, 0) | extra
+
+    def _write(self, y, x, text, attr=0):
+        height, width = self.stdscr.getmaxyx()
+        if y < 0 or y >= height or x >= width:
+            return
+        try:
+            self.stdscr.addnstr(y, x, text, max(width - x - 1, 0), attr)
+        except self.curses.error:
+            pass
+
+    def _draw_wrapped(self, y, x, text, width, attr=0):
+        lines = textwrap.wrap(str(text), max(width, 10)) or [""]
+        for line in lines:
+            self._write(y, x, line, attr)
+            y += 1
+        return y
+
+    def _fill_rect(self, y, x, h, w, char=" ", attr=0):
+        for row in range(h):
+            self._write(y + row, x, char * max(w, 0), attr)
+
+    def _draw_box(self, y, x, h, w, title=None, attr=0):
+        if h < 2 or w < 2:
+            return
+        g = self.glyphs
+        self._write(y, x, g["tl"] + g["h"] * (w - 2) + g["tr"], attr)
+        for row in range(1, h - 1):
+            self._write(y + row, x, g["v"] + " " * (w - 2) + g["v"], attr)
+        self._write(y + h - 1, x, g["bl"] + g["h"] * (w - 2) + g["br"], attr)
+        if title:
+            self._write(y, x + 2, " " + title + " ", attr | self.curses.A_BOLD)
+
+    def _layout(self):
+        height, width = self.stdscr.getmaxyx()
+        win_w = min(92, max(60, width - 4))
+        win_h = min(28, max(20, height - 2))
+        win_x = max(0, (width - win_w) // 2)
+        win_y = max(0, (height - win_h) // 2)
+        sidebar_w = 17 if win_w >= 76 else 0
+        return {
+            "win_y": win_y,
+            "win_x": win_x,
+            "win_h": win_h,
+            "win_w": win_w,
+            "sidebar_w": sidebar_w,
+            "content_y": win_y + 4,
+            "content_x": win_x + 2 + sidebar_w,
+            "content_h": win_h - 8,
+            "content_w": win_w - sidebar_w - 4,
+            "footer_y": win_y + win_h - 3,
+        }
+
+    def _begin_frame(self, title, subtitle):
+        height, width = self.stdscr.getmaxyx()
+        self.focusables = []
+        self.mouse_targets = []
+        self.stdscr.bkgd(" ", 0)
+        self.stdscr.erase()
+        layout = self._layout()
+        self._fill_rect(layout["win_y"], layout["win_x"], layout["win_h"], layout["win_w"], " ", self._attr("panel"))
+        self._draw_box(layout["win_y"], layout["win_x"], layout["win_h"], layout["win_w"], attr=self._attr("panel"))
+        self._write(layout["win_y"] + 1, layout["win_x"] + 2, " " * (layout["win_w"] - 4), self._attr("title"))
+        self._write(layout["win_y"] + 1, layout["win_x"] + 4, "Himmelblau Installer", self._attr("title"))
+        self._write(layout["win_y"] + 2, layout["win_x"] + 4, title, self._attr("accent"))
+        self._draw_wrapped(layout["win_y"] + 2, layout["win_x"] + 4 + len(title) + 3, subtitle, max(layout["win_w"] - len(title) - 12, 20), self._attr("muted"))
+        if layout["sidebar_w"]:
+            self._draw_steps(layout)
+            divider_x = layout["win_x"] + layout["sidebar_w"] + 1
+            for row in range(layout["win_y"] + 4, layout["footer_y"]):
+                self._write(row, divider_x, self.glyphs["v"], self._attr("muted"))
+        return layout
+
+    def _draw_steps(self, layout):
+        x = layout["win_x"] + 3
+        y = layout["win_y"] + 5
+        current_index = [key for key, _ in self.STEPS].index(self.page)
+        for index, (key, label) in enumerate(self.STEPS):
+            if index == current_index:
+                marker = self.glyphs["current"]
+            elif index < current_index:
+                marker = self.glyphs["done"]
+            else:
+                marker = self.glyphs["pending"]
+            attr = self._attr("selected") if index == current_index else self._attr("muted")
+            self._write(y + index * 2, x, f"{marker} {label}", attr)
+
+    def _remember_focus(self):
+        if 0 <= self.focus_index < len(self.focusables):
+            self.focus_key = self.focusables[self.focus_index].get("key")
+
+    def _restore_focus(self):
+        if not self.focusables:
+            self.focus_index = 0
+            self.focus_key = None
+            self._hide_cursor()
+            return
+        if self.focus_key:
+            for index, item in enumerate(self.focusables):
+                if item.get("key") == self.focus_key and item.get("enabled", True):
+                    self.focus_index = index
+                    break
+            else:
+                self.focus_index = 0
+        self.focus_index = min(self.focus_index, len(self.focusables) - 1)
+        if not self.focusables[self.focus_index].get("enabled", True):
+            self._move_focus(1)
+        self.focus_key = self.focusables[self.focus_index].get("key")
+
+    def _is_focused(self, key):
+        if self.focus_key == key:
+            return True
+        return bool(self.focusables and 0 <= self.focus_index < len(self.focusables) and self.focusables[self.focus_index].get("key") == key)
+
+    def _add_target(self, key, kind, bounds, action=None, enabled=True, field=None):
+        item = {"key": key, "kind": kind, "bounds": bounds, "action": action, "enabled": enabled, "field": field}
+        if enabled:
+            self.focusables.append(item)
+        self.mouse_targets.append(item)
+        return item
+
+    def _hit_test(self, y, x):
+        for item in reversed(self.mouse_targets):
+            row, col, h, w = item["bounds"]
+            if row <= y < row + h and col <= x < col + w:
+                return item
+        return None
+
+    def _button_key(self, label):
+        normalized = re.sub(r"[^a-z0-9]+", "_", label.lower()).strip("_")
+        return "button:" + normalized
+
+    def _button(self, y, x, label, action, primary=False, enabled=True, key_label=None):
+        key = self._button_key(key_label or label)
+        if enabled and self.focus_key is None:
+            self.focus_key = key
+        focused = self._is_focused(key)
+        face = f"  {label}  "
+        text = f"{self.glyphs['focus_l']} {face} {self.glyphs['focus_r']}" if focused and enabled else f"  {face}  "
+        if not enabled:
+            attr = self._attr("disabled")
+        elif focused and primary:
+            attr = self._attr("primary_focus")
+        elif focused:
+            attr = self._attr("button_focus")
+        elif primary:
+            attr = self._attr("primary")
+        else:
+            attr = self._attr("button")
+        self._write(y, x, text, attr)
+        self._add_target(key, "button", (y, x, 1, len(text)), action, enabled)
+        return len(text)
+
+    def _footer_buttons(self, layout, buttons):
+        y = layout["footer_y"]
+        right = layout["win_x"] + layout["win_w"] - 3
+        self._write(y - 1, layout["win_x"] + 1, self.glyphs["h"] * (layout["win_w"] - 2), self._attr("muted"))
+        positions = []
+        x = right
+        for button in reversed(buttons):
+            label = button["label"]
+            width = len(label) + 8
+            x -= width
+            positions.append((button, x))
+            x -= 2
+        for button, x in reversed(positions):
+            self._button(y, x, button["label"], button.get("action"), button.get("primary", False), button.get("enabled", True), button.get("key_label"))
+
+    def _row(self, y, x, width, label, value):
+        label_w = min(20, max(12, width // 3))
+        self._write(y, x, label, self._attr("muted"))
+        self._draw_wrapped(y, x + label_w, value, max(width - label_w, 10), self._attr("panel"))
+        return y + 1
+
+    def _radio(self, y, x, width, key, label, selected, action):
+        if self.focus_key is None:
+            self.focus_key = key
+        focused = self._is_focused(key)
+        attr = self._attr("button_focus") if focused else self._attr("panel")
+        marker = self.glyphs["radio_on"] if selected else self.glyphs["radio_off"]
+        prefix = f"{self.glyphs['focus_l']} " if focused else "  "
+        text = (prefix + marker + " " + label)[:width]
+        self._write(y, x, text.ljust(width), attr)
+        self._add_target(key, "radio", (y, x, 1, width), action)
+        return y + 1
+
+    def _checkbox(self, y, x, width, key, label, checked, action):
+        if self.focus_key is None:
+            self.focus_key = key
+        focused = self._is_focused(key)
+        attr = self._attr("button_focus") if focused else self._attr("panel")
+        marker = self.glyphs["check_on"] if checked else self.glyphs["check_off"]
+        prefix = f"{self.glyphs['focus_l']} " if focused else "  "
+        text = (prefix + marker + " " + label)[:width]
+        self._write(y, x, text.ljust(width), attr)
+        self._add_target(key, "checkbox", (y, x, 1, width), action)
+        return y + 1
+
+    def _input(self, y, x, width, field, label):
+        value = self._field_value(field)
+        key = "field:" + field
+        if self.focus_key is None:
+            self.focus_key = key
+        focused = self._is_focused(key)
+        label_w = min(22, max(14, width // 3))
+        input_w = max(width - label_w - 1, 10)
+        cursor = min(self.input_cursor.get(field, len(value)), len(value))
+        start = max(0, cursor - input_w + 2)
+        shown = value[start:start + input_w]
+        attr = self._attr("input_focus") if focused else self._attr("input")
+        self._write(y, x, label, self._attr("muted"))
+        if focused:
+            self._write(y, x + label_w - 1, self.glyphs["focus_l"], self._attr("button_focus"))
+            self._write(y, x + label_w, shown.ljust(input_w), attr)
+            self._write(y, x + label_w + input_w, self.glyphs["focus_r"], self._attr("button_focus"))
+            bounds = (y, x + label_w - 1, 1, input_w + 2)
+        else:
+            self._write(y, x + label_w - 1, self.glyphs["input_l"], attr)
+            self._write(y, x + label_w, shown.ljust(input_w), attr)
+            self._write(y, x + label_w + input_w, self.glyphs["input_r"], attr)
+            bounds = (y, x + label_w - 1, 1, input_w + 2)
+        self._add_target(key, "field", bounds, None, True, field)
+        if focused:
+            self.cursor_position = (y, x + label_w + min(cursor - start, input_w - 1))
+        return y + 1
+
+    def render(self):
+        self._remember_focus()
+        self.cursor_position = None
+        self._hide_cursor()
+        if self.page == "preflight":
+            self.render_preflight()
+        elif self.page == "source":
+            self.render_source()
+        elif self.page == "identity":
+            self.render_identity()
+        elif self.page == "options":
+            self.render_options()
+        elif self.page == "review":
+            self.render_review()
+        elif self.page == "install":
+            self.render_install()
+        elif self.page == "done":
+            self.render_done()
+        self._restore_focus()
+        if self.cursor_position:
+            try:
+                self.stdscr.move(*self.cursor_position)
+                self._show_cursor()
+            except self.curses.error:
+                pass
+        self.stdscr.refresh()
+
+    def render_preflight(self):
+        layout = self._begin_frame("Preflight", "Review detected system details before continuing.")
+        y = layout["content_y"] + 1
+        x = layout["content_x"] + 2
+        width = layout["content_w"] - 4
+        self._draw_box(layout["content_y"], layout["content_x"], min(8, layout["content_h"]), layout["content_w"], f"{self.glyphs['info']} System", self._attr("panel"))
+        distro = DISTRO_LABELS.get(self.target, self.info.get("PRETTY_NAME", "Unknown"))
+        y = self._row(y, x, width, "Distribution", distro)
+        y = self._row(y, x, width, "Package manager", self.manager or "Unknown")
+        y = self._row(y, x, width, "Configuration", "Existing provider detected" if self.existing_config else "New provider configuration")
+        y = self._row(y, x, width, "Install state", "Himmelblau appears installed" if self.installed else "Himmelblau not detected")
+        y = layout["content_y"] + 9
+        if self.warnings or self.blockers:
+            self._draw_box(y, layout["content_x"], min(6, layout["footer_y"] - y - 1), layout["content_w"], "Messages", self._attr("panel"))
+            y += 1
+        for warning in self.warnings:
+            y = self._draw_wrapped(y, x, f"{self.glyphs['warning']} Warning: " + warning, width, self._attr("warning"))
+        for blocker in self.blockers:
+            y = self._draw_wrapped(y, x, f"{self.glyphs['error']} Error: " + blocker, width, self._attr("error"))
+        buttons = [{"label": "Close" if self.blockers else f"{self.glyphs['cancel']} Cancel", "key_label": "Close" if self.blockers else "Cancel", "action": self.cancel}]
+        if not self.blockers:
+            buttons.append({"label": f"Next {self.glyphs['next']}", "key_label": "Next", "action": self.next_page, "primary": True})
+        self._footer_buttons(layout, buttons)
+
+    def render_source(self):
+        layout = self._begin_frame("Package Source", "Choose where Himmelblau packages should be installed from.")
+        y = layout["content_y"] + 1
+        x = layout["content_x"] + 2
+        width = layout["content_w"] - 4
+        self._draw_box(layout["content_y"], layout["content_x"], max(6, len(self.choices) + 3), layout["content_w"], "Available sources", self._attr("panel"))
+        for index, choice in enumerate(self.choices):
+            suffix = " (recommended)" if index == 0 else ""
+            def choose(value=choice["value"], choice_index=index):
+                self.channel = value
+                self.choice_index = choice_index
+            y = self._radio(y, x, width, "source:" + choice["value"], choice["label"] + suffix, choice["value"] == self.channel, choose)
+        self._footer_buttons(layout, [
+            {"label": f"{self.glyphs['back']} Back", "key_label": "Back", "action": self.back_page},
+            {"label": f"{self.glyphs['cancel']} Cancel", "key_label": "Cancel", "action": self.cancel},
+            {"label": f"Next {self.glyphs['next']}", "key_label": "Next", "action": self.next_page, "primary": True},
+        ])
+
+    def _identity_items(self):
+        items = []
+        if self.existing_config:
+            items.extend(["keep", "replace"])
+            if self.config_action == "keep":
+                return items
+        items.extend(["mode_entra", "mode_oidc"])
+        if self.mode == "entra":
+            items.append("domain")
+        else:
+            items.extend(["issuer", "appid"])
+        return items
+
+    def _field_value(self, item):
+        if item == "domain":
+            return self.domain
+        if item == "issuer":
+            return self.issuer
+        if item == "appid":
+            return self.appid
+        if item == "pam_allow_groups":
+            return self.pam_allow_groups
+        return ""
+
+    def _set_field_value(self, item, value):
+        if item == "domain":
+            self.domain = value
+        elif item == "issuer":
+            self.issuer = value
+        elif item == "appid":
+            self.appid = value
+        elif item == "pam_allow_groups":
+            self.pam_allow_groups = value
+
+    def render_identity(self):
+        layout = self._begin_frame("Identity Provider", "Use an existing provider configuration or enter a new one.")
+        y = layout["content_y"] + 1
+        x = layout["content_x"] + 2
+        width = layout["content_w"] - 4
+        self._draw_box(layout["content_y"], layout["content_x"], layout["content_h"], layout["content_w"], "Provider settings", self._attr("panel"))
+        if self.existing_config:
+            self._write(y, x, "Existing configuration detected:", self._attr("muted"))
+            y += 1
+            y = self._draw_wrapped(y, x + 2, config_summary(self.existing_config), width - 2, self._attr("panel"))
+            y += 1
+            y = self._radio(y, x, width, "config:keep", "Keep existing configuration", self.config_action == "keep", lambda: setattr(self, "config_action", "keep"))
+            y = self._radio(y, x, width, "config:replace", "Replace identity provider configuration", self.config_action == "replace", lambda: setattr(self, "config_action", "replace"))
+            y += 1
+            if self.config_action == "keep":
+                if self.message:
+                    self._draw_wrapped(y, x, self.message, width, self._attr("error"))
+                self._footer_buttons(layout, [
+                    {"label": f"{self.glyphs['back']} Back", "key_label": "Back", "action": self.back_page},
+                    {"label": f"{self.glyphs['cancel']} Cancel", "key_label": "Cancel", "action": self.cancel},
+                    {"label": f"Next {self.glyphs['next']}", "key_label": "Next", "action": self.next_page, "primary": True},
+                ])
+                return
+        y = self._radio(y, x, width, "mode:entra", "Microsoft Entra ID", self.mode == "entra", lambda: setattr(self, "mode", "entra"))
+        y = self._radio(y, x, width, "mode:oidc", "Generic OIDC provider (Google Workspace, Okta, Keycloak, etc.)", self.mode == "oidc", lambda: setattr(self, "mode", "oidc"))
+        y += 1
+        if self.mode == "entra":
+            y = self._input(y, x, width, "domain", "Entra ID domain")
+        else:
+            y = self._input(y, x, width, "issuer", "OIDC issuer URL")
+            y = self._input(y, x, width, "appid", "Application/client ID")
+        if self.message:
+            self._draw_wrapped(y + 1, x, self.message, width, self._attr("error"))
+        self._footer_buttons(layout, [
+            {"label": f"{self.glyphs['back']} Back", "key_label": "Back", "action": self.back_page},
+            {"label": f"{self.glyphs['cancel']} Cancel", "key_label": "Cancel", "action": self.cancel},
+            {"label": f"Next {self.glyphs['next']}", "key_label": "Next", "action": self.next_page, "primary": True},
+        ])
+
+    def selected_provider_mode(self):
+        config, _ = self.selected_idp()
+        return config["mode"]
+
+    def render_options(self):
+        layout = self._begin_frame("Access & Authentication", "Configure optional himmelblau.conf access settings.")
+        y = layout["content_y"] + 1
+        x = layout["content_x"] + 2
+        width = layout["content_w"] - 4
+        self._draw_box(layout["content_y"], layout["content_x"], layout["content_h"], layout["content_w"], "himmelblau.conf options", self._attr("panel"))
+        self._write(y, x, "Permitted users and groups", self._attr("muted"))
+        y += 1
+        y = self._draw_wrapped(
+            y,
+            x,
+            "Optional. Leave blank to allow all users. Use comma-separated user UPNs and group Object ID GUIDs; group names are not valid.",
+            width,
+            self._attr("panel"),
+        )
+        y = self._input(y, x, width, "pam_allow_groups", "Allowed")
+        y += 1
+        y = self._checkbox(
+            y,
+            x,
+            width,
+            "option:enable_hello",
+            "Enable Linux Hello PIN authentication",
+            self.enable_hello,
+            lambda: setattr(self, "enable_hello", not self.enable_hello),
+        )
+        y = self._draw_wrapped(y, x + 2, "Default: enabled. If disabled, users must authenticate to the identity provider for each login.", width - 2, self._attr("muted"))
+        y = self._checkbox(
+            y,
+            x,
+            width,
+            "option:allow_console_password_only",
+            "Allow password-only local console logins",
+            self.allow_console_password_only,
+            lambda: setattr(self, "allow_console_password_only", not self.allow_console_password_only),
+        )
+        y = self._draw_wrapped(y, x + 2, "Default: enabled. Remote authentication still requires MFA unless other remote Hello options apply.", width - 2, self._attr("muted"))
+        if self.selected_provider_mode() != "oidc":
+            y = self._checkbox(
+                y,
+                x,
+                width,
+                "option:apply_policy",
+                "Apply Intune device compliance policies",
+                self.apply_policy,
+                lambda: setattr(self, "apply_policy", not self.apply_policy),
+            )
+            y = self._draw_wrapped(y, x + 2, "Default: enabled. Non-compliant devices may be denied authentication.", width - 2, self._attr("muted"))
+        if self.message:
+            self._draw_wrapped(y + 1, x, self.message, width, self._attr("error"))
+        self._footer_buttons(layout, [
+            {"label": f"{self.glyphs['back']} Back", "key_label": "Back", "action": self.back_page},
+            {"label": f"{self.glyphs['cancel']} Cancel", "key_label": "Cancel", "action": self.cancel},
+            {"label": f"Next {self.glyphs['next']}", "key_label": "Next", "action": self.next_page, "primary": True},
+        ])
+
+    def render_review(self):
+        layout = self._begin_frame("Review", "Confirm the changes before the installer modifies this system.")
+        y = layout["content_y"] + 1
+        x = layout["content_x"] + 2
+        width = layout["content_w"] - 4
+        self._draw_box(layout["content_y"], layout["content_x"], layout["content_h"], layout["content_w"], "Summary", self._attr("panel"))
+        idp_config, write_config = self.selected_idp()
+        for line in summary_lines(self.target, self.manager, self.channel, idp_config, write_config, self.selected_options()):
+            if ": " in line:
+                label, value = line.split(": ", 1)
+                y = self._row(y, x, width, label, value)
+            else:
+                y = self._draw_wrapped(y, x, line, width, self._attr("accent"))
+        y += 1
+        self._draw_wrapped(y, x, "Administrative authorization will be requested when installation begins.", width, self._attr("muted"))
+        self._footer_buttons(layout, [
+            {"label": f"{self.glyphs['back']} Back", "key_label": "Back", "action": self.back_page},
+            {"label": f"{self.glyphs['cancel']} Cancel", "key_label": "Cancel", "action": self.cancel},
+            {"label": f"{self.glyphs['ok']} Install", "key_label": "Install", "action": self.start_install, "primary": True},
+        ])
+
+    def render_install(self):
+        layout = self._begin_frame("Installing", "Keep this terminal open while packages and services are configured.")
+        y = layout["content_y"] + 1
+        x = layout["content_x"] + 2
+        width = layout["content_w"] - 4
+        self._draw_wrapped(y, x, self.progress_text, width, self._attr("accent"))
+        y += 2
+        bar_w = max(width - 4, 10)
+        filled = int(bar_w * self.progress_percent / 100.0)
+        percent = "%3d%%" % int(self.progress_percent)
+        self._write(y, x, self.glyphs["bar_full"] * filled + self.glyphs["bar_empty"] * (bar_w - filled) + " " + percent, self._attr("input"))
+        y += 2
+        box_h = max(layout["footer_y"] - y - 1, 4)
+        self._draw_box(y, layout["content_x"], box_h, layout["content_w"], "Details", self._attr("panel"))
+        y += 1
+        for line in self.transcript[-max(box_h - 2, 0):]:
+            self._draw_wrapped(y, x, line, width, self._attr("muted"))
+            y += 1
+        self._footer_buttons(layout, [
+            {"label": f"{self.glyphs['back']} Back", "key_label": "Back", "enabled": False},
+            {"label": f"{self.glyphs['cancel']} Cancel", "key_label": "Cancel", "enabled": False},
+            {"label": "Installing...", "key_label": "Installing", "enabled": False, "primary": True},
+        ])
+
+    def render_done(self):
+        title = "Installation Complete" if self.install_ok else "Installation Failed"
+        subtitle = "The installation finished successfully." if self.install_ok else "Review the details below before retrying."
+        layout = self._begin_frame(title, subtitle)
+        y = layout["content_y"] + 1
+        x = layout["content_x"] + 2
+        width = layout["content_w"] - 4
+        attr = self._attr("accent") if self.install_ok else self._attr("error")
+        y = self._draw_wrapped(y, x, self.final_message, width, attr)
+        self._draw_wrapped(y + 1, x, f"Log: {LOG_PATH}", width, self._attr("muted"))
+        self._footer_buttons(layout, [
+            {"label": "Close", "key_label": "Close", "action": self.close_done, "primary": True},
+        ])
+
+    def selected_idp(self):
+        if self.existing_config and self.config_action == "keep":
+            return self.existing_config, False
+        if self.mode == "entra":
+            return {"mode": "entra", "domain": self.domain.strip()}, True
+        return {"mode": "oidc", "oidc_issuer_url": self.issuer.strip(), "app_id": self.appid.strip()}, True
+
+    def selected_options(self):
+        return {
+            "pam_allow_groups": self.pam_allow_groups.strip(),
+            "enable_hello": self.enable_hello,
+            "allow_console_password_only": self.allow_console_password_only,
+            "apply_policy": self.apply_policy,
+        }
+
+    def validate_identity(self):
+        config, _ = self.selected_idp()
+        if config["mode"] == "entra":
+            return validate_domain(config.get("domain", ""))
+        ok, message = validate_oidc_issuer_url(config.get("oidc_issuer_url", ""))
+        if not ok:
+            return ok, message
+        return validate_app_id(config.get("app_id", ""))
+
+    def validate_options(self):
+        return validate_pam_allow_groups(self.pam_allow_groups)
+
+    def on_event(self, event):
+        log_worker_event(event)
+        etype = event.get("type")
+        if etype == "step":
+            total = max(event.get("total", 1), 1)
+            index = event.get("index", 1)
+            self.progress_percent = (index - 1) * 100.0 / total
+            self.progress_text = "Step %s of %s: %s" % (index, total, event.get("kind", ""))
+        elif etype == "done":
+            self.progress_percent = 100
+            self.progress_text = "Finishing..."
+        elif etype in ("command", "output", "warning", "info", "error"):
+            text = event.get("text", "")
+            if text:
+                self.transcript.append(text)
+        self.render()
+
+    def start_install(self):
+        self.page = "install"
+        self.render()
+        try:
+            self._disable_mouse()
+            authorize_sudo_for_curses(self.curses)
+            self._enable_mouse()
+            idp_config, write_config = self.selected_idp()
+            plan = build_install_plan(self.channel, self.target, idp_config, write_config, self.selected_options())
+            run_elevated_plan(plan, on_event=self.on_event, prefer_gui=False, non_interactive=True)
+            self.install_ok = True
+            self.final_message = "Himmelblau installation completed."
+        except Exception as err:
+            self._enable_mouse()
+            self.install_ok = False
+            self.final_message = str(err)
+        self.exit_code = 0 if self.install_ok else 1
+        self.page = "done"
+        self.render()
+
+    def close_done(self):
+        return False
+
+    def cancel(self):
+        self.exit_code = 130
+        return False
+
+    def next_page(self):
+        if self.page == "preflight" and not self.blockers:
+            self.page = "source"
+        elif self.page == "source":
+            self.page = "identity"
+        elif self.page == "identity":
+            ok, message = self.validate_identity()
+            if ok:
+                self.message = ""
+                self.page = "options"
+            else:
+                self.message = message
+        elif self.page == "options":
+            ok, message = self.validate_options()
+            if ok:
+                self.message = ""
+                self.page = "review"
+            else:
+                self.message = message
+        return True
+
+    def back_page(self):
+        self.message = ""
+        if self.page == "source":
+            self.page = "preflight"
+        elif self.page == "identity":
+            self.page = "source"
+        elif self.page == "options":
+            self.page = "identity"
+        elif self.page == "review":
+            self.page = "options"
+        return True
+
+    def _move_focus(self, delta):
+        if not self.focusables:
+            return
+        start = self.focus_index
+        index = start
+        while True:
+            index = (index + delta) % len(self.focusables)
+            if self.focusables[index].get("enabled", True):
+                self.focus_index = index
+                self.focus_key = self.focusables[index].get("key")
+                return
+            if index == start:
+                return
+
+    def _activate_focused(self):
+        if not self.focusables:
+            return True
+        item = self.focusables[self.focus_index]
+        if not item.get("enabled", True):
+            return True
+        if item["kind"] == "field":
+            return True
+        action = item.get("action")
+        if action:
+            result = action()
+            return True if result is None else result
+        return True
+
+    def _focused_field(self):
+        if not self.focusables or not (0 <= self.focus_index < len(self.focusables)):
+            return None
+        item = self.focusables[self.focus_index]
+        if item["kind"] == "field":
+            return item.get("field")
+        return None
+
+    def _edit_field(self, field, key):
+        value = self._field_value(field)
+        cursor = min(self.input_cursor.get(field, len(value)), len(value))
+        if key in (self.curses.KEY_BACKSPACE, 127, 8):
+            if cursor:
+                value = value[:cursor - 1] + value[cursor:]
+                cursor -= 1
+        elif key == getattr(self.curses, "KEY_DC", -1):
+            value = value[:cursor] + value[cursor + 1:]
+        elif key == getattr(self.curses, "KEY_LEFT", -1):
+            cursor = max(0, cursor - 1)
+        elif key == getattr(self.curses, "KEY_RIGHT", -1):
+            cursor = min(len(value), cursor + 1)
+        elif key == getattr(self.curses, "KEY_HOME", -1):
+            cursor = 0
+        elif key == getattr(self.curses, "KEY_END", -1):
+            cursor = len(value)
+        elif 32 <= key <= 126:
+            value = value[:cursor] + chr(key) + value[cursor:]
+            cursor += 1
+        self._set_field_value(field, value)
+        self.input_cursor[field] = cursor
+
+    def _handle_mouse(self):
+        try:
+            _, x, y, _, state = self.curses.getmouse()
+        except Exception:
+            return True
+        if hasattr(self.curses, "BUTTON1_CLICKED") and not (state & self.curses.BUTTON1_CLICKED):
+            if hasattr(self.curses, "BUTTON1_RELEASED") and not (state & self.curses.BUTTON1_RELEASED):
+                return True
+        item = self._hit_test(y, x)
+        if not item or not item.get("enabled", True):
+            return True
+        for index, focusable in enumerate(self.focusables):
+            if focusable.get("key") == item.get("key"):
+                self.focus_index = index
+                self.focus_key = item.get("key")
+                break
+        if item["kind"] != "field" and item.get("action"):
+            result = item["action"]()
+            return True if result is None else result
+        return True
+
+    def handle_key(self, key):
+        if key == getattr(self.curses, "KEY_MOUSE", -1000):
+            return self._handle_mouse()
+        field = self._focused_field()
+        if field and key not in (9, getattr(self.curses, "KEY_BTAB", -1), 10, 13, 27):
+            self._edit_field(field, key)
+            return True
+        if key == 9:
+            self._move_focus(1)
+        elif key == getattr(self.curses, "KEY_BTAB", -1):
+            self._move_focus(-1)
+        elif key in (10, 13, ord(" ")):
+            return self._activate_focused()
+        elif key == 27:
+            if self.page not in ("install", "done"):
+                return self.cancel()
+        elif key in (ord("q"), ord("Q")) and self.page != "install":
+            return self.cancel() if self.page != "done" else self.close_done()
+        elif key in (self.curses.KEY_UP, self.curses.KEY_LEFT):
+            self._move_focus(-1)
+        elif key in (self.curses.KEY_DOWN, self.curses.KEY_RIGHT):
+            self._move_focus(1)
+        return True
+
+    def run(self):
+        try:
+            while True:
+                self.render()
+                key = self.stdscr.getch()
+                if not self.handle_key(key):
+                    return self.exit_code
+        finally:
+            self._disable_mouse()
+
+
+def run_curses():
+    try:
+        import curses
+    except Exception as err:
+        log("curses unavailable: " + str(err))
+        return CURSES_STARTUP_EXIT
+
+    try:
+        return curses.wrapper(lambda stdscr: WizardCursesUi(stdscr, curses).run())
+    except curses.error as err:
+        log("curses startup failed: " + str(err))
+        return CURSES_STARTUP_EXIT
+
+
+def run_curses_terminal_child():
+    if not hasattr(os, "fork"):
+        return CURSES_STARTUP_EXIT
+    try:
+        pid = os.fork()
+    except OSError as err:
+        log("Unable to fork curses UI: " + str(err))
+        return CURSES_STARTUP_EXIT
+    if pid == 0:
+        try:
+            terminal_fd = acquire_terminal_fd()
+            try:
+                attach_terminal_stdio(terminal_fd)
+            finally:
+                if terminal_fd > 2:
+                    os.close(terminal_fd)
+            rc = run_curses()
+        except KeyboardInterrupt:
+            rc = 130
+        except Exception as err:
+            log("curses UI failed before startup: " + str(err))
+            rc = CURSES_STARTUP_EXIT
+        os._exit(rc)
+    while True:
+        try:
+            _, status = os.waitpid(pid, 0)
+            break
+        except InterruptedError:
+            continue
+    if os.WIFEXITED(status):
+        return os.WEXITSTATUS(status)
+    if os.WIFSIGNALED(status):
+        return 128 + os.WTERMSIG(status)
+    return 1
+
+
+def main():
+    if not has_interactive_terminal():
+        run_headless_install()
+        return
+    exit_code = run_curses_terminal_child()
+    if exit_code == CURSES_STARTUP_EXIT:
+        raise InstallError("Unable to start the interactive curses installer. Run this command from a terminal.")
+    if exit_code:
+        sys.exit(exit_code)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except InstallError as err:
+        try:
+            ui = CliUi()
+            ui.error(str(err))
+            ui.info(f"Log: {LOG_PATH}")
+        except Exception:
+            print("error: " + str(err), file=sys.stderr)
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("\nInstallation cancelled.", file=sys.stderr)
+        sys.exit(130)
+PYTHON_PAYLOAD

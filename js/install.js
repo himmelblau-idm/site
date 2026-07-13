@@ -2,6 +2,10 @@
  * Leave "include" empty to mean "all distros in your selector are supported"
  * and just list exceptions in "exclude". If you prefer strict allow-lists,
  * put distros in "include" and set "exclude" to [].
+ *
+ * The /install bootstrapper reads this object at runtime from
+ * https://himmelblau-idm.org/js/install.js. Keep this object data-only:
+ * simple channel keys with include/exclude string arrays.
  **************************************************************************/
 const REPO_SUPPORT = {
 	stable: {
@@ -71,7 +75,7 @@ function isSupported(channel, distro) {
 }
 
 function addCopyButtons() {
-	document.querySelectorAll('#download-links pre').forEach((pre) => {
+	document.querySelectorAll('#download-links pre, .hb-install-panel pre').forEach((pre) => {
 		if (pre.parentElement.classList.contains('code-block')) return;
 
 		const wrapper = document.createElement('div');
@@ -472,5 +476,6 @@ document
 const channelEl = document.getElementById('channel');
 if (channelEl) channelEl.addEventListener('change', provideRepoInstructions);
 document.addEventListener('DOMContentLoaded', () => {
+	addCopyButtons();
 	if (document.getElementById('linux-distro')) provideRepoInstructions();
 });

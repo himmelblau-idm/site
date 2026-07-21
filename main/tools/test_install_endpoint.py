@@ -456,63 +456,98 @@ class InstallEndpointTests(unittest.TestCase):
         )
 
     def test_has_interactive_terminal_uses_stdin_tty(self):
-        old_stdin = installer.sys.stdin
-
-        class FakeStdin:
-            def isatty(self):
-                return True
+        old_open = installer.os.open
+        old_isatty = installer.os.isatty
+        old_close = installer.os.close
+        opened = []
+        closed = []
 
         try:
-            installer.sys.stdin = FakeStdin()
+            def fake_isatty(fd):
+                return fd in (0, 100)
+
+            def fake_open(path, flags):
+                opened.append(path)
+                if path == "/dev/tty":
+                    raise OSError("no controlling tty")
+                if path == "/proc/self/fd/0":
+                    return 100
+                raise OSError("unexpected path")
+
+            installer.os.isatty = fake_isatty
+            installer.os.open = fake_open
+            installer.os.close = lambda fd: closed.append(fd)
             self.assertTrue(installer.has_interactive_terminal())
+            self.assertEqual(opened, ["/dev/tty", "/proc/self/fd/0"])
+            self.assertEqual(closed, [100])
         finally:
-            installer.sys.stdin = old_stdin
+            installer.os.open = old_open
+            installer.os.isatty = old_isatty
+            installer.os.close = old_close
 
     def test_has_interactive_terminal_uses_dev_tty(self):
-        old_stdin = installer.sys.stdin
-        sentinel = object()
-
-        class FakeStdin:
-            def isatty(self):
-                return False
-
-        class FakeTty:
-            def close(self):
-                pass
-
-        def fake_open(path, mode, encoding=None):
-            self.assertEqual(path, "/dev/tty")
-            self.assertEqual(mode, "r+")
-            return FakeTty()
+        old_open = installer.os.open
+        old_isatty = installer.os.isatty
+        old_close = installer.os.close
+        closed = []
 
         try:
-            installer.sys.stdin = FakeStdin()
-            setattr(installer, "open", fake_open)
+            installer.os.isatty = lambda fd: fd == 100
+
+            def fake_open(path, flags):
+                self.assertEqual(path, "/dev/tty")
+                return 100
+
+            installer.os.open = fake_open
+            installer.os.close = lambda fd: closed.append(fd)
             self.assertTrue(installer.has_interactive_terminal())
+            self.assertEqual(closed, [100])
         finally:
-            installer.sys.stdin = old_stdin
-            if getattr(installer, "open", sentinel) is not sentinel:
-                delattr(installer, "open")
+            installer.os.open = old_open
+            installer.os.isatty = old_isatty
+            installer.os.close = old_close
+
+    def test_has_interactive_terminal_uses_stdout_tty_without_dev_tty(self):
+        old_open = installer.os.open
+        old_isatty = installer.os.isatty
+        old_close = installer.os.close
+        opened = []
+        closed = []
+
+        try:
+            def fake_isatty(fd):
+                return fd in (1, 100)
+
+            def fake_open(path, flags):
+                opened.append(path)
+                if path == "/dev/tty":
+                    raise OSError("no controlling tty")
+                if path == "/proc/self/fd/1":
+                    return 100
+                raise OSError("unexpected path")
+
+            installer.os.isatty = fake_isatty
+            installer.os.open = fake_open
+            installer.os.close = lambda fd: closed.append(fd)
+            self.assertTrue(installer.has_interactive_terminal())
+            self.assertEqual(opened, ["/dev/tty", "/proc/self/fd/1"])
+            self.assertEqual(closed, [100])
+        finally:
+            installer.os.open = old_open
+            installer.os.isatty = old_isatty
+            installer.os.close = old_close
 
     def test_has_interactive_terminal_false_without_tty(self):
-        old_stdin = installer.sys.stdin
-        sentinel = object()
-
-        class FakeStdin:
-            def isatty(self):
-                return False
-
-        def fake_open(path, mode, encoding=None):
-            raise OSError("no tty")
+        old_open = installer.os.open
+        old_isatty = installer.os.isatty
 
         try:
-            installer.sys.stdin = FakeStdin()
-            setattr(installer, "open", fake_open)
+            installer.os.isatty = lambda fd: False
+            installer.os.open = lambda path, flags: (_ for _ in ()).throw(OSError("no tty"))
             self.assertFalse(installer.has_interactive_terminal())
         finally:
-            installer.sys.stdin = old_stdin
-            if getattr(installer, "open", sentinel) is not sentinel:
-                delattr(installer, "open")
+            installer.os.open = old_open
+            installer.os.isatty = old_isatty
 
     def test_main_uses_curses_when_tty_available(self):
         calls = []

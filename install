@@ -242,15 +242,30 @@ def shell_join(argv):
     return " ".join(shlex.quote(str(part)) for part in argv)
 
 
+def terminal_candidate_paths():
+    candidates = ["/dev/tty"]
+    for fd in (0, 1, 2):
+        try:
+            if not os.isatty(fd):
+                continue
+        except OSError:
+            continue
+        candidates.extend([f"/proc/self/fd/{fd}", f"/dev/fd/{fd}"])
+    return candidates
+
+
 def has_interactive_terminal():
-    if sys.stdin.isatty():
-        return True
-    try:
-        handle = open("/dev/tty", "r+", encoding="utf-8")
-    except OSError:
-        return False
-    handle.close()
-    return True
+    for path in terminal_candidate_paths():
+        try:
+            fd = os.open(path, os.O_RDWR)
+        except OSError:
+            continue
+        try:
+            if os.isatty(fd):
+                return True
+        finally:
+            os.close(fd)
+    return False
 
 
 def run(argv, ui, check=True, input_text=None):
@@ -1492,16 +1507,8 @@ CURSES_STARTUP_EXIT = 75
 
 
 def acquire_terminal_fd():
-    candidates = ["/dev/tty"]
-    for fd in (0, 1, 2):
-        try:
-            if not os.isatty(fd):
-                continue
-        except OSError:
-            continue
-        candidates.extend([f"/proc/self/fd/{fd}", f"/dev/fd/{fd}"])
     errors = []
-    for path in candidates:
+    for path in terminal_candidate_paths():
         try:
             fd = os.open(path, os.O_RDWR)
         except OSError as err:

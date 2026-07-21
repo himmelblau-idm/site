@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import contextlib
 import io
+import json
 import pathlib
 import shutil
 import tempfile
@@ -146,6 +147,116 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertIn('subprocess.run(["gpg", "--dearmor"]', source)
         self.assertNotIn("arch=amd64", source)
         self.assertNotIn("/etc/apt/keyrings/himmelblau.asc", source)
+
+    def test_zypper_community_install_uses_himmelblau_repo_without_refreshing_all_repos(self):
+        calls = []
+        old_run = installer.run
+        old_geteuid = installer.os.geteuid
+        try:
+            installer.os.geteuid = lambda: 0
+            installer.run = lambda argv, ui, check=True, input_text=None: calls.append(argv) or types.SimpleNamespace(stdout="")
+            installer.install_packages("stable", "tumbleweed", object())
+            self.assertIn(
+                [
+                    "zypper",
+                    "--non-interactive",
+                    "--no-refresh",
+                    "install",
+                    "-y",
+                    "--from",
+                    "himmelblau-stable",
+                    "himmelblau",
+                    "pam-himmelblau",
+                    "nss-himmelblau",
+                ],
+                calls,
+            )
+        finally:
+            installer.run = old_run
+            installer.os.geteuid = old_geteuid
+
+    def test_zypper_subscription_install_keeps_default_repo_behavior(self):
+        calls = []
+        old_run = installer.run
+        old_geteuid = installer.os.geteuid
+        try:
+            installer.os.geteuid = lambda: 0
+            installer.run = lambda argv, ui, check=True, input_text=None: calls.append(argv) or types.SimpleNamespace(stdout="")
+            installer.install_packages("subscription", "tumbleweed", object())
+            self.assertEqual(calls, [[
+                "zypper",
+                "--non-interactive",
+                "install",
+                "-y",
+                "himmelblau",
+                "pam-himmelblau",
+                "libnss_himmelblau2",
+            ]])
+        finally:
+            installer.run = old_run
+            installer.os.geteuid = old_geteuid
+
+    def test_root_worker_zypper_community_install_uses_himmelblau_repo_without_refreshing_all_repos(self):
+        source = installer.ROOT_WORKER_SOURCE
+        self.assertIn('["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel]', source)
+        self.assertIn('["zypper", "--non-interactive", "install", "-y"] + packages', source)
+
+    def test_worker_failure_status_reads_last_worker_error(self):
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
+            path = handle.name
+            handle.write(json.dumps({"type": "started"}) + "\n")
+            handle.write(json.dumps({"type": "error", "text": "first failure"}) + "\n")
+            handle.write(json.dumps({"type": "error", "text": "last failure"}) + "\n")
+        try:
+            self.assertEqual(installer.worker_failure_status(path), (True, "last failure"))
+        finally:
+            pathlib.Path(path).unlink(missing_ok=True)
+
+    def test_noninteractive_elevation_reports_worker_error_after_worker_started(self):
+        old_geteuid = installer.os.geteuid
+        old_which = installer.shutil.which
+        old_popen = installer.subprocess.Popen
+        old_wait = installer.wait_with_events
+        try:
+            installer.os.geteuid = lambda: 1000
+            installer.shutil.which = lambda command: "/usr/bin/sudo" if command == "sudo" else None
+            installer.subprocess.Popen = lambda argv: object()
+
+            def fake_wait(proc, event_log, on_event):
+                with open(event_log, "w", encoding="utf-8") as handle:
+                    handle.write(json.dumps({"type": "started"}) + "\n")
+                    handle.write(json.dumps({"type": "error", "text": "zypper failed"}) + "\n")
+                return 1
+
+            installer.wait_with_events = fake_wait
+            with self.assertRaises(installer.InstallError) as raised:
+                installer.run_elevated_plan(installer.build_package_only_plan("stable", "ubuntu24.04"), non_interactive=True)
+            self.assertEqual(str(raised.exception), "zypper failed")
+            self.assertNotIsInstance(raised.exception, installer.ElevationError)
+        finally:
+            installer.os.geteuid = old_geteuid
+            installer.shutil.which = old_which
+            installer.subprocess.Popen = old_popen
+            installer.wait_with_events = old_wait
+
+    def test_noninteractive_elevation_reports_sudo_error_when_worker_never_started(self):
+        old_geteuid = installer.os.geteuid
+        old_which = installer.shutil.which
+        old_popen = installer.subprocess.Popen
+        old_wait = installer.wait_with_events
+        try:
+            installer.os.geteuid = lambda: 1000
+            installer.shutil.which = lambda command: "/usr/bin/sudo" if command == "sudo" else None
+            installer.subprocess.Popen = lambda argv: object()
+            installer.wait_with_events = lambda proc, event_log, on_event: 1
+            with self.assertRaises(installer.ElevationError) as raised:
+                installer.run_elevated_plan(installer.build_package_only_plan("stable", "ubuntu24.04"), non_interactive=True)
+            self.assertIn("requires root or passwordless sudo", str(raised.exception))
+        finally:
+            installer.os.geteuid = old_geteuid
+            installer.shutil.which = old_which
+            installer.subprocess.Popen = old_popen
+            installer.wait_with_events = old_wait
 
     def test_domain_validation(self):
         self.assertEqual(installer.validate_domain("example.onmicrosoft.com"), (True, ""))

@@ -781,7 +781,10 @@ def install_packages(channel, target, ui):
     if manager == "apt":
         run(sudo_prefix() + ["apt-get", "install", "-y"] + packages, ui)
     elif manager == "zypper":
-        run(sudo_prefix() + ["zypper", "--non-interactive", "install", "-y"] + packages, ui)
+        if channel == "subscription":
+            run(sudo_prefix() + ["zypper", "--non-interactive", "install", "-y"] + packages, ui)
+        else:
+            run(sudo_prefix() + ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", f"himmelblau-{channel}"] + packages, ui)
     elif manager == "dnf":
         run(sudo_prefix() + ["dnf", "install", "-y"] + packages, ui)
     else:
@@ -1186,7 +1189,10 @@ def install_packages(channel, target, event_log):
     if manager == "apt":
         run(["apt-get", "install", "-y"] + packages, event_log)
     elif manager == "zypper":
-        run(["zypper", "--non-interactive", "install", "-y"] + packages, event_log)
+        if channel == "subscription":
+            run(["zypper", "--non-interactive", "install", "-y"] + packages, event_log)
+        else:
+            run(["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel] + packages, event_log)
     elif manager == "dnf":
         run(["dnf", "install", "-y"] + packages, event_log)
     else:
@@ -1350,6 +1356,37 @@ def wait_with_events(proc, event_log, on_event):
     return proc.returncode
 
 
+def worker_failure_status(event_log):
+    saw_worker_event = False
+    last_error = None
+    try:
+        with open(event_log, encoding="utf-8") as handle:
+            for raw in handle:
+                raw = raw.strip()
+                if not raw:
+                    continue
+                try:
+                    event = json.loads(raw)
+                except ValueError:
+                    saw_worker_event = True
+                    continue
+                etype = event.get("type")
+                if etype:
+                    saw_worker_event = True
+                if etype == "error" and event.get("text"):
+                    last_error = event["text"]
+    except OSError:
+        pass
+    return saw_worker_event, last_error
+
+
+def raise_worker_or_elevation_error(event_log, elevation_message):
+    saw_worker_event, worker_error = worker_failure_status(event_log)
+    if saw_worker_event:
+        raise InstallError(worker_error or "Privileged installation failed.")
+    raise ElevationError(elevation_message)
+
+
 def run_elevated_plan(plan, on_event=None, prefer_gui=True, non_interactive=False):
     on_event = on_event or (lambda event: None)
     work_dir = make_work_dir()
@@ -1362,7 +1399,7 @@ def run_elevated_plan(plan, on_event=None, prefer_gui=True, non_interactive=Fals
             proc = subprocess.Popen(worker_cmd)
             rc = wait_with_events(proc, event_log, on_event)
             if rc != 0:
-                raise ElevationError("Privileged installation failed.")
+                raise_worker_or_elevation_error(event_log, "Privileged installation failed.")
             return
 
         if non_interactive:
@@ -1372,7 +1409,10 @@ def run_elevated_plan(plan, on_event=None, prefer_gui=True, non_interactive=Fals
             proc = subprocess.Popen(["sudo", "-n"] + worker_cmd)
             rc = wait_with_events(proc, event_log, on_event)
             if rc != 0:
-                raise ElevationError("This non-interactive install requires root or passwordless sudo.\nRe-run as root, configure passwordless sudo, or run from an interactive terminal for guided setup.")
+                raise_worker_or_elevation_error(
+                    event_log,
+                    "This non-interactive install requires root or passwordless sudo.\nRe-run as root, configure passwordless sudo, or run from an interactive terminal for guided setup.",
+                )
             return
 
         if prefer_gui and shutil.which("pkexec"):
@@ -1389,7 +1429,7 @@ def run_elevated_plan(plan, on_event=None, prefer_gui=True, non_interactive=Fals
             rc = wait_with_events(proc, event_log, on_event)
             if rc == 0:
                 return
-            raise ElevationError("Privileged installation failed or was cancelled.")
+            raise_worker_or_elevation_error(event_log, "Privileged installation failed or was cancelled.")
 
         manual = shell_join(["sudo"] + worker_cmd)
         raise ElevationError("No graphical authorization agent or terminal emulator was available.\nRun this command in a terminal:\n" + manual)

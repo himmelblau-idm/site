@@ -155,7 +155,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#download-himmelblau-for-linux" class="md-skip">
+        <a href="#linux-cloud-authentication" class="md-skip">
           Skip to content
         </a>
       
@@ -655,7 +655,24 @@
   
 
 
-<h1 id="download-himmelblau-for-linux">Download Himmelblau for Linux</h1>
+<h1 id="linux-cloud-authentication">Linux Cloud Authentication</h1>
+<div class="hb-install-page">
+
+<div class="hb-install-panel">
+  <p>Run this in your terminal, then follow the onscreen instructions.</p>
+
+  <pre>curl -fsSL https://himmelblau-idm.org/install | sh</pre>
+
+  <p class="hb-install-note">Uses your native package manager and signed Himmelblau packages. <a href="https://himmelblau-idm.org/install">Review the installer</a>.</p>
+</div>
+
+<p class="hb-install-help">Need manual repository commands? Use the advanced section below.</p>
+
+<details class="hb-advanced-install">
+<summary>Advanced manual package repository instructions</summary>
+
+Use these instructions if you manage repositories with configuration management, need to review every command before running it, want to install optional packages manually, or prefer vendor-supported distribution packages where available.
+
 <div class="download-selector">
 <div id="channel-buttons" class="channel-buttons">
   <button data-value="subscription" class="channel-btn active">Vendor Supported<sup class="footnote-mark">*</sup></button>
@@ -699,20 +716,23 @@
     <option value="nixos">NixOS</option>
 </select>
 </div>
-<p><select id="channel" style="display:none;">
+<select id="channel" style="display:none;">
     <option value="subscription" selected>Vendor Supported</option>
     <option value="stable">Community Stable</option>
     <option value="nightly">Community Nightly</option>
-</select></p>
+</select>
 <div id="download-links" style="margin-top: 20px;"></div>
 <div id="configuration" style="display: none;"></div>
-<p>Refer to <a href="../docs/index.html">the documentation</a> for configuration.</p>
 <script src="../js/install.js"></script>
 
 <p class="footnote">
   <span class="footnote-mark">*</span>
   Vendor-supported packages are installed using your distribution’s subscription channels (e.g. SLE, Rocky Linux).
 </p>
+
+</details>
+
+</div>
 
 
 

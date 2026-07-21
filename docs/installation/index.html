@@ -421,9 +421,18 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#prebuilt-packages-recommended" class="md-nav__link">
+  <a href="#bootstrap-installer-recommended" class="md-nav__link">
     <span class="md-ellipsis">
-      Prebuilt Packages (Recommended)
+      Bootstrap Installer (Recommended)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-repository-setup-advanced" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual Repository Setup (Advanced)
     </span>
   </a>
   
@@ -1373,9 +1382,18 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#prebuilt-packages-recommended" class="md-nav__link">
+  <a href="#bootstrap-installer-recommended" class="md-nav__link">
     <span class="md-ellipsis">
-      Prebuilt Packages (Recommended)
+      Bootstrap Installer (Recommended)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-repository-setup-advanced" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual Repository Setup (Advanced)
     </span>
   </a>
   
@@ -1516,18 +1534,27 @@
 
 <hr />
 <h2 id="installation">Installation</h2>
-<h3 id="prebuilt-packages-recommended">Prebuilt Packages (Recommended)</h3>
-<p>Himmelblau provides prebuilt packages for all major Linux distributions — including Debian, Ubuntu, Fedora, Rocky Linux, RHEL, openSUSE Leap, SLE, and NixOS — via our official build server.</p>
-<p>➡️ <strong><a href="https://himmelblau-idm.org/downloads">Visit the Downloads page</a></strong> to:</p>
-<ul>
-<li>Select your distribution and release channel (Stable / Nightly)</li>
-<li>View the correct repository setup commands for your system</li>
-<li>Copy one-click install instructions for your package manager (<code>apt</code>, <code>dnf</code>, or <code>zypper</code>)</li>
-</ul>
+<h3 id="bootstrap-installer-recommended">Bootstrap Installer (Recommended)</h3>
+<p>For most users, install Himmelblau with the bootstrap installer:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://himmelblau-idm.org/install<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</code></pre></div>
+<p>The bootstrapper detects your distribution, offers the supported package sources, adds the trusted Himmelblau repository when needed, installs packages with your native package manager, and asks whether to configure Microsoft Entra ID or a generic OIDC provider such as Google Workspace, Okta, or Keycloak.</p>
+<p>For Entra ID, it writes a <code>domain</code> setting. For generic OIDC, it writes <code>oidc_issuer_url</code> and <code>app_id</code>. If <code>/etc/himmelblau/himmelblau.conf</code> already contains a complete identity provider configuration, the bootstrapper treats it as an upgrade or repair install and leaves the file unchanged.</p>
+<p>After package installation and configuration, the bootstrapper enables and starts both <code>himmelblaud</code> and <code>himmelblaud-tasks</code>.</p>
+<p>The bootstrapper does <strong>not</strong> download or install Himmelblau binaries directly. It delegates installation to <code>apt</code>, <code>dnf</code>, or <code>zypper</code>, and relies on package repositories and package signatures.</p>
 <blockquote>
-<p>This is the <strong>recommended</strong> installation method for production systems and most users.
-The downloads page is always kept in sync with the latest release metadata on <a href="https://packages.himmelblau-idm.org/">packages.himmelblau-idm.org</a>.</p>
+<p>This is the <strong>recommended</strong> installation method for production systems and most users.</p>
 </blockquote>
+<hr />
+<h3 id="manual-repository-setup-advanced">Manual Repository Setup (Advanced)</h3>
+<p>Use the manual repository instructions if you manage repositories with configuration management, need to audit each command before running it, want to install optional packages explicitly, or need vendor-supported distribution packages.</p>
+<p>➡️ <strong><a href="https://himmelblau-idm.org/downloads">Visit the Downloads page</a></strong> and expand <strong>Advanced manual package repository instructions</strong> to:</p>
+<ul>
+<li>Select your distribution and release channel</li>
+<li>View the correct repository setup commands for your system</li>
+<li>Copy package-manager commands for <code>apt</code>, <code>dnf</code>, or <code>zypper</code></li>
+</ul>
+<p>The downloads page is kept in sync with the latest release metadata and support matrix used by the bootstrap installer.</p>
 <hr />
 <h3 id="building-from-source-advanced-developer-use">Building from Source (Advanced / Developer Use)</h3>
 <p>If you prefer to build Himmelblau locally — for testing, development, or packaging validation — use the included <code>Makefile</code>.<br />

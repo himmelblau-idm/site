@@ -592,6 +592,151 @@ pre::-webkit-scrollbar-thumb {
   margin-bottom: 1.5rem;
 }
 
+.md-content__inner:has(.hb-install-page) {
+  max-width: 56rem;
+  margin: 1.5rem auto 0;
+  padding: 2.5rem 3rem 2.25rem;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body:has(.hb-install-page) {
+  background-image: none;
+  background-color: #ffffff;
+}
+
+body:has(.hb-install-page)::after {
+  display: none;
+}
+
+body:has(.hb-install-page) .md-main {
+  background: #ffffff;
+}
+
+body:has(.hb-install-page) .md-footer,
+body:has(.hb-install-page) .hb-donate-banner,
+body:has(.hb-install-page) .hb-workshop-banner {
+  display: none;
+}
+
+.hb-install-page {
+  text-align: center;
+}
+
+.md-content__inner:has(.hb-install-page) > h1 {
+  margin: 0;
+  color: #111827;
+  font-size: 2.8rem;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.hb-install-tagline {
+  margin: 1rem 0 1.6rem;
+  color: #4b5563;
+  font-size: 1.22rem;
+}
+
+.hb-install-panel {
+  margin: 0 auto 1.65rem;
+  padding: 2rem 1.5rem 1.55rem;
+  border: 1px solid rgba(80, 96, 120, 0.28);
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(20, 40, 70, 0.12);
+}
+
+.hb-install-panel > p:first-of-type {
+  margin: 0 0 1.5rem;
+  color: #5f6877;
+  font-size: 1.05rem;
+}
+
+.hb-install-panel pre {
+  max-width: 100%;
+  margin: 0;
+  padding: 0.72rem 2.25rem 0.72rem 0.95rem;
+  text-align: left;
+  border: 0;
+  border-radius: 0;
+  background: #f7f7f7;
+  box-shadow: none;
+  font-size: 0.86rem;
+}
+
+.hb-install-panel .code-block {
+  display: inline-block;
+  max-width: 100%;
+  margin: 0;
+}
+
+.hb-install-panel pre::before {
+  content: "$ ";
+  color: #111827;
+  font-weight: 700;
+}
+
+.hb-install-note {
+  margin: 1.3rem 0 0;
+  color: #747d8c;
+  font-size: 0.82rem;
+}
+
+.hb-install-help {
+  margin: 0 0 0.9rem;
+  color: #677284;
+  font-size: 0.95rem;
+}
+
+.hb-advanced-install {
+  margin: 0 auto !important;
+  padding: 0 0.75rem !important;
+  border: 1px solid rgba(49, 117, 255, 0.85);
+  border-radius: 0.25rem;
+  box-shadow: none;
+  text-align: left;
+  overflow: visible;
+}
+
+.hb-advanced-install > summary {
+  margin: 0 -0.75rem !important;
+  padding: 0.55rem 2.2rem 0.55rem 1.95rem !important;
+  background: rgba(49, 117, 255, 0.08);
+  color: #3b7f94;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.hb-advanced-install[open] {
+  margin: 0 auto !important;
+  padding: 0 0.75rem 0.75rem !important;
+  border: 1px solid rgba(49, 117, 255, 0.85);
+}
+
+.hb-advanced-install[open] > summary {
+  margin-bottom: 0.65rem !important;
+  border-bottom: 1px solid rgba(49, 117, 255, 0.18);
+}
+
+@media (max-width: 700px) {
+  .md-content__inner:has(.hb-install-page) {
+    margin-top: 0.75rem;
+    padding: 1.8rem 1rem 1.6rem;
+  }
+
+  .md-content__inner:has(.hb-install-page) > h1 {
+    font-size: 2.15rem;
+  }
+
+  .hb-install-tagline {
+    font-size: 1rem;
+  }
+
+  .hb-install-panel {
+    padding: 1.5rem 0.75rem 1.2rem;
+  }
+}
+
 /* Make the distro select feel like a sibling to the squares */
 .linux-distro-select {
   display: inline-block;

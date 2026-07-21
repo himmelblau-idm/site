@@ -1597,7 +1597,7 @@
 <p>This page also describes required system integration steps, including PAM and NSS configuration.</p>
 <hr />
 <h2 id="config-file-etchimmelblauhimmelblauconf">Config File: <a href="../reference/himmelblau-conf/"><code>/etc/himmelblau/himmelblau.conf</code></a></h2>
-<p>To enable authentication, you must configure the <code>domain</code> option in the <a href="../reference/himmelblau-conf/"><code>/etc/himmelblau/himmelblau.conf</code></a> file. This setting determines which tenant/domain is permitted to authenticate to the host. You SHOULD specify the primary domain for the tenant.
+<p>To enable authentication, configure one identity provider in the <a href="../reference/himmelblau-conf/"><code>/etc/himmelblau/himmelblau.conf</code></a> file. For Microsoft Entra ID, set <code>domain</code> to the tenant domain that is permitted to authenticate to the host. For a generic OIDC provider such as Google Workspace, Okta, or Keycloak, set both <code>oidc_issuer_url</code> and <code>app_id</code>.
 All other configuration options are optional.</p>
 <h3 id="format">Format</h3>
 <p>The file uses an INI-like syntax with support for <code>[global]</code> and per-domain sections:</p>
@@ -1606,6 +1606,11 @@ All other configuration options are optional.</p>
 
 <span class="k">[example.com]</span>
 <span class="na">app_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">00000000-1111-2222-3333-444444444444</span>
+</code></pre></div>
+<p>For generic OIDC authentication, use the issuer URL and the client ID from your provider:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[global]</span>
+<span class="na">oidc_issuer_url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">https://keycloak.example.com/realms/himmelblau</span>
+<span class="na">app_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">himmelblau-login</span>
 </code></pre></div>
 <h3 id="key-options">Key Options</h3>
 <table>
@@ -1619,6 +1624,14 @@ All other configuration options are optional.</p>
 <tr>
 <td><code>domain</code></td>
 <td>The allowed Entra ID domain</td>
+</tr>
+<tr>
+<td><code>oidc_issuer_url</code></td>
+<td>The OIDC issuer URL for non-Entra ID providers</td>
+</tr>
+<tr>
+<td><code>app_id</code></td>
+<td>The OIDC client ID, or an Entra ID application ID for advanced features</td>
 </tr>
 <tr>
 <td><code>pam_allow_groups</code></td>
@@ -1646,11 +1659,11 @@ All other configuration options are optional.</p>
 <p>To allow users to authenticate with Azure Entra ID, Himmelblau must be integrated into your system’s PAM (Pluggable Authentication Module) stack. This directs authentication requests to the <code>pam_himmelblau.so</code> module.</p>
 <hr />
 <h3 id="preferred-configuration-methods">Preferred Configuration Methods</h3>
-<p>Use one of the following automated tools to insert Himmelblau into the appropriate PAM files.</p>
+<p>Community packages normally configure PAM and NSS during package installation. If you installed distro-provided packages, are repairing an installation, or maintain custom PAM/NSS policy, use one of the following tools to insert Himmelblau into the appropriate PAM files.</p>
 <ul>
 <li><strong>Ubuntu / Debian:</strong></li>
 </ul>
-<p>PAM configuration is handled automatically by the packages. No manual steps are required.</p>
+<p>PAM configuration is handled automatically by the packages. No manual steps are required for the normal community package install.</p>
 <ul>
 <li><strong>openSUSE / Tumbleweed:</strong></li>
 </ul>

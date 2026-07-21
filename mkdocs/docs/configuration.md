@@ -10,7 +10,7 @@ This page also describes required system integration steps, including PAM and NS
 
 ## Config File: [`/etc/himmelblau/himmelblau.conf`](reference/himmelblau-conf.md)
 
-To enable authentication, you must configure the `domain` option in the [`/etc/himmelblau/himmelblau.conf`](reference/himmelblau-conf.md) file. This setting determines which tenant/domain is permitted to authenticate to the host. You SHOULD specify the primary domain for the tenant.
+To enable authentication, configure one identity provider in the [`/etc/himmelblau/himmelblau.conf`](reference/himmelblau-conf.md) file. For Microsoft Entra ID, set `domain` to the tenant domain that is permitted to authenticate to the host. For a generic OIDC provider such as Google Workspace, Okta, or Keycloak, set both `oidc_issuer_url` and `app_id`.
 All other configuration options are optional.
 
 ### Format
@@ -25,11 +25,21 @@ domain = example.com
 app_id = 00000000-1111-2222-3333-444444444444
 ```
 
+For generic OIDC authentication, use the issuer URL and the client ID from your provider:
+
+```ini
+[global]
+oidc_issuer_url = https://keycloak.example.com/realms/himmelblau
+app_id = himmelblau-login
+```
+
 ### Key Options
 
 | Key                   | Description|
 | --------------------- | ------------------------------------------------------------- |
 | `domain`		        | The allowed Entra ID domain                                   |
+| `oidc_issuer_url`     | The OIDC issuer URL for non-Entra ID providers                |
+| `app_id`              | The OIDC client ID, or an Entra ID application ID for advanced features |
 | `pam_allow_groups`    | Group object IDs and user UPNs allowed to authenticate        |
 | `enable_hello`        | Enables Linux Hello PIN support                               |
 
@@ -58,11 +68,11 @@ To allow users to authenticate with Azure Entra ID, Himmelblau must be integrate
 
 ### Preferred Configuration Methods
 
-Use one of the following automated tools to insert Himmelblau into the appropriate PAM files.
+Community packages normally configure PAM and NSS during package installation. If you installed distro-provided packages, are repairing an installation, or maintain custom PAM/NSS policy, use one of the following tools to insert Himmelblau into the appropriate PAM files.
 
 * **Ubuntu / Debian:**
 
-  PAM configuration is handled automatically by the packages. No manual steps are required.
+  PAM configuration is handled automatically by the packages. No manual steps are required for the normal community package install.
 
 * **openSUSE / Tumbleweed:**
 

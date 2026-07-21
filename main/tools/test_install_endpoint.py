@@ -131,6 +131,23 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertEqual(installer.required_manager_command("fedora43"), "dnf")
         self.assertEqual(installer.required_manager_command("sle16"), "zypper")
 
+    def test_apt_get_command_sets_noninteractive_debconf_frontend(self):
+        old_geteuid = installer.os.geteuid
+        try:
+            installer.os.geteuid = lambda: 0
+            self.assertEqual(
+                installer.apt_get_command("install", "-y", "himmelblau"),
+                ["env", "DEBIAN_FRONTEND=noninteractive", "apt-get", "install", "-y", "himmelblau"],
+            )
+
+            installer.os.geteuid = lambda: 1000
+            self.assertEqual(
+                installer.apt_get_command("update"),
+                ["sudo", "env", "DEBIAN_FRONTEND=noninteractive", "apt-get", "update"],
+            )
+        finally:
+            installer.os.geteuid = old_geteuid
+
     def test_apt_source_line_uses_detected_arch_and_dearmored_keyring(self):
         source = installer.apt_source_line("https://packages.example/deb/ubuntu24.04", "arm64")
         self.assertEqual(
@@ -145,6 +162,9 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertIn('run(["dpkg", "--print-architecture"]', source)
         self.assertIn('APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"', source)
         self.assertIn('subprocess.run(["gpg", "--dearmor"]', source)
+        self.assertIn('APT_DEBCONF_ENV = "DEBIAN_FRONTEND=noninteractive"', source)
+        self.assertIn('def apt_get_command(*args):', source)
+        self.assertNotIn('run(["apt-get"', source)
         self.assertNotIn("arch=amd64", source)
         self.assertNotIn("/etc/apt/keyrings/himmelblau.asc", source)
 

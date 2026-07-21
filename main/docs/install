@@ -83,6 +83,7 @@ DISTRO_LABELS = {
 
 COMMUNITY_PACKAGES = ["himmelblau", "pam-himmelblau", "nss-himmelblau"]
 SUSE_SUBSCRIPTION_PACKAGES = ["himmelblau", "pam-himmelblau", "libnss_himmelblau2"]
+APT_DEBCONF_ENV = "DEBIAN_FRONTEND=noninteractive"
 
 
 class InstallError(Exception):
@@ -321,6 +322,10 @@ def install_bytes(path, data, mode, ui):
 
 def sudo_prefix():
     return [] if os.geteuid() == 0 else ["sudo"]
+
+
+def apt_get_command(*args):
+    return sudo_prefix() + ["env", APT_DEBCONF_ENV, "apt-get"] + list(args)
 
 
 def read_os_release(path="/etc/os-release"):
@@ -708,8 +713,8 @@ def himmelblau_installed(target):
 
 
 def apt_install_prereqs(ui):
-    run(sudo_prefix() + ["apt-get", "update"], ui)
-    run(sudo_prefix() + ["apt-get", "install", "-y", "ca-certificates", "curl", "gnupg"], ui)
+    run(apt_get_command("update"), ui)
+    run(apt_get_command("install", "-y", "ca-certificates", "curl", "gnupg"), ui)
 
 
 def apt_architecture(ui):
@@ -742,7 +747,7 @@ def apt_repo_setup(channel, target, ui):
     install_bytes(APT_KEYRING_PATH, dearmor_apt_key(key_proc.stdout), "0644", ui)
     source = apt_source_line(repo_url, architecture)
     install_text("/etc/apt/sources.list.d/himmelblau.list", source, "0644", ui)
-    run(sudo_prefix() + ["apt-get", "update"], ui)
+    run(apt_get_command("update"), ui)
 
 
 def zypper_repo_setup(channel, target, ui):
@@ -779,7 +784,7 @@ def install_packages(channel, target, ui):
 
     packages = SUSE_SUBSCRIPTION_PACKAGES if channel == "subscription" and is_suse(target) else COMMUNITY_PACKAGES
     if manager == "apt":
-        run(sudo_prefix() + ["apt-get", "install", "-y"] + packages, ui)
+        run(apt_get_command("install", "-y", *packages), ui)
     elif manager == "zypper":
         if channel == "subscription":
             run(sudo_prefix() + ["zypper", "--non-interactive", "install", "-y"] + packages, ui)
@@ -935,6 +940,7 @@ CONFIG_BOOLEAN_DEFAULTS = {
 }
 COMMUNITY_PACKAGES = ["himmelblau", "pam-himmelblau", "nss-himmelblau"]
 SUSE_SUBSCRIPTION_PACKAGES = ["himmelblau", "pam-himmelblau", "libnss_himmelblau2"]
+APT_DEBCONF_ENV = "DEBIAN_FRONTEND=noninteractive"
 DISTRO_LABELS = {
     "sle15sp6": "SUSE Linux Enterprise 15 SP6 / openSUSE Leap 15.6",
     "sle15sp7": "SUSE Linux Enterprise 15 SP7",
@@ -986,6 +992,10 @@ def run(argv, event_log, check=True):
         detail = "\n\nLast command output:\n" + tail if tail else ""
         raise WorkerError("Command failed with exit code %s: %s%s" % (proc.returncode, shell_join(argv), detail))
     return proc
+
+
+def apt_get_command(*args):
+    return ["env", APT_DEBCONF_ENV, "apt-get"] + list(args)
 
 
 def package_manager(target):
@@ -1164,7 +1174,7 @@ def apt_repo_setup(channel, target, event_log):
     install_bytes(APT_KEYRING_PATH, dearmor_apt_key(key_data), "0644", event_log)
     source = apt_source_line(repo_url, architecture)
     install_text("/etc/apt/sources.list.d/himmelblau.list", source, "0644", event_log)
-    run(["apt-get", "update"], event_log)
+    run(apt_get_command("update"), event_log)
 
 
 def zypper_repo_setup(channel, target, event_log):
@@ -1187,7 +1197,7 @@ def install_packages(channel, target, event_log):
     manager = package_manager(target)
     packages = SUSE_SUBSCRIPTION_PACKAGES if channel == "subscription" and is_suse(target) else COMMUNITY_PACKAGES
     if manager == "apt":
-        run(["apt-get", "install", "-y"] + packages, event_log)
+        run(apt_get_command("install", "-y", *packages), event_log)
     elif manager == "zypper":
         if channel == "subscription":
             run(["zypper", "--non-interactive", "install", "-y"] + packages, event_log)
@@ -1202,8 +1212,8 @@ def install_packages(channel, target, event_log):
 def execute_step(step, event_log):
     kind = step["kind"]
     if kind == "apt_prereqs":
-        run(["apt-get", "update"], event_log)
-        run(["apt-get", "install", "-y", "ca-certificates", "curl", "gnupg"], event_log)
+        run(apt_get_command("update"), event_log)
+        run(apt_get_command("install", "-y", "ca-certificates", "curl", "gnupg"), event_log)
     elif kind == "apt_repo":
         apt_repo_setup(step["channel"], step["target"], event_log)
     elif kind == "zypper_repo":

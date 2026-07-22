@@ -30,6 +30,14 @@ def load_installer_module():
 installer = load_installer_module()
 
 
+APT_CONFFILE_OPTIONS = [
+    "-o",
+    "Dpkg::Options::=--force-confdef",
+    "-o",
+    "Dpkg::Options::=--force-confold",
+]
+
+
 class InstallEndpointTests(unittest.TestCase):
     def test_endpoint_is_extensionless_shell_wrapper(self):
         self.assertEqual(INSTALL_PATH.name, "install")
@@ -39,6 +47,53 @@ class InstallEndpointTests(unittest.TestCase):
 
     def test_root_endpoint_matches_docs_source(self):
         self.assertEqual(ROOT_INSTALL_PATH.read_text(encoding="utf-8"), INSTALL_PATH.read_text(encoding="utf-8"))
+
+    def test_installer_avoids_python37_only_subprocess_text_keyword(self):
+        source = INSTALL_PATH.read_text(encoding="utf-8")
+        self.assertNotIn("text=True", source)
+        self.assertNotIn("text=True", installer.ROOT_WORKER_SOURCE)
+        self.assertIn("universal_newlines=True", source)
+        self.assertIn("universal_newlines=True", installer.ROOT_WORKER_SOURCE)
+
+    def test_run_helper_uses_python36_compatible_subprocess_kwargs(self):
+        calls = []
+        old_run = installer.subprocess.run
+        old_log = installer.log
+
+        class FakeProc:
+            stdout = "ok\n"
+            returncode = 0
+
+        try:
+            installer.log = lambda message: None
+
+            def fake_run(argv, *args, **kwargs):
+                self.assertNotIn("text", kwargs)
+                calls.append(kwargs)
+                return FakeProc()
+
+            installer.subprocess.run = fake_run
+            ui = types.SimpleNamespace(info=lambda message: None)
+            installer.run(["echo", "ok"], ui)
+            self.assertTrue(calls[0]["universal_newlines"])
+        finally:
+            installer.subprocess.run = old_run
+            installer.log = old_log
+
+    def test_himmelblau_installed_uses_python36_compatible_subprocess_kwargs(self):
+        calls = []
+        old_run = installer.subprocess.run
+        try:
+            def fake_run(argv, *args, **kwargs):
+                self.assertNotIn("text", kwargs)
+                calls.append((argv, kwargs))
+                return types.SimpleNamespace(stdout="install ok installed")
+
+            installer.subprocess.run = fake_run
+            self.assertTrue(installer.himmelblau_installed("ubuntu24.04"))
+            self.assertTrue(calls[0][1]["universal_newlines"])
+        finally:
+            installer.subprocess.run = old_run
 
     def test_headless_events_are_persisted_to_log(self):
         messages = []
@@ -137,7 +192,7 @@ class InstallEndpointTests(unittest.TestCase):
             installer.os.geteuid = lambda: 0
             self.assertEqual(
                 installer.apt_get_command("install", "-y", "himmelblau"),
-                ["env", "DEBIAN_FRONTEND=noninteractive", "apt-get", "install", "-y", "himmelblau"],
+                ["env", "DEBIAN_FRONTEND=noninteractive", "apt-get"] + APT_CONFFILE_OPTIONS + ["install", "-y", "himmelblau"],
             )
 
             installer.os.geteuid = lambda: 1000
@@ -164,9 +219,31 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertIn('subprocess.run(["gpg", "--dearmor"]', source)
         self.assertIn('APT_DEBCONF_ENV = "DEBIAN_FRONTEND=noninteractive"', source)
         self.assertIn('def apt_get_command(*args):', source)
+        self.assertIn('Dpkg::Options::=--force-confdef', source)
+        self.assertIn('Dpkg::Options::=--force-confold', source)
         self.assertNotIn('run(["apt-get"', source)
         self.assertNotIn("arch=amd64", source)
         self.assertNotIn("/etc/apt/keyrings/himmelblau.asc", source)
+
+    def test_debian_package_install_preserves_existing_conffiles(self):
+        calls = []
+        old_run = installer.run
+        old_repo = installer.apt_repo_setup
+        old_geteuid = installer.os.geteuid
+        try:
+            installer.os.geteuid = lambda: 0
+            installer.apt_repo_setup = lambda channel, target, ui: calls.append(["repo", channel, target])
+            installer.run = lambda argv, ui, check=True, input_text=None: calls.append(argv) or types.SimpleNamespace(stdout="")
+            installer.install_packages("stable", "debian13", object())
+            install_calls = [call for call in calls if isinstance(call, list) and call[:3] == ["env", "DEBIAN_FRONTEND=noninteractive", "apt-get"] and "install" in call]
+            self.assertTrue(install_calls)
+            self.assertIn("Dpkg::Options::=--force-confdef", install_calls[-1])
+            self.assertIn("Dpkg::Options::=--force-confold", install_calls[-1])
+            self.assertEqual(install_calls[-1][-3:], ["himmelblau", "pam-himmelblau", "nss-himmelblau"])
+        finally:
+            installer.run = old_run
+            installer.apt_repo_setup = old_repo
+            installer.os.geteuid = old_geteuid
 
     def test_zypper_community_install_uses_himmelblau_repo_without_refreshing_all_repos(self):
         calls = []

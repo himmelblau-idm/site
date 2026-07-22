@@ -276,7 +276,7 @@ def run(argv, ui, check=True, input_text=None):
         proc = subprocess.run(
             argv,
             input=input_text,
-            text=True,
+            universal_newlines=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             check=False,
@@ -325,7 +325,15 @@ def sudo_prefix():
 
 
 def apt_get_command(*args):
-    return sudo_prefix() + ["env", APT_DEBCONF_ENV, "apt-get"] + list(args)
+    command = sudo_prefix() + ["env", APT_DEBCONF_ENV, "apt-get"]
+    if args and args[0] == "install":
+        command.extend([
+            "-o",
+            "Dpkg::Options::=--force-confdef",
+            "-o",
+            "Dpkg::Options::=--force-confold",
+        ])
+    return command + list(args)
 
 
 def read_os_release(path="/etc/os-release"):
@@ -708,7 +716,7 @@ def write_idp_config(config, ui):
 
 def himmelblau_installed(target):
     if is_deb(target):
-        return subprocess.run(["dpkg-query", "-W", "-f=${Status}", "himmelblau"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True).stdout.startswith("install ok installed")
+        return subprocess.run(["dpkg-query", "-W", "-f=${Status}", "himmelblau"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, universal_newlines=True).stdout.startswith("install ok installed")
     return subprocess.run(["rpm", "-q", "himmelblau"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
 
 
@@ -981,7 +989,7 @@ def shell_join(argv):
 def run(argv, event_log, check=True):
     emit(event_log, {"type": "command", "argv": argv, "text": "Running: " + shell_join(argv)})
     try:
-        proc = subprocess.run(argv, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False)
+        proc = subprocess.run(argv, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False)
     except FileNotFoundError:
         raise WorkerError("Required command not found: " + argv[0])
     output = proc.stdout or ""
@@ -995,7 +1003,15 @@ def run(argv, event_log, check=True):
 
 
 def apt_get_command(*args):
-    return ["env", APT_DEBCONF_ENV, "apt-get"] + list(args)
+    command = ["env", APT_DEBCONF_ENV, "apt-get"]
+    if args and args[0] == "install":
+        command.extend([
+            "-o",
+            "Dpkg::Options::=--force-confdef",
+            "-o",
+            "Dpkg::Options::=--force-confold",
+        ])
+    return command + list(args)
 
 
 def package_manager(target):

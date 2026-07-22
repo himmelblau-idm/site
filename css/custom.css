@@ -625,11 +625,12 @@ body:has(.hb-install-page) .hb-workshop-banner {
 }
 
 .md-content__inner:has(.hb-install-page) > h1 {
-  margin: 0;
+  margin: 0 0 0.45rem;
   color: #111827;
-  font-size: 2.8rem;
-  line-height: 1;
+  font-size: 2.45rem;
+  line-height: 1.08;
   font-weight: 800;
+  text-align: center;
 }
 
 .hb-install-tagline {
@@ -725,7 +726,7 @@ body:has(.hb-install-page) .hb-workshop-banner {
   }
 
   .md-content__inner:has(.hb-install-page) > h1 {
-    font-size: 2.15rem;
+    font-size: 1.9rem;
   }
 
   .hb-install-tagline {

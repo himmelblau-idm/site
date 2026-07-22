@@ -1701,7 +1701,7 @@ class WizardCursesUi:
                 "focus_l": "▶", "focus_r": "◀", "back": "‹", "next": "›",
                 "ok": "✓", "cancel": "✕", "warning": "⚠", "error": "✗", "info": "ℹ",
                 "bar_full": "█", "bar_empty": "░",
-                "input_l": "▏", "input_r": "▕",
+                "input_l": "▶", "input_r": "◀",
             }
         return {
             "tl": "+", "tr": "+", "bl": "+", "br": "+", "h": "-", "v": "|",
@@ -1710,7 +1710,7 @@ class WizardCursesUi:
             "focus_l": ">", "focus_r": "<", "back": "<", "next": ">",
             "ok": "v", "cancel": "x", "warning": "!", "error": "x", "info": "i",
             "bar_full": "#", "bar_empty": " ",
-            "input_l": "|", "input_r": "|",
+            "input_l": ">", "input_r": "<",
         }
 
     def _configure(self):

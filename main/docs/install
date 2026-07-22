@@ -357,6 +357,18 @@ def major_version(info):
     return match.group(1) if match else ""
 
 
+def is_fedora_rawhide(info):
+    fields = (
+        "VERSION_ID",
+        "VERSION",
+        "VERSION_CODENAME",
+        "PRETTY_NAME",
+        "REDHAT_BUGZILLA_PRODUCT_VERSION",
+        "REDHAT_SUPPORT_PRODUCT_VERSION",
+    )
+    return any("rawhide" in info.get(field, "").lower() for field in fields)
+
+
 def distro_target(info):
     distro_id = info.get("ID", "").lower()
     like = set(info.get("ID_LIKE", "").lower().split())
@@ -373,7 +385,7 @@ def distro_target(info):
         if version.startswith("16"):
             return "sle16"
     if distro_id == "fedora":
-        if version.lower() == "rawhide":
+        if is_fedora_rawhide(info):
             return "rawhide"
         return "fedora" + major_version(info)
     if distro_id in ("rhel", "rocky", "almalinux", "ol", "oracle") or "rhel" in like:
@@ -1880,8 +1892,20 @@ class WizardCursesUi:
         except self.curses.error:
             pass
 
+    def _wrapped_lines(self, text, width):
+        return textwrap.wrap(str(text), max(width, 10)) or [""]
+
+    def _visible_wrapped_lines(self, lines, width, limit):
+        visible = []
+        for line in reversed(lines):
+            for wrapped in reversed(self._wrapped_lines(line, width)):
+                visible.append(wrapped)
+                if len(visible) >= limit:
+                    return list(reversed(visible))
+        return list(reversed(visible))
+
     def _draw_wrapped(self, y, x, text, width, attr=0):
-        lines = textwrap.wrap(str(text), max(width, 10)) or [""]
+        lines = self._wrapped_lines(text, width)
         for line in lines:
             self._write(y, x, line, attr)
             y += 1
@@ -2333,8 +2357,9 @@ class WizardCursesUi:
         box_h = max(layout["footer_y"] - y - 1, 4)
         self._draw_box(y, layout["content_x"], box_h, layout["content_w"], "Details", self._attr("panel"))
         y += 1
-        for line in self.transcript[-max(box_h - 2, 0):]:
-            self._draw_wrapped(y, x, line, width, self._attr("muted"))
+        details_rows = max(box_h - 2, 0)
+        for line in self._visible_wrapped_lines(self.transcript, width, details_rows):
+            self._write(y, x, line, self._attr("muted"))
             y += 1
         self._footer_buttons(layout, [
             {"label": f"{self.glyphs['back']} Back", "key_label": "Back", "enabled": False},

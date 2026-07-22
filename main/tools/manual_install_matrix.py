@@ -178,8 +178,16 @@ def prereq_command(target: Target | str) -> str:
             "zypper --non-interactive install -y 'python3*-curses'"
         )
     return (
-        "dnf install -y python3 python3-curses ca-certificates curl gnupg2 sudo || "
-        "dnf install -y python3 python3-curses ca-certificates curl gnupg sudo"
+        "(dnf install -y python3 ca-certificates gnupg2 sudo || "
+        "dnf install -y python3 ca-certificates gnupg sudo) && "
+        "(python3 -c 'import curses' || "
+        "dnf install -y python3-curses || "
+        "dnf install -y python3-libs || "
+        "dnf install -y python3.13-libs || "
+        "dnf install -y python3.12-libs || "
+        "dnf install -y python3.11-libs || "
+        "dnf install -y python3.9-libs) && "
+        "python3 -c 'import curses'"
     )
 
 

@@ -140,6 +140,24 @@ class InstallEndpointTests(unittest.TestCase):
         finally:
             installer.log = old_log
 
+    def test_curses_details_rows_are_clipped_after_wrapping(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        transcript = [
+            "Enabled     : Yes",
+            "Running: zypper --non-interactive --no-refresh install -y --from himmelblau-stable himmelblau pam-himmelblau nss-himmelblau",
+            "The newest package output should remain visible",
+        ]
+
+        visible = ui._visible_wrapped_lines(transcript, width=32, limit=4)
+
+        self.assertLessEqual(len(visible), 4)
+        self.assertEqual(visible, [
+            "himmelblau pam-himmelblau nss-",
+            "himmelblau",
+            "The newest package output should",
+            "remain visible",
+        ])
+
     def test_extracts_current_repo_support_object(self):
         matrix = installer.extract_repo_support(INSTALL_JS_PATH.read_text(encoding="utf-8"))
         self.assertEqual(matrix["stable"]["exclude"], ["fedora44"])
@@ -168,6 +186,12 @@ class InstallEndpointTests(unittest.TestCase):
             ({"ID": "linuxmint", "VERSION_ID": "22"}, "ubuntu24.04"),
             ({"ID": "debian", "VERSION_ID": "13"}, "debian13"),
             ({"ID": "fedora", "VERSION_ID": "43"}, "fedora43"),
+            ({"ID": "fedora", "VERSION_ID": "rawhide"}, "rawhide"),
+            ({"ID": "fedora", "VERSION_ID": "45", "VERSION": "45 (Rawhide Prerelease)"}, "rawhide"),
+            ({"ID": "fedora", "VERSION_ID": "45", "PRETTY_NAME": "Fedora Linux 45 (Rawhide Prerelease)"}, "rawhide"),
+            ({"ID": "fedora", "VERSION_ID": "45", "REDHAT_BUGZILLA_PRODUCT_VERSION": "rawhide"}, "rawhide"),
+            ({"ID": "fedora", "VERSION_ID": "45", "REDHAT_SUPPORT_PRODUCT_VERSION": "rawhide"}, "rawhide"),
+            ({"ID": "fedora", "VERSION_ID": "45"}, "fedora45"),
             ({"ID": "rocky", "VERSION_ID": "9.5"}, "rocky9"),
             ({"ID": "almalinux", "VERSION_ID": "10"}, "rocky10"),
             ({"ID": "amzn", "VERSION_ID": "2023"}, "amzn2023"),
@@ -618,6 +642,12 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertNotIn("write_global_config", kinds)
         self.assertNotIn("configure_distro_provided", kinds)
         self.assertEqual(kinds, ["apt_prereqs", "apt_repo", "install_packages", "note", "enable_services", "maybe_status"])
+
+    def test_rawhide_plan_uses_rawhide_dnf_repo_target(self):
+        plan = installer.build_package_only_plan("nightly", "rawhide")
+        self.assertEqual(plan["target"], "rawhide")
+        self.assertEqual(plan["manager"], "dnf")
+        self.assertIn({"kind": "dnf_repo", "channel": "nightly", "target": "rawhide"}, plan["steps"])
 
     def test_default_community_channel_prefers_stable(self):
         matrix = installer.extract_repo_support(INSTALL_JS_PATH.read_text(encoding="utf-8"))

@@ -1179,6 +1179,94 @@ class InstallEndpointTests(unittest.TestCase):
         finally:
             installer.discover_idp_candidates = old_discover
 
+    def test_curses_identity_skip_empty_domain_opens_manual_without_discovery(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        ui.page = "identity"
+        ui.identity_stage = "input"
+        ui.input_mode = "domain"
+        ui.domain = "   "
+        ui.username = ""
+        ui.existing_config = None
+        ui.discovery_candidates = []
+        ui.discovery_messages = ["old message"]
+        ui.selected_candidate_key = None
+        ui.message = "old error"
+
+        old_discover = installer.discover_idp_candidates
+        try:
+            def fake_discover(*args, **kwargs):
+                raise AssertionError("discovery should not run when skipping")
+
+            installer.discover_idp_candidates = fake_discover
+            self.assertTrue(ui.skip_identity_discovery())
+            self.assertEqual(ui.page, "identity")
+            self.assertEqual(ui.identity_stage, "results")
+            self.assertEqual(ui.discovery_messages, [])
+            self.assertEqual(ui.selected_candidate_key, "manual")
+            self.assertEqual(ui.discovery_candidates, [installer.manual_idp_candidate()])
+            self.assertEqual(ui.message, "")
+        finally:
+            installer.discover_idp_candidates = old_discover
+
+    def test_curses_identity_skip_empty_username_opens_manual_without_discovery(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        ui.page = "identity"
+        ui.identity_stage = "input"
+        ui.input_mode = "username"
+        ui.domain = ""
+        ui.username = ""
+        ui.discovery_candidates = []
+        ui.discovery_messages = []
+        ui.selected_candidate_key = None
+        ui.message = ""
+
+        old_discover = installer.discover_idp_candidates
+        try:
+            def fake_discover(*args, **kwargs):
+                raise AssertionError("discovery should not run when skipping")
+
+            installer.discover_idp_candidates = fake_discover
+            self.assertTrue(ui.skip_identity_discovery())
+            self.assertEqual(ui.identity_stage, "results")
+            self.assertEqual(ui.selected_candidate_key, "manual")
+            self.assertEqual(ui.discovery_candidates, [installer.manual_idp_candidate()])
+        finally:
+            installer.discover_idp_candidates = old_discover
+
+    def test_curses_identity_footer_primary_switches_between_skip_and_next(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        ui.identity_stage = "input"
+        ui.input_mode = "domain"
+        ui.domain = ""
+        ui.username = ""
+        ui.message = ""
+        ui.glyphs = {"back": "<", "cancel": "x", "next": ">"}
+        ui._attr = lambda name, extra=0: 0
+        ui._begin_frame = lambda title, subtitle: {
+            "content_y": 0,
+            "content_x": 0,
+            "content_h": 20,
+            "content_w": 80,
+            "footer_y": 19,
+            "win_x": 0,
+            "win_w": 80,
+        }
+        ui._draw_box = lambda *args, **kwargs: None
+        ui._radio = lambda y, x, width, key, label, selected, action: y + 1
+        ui._input = lambda y, x, width, field, label: y + 1
+        ui._draw_wrapped = lambda y, x, text, width, attr=0: y + 1
+        footers = []
+        ui._footer_buttons = lambda layout, buttons: footers.append(buttons)
+
+        ui.render_identity()
+        self.assertEqual(footers[-1][-1]["key_label"], "Skip")
+        self.assertEqual(footers[-1][-1]["action"], ui.skip_identity_discovery)
+
+        ui.domain = "example.com"
+        ui.render_identity()
+        self.assertEqual(footers[-1][-1]["key_label"], "Next")
+        self.assertEqual(footers[-1][-1]["action"], ui.next_page)
+
     def test_curses_options_page_hides_apply_policy_for_oidc(self):
         ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
         ui.existing_config = None

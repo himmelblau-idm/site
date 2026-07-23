@@ -721,6 +721,17 @@ def discover_oidc_candidates(input_mode, identifier, domain):
     return candidates, messages
 
 
+def manual_idp_candidate():
+    return {
+        "key": "manual",
+        "label": "Configure identity provider manually",
+        "config": None,
+        "write_idp": True,
+        "requires_app_id": False,
+        "source": "Manual",
+    }
+
+
 def discover_idp_candidates(input_mode, identifier, existing_config=None):
     domain, message = lookup_domain(input_mode, identifier)
     if not domain:
@@ -742,14 +753,7 @@ def discover_idp_candidates(input_mode, identifier, existing_config=None):
     oidc_candidates, oidc_messages = discover_oidc_candidates(input_mode, identifier.strip(), domain)
     candidates.extend(oidc_candidates)
     messages.extend(oidc_messages)
-    candidates.append({
-        "key": "manual",
-        "label": "Configure identity provider manually",
-        "config": None,
-        "write_idp": True,
-        "requires_app_id": False,
-        "source": "Manual",
-    })
+    candidates.append(manual_idp_candidate())
     return candidates, messages, domain
 
 
@@ -2462,6 +2466,20 @@ class WizardCursesUi:
             self.domain = domain
             self.input_cursor["domain"] = len(self.domain)
 
+    def identity_lookup_value(self):
+        if getattr(self, "input_mode", "domain") == "username":
+            return self.username.strip()
+        return self.domain.strip()
+
+    def skip_identity_discovery(self):
+        self.discovery_candidates = [manual_idp_candidate()]
+        self.discovery_messages = []
+        self.lookup_domain = ""
+        self.identity_stage = "results"
+        self.selected_candidate_key = "manual"
+        self.message = ""
+        return True
+
     def render_identity(self):
         layout = self._begin_frame("Identity Provider", "Discover a provider from a domain or UPN, or configure one manually.")
         y = layout["content_y"] + 1
@@ -2499,10 +2517,14 @@ class WizardCursesUi:
                     y = self._input(y, x, width, "appid", "Application/client ID")
         if self.message:
             self._draw_wrapped(y + 1, x, self.message, width, self._attr("error"))
+        if self.identity_stage == "input" and not self.identity_lookup_value():
+            primary_button = {"label": f"Skip {self.glyphs['next']}", "key_label": "Skip", "action": self.skip_identity_discovery, "primary": True}
+        else:
+            primary_button = {"label": f"Next {self.glyphs['next']}", "key_label": "Next", "action": self.next_page, "primary": True}
         self._footer_buttons(layout, [
             {"label": f"{self.glyphs['back']} Back", "key_label": "Back", "action": self.back_page},
             {"label": f"{self.glyphs['cancel']} Cancel", "key_label": "Cancel", "action": self.cancel},
-            {"label": f"Next {self.glyphs['next']}", "key_label": "Next", "action": self.next_page, "primary": True},
+            primary_button,
         ])
 
     def selected_provider_mode(self):

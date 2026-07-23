@@ -7,6 +7,8 @@ import shutil
 import tempfile
 import types
 import unittest
+import urllib.parse
+import urllib.error
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -400,6 +402,103 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertFalse(ok)
         ok, _ = installer.validate_app_id("bad client")
         self.assertFalse(ok)
+
+    def test_username_validation_extracts_lookup_domain(self):
+        self.assertEqual(installer.lookup_domain("username", "alice@example.com"), ("example.com", ""))
+        domain, message = installer.lookup_domain("username", "alice")
+        self.assertIsNone(domain)
+        self.assertIn("UPN", message)
+
+    def test_entra_discovery_uses_static_odc_endpoint(self):
+        calls = []
+        old_open_json = installer._open_json
+        try:
+            def fake_open_json(url, *args, **kwargs):
+                calls.append(url)
+                return {"tenantId": "tenant-123", "authority_host": "login.microsoftonline.com"}
+
+            installer._open_json = fake_open_json
+            candidate = installer.discover_entra_candidate("example.com")
+            self.assertEqual(candidate["config"], {"mode": "entra", "domain": "example.com"})
+            self.assertEqual(candidate["source"], "Entra ID")
+            parsed = urllib.parse.urlparse(calls[0])
+            self.assertEqual(parsed.scheme + "://" + parsed.netloc + parsed.path, installer.ENTRA_ODC_URL)
+            self.assertEqual(urllib.parse.parse_qs(parsed.query), {"domain": ["example.com"]})
+        finally:
+            installer._open_json = old_open_json
+
+    def test_webfinger_checks_actual_domain_before_provider_variants(self):
+        calls = []
+        old_open_json = installer._open_json
+        try:
+            def fake_open_json(url, *args, **kwargs):
+                calls.append(url)
+                raise urllib.error.URLError("missing")
+
+            installer._open_json = fake_open_json
+            candidates, messages = installer.discover_oidc_candidates("username", "alice@example.com", "example.com")
+            self.assertEqual(candidates, [])
+            self.assertEqual(messages, [])
+            first = urllib.parse.urlparse(calls[0])
+            self.assertEqual(first.scheme + "://" + first.netloc + first.path, "https://example.com/.well-known/webfinger")
+            self.assertEqual(urllib.parse.parse_qs(first.query)["resource"], ["acct:alice@example.com"])
+        finally:
+            installer._open_json = old_open_json
+
+    def test_domain_webfinger_does_not_invent_account_resource(self):
+        calls = []
+        old_open_json = installer._open_json
+        try:
+            def fake_open_json(url, *args, **kwargs):
+                calls.append(url)
+                raise urllib.error.URLError("missing")
+
+            installer._open_json = fake_open_json
+            candidates, messages = installer.discover_oidc_candidates("domain", "example.com", "example.com")
+            self.assertEqual(candidates, [])
+            resources = []
+            for url in calls:
+                resources.extend(urllib.parse.parse_qs(urllib.parse.urlparse(url).query).get("resource", []))
+            self.assertEqual(resources, ["https://example.com/", "https://example.com/"])
+            self.assertNotIn("acct:himmelblau@example.com", resources)
+            self.assertNotIn("okta:acct:himmelblau@example.com", resources)
+        finally:
+            installer._open_json = old_open_json
+
+    def test_discovery_candidate_order_includes_existing_entra_oidc_manual(self):
+        old_open_json = installer._open_json
+        try:
+            def fake_open_json(url, *args, **kwargs):
+                if url.startswith(installer.ENTRA_ODC_URL):
+                    return {"tenantId": "tenant-123", "authority_host": "login.microsoftonline.com"}
+                parsed = urllib.parse.urlparse(url)
+                if parsed.path == "/.well-known/webfinger":
+                    return {"links": [{"rel": installer.OIDC_WEBFINGER_REL, "href": "https://issuer.example.com"}]}
+                raise urllib.error.URLError("missing")
+
+            installer._open_json = fake_open_json
+            existing = {"mode": "entra", "domain": "old.example.com"}
+            candidates, messages, domain = installer.discover_idp_candidates("domain", "example.com", existing)
+            self.assertEqual(domain, "example.com")
+            self.assertEqual([candidate["key"].split(":")[0] for candidate in candidates], ["existing", "discovered", "discovered", "manual"])
+            self.assertEqual(candidates[1]["config"], {"mode": "entra", "domain": "example.com"})
+            self.assertEqual(candidates[2]["config"]["oidc_issuer_url"], "https://issuer.example.com")
+            self.assertTrue(candidates[2]["requires_app_id"])
+        finally:
+            installer._open_json = old_open_json
+
+    def test_oidc_discovery_deduplicates_issuers(self):
+        old_open_json = installer._open_json
+        try:
+            def fake_open_json(url, *args, **kwargs):
+                return {"links": [{"rel": installer.OIDC_WEBFINGER_REL_HTTPS, "href": "https://issuer.example.com"}]}
+
+            installer._open_json = fake_open_json
+            candidates, _ = installer.discover_oidc_candidates("domain", "example.com", "example.com")
+            self.assertEqual(len(candidates), 1)
+            self.assertEqual(candidates[0]["config"]["oidc_issuer_url"], "https://issuer.example.com")
+        finally:
+            installer._open_json = old_open_json
 
     def test_existing_idp_config_detects_entra_domain(self):
         with self.subTest("domain"):
@@ -993,6 +1092,44 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertEqual(ui.page, "options")
         self.assertTrue(ui.back_page())
         self.assertEqual(ui.page, "identity")
+
+    def test_curses_identity_next_runs_discovery_before_options(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        ui.page = "identity"
+        ui.identity_stage = "input"
+        ui.input_mode = "domain"
+        ui.domain = "example.com"
+        ui.username = ""
+        ui.existing_config = None
+        ui.discovery_candidates = []
+        ui.discovery_messages = []
+        ui.selected_candidate_key = None
+        ui.manual_mode = "entra"
+        ui.message = ""
+
+        old_discover = installer.discover_idp_candidates
+        try:
+            def fake_discover(input_mode, identifier, existing_config=None):
+                self.assertEqual((input_mode, identifier, existing_config), ("domain", "example.com", None))
+                return [
+                    {
+                        "key": "manual",
+                        "label": "Configure identity provider manually",
+                        "config": None,
+                        "write_idp": True,
+                        "requires_app_id": False,
+                    }
+                ], ["No OIDC issuer was discovered with WebFinger."], "example.com"
+
+            installer.discover_idp_candidates = fake_discover
+            self.assertTrue(ui.next_page())
+            self.assertEqual(ui.page, "identity")
+            self.assertEqual(ui.identity_stage, "results")
+            self.assertEqual(ui.selected_candidate_key, "manual")
+            self.assertTrue(ui.next_page())
+            self.assertEqual(ui.page, "options")
+        finally:
+            installer.discover_idp_candidates = old_discover
 
     def test_curses_options_page_hides_apply_policy_for_oidc(self):
         ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)

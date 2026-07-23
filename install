@@ -53,6 +53,10 @@ CONFIG_BOOLEAN_DEFAULTS = {
     "apply_policy": True,
 }
 CONFIG_OPTION_KEYS = set(CONFIG_BOOLEAN_DEFAULTS) | {"pam_allow_groups"}
+ENTRA_ODC_URL = "https://odc.officeapps.live.com/odc/v2.1/federationProvider"
+OIDC_WEBFINGER_REL = "http://openid.net/specs/connect/1.0/issuer"
+OIDC_WEBFINGER_REL_HTTPS = "https://openid.net/specs/connect/1.0/issuer"
+IDP_DISCOVERY_TIMEOUT = 5
 
 FALLBACK_REPO_SUPPORT = {
     "stable": {"include": [], "exclude": ["fedora44"]},
@@ -519,6 +523,30 @@ def validate_domain(domain):
     return True, ""
 
 
+def validate_username(username):
+    if not username:
+        return False, "Enter a UPN such as user@example.com."
+    if username.count("@") != 1:
+        return False, "Use a UPN such as user@example.com."
+    local, domain = username.rsplit("@", 1)
+    if not local or re.search(r"\s", local):
+        return False, "Use a UPN such as user@example.com."
+    return validate_domain(domain)
+
+
+def lookup_domain(input_mode, value):
+    text = (value or "").strip()
+    if input_mode == "username":
+        ok, message = validate_username(text)
+        if not ok:
+            return None, message
+        return text.rsplit("@", 1)[1].lower(), ""
+    ok, message = validate_domain(text)
+    if not ok:
+        return None, message
+    return text.lower(), ""
+
+
 def validate_oidc_issuer_url(url):
     if not url:
         return False, "Enter the OIDC issuer URL."
@@ -596,7 +624,167 @@ def config_summary(config):
     return f"OIDC issuer: {config['oidc_issuer_url']} / app_id: {config['app_id']}"
 
 
+def idp_candidate_summary(candidate):
+    return candidate.get("label") or config_summary(candidate["config"])
+
+
+def _open_json(url, timeout=IDP_DISCOVERY_TIMEOUT, accept="application/json"):
+    request = urllib.request.Request(url, headers={"Accept": accept})
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return json.loads(response.read(256 * 1024).decode("utf-8"))
+
+
+def discover_entra_candidate(domain):
+    url = ENTRA_ODC_URL + "?" + urllib.parse.urlencode({"domain": domain})
+    try:
+        data = _open_json(url)
+    except (OSError, urllib.error.URLError, ValueError) as err:
+        log("Entra federation discovery failed for %s: %s" % (domain, err))
+        return None
+    tenant_id = str(data.get("tenantId") or data.get("tenant_id") or "").strip()
+    authority_host = str(data.get("authority_host") or data.get("authorityHost") or "").strip()
+    if not tenant_id or not authority_host:
+        log("Entra federation discovery returned incomplete data for %s" % domain)
+        return None
+    return {
+        "key": "discovered:entra",
+        "label": "Microsoft Entra ID (%s)" % domain,
+        "config": {"mode": "entra", "domain": domain},
+        "write_idp": True,
+        "requires_app_id": False,
+        "source": "Entra ID",
+    }
+
+
+def _webfinger_url(endpoint, resource, rel=OIDC_WEBFINGER_REL):
+    return endpoint + "?" + urllib.parse.urlencode({"resource": resource, "rel": rel})
+
+
+def _webfinger_resources(input_mode, identifier, domain):
+    if input_mode == "username":
+        return ["acct:" + identifier]
+    return ["https://%s/" % domain]
+
+
+def _webfinger_specs(input_mode, identifier, domain):
+    resources = _webfinger_resources(input_mode, identifier, domain)
+    root = "https://%s/.well-known/webfinger" % domain
+    specs = [("Domain WebFinger", root, resources)]
+    specs.append(("PingAM WebFinger", "https://%s/am/.well-known/webfinger" % domain, resources))
+    return specs
+
+
+def _issuer_from_webfinger(data):
+    if not isinstance(data, dict):
+        return None
+    for link in data.get("links") or []:
+        if not isinstance(link, dict):
+            continue
+        if link.get("rel") not in (OIDC_WEBFINGER_REL, OIDC_WEBFINGER_REL_HTTPS):
+            continue
+        href = str(link.get("href") or "").strip()
+        ok, _ = validate_oidc_issuer_url(href)
+        if ok:
+            return href
+    return None
+
+
+def discover_oidc_candidates(input_mode, identifier, domain):
+    candidates = []
+    messages = []
+    seen_issuers = set()
+    seen_urls = set()
+    for source, endpoint, resources in _webfinger_specs(input_mode, identifier, domain):
+        for resource in resources:
+            url = _webfinger_url(endpoint, resource)
+            if url in seen_urls:
+                continue
+            seen_urls.add(url)
+            try:
+                log("%s" % url)
+                data = _open_json(url, accept="application/jrd+json, application/json")
+            except (OSError, urllib.error.URLError, ValueError) as err:
+                log("%s failed for %s: %s" % (source, resource, err))
+                continue
+            issuer = _issuer_from_webfinger(data)
+            if not issuer or issuer in seen_issuers:
+                continue
+            seen_issuers.add(issuer)
+            candidates.append({
+                "key": "discovered:oidc:%d" % len(candidates),
+                "label": "%s OIDC issuer: %s" % (source, issuer),
+                "config": {"mode": "oidc", "oidc_issuer_url": issuer, "app_id": ""},
+                "write_idp": True,
+                "requires_app_id": True,
+                "source": source,
+            })
+    return candidates, messages
+
+
+def discover_idp_candidates(input_mode, identifier, existing_config=None):
+    domain, message = lookup_domain(input_mode, identifier)
+    if not domain:
+        return [], [message], None
+    candidates = []
+    messages = []
+    if existing_config:
+        candidates.append({
+            "key": "existing",
+            "label": "Keep existing configuration: " + config_summary(existing_config),
+            "config": existing_config,
+            "write_idp": False,
+            "requires_app_id": False,
+            "source": "Existing",
+        })
+    entra_candidate = discover_entra_candidate(domain)
+    if entra_candidate:
+        candidates.append(entra_candidate)
+    oidc_candidates, oidc_messages = discover_oidc_candidates(input_mode, identifier.strip(), domain)
+    candidates.extend(oidc_candidates)
+    messages.extend(oidc_messages)
+    candidates.append({
+        "key": "manual",
+        "label": "Configure identity provider manually",
+        "config": None,
+        "write_idp": True,
+        "requires_app_id": False,
+        "source": "Manual",
+    })
+    return candidates, messages, domain
+
+
 def prompt_idp_config(ui):
+    provider_mode = ui.choose("Find identity provider by", [
+        {"label": "Domain name", "value": "domain"},
+        {"label": "UPN username", "value": "username"},
+    ])
+    if provider_mode == "username":
+        identifier = ui.ask("Enter a UPN username", validator=validate_username)
+    else:
+        identifier = ui.ask("Enter your identity domain", validator=validate_domain)
+    candidates, messages, lookup = discover_idp_candidates(provider_mode, identifier, existing_idp_config())
+    for message in messages:
+        ui.info(message)
+    choice = ui.choose("Choose identity provider", [{"label": idp_candidate_summary(candidate), "value": candidate["key"]} for candidate in candidates])
+    selected = next(candidate for candidate in candidates if candidate["key"] == choice)
+    if selected["key"] == "manual":
+        mode = ui.choose("Choose authentication provider", [
+            {"label": "Microsoft Entra ID", "value": "entra"},
+            {"label": "Generic OIDC provider (Google Workspace, Okta, Keycloak, etc.)", "value": "oidc"},
+        ])
+        if mode == "entra":
+            domain = ui.ask("Enter your Entra ID domain", default=lookup, validator=validate_domain)
+            return {"mode": "entra", "domain": domain}, True
+        oidc_issuer_url = ui.ask("Enter the OIDC issuer URL", validator=validate_oidc_issuer_url)
+        app_id = ui.ask("Enter the OIDC application/client ID", validator=validate_app_id)
+        return {"mode": "oidc", "oidc_issuer_url": oidc_issuer_url, "app_id": app_id}, True
+    config = dict(selected["config"])
+    if selected.get("requires_app_id"):
+        config["app_id"] = ui.ask("Enter the OIDC application/client ID", validator=validate_app_id)
+    return config, selected.get("write_idp", True)
+
+
+def prompt_manual_idp_config(ui):
     mode = ui.choose("Choose authentication provider", [
         {"label": "Microsoft Entra ID", "value": "entra"},
         {"label": "Generic OIDC provider (Google Workspace, Okta, Keycloak, etc.)", "value": "oidc"},
@@ -1501,14 +1689,7 @@ def run_cli():
         ui.info("Himmelblau appears to already be installed; this will update or repair the installation.")
 
     channel = ui.choose("Choose installation source", choices)
-    existing_config = existing_idp_config()
-    if existing_config:
-        ui.info(f"Existing identity provider configuration detected; leaving {CONFIG_PATH} unchanged.")
-        idp_config = existing_config
-        write_config = False
-    else:
-        idp_config = prompt_idp_config(ui)
-        write_config = True
+    idp_config, write_config = prompt_idp_config(ui)
 
     summary = summary_lines(target, manager, channel, idp_config, write_config)
     if not ui.confirm("\n".join(summary) + "\n\nContinue?", default=False):
@@ -1657,16 +1838,23 @@ class WizardCursesUi:
         self.existing_config = None
         self.installed = False
         self.channel = None
-        self.config_action = "keep"
+        self.identity_stage = "input"
+        self.input_mode = "domain"
+        self.lookup_domain = ""
+        self.discovery_candidates = []
+        self.discovery_messages = []
+        self.selected_candidate_key = None
+        self.manual_mode = "entra"
         self.mode = "entra"
         self.domain = ""
+        self.username = ""
         self.issuer = ""
         self.appid = ""
         self.pam_allow_groups = ""
         self.enable_hello = True
         self.allow_console_password_only = True
         self.apply_policy = True
-        self.input_cursor = {"domain": 0, "issuer": 0, "appid": 0, "pam_allow_groups": 0}
+        self.input_cursor = {"domain": 0, "username": 0, "issuer": 0, "appid": 0, "pam_allow_groups": 0}
         self.message = ""
         self.progress_text = "Requesting administrative authorization..."
         self.progress_percent = 0
@@ -1874,6 +2062,7 @@ class WizardCursesUi:
                     self.issuer = self.existing_config.get("oidc_issuer_url", "")
                     self.appid = self.existing_config.get("app_id", "")
                     self.mode = self.existing_config.get("mode", "entra")
+                    self.manual_mode = self.mode
                     self.input_cursor["domain"] = len(self.domain)
                     self.input_cursor["issuer"] = len(self.issuer)
                     self.input_cursor["appid"] = len(self.appid)
@@ -2190,12 +2379,19 @@ class WizardCursesUi:
 
     def _identity_items(self):
         items = []
-        if self.existing_config:
-            items.extend(["keep", "replace"])
-            if self.config_action == "keep":
-                return items
+        if self.identity_stage == "input":
+            items.extend(["input_domain", "input_username"])
+            items.append("domain" if self.input_mode == "domain" else "username")
+            return items
+        for candidate in self.discovery_candidates:
+            items.append(candidate["key"])
+        if self.selected_candidate_key != "manual":
+            selected = self.selected_candidate()
+            if selected and selected.get("requires_app_id"):
+                items.append("appid")
+            return items
         items.extend(["mode_entra", "mode_oidc"])
-        if self.mode == "entra":
+        if self.manual_mode == "entra":
             items.append("domain")
         else:
             items.extend(["issuer", "appid"])
@@ -2204,6 +2400,8 @@ class WizardCursesUi:
     def _field_value(self, item):
         if item == "domain":
             return self.domain
+        if item == "username":
+            return self.username
         if item == "issuer":
             return self.issuer
         if item == "appid":
@@ -2215,6 +2413,8 @@ class WizardCursesUi:
     def _set_field_value(self, item, value):
         if item == "domain":
             self.domain = value
+        elif item == "username":
+            self.username = value
         elif item == "issuer":
             self.issuer = value
         elif item == "appid":
@@ -2222,37 +2422,79 @@ class WizardCursesUi:
         elif item == "pam_allow_groups":
             self.pam_allow_groups = value
 
+    def selected_candidate(self):
+        for candidate in getattr(self, "discovery_candidates", []):
+            if candidate["key"] == getattr(self, "selected_candidate_key", None):
+                return candidate
+        return None
+
+    def _choose_candidate(self, candidate):
+        self.selected_candidate_key = candidate["key"]
+        config = candidate.get("config")
+        if not config:
+            return
+        self.mode = config.get("mode", self.mode)
+        if config.get("mode") == "entra":
+            self.domain = config.get("domain", self.domain)
+            self.input_cursor["domain"] = len(self.domain)
+        elif config.get("mode") == "oidc":
+            self.issuer = config.get("oidc_issuer_url", self.issuer)
+            self.input_cursor["issuer"] = len(self.issuer)
+
+    def _set_input_mode(self, mode):
+        self.input_mode = mode
+        self.identity_stage = "input"
+        self.message = ""
+
+    def run_identity_discovery(self):
+        identifier = self.username.strip() if self.input_mode == "username" else self.domain.strip()
+        candidates, messages, domain = discover_idp_candidates(self.input_mode, identifier, self.existing_config)
+        self.discovery_candidates = candidates
+        self.discovery_messages = messages
+        self.lookup_domain = domain or ""
+        self.identity_stage = "results"
+        self.selected_candidate_key = candidates[0]["key"] if candidates else None
+        if self.selected_candidate_key:
+            self._choose_candidate(candidates[0])
+        if domain and not self.domain:
+            self.domain = domain
+            self.input_cursor["domain"] = len(self.domain)
+
     def render_identity(self):
-        layout = self._begin_frame("Identity Provider", "Use an existing provider configuration or enter a new one.")
+        layout = self._begin_frame("Identity Provider", "Discover a provider from a domain or UPN, or configure one manually.")
         y = layout["content_y"] + 1
         x = layout["content_x"] + 2
         width = layout["content_w"] - 4
         self._draw_box(layout["content_y"], layout["content_x"], layout["content_h"], layout["content_w"], "Provider settings", self._attr("panel"))
-        if self.existing_config:
-            self._write(y, x, "Existing configuration detected:", self._attr("muted"))
+        if self.identity_stage == "input":
+            y = self._radio(y, x, width, "input:domain", "Domain name", self.input_mode == "domain", lambda: self._set_input_mode("domain"))
+            y = self._radio(y, x, width, "input:username", "UPN username", self.input_mode == "username", lambda: self._set_input_mode("username"))
             y += 1
-            y = self._draw_wrapped(y, x + 2, config_summary(self.existing_config), width - 2, self._attr("panel"))
-            y += 1
-            y = self._radio(y, x, width, "config:keep", "Keep existing configuration", self.config_action == "keep", lambda: setattr(self, "config_action", "keep"))
-            y = self._radio(y, x, width, "config:replace", "Replace identity provider configuration", self.config_action == "replace", lambda: setattr(self, "config_action", "replace"))
-            y += 1
-            if self.config_action == "keep":
-                if self.message:
-                    self._draw_wrapped(y, x, self.message, width, self._attr("error"))
-                self._footer_buttons(layout, [
-                    {"label": f"{self.glyphs['back']} Back", "key_label": "Back", "action": self.back_page},
-                    {"label": f"{self.glyphs['cancel']} Cancel", "key_label": "Cancel", "action": self.cancel},
-                    {"label": f"Next {self.glyphs['next']}", "key_label": "Next", "action": self.next_page, "primary": True},
-                ])
-                return
-        y = self._radio(y, x, width, "mode:entra", "Microsoft Entra ID", self.mode == "entra", lambda: setattr(self, "mode", "entra"))
-        y = self._radio(y, x, width, "mode:oidc", "Generic OIDC provider (Google Workspace, Okta, Keycloak, etc.)", self.mode == "oidc", lambda: setattr(self, "mode", "oidc"))
-        y += 1
-        if self.mode == "entra":
-            y = self._input(y, x, width, "domain", "Entra ID domain")
+            if self.input_mode == "username":
+                y = self._input(y, x, width, "username", "UPN username")
+            else:
+                y = self._input(y, x, width, "domain", "Domain")
         else:
-            y = self._input(y, x, width, "issuer", "OIDC issuer URL")
-            y = self._input(y, x, width, "appid", "Application/client ID")
+            for message in self.discovery_messages:
+                y = self._draw_wrapped(y, x, message, width, self._attr("muted"))
+            y += 1
+            for candidate in self.discovery_candidates:
+                def choose(candidate=candidate):
+                    self._choose_candidate(candidate)
+                y = self._radio(y, x, width, "candidate:" + candidate["key"], idp_candidate_summary(candidate), self.selected_candidate_key == candidate["key"], choose)
+            y += 1
+            selected = self.selected_candidate()
+            if selected and selected.get("requires_app_id"):
+                y = self._input(y, x, width, "appid", "Application/client ID")
+            elif self.selected_candidate_key == "manual":
+                y = self._radio(y, x, width, "mode:entra", "Microsoft Entra ID", self.manual_mode == "entra", lambda: setattr(self, "manual_mode", "entra"))
+                y = self._radio(y, x, width, "mode:oidc", "Generic OIDC provider (Google Workspace, Okta, Keycloak, etc.)", self.manual_mode == "oidc", lambda: setattr(self, "manual_mode", "oidc"))
+                y += 1
+                if self.manual_mode == "entra":
+                    y = self._input(y, x, width, "domain", "Entra ID domain")
+                else:
+                    y = self._input(y, x, width, "issuer", "OIDC issuer URL")
+                    y = self._input(y, x, width, "appid", "Application/client ID")
         if self.message:
             self._draw_wrapped(y + 1, x, self.message, width, self._attr("error"))
         self._footer_buttons(layout, [
@@ -2382,9 +2624,13 @@ class WizardCursesUi:
         ])
 
     def selected_idp(self):
-        if self.existing_config and self.config_action == "keep":
-            return self.existing_config, False
-        if self.mode == "entra":
+        candidate = self.selected_candidate()
+        if candidate and candidate["key"] != "manual":
+            config = dict(candidate["config"])
+            if candidate.get("requires_app_id"):
+                config["app_id"] = self.appid.strip()
+            return config, candidate.get("write_idp", True)
+        if getattr(self, "manual_mode", getattr(self, "mode", "entra")) == "entra":
             return {"mode": "entra", "domain": self.domain.strip()}, True
         return {"mode": "oidc", "oidc_issuer_url": self.issuer.strip(), "app_id": self.appid.strip()}, True
 
@@ -2397,6 +2643,12 @@ class WizardCursesUi:
         }
 
     def validate_identity(self):
+        if getattr(self, "identity_stage", "results") == "input":
+            input_mode = getattr(self, "input_mode", "domain")
+            identifier = self.username.strip() if input_mode == "username" else self.domain.strip()
+            if input_mode == "username":
+                return validate_username(identifier)
+            return validate_domain(identifier)
         config, _ = self.selected_idp()
         if config["mode"] == "entra":
             return validate_domain(config.get("domain", ""))
@@ -2461,7 +2713,10 @@ class WizardCursesUi:
             ok, message = self.validate_identity()
             if ok:
                 self.message = ""
-                self.page = "options"
+                if getattr(self, "identity_stage", "results") == "input":
+                    self.run_identity_discovery()
+                else:
+                    self.page = "options"
             else:
                 self.message = message
         elif self.page == "options":
@@ -2478,7 +2733,11 @@ class WizardCursesUi:
         if self.page == "source":
             self.page = "preflight"
         elif self.page == "identity":
-            self.page = "source"
+            if getattr(self, "identity_stage", "input") == "results":
+                self.identity_stage = "input"
+                self.message = ""
+            else:
+                self.page = "source"
         elif self.page == "options":
             self.page = "identity"
         elif self.page == "review":

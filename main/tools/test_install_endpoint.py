@@ -160,6 +160,54 @@ class InstallEndpointTests(unittest.TestCase):
             "remain visible",
         ])
 
+    def test_curses_row_advances_after_wrapped_value(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        writes = []
+        ui._attr = lambda name, extra=0: 0
+        ui._write = lambda y, x, text, attr=0: writes.append((y, x, text))
+        ui._draw_wrapped = lambda y, x, text, width, attr=0: y + 3
+
+        next_y = ui._row(4, 2, 48, "Repository base", "https://packages.example/stable/latest")
+
+        self.assertEqual(next_y, 7)
+        self.assertEqual(writes, [(4, 2, "Repository base")])
+
+    def test_curses_row_reserves_long_label_column(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        writes = []
+        wrapped = []
+        ui._attr = lambda name, extra=0: 0
+        ui._write = lambda y, x, text, attr=0: writes.append((y, x, text))
+
+        def fake_draw_wrapped(y, x, text, width, attr=0):
+            wrapped.append((y, x, text, width))
+            return y + 1
+
+        ui._draw_wrapped = fake_draw_wrapped
+        ui._row(1, 3, 62, "Console password-only", "Enabled")
+
+        self.assertEqual(writes, [(1, 3, "Console password-only")])
+        self.assertGreaterEqual(wrapped[0][1], 3 + len("Console password-only") + 1)
+        self.assertEqual(wrapped[0][2], "Enabled")
+
+    def test_curses_row_stacks_when_too_narrow_for_columns(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        writes = []
+        wrapped = []
+        ui._attr = lambda name, extra=0: 0
+        ui._write = lambda y, x, text, attr=0: writes.append((y, x, text))
+
+        def fake_draw_wrapped(y, x, text, width, attr=0):
+            wrapped.append((y, x, text, width))
+            return y + 2
+
+        ui._draw_wrapped = fake_draw_wrapped
+        next_y = ui._row(6, 4, 22, "Console password-only", "Enabled")
+
+        self.assertEqual(next_y, 9)
+        self.assertEqual(writes, [(6, 4, "Console password-only")])
+        self.assertEqual(wrapped, [(7, 6, "Enabled", 20)])
+
     def test_extracts_current_repo_support_object(self):
         matrix = installer.extract_repo_support(INSTALL_JS_PATH.read_text(encoding="utf-8"))
         self.assertEqual(matrix["stable"]["exclude"], ["fedora44"])

@@ -669,8 +669,8 @@ def _webfinger_resources(input_mode, identifier, domain):
 def _webfinger_specs(input_mode, identifier, domain):
     resources = _webfinger_resources(input_mode, identifier, domain)
     root = "https://%s/.well-known/webfinger" % domain
-    specs = [("Domain WebFinger", root, resources)]
-    specs.append(("PingAM WebFinger", "https://%s/am/.well-known/webfinger" % domain, resources))
+    specs = [("Domain", root, resources)]
+    specs.append(("PingAM", "https://%s/am/.well-known/webfinger" % domain, resources))
     return specs
 
 
@@ -2251,10 +2251,12 @@ class WizardCursesUi:
             self._button(y, x, button["label"], button.get("action"), button.get("primary", False), button.get("enabled", True), button.get("key_label"))
 
     def _row(self, y, x, width, label, value):
-        label_w = min(20, max(12, width // 3))
+        label_w = min(max(len(label) + 2, 12), max(width // 2, 12), 28)
+        if width - label_w < 12:
+            self._write(y, x, label, self._attr("muted"))
+            return self._draw_wrapped(y + 1, x + 2, value, max(width - 2, 10), self._attr("panel"))
         self._write(y, x, label, self._attr("muted"))
-        self._draw_wrapped(y, x + label_w, value, max(width - label_w, 10), self._attr("panel"))
-        return y + 1
+        return self._draw_wrapped(y, x + label_w, value, max(width - label_w, 10), self._attr("panel"))
 
     def _radio(self, y, x, width, key, label, selected, action):
         if self.focus_key is None:

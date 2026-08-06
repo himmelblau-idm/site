@@ -126,6 +126,15 @@ names are not guaranteed to be unique in Entra Id.
 
 If not set, all Entra ID users are permitted to authenticate.
 
+This restriction is enforced during PAM account management: a user who
+is not permitted causes pam_himmelblau to return PAM_AUTH_ERR from its
+account phase. A PAM stack that discards that result (for example an
+account line whose control maps every non-success return to ignore)
+silently admits users that the allow list is meant to reject, because a
+later module such as pam_unix then succeeds for any resolvable user.
+When composing an account stack by hand, make sure the denial is
+terminal.
+
 Default: All users permitted
 
 ```text

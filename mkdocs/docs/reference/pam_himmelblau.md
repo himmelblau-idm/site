@@ -82,9 +82,8 @@ are not implicitly allowed.
 
 Configure `/etc/pam.d/common-account` in a similar manner.
 
-    account    [default=1 ignore=ignore success=ok] pam_localuser.so
+    account    [success=end auth_err=die default=ignore] pam_himmelblau.so ignore_unknown_user
     account    sufficient    pam_unix.so
-    account    sufficient    pam_himmelblau.so ignore_unknown_user
     account    required      pam_deny.so
 
 In `/etc/pam.d/common-session`, set `pam_himmelblau.so` as an optional

@@ -133,11 +133,36 @@ CIFS: VFS: \\<storage-account>.file.core.windows.net failed to create a new SMB 
 Check the following before assuming the storage account is misconfigured:
 
 - `klist` for the logged-in user shows `KEYRING:` as the ticket cache type and contains `krbtgt/KERBEROS.MICROSOFTONLINE.COM@KERBEROS.MICROSOFTONLINE.COM`.
+- `/etc/krb5.conf` includes `includedir /etc/krb5.conf.d` and the subdirectory does not contain conflicting or incompatible overrides.
 - The mount command uses `cruid="$(id -u)"` for the logged-in user who owns the TGT.
 - The mount command includes `username="$(id -u)"`.
 - The installed `cifs-utils` package is version 7.6 or newer.
 - `keyutils` is installed and `/etc/request-key.conf` or `/etc/request-key.d/` contains a `cifs.spnego` rule that invokes `cifs.upcall`.
 - The Azure Files share works from a Windows client with the same identity.
 - The user has the required Storage File Data SMB role assignment on the storage account or share.
+- `kvno -S cifs $storageaccount.file.core.windows.net` issues a ticket for the Azure Files service principal without errors.
 
 If these checks pass and `cifs.upcall` still reports that a valid TGT is not present, collect the `klist` output, the exact `mount.cifs` command, the `cifs-utils` version, and the relevant `journalctl` CIFS lines when reporting the issue.
+
+If the mount fails with `mount error(5): Input/output error`, enabled debug logging:
+
+```bash
+echo 7 | sudo tee /proc/fs/cifs/cifsFYI
+```
+
+Then try to mount the share again and check the logs:
+
+```bash
+sudo dmesg | grep -E "STATUS_|SessSetup|cifs_mount"
+# Disable debug output
+echo 0 | sudo tee /proc/fs/cifs/cifsFYI
+```
+
+If the error is `STATUS_MORE_PROCESSING_REQUIRED`, verify that the kerberos configuration only includes encryption types supported by Microsoft Entra Kerberos. For example, in `/etc/krb5.conf`:
+
+```ini
+[libdefaults]
+ default_tkt_enctypes = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96
+ default_tgs_enctypes = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96
+ permitted_enctypes = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96
+```

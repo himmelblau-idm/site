@@ -1511,9 +1511,8 @@ auth        sufficient    pam_himmelblau.so ignore_unknown_user
 auth        required      pam_deny.so</p>
 </div>
 <p>Configure <code>/etc/pam.d/common-account</code> in a similar manner.</p>
-<pre><code>account    [default=1 ignore=ignore success=ok] pam_localuser.so
+<pre><code>account    [success=end auth_err=die default=ignore] pam_himmelblau.so ignore_unknown_user
 account    sufficient    pam_unix.so
-account    sufficient    pam_himmelblau.so ignore_unknown_user
 account    required      pam_deny.so
 </code></pre>
 <p>In <code>/etc/pam.d/common-session</code>, set <code>pam_himmelblau.so</code> as an optional

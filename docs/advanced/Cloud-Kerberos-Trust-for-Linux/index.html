@@ -1493,14 +1493,30 @@ CIFS: VFS: \\&lt;storage-account&gt;.file.core.windows.net failed to create a ne
 <p>Check the following before assuming the storage account is misconfigured:</p>
 <ul>
 <li><code>klist</code> for the logged-in user shows <code>KEYRING:</code> as the ticket cache type and contains <code>krbtgt/KERBEROS.MICROSOFTONLINE.COM@KERBEROS.MICROSOFTONLINE.COM</code>.</li>
+<li><code>/etc/krb5.conf</code> includes <code>includedir /etc/krb5.conf.d</code> and the subdirectory does not contain conflicting or incompatible overrides.</li>
 <li>The mount command uses <code>cruid="$(id -u)"</code> for the logged-in user who owns the TGT.</li>
 <li>The mount command includes <code>username="$(id -u)"</code>.</li>
 <li>The installed <code>cifs-utils</code> package is version 7.6 or newer.</li>
 <li><code>keyutils</code> is installed and <code>/etc/request-key.conf</code> or <code>/etc/request-key.d/</code> contains a <code>cifs.spnego</code> rule that invokes <code>cifs.upcall</code>.</li>
 <li>The Azure Files share works from a Windows client with the same identity.</li>
 <li>The user has the required Storage File Data SMB role assignment on the storage account or share.</li>
+<li><code>kvno -S cifs $storageaccount.file.core.windows.net</code> issues a ticket for the Azure Files service principal without errors.</li>
 </ul>
 <p>If these checks pass and <code>cifs.upcall</code> still reports that a valid TGT is not present, collect the <code>klist</code> output, the exact <code>mount.cifs</code> command, the <code>cifs-utils</code> version, and the relevant <code>journalctl</code> CIFS lines when reporting the issue.</p>
+<p>If the mount fails with <code>mount error(5): Input/output error</code>, enabled debug logging:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="m">7</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/proc/fs/cifs/cifsFYI
+</code></pre></div>
+<p>Then try to mount the share again and check the logs:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dmesg<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;STATUS_|SessSetup|cifs_mount&quot;</span>
+<span class="c1"># Disable debug output</span>
+<span class="nb">echo</span><span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/proc/fs/cifs/cifsFYI
+</code></pre></div>
+<p>If the error is <code>STATUS_MORE_PROCESSING_REQUIRED</code>, verify that the kerberos configuration only includes encryption types supported by Microsoft Entra Kerberos. For example, in <code>/etc/krb5.conf</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[libdefaults]</span>
+<span class="w"> </span><span class="na">default_tkt_enctypes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96</span>
+<span class="w"> </span><span class="na">default_tgs_enctypes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96</span>
+<span class="w"> </span><span class="na">permitted_enctypes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96</span>
+</code></pre></div>
 
 
 

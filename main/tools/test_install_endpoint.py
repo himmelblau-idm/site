@@ -308,7 +308,7 @@ class InstallEndpointTests(unittest.TestCase):
             installer.os.geteuid = lambda: 0
             installer.apt_repo_setup = lambda channel, target, ui: calls.append(["repo", channel, target])
             installer.run = lambda argv, ui, check=True, input_text=None: calls.append(argv) or types.SimpleNamespace(stdout="")
-            installer.install_packages("stable", "debian13", object())
+            installer.install_packages("stable", "debian13", object(), installer.COMMUNITY_PACKAGES, [])
             install_calls = [call for call in calls if isinstance(call, list) and call[:3] == ["env", "DEBIAN_FRONTEND=noninteractive", "apt-get"] and "install" in call]
             self.assertTrue(install_calls)
             self.assertIn("Dpkg::Options::=--force-confdef", install_calls[-1])
@@ -326,7 +326,7 @@ class InstallEndpointTests(unittest.TestCase):
         try:
             installer.os.geteuid = lambda: 0
             installer.run = lambda argv, ui, check=True, input_text=None: calls.append(argv) or types.SimpleNamespace(stdout="")
-            installer.install_packages("stable", "tumbleweed", object())
+            installer.install_packages("stable", "tumbleweed", object(), installer.COMMUNITY_PACKAGES, [])
             self.assertIn(
                 [
                     "zypper",
@@ -353,7 +353,7 @@ class InstallEndpointTests(unittest.TestCase):
         try:
             installer.os.geteuid = lambda: 0
             installer.run = lambda argv, ui, check=True, input_text=None: calls.append(argv) or types.SimpleNamespace(stdout="")
-            installer.install_packages("subscription", "tumbleweed", object())
+            installer.install_packages("subscription", "tumbleweed", object(), installer.SUSE_SUBSCRIPTION_PACKAGES, [])
             self.assertEqual(calls, [[
                 "zypper",
                 "--non-interactive",
@@ -369,8 +369,104 @@ class InstallEndpointTests(unittest.TestCase):
 
     def test_root_worker_zypper_community_install_uses_himmelblau_repo_without_refreshing_all_repos(self):
         source = installer.ROOT_WORKER_SOURCE
-        self.assertIn('["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel]', source)
+        self.assertIn('["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel] + packages', source)
         self.assertIn('["zypper", "--non-interactive", "install", "-y"] + packages', source)
+
+    def test_detected_package_selection_includes_contextual_packages(self):
+        old_package_installed = installer.package_installed
+        old_which = installer.shutil.which
+        old_path_exists = installer.path_exists
+        old_list_dir = installer.list_dir
+        old_command_output = installer.command_output
+        old_read_text_file = installer.read_text_file
+        installed = {
+            "openssh-server",
+            "gdm3",
+            "firefox",
+        }
+        try:
+            installer.package_installed = lambda target, names: any(name in installed for name in names)
+            installer.shutil.which = lambda command: None
+            installer.path_exists = lambda path: path == "/sys/fs/selinux"
+            installer.list_dir = lambda path: ["plasma.desktop"] if path == "/usr/share/xsessions" else []
+            installer.command_output = lambda argv: types.SimpleNamespace(stdout="", returncode=1)
+            installer.read_text_file = lambda path: "Y" if path == "/sys/module/apparmor/parameters/enabled" else ""
+            packages, best_effort = installer.detected_package_selection("stable", "ubuntu24.04")
+            self.assertEqual(
+                packages,
+                [
+                    "himmelblau",
+                    "pam-himmelblau",
+                    "nss-himmelblau",
+                    "himmelblau-sshd-config",
+                    "himmelblau-qr-greeter",
+                    "himmelblau-sso",
+                    "himmelblau-sso-policies",
+                    "o365",
+                ],
+            )
+            self.assertEqual(best_effort, ["himmelblau-selinux", "himmelblau-apparmor"])
+        finally:
+            installer.package_installed = old_package_installed
+            installer.shutil.which = old_which
+            installer.path_exists = old_path_exists
+            installer.list_dir = old_list_dir
+            installer.command_output = old_command_output
+            installer.read_text_file = old_read_text_file
+
+    def test_edge_installs_sso_without_browser_policies(self):
+        old_package_installed = installer.package_installed
+        old_which = installer.shutil.which
+        old_path_exists = installer.path_exists
+        old_list_dir = installer.list_dir
+        old_read_text_file = installer.read_text_file
+        try:
+            installer.package_installed = lambda target, names: "microsoft-edge-stable" in names
+            installer.shutil.which = lambda command: None
+            installer.path_exists = lambda path: False
+            installer.list_dir = lambda path: []
+            installer.read_text_file = lambda path: ""
+            packages, best_effort = installer.detected_package_selection("stable", "ubuntu24.04")
+            self.assertIn("himmelblau-sso", packages)
+            self.assertNotIn("himmelblau-sso-policies", packages)
+            self.assertEqual(best_effort, [])
+        finally:
+            installer.package_installed = old_package_installed
+            installer.shutil.which = old_which
+            installer.path_exists = old_path_exists
+            installer.list_dir = old_list_dir
+            installer.read_text_file = old_read_text_file
+
+    def test_dnf_install_includes_required_and_best_effort_packages(self):
+        calls = []
+        warnings = []
+        ui = types.SimpleNamespace(warn=warnings.append)
+        old_run = installer.run
+        try:
+            def fake_run(argv, ui, check=True, input_text=None):
+                calls.append((argv, check))
+                return types.SimpleNamespace(stdout="", returncode=1 if not check else 0)
+
+            installer.run = fake_run
+            installer.install_packages(
+                "stable",
+                "fedora43",
+                ui,
+                ["himmelblau", "pam-himmelblau", "nss-himmelblau", "himmelblau-sso"],
+                ["himmelblau-selinux", "himmelblau-apparmor"],
+            )
+            self.assertIn((["sudo", "dnf", "install", "-y", "himmelblau", "pam-himmelblau", "nss-himmelblau", "himmelblau-sso"], True), calls)
+            self.assertIn((["sudo", "dnf", "install", "-y", "himmelblau-selinux"], False), calls)
+            self.assertIn((["sudo", "dnf", "install", "-y", "himmelblau-apparmor"], False), calls)
+            self.assertEqual(
+                warnings,
+                [
+                    "Optional package himmelblau-selinux could not be installed; continuing.",
+                    "Optional package himmelblau-apparmor could not be installed; continuing.",
+                ],
+            )
+        finally:
+            installer.run = old_run
 
     def test_worker_failure_status_reads_last_worker_error(self):
         with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
@@ -751,44 +847,74 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertFalse(ok)
 
     def test_build_install_plan_uses_known_step_kinds(self):
-        plan = installer.build_install_plan(
-            "stable",
-            "ubuntu24.04",
-            {"mode": "entra", "domain": "example.onmicrosoft.com"},
-            True,
-            {
-                "pam_allow_groups": "",
-                "enable_hello": True,
-                "allow_console_password_only": True,
-                "apply_policy": True,
-            },
-        )
-        self.assertEqual(plan["version"], installer.PLAN_VERSION)
-        self.assertEqual(
-            [step["kind"] for step in plan["steps"]],
-            ["apt_prereqs", "apt_repo", "install_packages", "write_global_config", "note", "enable_services", "maybe_status"],
-        )
-        self.assertEqual(plan["steps"][3]["config"]["write_idp"], True)
-        self.assertTrue(installer.validate_install_plan(plan))
+        old_detected = installer.detected_package_selection
+        try:
+            installer.detected_package_selection = lambda channel, target: (
+                ["himmelblau", "pam-himmelblau", "nss-himmelblau", "himmelblau-sso"],
+                ["himmelblau-selinux"],
+            )
+            plan = installer.build_install_plan(
+                "stable",
+                "ubuntu24.04",
+                {"mode": "entra", "domain": "example.onmicrosoft.com"},
+                True,
+                {
+                    "pam_allow_groups": "",
+                    "enable_hello": True,
+                    "allow_console_password_only": True,
+                    "apply_policy": True,
+                },
+            )
+            self.assertEqual(plan["version"], installer.PLAN_VERSION)
+            self.assertEqual(
+                [step["kind"] for step in plan["steps"]],
+                ["apt_prereqs", "apt_repo", "install_packages", "write_global_config", "note", "enable_services", "maybe_status"],
+            )
+            self.assertEqual(plan["steps"][2]["packages"], ["himmelblau", "pam-himmelblau", "nss-himmelblau", "himmelblau-sso"])
+            self.assertEqual(plan["steps"][2]["best_effort_packages"], ["himmelblau-selinux"])
+            self.assertEqual(plan["steps"][3]["config"]["write_idp"], True)
+            self.assertTrue(installer.validate_install_plan(plan))
+        finally:
+            installer.detected_package_selection = old_detected
 
     def test_install_plan_rejects_unknown_step_kind(self):
+        old_detected = installer.detected_package_selection
+        installer.detected_package_selection = lambda channel, target: (["himmelblau", "pam-himmelblau", "nss-himmelblau"], [])
         plan = installer.build_install_plan(
             "stable",
             "ubuntu24.04",
             {"mode": "entra", "domain": "example.onmicrosoft.com"},
             False,
         )
-        plan["steps"].append({"kind": "shell", "command": "whoami"})
-        with self.assertRaises(installer.InstallError):
-            installer.validate_install_plan(plan)
+        try:
+            plan["steps"].append({"kind": "shell", "command": "whoami"})
+            with self.assertRaises(installer.InstallError):
+                installer.validate_install_plan(plan)
+        finally:
+            installer.detected_package_selection = old_detected
+
+    def test_install_plan_rejects_invalid_package_name(self):
+        old_detected = installer.detected_package_selection
+        try:
+            installer.detected_package_selection = lambda channel, target: (["himmelblau", "bad package"], [])
+            plan = installer.build_package_only_plan("stable", "ubuntu24.04")
+            with self.assertRaises(installer.InstallError):
+                installer.validate_install_plan(plan)
+        finally:
+            installer.detected_package_selection = old_detected
 
     def test_package_only_plan_omits_configuration_steps(self):
-        plan = installer.build_package_only_plan("stable", "ubuntu24.04")
-        kinds = [step["kind"] for step in plan["steps"]]
-        self.assertNotIn("write_idp_config", kinds)
-        self.assertNotIn("write_global_config", kinds)
-        self.assertNotIn("configure_distro_provided", kinds)
-        self.assertEqual(kinds, ["apt_prereqs", "apt_repo", "install_packages", "note", "enable_services", "maybe_status"])
+        old_detected = installer.detected_package_selection
+        try:
+            installer.detected_package_selection = lambda channel, target: (["himmelblau", "pam-himmelblau", "nss-himmelblau"], [])
+            plan = installer.build_package_only_plan("stable", "ubuntu24.04")
+            kinds = [step["kind"] for step in plan["steps"]]
+            self.assertNotIn("write_idp_config", kinds)
+            self.assertNotIn("write_global_config", kinds)
+            self.assertNotIn("configure_distro_provided", kinds)
+            self.assertEqual(kinds, ["apt_prereqs", "apt_repo", "install_packages", "note", "enable_services", "maybe_status"])
+        finally:
+            installer.detected_package_selection = old_detected
 
     def test_rawhide_plan_uses_rawhide_dnf_repo_target(self):
         plan = installer.build_package_only_plan("nightly", "rawhide")

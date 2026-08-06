@@ -38,7 +38,7 @@ import urllib.request
 
 
 VERSION = "2026.07.13"
-PLAN_VERSION = 1
+PLAN_VERSION = 2
 SUPPORT_JS_URL = "https://himmelblau-idm.org/js/install.js"
 GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
 APT_KEYRING_DIR = "/etc/apt/keyrings"
@@ -88,6 +88,39 @@ DISTRO_LABELS = {
 COMMUNITY_PACKAGES = ["himmelblau", "pam-himmelblau", "nss-himmelblau"]
 SUSE_SUBSCRIPTION_PACKAGES = ["himmelblau", "pam-himmelblau", "libnss_himmelblau2"]
 APT_DEBCONF_ENV = "DEBIAN_FRONTEND=noninteractive"
+BEST_EFFORT_PACKAGES = ["himmelblau-selinux", "himmelblau-apparmor"]
+PACKAGE_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.+-]*$")
+
+OPENSSH_SERVER_PACKAGES = ["openssh-server"]
+OPENSSH_SERVER_COMMANDS = ["sshd"]
+OPENSSH_SERVER_PATHS = ["/usr/sbin/sshd", "/usr/libexec/openssh/sshd"]
+GDM_PACKAGES = ["gdm", "gdm3"]
+GDM_COMMANDS = ["gdm", "gdm3"]
+GDM_PATHS = ["/usr/lib/systemd/system/gdm.service", "/usr/lib/systemd/system/gdm3.service"]
+FIREFOX_PACKAGES = ["firefox", "firefox-esr"]
+FIREFOX_COMMANDS = ["firefox"]
+CHROME_PACKAGES = ["google-chrome-stable", "google-chrome-beta", "google-chrome-unstable"]
+CHROME_COMMANDS = ["google-chrome", "google-chrome-stable"]
+CHROMIUM_PACKAGES = ["chromium", "chromium-browser"]
+CHROMIUM_COMMANDS = ["chromium", "chromium-browser"]
+EDGE_PACKAGES = ["microsoft-edge-stable", "microsoft-edge-beta", "microsoft-edge-dev"]
+EDGE_COMMANDS = ["microsoft-edge", "microsoft-edge-stable"]
+DESKTOP_PACKAGES = [
+    "gdm",
+    "gdm3",
+    "gnome-shell",
+    "plasma-desktop",
+    "plasma-workspace",
+    "kde-plasma-desktop",
+    "sddm",
+    "xfce4",
+    "mate-desktop-environment",
+    "cinnamon-desktop-environment",
+    "lxde",
+    "lxqt",
+]
+DESKTOP_COMMANDS = ["gnome-shell", "startplasma-x11", "startplasma-wayland", "sddm", "xfce4-session", "mate-session", "cinnamon-session"]
+DESKTOP_SESSION_DIRS = ["/usr/share/xsessions", "/usr/share/wayland-sessions"]
 
 
 class InstallError(Exception):
@@ -924,6 +957,148 @@ def himmelblau_installed(target):
     return subprocess.run(["rpm", "-q", "himmelblau"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
 
 
+def path_exists(path):
+    return os.path.exists(path)
+
+
+def list_dir(path):
+    try:
+        return os.listdir(path)
+    except OSError:
+        return []
+
+
+def read_text_file(path):
+    try:
+        with open(path, encoding="utf-8") as handle:
+            return handle.read(64 * 1024)
+    except OSError:
+        return ""
+
+
+def command_output(argv):
+    try:
+        return subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, universal_newlines=True, check=False)
+    except (OSError, TypeError):
+        return None
+
+
+def package_installed(target, package_names):
+    for package in package_names:
+        if is_deb(target):
+            proc = command_output(["dpkg-query", "-W", "-f=${Status}", package])
+            if proc and getattr(proc, "stdout", "").startswith("install ok installed"):
+                return True
+        else:
+            proc = command_output(["rpm", "-q", package])
+            if proc and getattr(proc, "returncode", 1) == 0:
+                return True
+    return False
+
+
+def has_package_command_or_path(target, package_names, commands, paths=()):
+    if package_installed(target, package_names):
+        return True
+    if any(shutil.which(command) for command in commands):
+        return True
+    return any(path_exists(path) for path in paths)
+
+
+def selinux_present():
+    if shutil.which("getenforce"):
+        proc = command_output(["getenforce"])
+        state = (getattr(proc, "stdout", "") if proc else "").strip().lower()
+        if state in ("enforcing", "permissive"):
+            return True
+    if path_exists("/sys/fs/selinux") or path_exists("/selinux"):
+        return True
+    config = read_text_file("/etc/selinux/config")
+    match = re.search(r"^\s*SELINUX\s*=\s*([A-Za-z_-]+)\s*$", config, re.M)
+    return bool(match and match.group(1).lower() != "disabled")
+
+
+def apparmor_present():
+    if shutil.which("aa-enabled"):
+        proc = command_output(["aa-enabled"])
+        if proc and getattr(proc, "returncode", 1) == 0:
+            return True
+    enabled = read_text_file("/sys/module/apparmor/parameters/enabled").strip().lower()
+    if enabled in ("y", "yes", "1"):
+        return True
+    return path_exists("/sys/kernel/security/apparmor") or path_exists("/etc/apparmor.d")
+
+
+def gdm_present(target):
+    return has_package_command_or_path(target, GDM_PACKAGES, GDM_COMMANDS, GDM_PATHS)
+
+
+def browser_presence(target):
+    firefox = has_package_command_or_path(target, FIREFOX_PACKAGES, FIREFOX_COMMANDS)
+    chrome = has_package_command_or_path(target, CHROME_PACKAGES, CHROME_COMMANDS)
+    chromium = has_package_command_or_path(target, CHROMIUM_PACKAGES, CHROMIUM_COMMANDS)
+    edge = has_package_command_or_path(target, EDGE_PACKAGES, EDGE_COMMANDS)
+    return {
+        "any": firefox or chrome or chromium or edge,
+        "policies": firefox or chrome or chromium,
+    }
+
+
+def desktop_environment_present(target):
+    if gdm_present(target):
+        return True
+    if has_package_command_or_path(target, DESKTOP_PACKAGES, DESKTOP_COMMANDS):
+        return True
+    return any(list_dir(path) for path in DESKTOP_SESSION_DIRS)
+
+
+def base_packages(channel, target):
+    if channel == "subscription" and is_suse(target):
+        return list(SUSE_SUBSCRIPTION_PACKAGES)
+    return list(COMMUNITY_PACKAGES)
+
+
+def detected_package_selection(channel, target):
+    packages = base_packages(channel, target)
+    best_effort_packages = []
+    if has_package_command_or_path(target, OPENSSH_SERVER_PACKAGES, OPENSSH_SERVER_COMMANDS, OPENSSH_SERVER_PATHS):
+        packages.append("himmelblau-sshd-config")
+    if gdm_present(target):
+        packages.append("himmelblau-qr-greeter")
+    browsers = browser_presence(target)
+    if browsers["any"]:
+        packages.append("himmelblau-sso")
+    if browsers["policies"]:
+        packages.append("himmelblau-sso-policies")
+    if desktop_environment_present(target):
+        packages.append("o365")
+    if selinux_present():
+        best_effort_packages.append("himmelblau-selinux")
+    if apparmor_present():
+        best_effort_packages.append("himmelblau-apparmor")
+    return packages, best_effort_packages
+
+
+def package_install_command(manager, channel, target, packages):
+    packages = list(packages)
+    if manager == "apt":
+        return apt_get_command("install", "-y", *packages)
+    if manager == "zypper":
+        if channel == "subscription":
+            return sudo_prefix() + ["zypper", "--non-interactive", "install", "-y"] + packages
+        return sudo_prefix() + ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", f"himmelblau-{channel}"] + packages
+    if manager == "dnf":
+        return sudo_prefix() + ["dnf", "install", "-y"] + packages
+    raise InstallError("NixOS is not supported by this bootstrap installer. Use the advanced manual instructions.")
+
+
+def validate_package_list(packages):
+    if not isinstance(packages, list):
+        raise InstallError("Invalid install plan package list.")
+    for package in packages:
+        if not isinstance(package, str) or not PACKAGE_NAME_RE.match(package):
+            raise InstallError("Invalid install plan package name.")
+
+
 def apt_install_prereqs(ui):
     run(apt_get_command("update"), ui)
     run(apt_get_command("install", "-y", "ca-certificates", "curl", "gnupg"), ui)
@@ -984,7 +1159,7 @@ gpgkey={GPG_KEY_URL}
     run(sudo_prefix() + ["dnf", "makecache", "--refresh", "-y"], ui)
 
 
-def install_packages(channel, target, ui):
+def install_packages(channel, target, ui, packages=None, best_effort_packages=None):
     manager = package_manager(target)
     if channel != "subscription":
         if manager == "apt":
@@ -994,18 +1169,14 @@ def install_packages(channel, target, ui):
         elif manager == "dnf":
             dnf_repo_setup(channel, target, ui)
 
-    packages = SUSE_SUBSCRIPTION_PACKAGES if channel == "subscription" and is_suse(target) else COMMUNITY_PACKAGES
-    if manager == "apt":
-        run(apt_get_command("install", "-y", *packages), ui)
-    elif manager == "zypper":
-        if channel == "subscription":
-            run(sudo_prefix() + ["zypper", "--non-interactive", "install", "-y"] + packages, ui)
-        else:
-            run(sudo_prefix() + ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", f"himmelblau-{channel}"] + packages, ui)
-    elif manager == "dnf":
-        run(sudo_prefix() + ["dnf", "install", "-y"] + packages, ui)
-    else:
-        raise InstallError("NixOS is not supported by this bootstrap installer. Use the advanced manual instructions.")
+    if packages is None or best_effort_packages is None:
+        packages, best_effort_packages = detected_package_selection(channel, target)
+    if packages:
+        run(package_install_command(manager, channel, target, packages), ui)
+    for package in best_effort_packages:
+        proc = run(package_install_command(manager, channel, target, [package]), ui, check=False)
+        if proc.returncode != 0:
+            ui.warn(f"Optional package {package} could not be installed; continuing.")
 
 
 def configure_distro_provided(target, ui):
@@ -1043,6 +1214,7 @@ def require_commands(commands):
 
 def build_install_plan(channel, target, idp_config, write_idp, options_config=None):
     manager = package_manager(target)
+    packages, best_effort_packages = detected_package_selection(channel, target)
     steps = []
     if channel != "subscription":
         if manager == "apt":
@@ -1051,7 +1223,13 @@ def build_install_plan(channel, target, idp_config, write_idp, options_config=No
             steps.append({"kind": "zypper_repo", "channel": channel, "target": target})
         elif manager == "dnf":
             steps.append({"kind": "dnf_repo", "channel": channel, "target": target})
-    steps.append({"kind": "install_packages", "channel": channel, "target": target})
+    steps.append({
+        "kind": "install_packages",
+        "channel": channel,
+        "target": target,
+        "packages": packages,
+        "best_effort_packages": best_effort_packages,
+    })
     if idp_config or options_config is not None:
         steps.append({
             "kind": "write_global_config",
@@ -1101,10 +1279,13 @@ def validate_install_plan(plan):
     for step in plan.get("steps", []):
         if not isinstance(step, dict) or step.get("kind") not in allowed:
             raise InstallError("Invalid install plan step.")
+        if step.get("kind") == "install_packages":
+            validate_package_list(step.get("packages"))
+            validate_package_list(step.get("best_effort_packages"))
     return True
 
 
-def summary_lines(target, manager, channel, idp_config, write_config, options_config=None):
+def summary_lines(target, manager, channel, idp_config, write_config, options_config=None, packages=None, best_effort_packages=None):
     lines = [
         "Ready to install Himmelblau.",
         f"Distribution: {DISTRO_LABELS[target]}",
@@ -1123,6 +1304,10 @@ def summary_lines(target, manager, channel, idp_config, write_config, options_co
             lines.append("Intune policy: " + ("Applied" if options_config.get("apply_policy", True) else "Not applied"))
     if channel != "subscription":
         lines.append(f"Repository base: {base_url(channel)}")
+    if packages:
+        lines.append("Packages: " + ", ".join(packages))
+    if best_effort_packages:
+        lines.append("Best-effort packages: " + ", ".join(best_effort_packages))
     return lines
 
 
@@ -1138,7 +1323,7 @@ import tempfile
 import time
 import urllib.request
 
-PLAN_VERSION = 1
+PLAN_VERSION = 2
 GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
 APT_KEYRING_DIR = "/etc/apt/keyrings"
 APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
@@ -1153,6 +1338,7 @@ CONFIG_BOOLEAN_DEFAULTS = {
 COMMUNITY_PACKAGES = ["himmelblau", "pam-himmelblau", "nss-himmelblau"]
 SUSE_SUBSCRIPTION_PACKAGES = ["himmelblau", "pam-himmelblau", "libnss_himmelblau2"]
 APT_DEBCONF_ENV = "DEBIAN_FRONTEND=noninteractive"
+PACKAGE_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.+-]*$")
 DISTRO_LABELS = {
     "sle15sp6": "SUSE Linux Enterprise 15 SP6 / openSUSE Leap 15.6",
     "sle15sp7": "SUSE Linux Enterprise 15 SP7",
@@ -1364,6 +1550,17 @@ def validate_plan(plan):
     for step in plan.get("steps", []):
         if not isinstance(step, dict) or step.get("kind") not in allowed:
             raise WorkerError("Invalid install plan step.")
+        if step.get("kind") == "install_packages":
+            validate_package_list(step.get("packages"))
+            validate_package_list(step.get("best_effort_packages"))
+
+
+def validate_package_list(packages):
+    if not isinstance(packages, list):
+        raise WorkerError("Invalid install plan package list.")
+    for package in packages:
+        if not isinstance(package, str) or not PACKAGE_NAME_RE.match(package):
+            raise WorkerError("Invalid install plan package name.")
 
 
 def apt_architecture(event_log):
@@ -1413,20 +1610,27 @@ def dnf_repo_setup(channel, target, event_log):
     run(["dnf", "makecache", "--refresh", "-y"], event_log)
 
 
-def install_packages(channel, target, event_log):
-    manager = package_manager(target)
-    packages = SUSE_SUBSCRIPTION_PACKAGES if channel == "subscription" and is_suse(target) else COMMUNITY_PACKAGES
+def package_install_command(manager, channel, target, packages):
+    packages = list(packages)
     if manager == "apt":
-        run(apt_get_command("install", "-y", *packages), event_log)
-    elif manager == "zypper":
+        return apt_get_command("install", "-y", *packages)
+    if manager == "zypper":
         if channel == "subscription":
-            run(["zypper", "--non-interactive", "install", "-y"] + packages, event_log)
-        else:
-            run(["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel] + packages, event_log)
-    elif manager == "dnf":
-        run(["dnf", "install", "-y"] + packages, event_log)
-    else:
-        raise WorkerError("NixOS is not supported by this bootstrap installer.")
+            return ["zypper", "--non-interactive", "install", "-y"] + packages
+        return ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel] + packages
+    if manager == "dnf":
+        return ["dnf", "install", "-y"] + packages
+    raise WorkerError("NixOS is not supported by this bootstrap installer.")
+
+
+def install_packages(channel, target, event_log, packages, best_effort_packages):
+    manager = package_manager(target)
+    if packages:
+        run(package_install_command(manager, channel, target, packages), event_log)
+    for package in best_effort_packages:
+        proc = run(package_install_command(manager, channel, target, [package]), event_log, check=False)
+        if proc.returncode != 0:
+            emit(event_log, {"type": "warning", "text": "Optional package %s could not be installed; continuing." % package})
 
 
 def execute_step(step, event_log):
@@ -1441,7 +1645,7 @@ def execute_step(step, event_log):
     elif kind == "dnf_repo":
         dnf_repo_setup(step["channel"], step["target"], event_log)
     elif kind == "install_packages":
-        install_packages(step["channel"], step["target"], event_log)
+        install_packages(step["channel"], step["target"], event_log, step["packages"], step["best_effort_packages"])
     elif kind == "write_global_config":
         write_global_config(step["config"], event_log)
     elif kind == "write_idp_config":
@@ -1694,8 +1898,9 @@ def run_cli():
 
     channel = ui.choose("Choose installation source", choices)
     idp_config, write_config = prompt_idp_config(ui)
+    packages, best_effort_packages = detected_package_selection(channel, target)
 
-    summary = summary_lines(target, manager, channel, idp_config, write_config)
+    summary = summary_lines(target, manager, channel, idp_config, write_config, None, packages, best_effort_packages)
     if not ui.confirm("\n".join(summary) + "\n\nContinue?", default=False):
         raise InstallError("Installation cancelled.")
 
@@ -1703,7 +1908,7 @@ def run_cli():
         require_commands(["sudo"])
         run(["sudo", "-v"], ui)
 
-    install_packages(channel, target, ui)
+    install_packages(channel, target, ui, packages, best_effort_packages)
     if write_config:
         write_idp_config(idp_config, ui)
 
@@ -1716,7 +1921,7 @@ def run_cli():
     maybe_status(ui)
 
     ui.info("Himmelblau installation completed.")
-    ui.info("Optional packages such as himmelblau-sso, himmelblau-qr-greeter, and himmelblau-sshd-config are documented at https://himmelblau-idm.org/downloads/")
+    ui.info("Detected optional packages were installed when available.")
 
 
 def print_headless_event(event):
@@ -2594,7 +2799,8 @@ class WizardCursesUi:
         width = layout["content_w"] - 4
         self._draw_box(layout["content_y"], layout["content_x"], layout["content_h"], layout["content_w"], "Summary", self._attr("panel"))
         idp_config, write_config = self.selected_idp()
-        for line in summary_lines(self.target, self.manager, self.channel, idp_config, write_config, self.selected_options()):
+        packages, best_effort_packages = detected_package_selection(self.channel, self.target)
+        for line in summary_lines(self.target, self.manager, self.channel, idp_config, write_config, self.selected_options(), packages, best_effort_packages):
             if ": " in line:
                 label, value = line.split(": ", 1)
                 y = self._row(y, x, width, label, value)

@@ -1,6 +1,6 @@
 {
   "$schema": "https://fundingjson.org/schema/v1.1.0.json",
-  "version": "1.1.0",
+  "version": "v1.1.0",
   "entity": {
     "type": "individual",
     "role": "maintainer",
@@ -21,7 +21,7 @@
       },
       "repositoryUrl": {
         "url": "https://github.com/himmelblau-idm/himmelblau",
-        "wellKnown": "https://raw.githubusercontent.com/himmelblau-idm/himmelblau/main/.well-known/funding-manifest-urls"
+        "wellKnown": "https://github.com/himmelblau-idm/himmelblau/raw/refs/heads/main/.well-known/funding-manifest-urls"
       },
       "licenses": [
         "spdx:GPL-3.0-or-later"

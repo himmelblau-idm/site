@@ -1,0 +1,161 @@
+{
+  "$schema": "https://fundingjson.org/schema/v1.1.0.json",
+  "version": "1.1.0",
+  "entity": {
+    "type": "individual",
+    "role": "maintainer",
+    "name": "David Mulder",
+    "email": "dmulder@himmelblau-idm.org",
+    "description": "David Mulder maintains the Himmelblau project, which brings enterprise sign-in and compliance capabilities to Linux desktops and servers.",
+    "webpageUrl": {
+      "url": "https://himmelblau-idm.org/"
+    }
+  },
+  "projects": [
+    {
+      "guid": "himmelblau",
+      "name": "Himmelblau",
+      "description": "Himmelblau brings enterprise sign-in and compliance capabilities to Linux desktops and servers, including Azure Entra ID and OIDC authentication.",
+      "webpageUrl": {
+        "url": "https://himmelblau-idm.org/"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/himmelblau-idm/himmelblau",
+        "wellKnown": "https://raw.githubusercontent.com/himmelblau-idm/himmelblau/main/.well-known/funding-manifest-urls"
+      },
+      "licenses": [
+        "spdx:GPL-3.0-or-later"
+      ],
+      "tags": [
+        "authentication",
+        "linux",
+        "entra-id",
+        "identity",
+        "oidc",
+        "compliance"
+      ]
+    },
+    {
+      "guid": "libhimmelblau",
+      "name": "libhimmelblau",
+      "description": "libhimmelblau provides library components for Himmelblau's enterprise sign-in and compliance integration on Linux.",
+      "webpageUrl": {
+        "url": "https://himmelblau-idm.org/"
+      },
+      "repositoryUrl": {
+        "url": "https://gitlab.com/samba-team/libhimmelblau",
+        "wellKnown": "https://gitlab.com/samba-team/libhimmelblau/-/raw/main/.well-known/funding-manifest-urls"
+      },
+      "licenses": [
+        "spdx:LGPL-3.0-or-later"
+      ],
+      "tags": [
+        "authentication",
+        "linux",
+        "entra-id",
+        "identity",
+        "oidc",
+        "compliance"
+      ]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "open-collective-sponsors",
+        "type": "payment-provider",
+        "address": "https://opencollective.com/himmelblau/contribute/sponsors-84876",
+        "description": "Open Collective sponsorship contributions for ongoing Himmelblau development."
+      },
+      {
+        "guid": "open-collective-backers",
+        "type": "payment-provider",
+        "address": "https://opencollective.com/himmelblau/contribute/backers-bench-84925/checkout",
+        "description": "Open Collective Backer's Program contributions for issue-specific funding."
+      },
+      {
+        "guid": "open-collective-donate",
+        "type": "payment-provider",
+        "address": "https://opencollective.com/himmelblau/donate",
+        "description": "Open Collective general donation page."
+      },
+      {
+        "guid": "spi-paypal",
+        "type": "payment-provider",
+        "address": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8GYKFLX9UNCH2",
+        "description": "US tax-exempt contributions through Himmelblau's Software in the Public Interest membership: https://www.spi-inc.org/projects/himmelblau/."
+      }
+    ],
+    "plans": [
+      {
+        "guid": "sponsorship",
+        "status": "active",
+        "name": "General sponsorship",
+        "description": "Support ongoing Himmelblau development, maintenance, and project independence.",
+        "amount": 0,
+        "currency": "USD",
+        "frequency": "other",
+        "channels": [
+          "open-collective-sponsors",
+          "open-collective-donate",
+          "spi-paypal"
+        ]
+      },
+      {
+        "guid": "backers-program",
+        "status": "active",
+        "name": "Backer's Program",
+        "description": "Fund a specific bug fix or feature request for Himmelblau.",
+        "amount": 0,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "open-collective-backers",
+          "spi-paypal"
+        ]
+      },
+      {
+        "guid": "monthly-maintenance",
+        "status": "active",
+        "name": "Monthly maintenance baseline",
+        "description": "Supports ongoing bug triage, releases, package maintenance, Entra ID compatibility work, documentation, and user support.",
+        "amount": 5000,
+        "currency": "USD",
+        "frequency": "monthly",
+        "channels": [
+          "open-collective-sponsors",
+          "open-collective-donate",
+          "spi-paypal"
+        ]
+      },
+      {
+        "guid": "security-reliability",
+        "status": "active",
+        "name": "Security and reliability fund",
+        "description": "Supports security review, authentication-flow hardening, CI and release pipeline improvements, and regression testing.",
+        "amount": 15000,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "open-collective-sponsors",
+          "open-collective-donate",
+          "spi-paypal"
+        ]
+      },
+      {
+        "guid": "sustained-development",
+        "status": "active",
+        "name": "Sustained development target",
+        "description": "Supports predictable maintainer time for continued Himmelblau development across the year.",
+        "amount": 60000,
+        "currency": "USD",
+        "frequency": "yearly",
+        "channels": [
+          "open-collective-sponsors",
+          "open-collective-donate",
+          "spi-paypal"
+        ]
+      }
+    ]
+  }
+}

@@ -18,8 +18,10 @@ theme:
   custom_dir: overrides
 extra_css:
   - css/custom.css
+  - css/home.css
   - assets/feedback.css
 extra_javascript:
+  - js/home.js
   - assets/feedback.js
 nav:
   - Home: index.md

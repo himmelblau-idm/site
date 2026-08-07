@@ -1466,8 +1466,8 @@
 <p><img alt="Create a Keycloak client" src="01_create_client.png" /></p>
 <p>For <strong>Client type</strong>, select <strong>OpenID Connect</strong>. Set <strong>Client ID</strong> to the value that Himmelblau will use as <code>app_id</code>.</p>
 <p>For example:</p>
-<div class="highlight"><pre><span></span><code>himmelblau-login
-</code></pre></div>
+<p><code>text
+himmelblau-login</code></p>
 <p>Then click <strong>Next</strong>.</p>
 <p><img alt="Set the Keycloak client ID" src="02_set_client_id_and_next.png" /></p>
 <p>On the capability configuration page, enable <strong>OAuth 2.0 Device Authorization Grant</strong>.</p>
@@ -1482,16 +1482,16 @@
 <h2 id="configure-himmelblau">Configure Himmelblau</h2>
 <p>Edit <code>/etc/himmelblau/himmelblau.conf</code> on the Linux client.</p>
 <p>For the classic Device Authorization Grant flow, use:</p>
-<div class="highlight"><pre><span></span><code><span class="k">[global]</span>
-<span class="na">oidc_issuer_url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">https://keycloak.example.com/realms/himmelblau</span>
-<span class="na">app_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">himmelblau-login</span>
-</code></pre></div>
+<p><code>ini
+[global]
+oidc_issuer_url = https://keycloak.example.com/realms/himmelblau
+app_id = himmelblau-login</code></p>
 <p>For Himmelblau 4.x and newer, you may optionally enable the orchestrator:</p>
-<div class="highlight"><pre><span></span><code><span class="k">[global]</span>
-<span class="na">oidc_issuer_url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">https://keycloak.example.com/realms/himmelblau</span>
-<span class="na">app_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">himmelblau-login</span>
-<span class="na">orchestrator_enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
-</code></pre></div>
+<p><code>ini
+[global]
+oidc_issuer_url = https://keycloak.example.com/realms/himmelblau
+app_id = himmelblau-login
+orchestrator_enabled = true</code></p>
 <p>The configuration values are:</p>
 <table>
 <thead>
@@ -1518,11 +1518,11 @@
 <p>The <code>oidc_issuer_url</code> must match the issuer advertised by Keycloak for the selected realm. The <code>app_id</code> must match the Keycloak client ID, not the realm name or the display name.</p>
 <h2 id="apply-the-configuration">Apply the Configuration</h2>
 <p>Restart the Himmelblau services after changing <code>/etc/himmelblau/himmelblau.conf</code>:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>himmelblaud<span class="w"> </span>himmelblaud-tasks<span class="w"> </span>himmelblaud-orchestrator
-</code></pre></div>
+<p><code>bash
+sudo systemctl restart himmelblaud himmelblaud-tasks himmelblaud-orchestrator</code></p>
 <p>Then test authentication with a Keycloak user:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>aad-tool<span class="w"> </span>auth-test<span class="w"> </span>--name<span class="w"> </span>user@example.com
-</code></pre></div>
+<p><code>bash
+sudo aad-tool auth-test --name user@example.com</code></p>
 <p>Replace <code>user@example.com</code> with the account identifier your Keycloak realm expects.</p>
 <p>With the classic Device Authorization Grant flow, the test or login flow should show a URL and code, or a QR code, and the user completes authentication in a browser.</p>
 <p>With <code>orchestrator_enabled = true</code> on Himmelblau 4.x or newer, login should use the native Linux PAM flow and complete on the same device.</p>
@@ -1538,8 +1538,8 @@
 <li>If you set <code>orchestrator_enabled = true</code>, confirm that the client is running Himmelblau 4.x or newer and that the <code>himmelblau-orchestrator</code> package is installed.</li>
 </ul>
 <p>Use the system journal for detailed logs:</p>
-<div class="highlight"><pre><span></span><code>journalctl<span class="w"> </span>-u<span class="w"> </span>himmelblaud<span class="w"> </span>-u<span class="w"> </span>himmelblaud-orchestrator
-</code></pre></div>
+<p><code>bash
+journalctl -u himmelblaud -u himmelblaud-orchestrator</code></p>
 <p>If you enable <code>debug = true</code> in your himmelblau.conf, the logs will include additional detail about provider discovery, token requests, and authentication flow selection.</p>
 
 

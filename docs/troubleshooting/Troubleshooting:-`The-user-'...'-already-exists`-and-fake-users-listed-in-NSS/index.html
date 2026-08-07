@@ -1381,14 +1381,12 @@
 
 <h4 id="overview">Overview</h4>
 <p>When using Himmelblau, you might encounter the error:</p>
-<div class="highlight"><pre><span></span><code>useradd: user &#39;test1&#39; already exists
-</code></pre></div>
+<p><code>useradd: user 'test1' already exists</code></p>
 <p>or similar behavior when attempting to create local users. You might also notice that nss responds affirmatively to the existence of fake users:</p>
-<div class="highlight"><pre><span></span><code>$ getent passwd fake_user1
+<p><code>$ getent passwd fake_user1
 fake_user1@example.com:x:955955525:955955525::/home/fake_user1:/bin/bash
 $ getent passwd fake_user2
-fake_user2@example.com:x:1881368896:1881368896::/home/fake_user2:/bin/bash
-</code></pre></div>
+fake_user2@example.com:x:1881368896:1881368896::/home/fake_user2:/bin/bash</code></p>
 <p>This problem occurs even for users that neither exist locally nor in your Azure Entra ID tenant. Additionally, this issue can lead to complications with package management tools (e.g., <code>apt</code> or <code>dnf</code>) that need to create system users during installation.</p>
 <h4 id="root-cause">Root Cause</h4>
 <p>This behavior arises from the <code>cn_name_mapping</code> parameter in your <strong>himmelblau.conf</strong> configuration file. By default, this parameter is enabled (<code>true</code>) unless explicitly set to <code>false</code>. When enabled, it automatically maps common names (CN) to user principal names (UPN).</p>
@@ -1407,27 +1405,23 @@ It's unknown which setting in Azure Entra Id is causing this behavior, but it is
 <li>
 <p><strong>Locate the Configuration File</strong>:
     The default configuration file is located at:</p>
-<div class="highlight"><pre><span></span><code>/etc/himmelblau/himmelblau.conf
-</code></pre></div>
+<p><code>/etc/himmelblau/himmelblau.conf</code></p>
 </li>
 <li>
 <p><strong>Edit the File</strong>:
     Open the file in your preferred text editor:</p>
-<div class="highlight"><pre><span></span><code>sudo nano /etc/himmelblau/himmelblau.conf
-</code></pre></div>
+<p><code>sudo nano /etc/himmelblau/himmelblau.conf</code></p>
 </li>
 <li>
 <p><strong>Disable </strong><strong><code>cn_name_mapping</code></strong>:
     Locate the <code>[global]</code> section and add or modify the following line:</p>
-<div class="highlight"><pre><span></span><code>cn_name_mapping = false
-</code></pre></div>
+<p><code>cn_name_mapping = false</code></p>
 </li>
 <li>
 <p><strong>Restart Himmelblau Services</strong>:
     After saving the changes, restart the Himmelblau services to apply the new configuration:</p>
-<div class="highlight"><pre><span></span><code>sudo systemctl restart himmelblaud
-sudo systemctl restart himmelblaud-tasks
-</code></pre></div>
+<p><code>sudo systemctl restart himmelblaud
+sudo systemctl restart himmelblaud-tasks</code></p>
 </li>
 </ol>
 <p>After disabling <code>cn_name_mapping</code>, all users will be required to authenticate to the host using their UPN.</p>
@@ -1435,14 +1429,12 @@ sudo systemctl restart himmelblaud-tasks
 <ul>
 <li>Check user enumeration again:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>getent passwd test1
-</code></pre></div>
+<p><code>getent passwd test1</code></p>
 <p>Ensure the user is not falsely listed.</p>
 <ul>
 <li>Retry adding a new user:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo useradd test1
-</code></pre></div>
+<p><code>sudo useradd test1</code></p>
 <p>It should now succeed without errors.</p>
 <h4 id="notes">Notes</h4>
 <p>Disabling <code>cn_name_mapping</code> prevents Himmelblau from making optimistic assumptions about user existence. This adjustment ensures compatibility with environments where Azure Entra ID has user enumeration disabled, aligning expected behavior with the tenant’s security configuration.</p>
@@ -1450,8 +1442,7 @@ sudo systemctl restart himmelblaud-tasks
 <ul>
 <li>For more details about <code>himmelblau.conf</code> parameters, refer to the <a href="https://himmelblau-idm.org/docs.html#configuration">Himmelblau Configuration Guide</a> or the <a href="https://manpages.opensuse.org/Tumbleweed/himmelblau/himmelblau.conf.5.en.html"><code>himmelblau.conf</code> man page</a>.</li>
 <li>If you continue experiencing issues, consider clearing or invalidating the Himmelblau cache using the <code>aad-tool</code> utility:
-  <div class="highlight"><pre><span></span><code>sudo aad-tool cache-clear
-</code></pre></div></li>
+  <code>sudo aad-tool cache-clear</code></li>
 </ul>
 
 

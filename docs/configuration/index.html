@@ -1601,17 +1601,17 @@
 All other configuration options are optional.</p>
 <h3 id="format">Format</h3>
 <p>The file uses an INI-like syntax with support for <code>[global]</code> and per-domain sections:</p>
-<div class="highlight"><pre><span></span><code><span class="k">[global]</span>
-<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">example.com</span>
-
-<span class="k">[example.com]</span>
-<span class="na">app_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">00000000-1111-2222-3333-444444444444</span>
-</code></pre></div>
+<p>```ini
+[global]
+domain = example.com</p>
+<p>[example.com]
+app_id = 00000000-1111-2222-3333-444444444444
+```</p>
 <p>For generic OIDC authentication, use the issuer URL and the client ID from your provider:</p>
-<div class="highlight"><pre><span></span><code><span class="k">[global]</span>
-<span class="na">oidc_issuer_url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">https://keycloak.example.com/realms/himmelblau</span>
-<span class="na">app_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">himmelblau-login</span>
-</code></pre></div>
+<p><code>ini
+[global]
+oidc_issuer_url = https://keycloak.example.com/realms/himmelblau
+app_id = himmelblau-login</code></p>
 <h3 id="key-options">Key Options</h3>
 <table>
 <thead>
@@ -1645,11 +1645,11 @@ All other configuration options are optional.</p>
 </table>
 <p><strong>Note:</strong> Leaving the <code>pam_allow_groups</code> option unset in the <code>/etc/himmelblau/himmelblau.conf</code> file <em>permits all users to authenticate</em>.</p>
 <p><strong>Note:</strong> On Ubuntu, you should additionally set <code>use_etc_skel</code> to <code>true</code> and configure <code>home_attr</code> and <code>home_alias</code> to match (I recommend using the <code>CN</code> or <code>SPN</code> attributes). These parameters are necessary, otherwise Ubuntu's snaps will fail to execute. These settings are set by default using the Himmelblau project Debian/Ubuntu packages.</p>
-<div class="highlight"><pre><span></span><code><span class="k">[global]</span>
-<span class="na">home_attr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">CN</span>
-<span class="na">home_alias</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">CN</span>
-<span class="na">use_etc_skel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
-</code></pre></div>
+<p><code>ini
+[global]
+home_attr = CN
+home_alias = CN
+use_etc_skel = true</code></p>
 <p>Refer to the <a href="../reference/himmelblau-conf/">himmelblau.conf</a> man page for a full list of options.</p>
 <blockquote>
 <p>⚠️<strong>Important</strong>: To require full TPM-backed security, set <code>hsm_type = tpm</code> <strong>before authenticating or enrolling this device</strong>. By default, Himmelblau uses <code>tpm_bound_soft_if_possible</code> (software HSM with a TPM-bound top key when available). <a href="../advanced/Configuring-a-Hardware-TPM-for-Secure-Key-Storage/">Learn how to configure TPM »</a>.</p>
@@ -1667,13 +1667,13 @@ All other configuration options are optional.</p>
 <ul>
 <li><strong>openSUSE / Tumbleweed:</strong></li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>pam-config<span class="w"> </span>--add<span class="w"> </span>--himmelblau
-</code></pre></div>
+<p><code>bash
+sudo pam-config --add --himmelblau</code></p>
 <ul>
 <li><strong>All systems (manual file editing):</strong></li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>aad-tool<span class="w"> </span>configure-pam
-</code></pre></div>
+<p><code>bash
+sudo aad-tool configure-pam</code></p>
 <p>This directly modifies PAM config files such as:</p>
 <ul>
 <li><code>/etc/pam.d/common-auth</code></li>
@@ -1692,38 +1692,38 @@ All other configuration options are optional.</p>
 </ul>
 <hr />
 <h4 id="example-etcpamdcommon-auth">Example: <code>/etc/pam.d/common-auth</code></h4>
-<div class="highlight"><pre><span></span><code>auth        required      pam_env.so
+<p><code>pam
+auth        required      pam_env.so
 auth        [default=1 ignore=ignore success=ok] pam_localuser.so
 auth        sufficient    pam_himmelblau.so ignore_unknown_user
 auth        sufficient    pam_unix.so nullok try_first_pass
-auth        required      pam_deny.so
-</code></pre></div>
+auth        required      pam_deny.so</code></p>
 <blockquote>
 <p>💡 To avoid fallback password prompts, keep <code>pam_himmelblau.so</code> above <code>pam_unix.so</code> in the pam <strong>auth</strong> stack.</p>
 </blockquote>
 <hr />
 <h4 id="example-etcpamdcommon-account">Example: <code>/etc/pam.d/common-account</code></h4>
-<div class="highlight"><pre><span></span><code>account     [default=1 ignore=ignore success=ok] pam_localuser.so
+<p><code>pam
+account     [default=1 ignore=ignore success=ok] pam_localuser.so
 account     sufficient    pam_unix.so
 account     sufficient    pam_himmelblau.so ignore_unknown_user
-account     required      pam_deny.so
-</code></pre></div>
+account     required      pam_deny.so</code></p>
 <hr />
 <h4 id="example-etcpamdcommon-session">Example: <code>/etc/pam.d/common-session</code></h4>
-<div class="highlight"><pre><span></span><code>session optional    pam_systemd.so
+<p><code>pam
+session optional    pam_systemd.so
 session required    pam_limits.so
 session optional    pam_unix.so try_first_pass
 session optional    pam_umask.so 
 session optional    pam_himmelblau.so
-session optional    pam_env.so
-</code></pre></div>
+session optional    pam_env.so</code></p>
 <hr />
 <h4 id="example-etcpamdcommon-password">Example: <code>/etc/pam.d/common-password</code></h4>
-<div class="highlight"><pre><span></span><code>password    sufficient  pam_himmelblau.so ignore_unknown_user
+<p><code>pam
+password    sufficient  pam_himmelblau.so ignore_unknown_user
 password    optional    pam_gnome_keyring.so use_authtok
 password    sufficient  pam_unix.so use_authtok nullok shadow try_first_pass
-password    required    pam_deny.so
-</code></pre></div>
+password    required    pam_deny.so</code></p>
 <h2 id="nss-configuration">NSS Configuration</h2>
 <p>To ensure system tools can resolve Entra ID users and groups:</p>
 <ol>
@@ -1732,29 +1732,29 @@ password    required    pam_deny.so
 <p>Find the <code>passwd</code> and <code>group</code> lines and modify them to include <code>himmelblau</code>, for example:</p>
 </li>
 </ol>
-<div class="highlight"><pre><span></span><code>passwd:     files himmelblau
-group:      files himmelblau
-</code></pre></div>
+<p><code>conf
+passwd:     files himmelblau
+group:      files himmelblau</code></p>
 <hr />
 <h2 id="disabling-linux-hello-pin">Disabling Linux Hello PIN</h2>
 <p>Linux Hello authentication is enabled by default. To disable it:</p>
-<div class="highlight"><pre><span></span><code><span class="k">[global]</span>
-<span class="na">enable_hello</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
-</code></pre></div>
+<p><code>ini
+[global]
+enable_hello = false</code></p>
 <hr />
 <h3 id="changing-a-hello-pin">Changing a Hello PIN</h3>
 <p>To change an existing Hello PIN, run <code>passwd</code> as the user. When <code>pam_himmelblau.so</code> is present in the system password stack, <code>passwd</code> updates the Hello PIN instead of (or in addition to) a local password.</p>
-<div class="highlight"><pre><span></span><code>passwd
-</code></pre></div>
+<p><code>bash
+passwd</code></p>
 <hr />
 <h3 id="pin-lifetime-and-cache-behavior">PIN lifetime and cache behavior</h3>
 <p>A Hello PIN can last indefinitely. It is only constrained by the lifetime of the cached PRT or refresh token (depending on the environment). If the host is offline longer than the cached PRT validity (often around 14 days, but tenant policy can differ), the Hello credentials expire and an online sign-in is required. At present, that online sign-in results in creating a new PIN; a future update will allow re-associating refreshed credentials with the existing PIN.</p>
 <hr />
 <h2 id="debug-logging">Debug Logging</h2>
 <p>Enable debug logs for troubleshooting:</p>
-<div class="highlight"><pre><span></span><code><span class="k">[global]</span>
-<span class="na">debug</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
-</code></pre></div>
+<p><code>ini
+[global]
+debug = true</code></p>
 <p>Logs are written to:</p>
 <ul>
 <li><code>journalctl -u himmelblaud -u himmelblaud-tasks</code></li>

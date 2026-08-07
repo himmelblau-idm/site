@@ -1458,25 +1458,20 @@ To obtain one:</p>
 <ul>
 <li>On <strong>Ubuntu/Debian</strong>:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo nano /etc/systemd/system/himmelblaud.service
-</code></pre></div>
+<p><code>sudo nano /etc/systemd/system/himmelblaud.service</code></p>
 <ul>
 <li>On <strong>RHEL/Fedora/openSUSE</strong>:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo nano /usr/lib/systemd/system/himmelblaud.service
-</code></pre></div>
+<p><code>sudo nano /usr/lib/systemd/system/himmelblaud.service</code></p>
 <p>Make sure it includes, and that the HTTPS_PROXY setting is correct for your mitmproxy instance:</p>
-<div class="highlight"><pre><span></span><code>Environment=&quot;HTTPS_PROXY=http://127.0.0.1:8080&quot;
-</code></pre></div>
+<p><code>Environment="HTTPS_PROXY=http://127.0.0.1:8080"</code></p>
 <p>Then reload systemd and restart <code>himmelblaud</code>:</p>
-<div class="highlight"><pre><span></span><code>sudo systemctl daemon-reload
-sudo systemctl restart himmelblaud himmelblaud-tasks
-</code></pre></div>
+<p><code>sudo systemctl daemon-reload
+sudo systemctl restart himmelblaud himmelblaud-tasks</code></p>
 <hr />
 <h2 id="2-install-and-start-mitmweb">2. Install and start <code>mitmweb</code></h2>
 <p>Download <code>mitmproxy</code> from <a href="https://mitmproxy.org/">https://mitmproxy.org/</a>, extract it, and run:</p>
-<div class="highlight"><pre><span></span><code>./mitmweb
-</code></pre></div>
+<p><code>./mitmweb</code></p>
 <p>This launches a local web interface at <code>http://127.0.0.1:8081/</code>.</p>
 <hr />
 <h2 id="3-install-the-mitmproxy-ca-certificate">3. Install the mitmproxy CA certificate</h2>
@@ -1484,21 +1479,18 @@ sudo systemctl restart himmelblaud himmelblaud-tasks
 <ul>
 <li><strong>Ubuntu/Debian:</strong></li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo cp ~/.mitmproxy/mitmproxy-ca-cert.pem /usr/local/share/ca-certificates/mitmproxy.crt
-sudo update-ca-certificates
-</code></pre></div>
+<p><code>sudo cp ~/.mitmproxy/mitmproxy-ca-cert.pem /usr/local/share/ca-certificates/mitmproxy.crt
+  sudo update-ca-certificates</code></p>
 <ul>
 <li><strong>Fedora/RHEL:</strong></li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo cp ~/.mitmproxy/mitmproxy-ca-cert.pem /etc/pki/ca-trust/source/anchors/
-sudo update-ca-trust
-</code></pre></div>
+<p><code>sudo cp ~/.mitmproxy/mitmproxy-ca-cert.pem /etc/pki/ca-trust/source/anchors/
+  sudo update-ca-trust</code></p>
 <ul>
 <li><strong>openSUSE:</strong></li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo cp ~/.mitmproxy/mitmproxy-ca-cert.pem /usr/share/pki/trust/anchors/mitmproxy.crt
-sudo update-ca-certificates
-</code></pre></div>
+<p><code>sudo cp ~/.mitmproxy/mitmproxy-ca-cert.pem /usr/share/pki/trust/anchors/mitmproxy.crt
+  sudo update-ca-certificates</code></p>
 <hr />
 <h2 id="4-reproduce-your-himmelblau-issue">4. Reproduce your Himmelblau issue</h2>
 <p>At this point:</p>
@@ -1518,14 +1510,12 @@ sudo update-ca-certificates
 <hr />
 <h2 id="6-obfuscate-sensitive-data-with-cirrus-scope">6. Obfuscate sensitive data with <code>cirrus-scope</code></h2>
 <p>Before sharing your capture, sanitize it using:</p>
-<div class="highlight"><pre><span></span><code>cirrus-scope obfuscate -i flows -o flows.obfuscated
-</code></pre></div>
+<p><code>cirrus-scope obfuscate -i flows -o flows.obfuscated</code></p>
 <p>This automatically masks known sensitive data like JWTs, flow tokens, tenant IDs, etc.</p>
 <p>You can also specify explicit items to redact (emails, passwords, etc):</p>
-<div class="highlight"><pre><span></span><code>cirrus-scope obfuscate -i flows -o flows.obfuscated \
-    --custom &quot;admin@contoso.com&quot; \
-    --custom &quot;SuperSecretPassword&quot;
-</code></pre></div>
+<p><code>cirrus-scope obfuscate -i flows -o flows.obfuscated \
+    --custom "admin@contoso.com" \
+    --custom "SuperSecretPassword"</code></p>
 <hr />
 <h2 id="done">Done!</h2>
 <p>You can now safely provide <code>flows.obfuscated</code> for debugging.

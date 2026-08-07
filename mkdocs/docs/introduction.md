@@ -105,15 +105,15 @@ are installed for this purpose. The himmelblau-sshd-config package is only requi
 
 After installing the packages, distributions based on Red Hat and SUSE require some manual work for integration into PAM. For all supported distributions based on Debian, all necessary PAM entries are made automatically. On Debian systems, the Himmelblau entries are made in the *common-* files in the /etc/pam.d/ directory. On Suse systems, it is necessary to customize the PAM system with the command *sudo pam-config --add --himmelblau*. For all other distributions, the command *aad-tool configure-pam* can be used. The *aad-tool* command is part of the Himmelblau packages.
 
-To also allow users to access via SSH using the PIN, it is necessary to adjust the line from Listing 1 in the file /etc/pam.d/common-auth:
+Remote services such as SSH require MFA by default. Linux Hello PIN authentication is intended for local, device-present login and should not be enabled as the sole factor for SSH. On systems affected by OpenSSH Bug 2876, add the `mfa_poll_prompt` option to the SSH PAM configuration so Microsoft Authenticator status messages are flushed to the terminal. The `no_hello_pin` option makes the SSH boundary explicit:
 
 ```
 --------- Listing 1-------
-auth    [success=2 default=ignore]    pam_himmelblau.so ignore_unknown_user mfa_poll_prompt
+auth    [success=2 default=ignore]    pam_himmelblau.so ignore_unknown_user no_hello_pin mfa_poll_prompt
 ----------------------------
 ```
 
-Without this adjustment, the password will always be requested instead of the PIN. The option *mfa_poll_prompt* is only needed if a distribution is usesd with an unfixed patch of OpenSSH. In Ubuntu and openSUSE OpenSSH isd already patched.
+The `mfa_poll_prompt` option is only needed on distributions whose OpenSSH package does not contain the prompt-flushing fix. Recent Ubuntu and openSUSE releases include the downstream patch. The option does not enable PIN authentication; it adds an interaction that allows the pending MFA message to appear.
 
 To access a Linux client via SSH, you also need to adjust the SSH configuration. To do this, create the file */etc/ssh/sshd_config.d/himmelblau.conf* with the content from Listing 2:
 
@@ -213,7 +213,7 @@ Finally, the successful first login is summarized and displayed again.
 
 If the app needs to be changed later, the user can do this themselves via the URL https://mysignins.microsoft.com/security-info.
 
-After completing the setup, the first login (here via ssh) to the Linux client follows. However, it is also possible to log in directly to a client integrated in Azure. Even when logging in locally on the client, it is sufficient to specify the CN (the CN is the part before the @ in the UPN); it is not necessary to specify the full name (User Principle Name (UPN)). The name is resolved via NSS, because himmelblau is entered there as the authentication source.
+After completing the setup, the first remote login to the Linux client can be performed over SSH. Remote login uses Entra authentication and MFA; it does not use the local Hello PIN by default. For a local graphical login, it is sufficient to specify the CN (the part before the @ in the UPN); it is not necessary to specify the full User Principal Name (UPN). The name is resolved via NSS because Himmelblau is configured as an identity source.
 
 Note: To make user logins unique, care should be taken to ensure that there are no local users with the same name in the domain.  Listing 7 shows the first login attempt after setting up two-factor authentication:
 
@@ -225,32 +225,23 @@ Entra Id Password:  
 (user02@192.168.56.81) Open your Authenticator app, and enter the number '11' to sign in. 
 No push? Check your mobile device's internet connection. 
 Press enter to continue 
-(user02@192.168.56.81) Set up a PIN 
-A Hello PIN is a fast, secure way to sign in to your device, apps, and services. 
-The minimum PIN length is 6 characters. 
-New PIN:  
-(user02@192.168.56.81) Set up a PIN 
-A Hello PIN is a fast, secure way to sign in to your device, apps, and services. 
-The minimum PIN length is 6 characters. 
-Confirm PIN:  
-Enrolling the Hello PIN. Please wait... 
-Enrolling the Hello PIN. Please wait...  
 ...
 user02@himmelblau:~$ 
 -----------------------------
 ```
 
-When you log in to the console for the first time, you will be asked to enter your new password again. If the password is correct, a two-digit number (11 in the example) will be displayed here, which you then enter in the app. Only when this number has been verified by the app will the system generate a new Hello PIN, which will then be used later to log in instead of the password. When logging in for the first time, a $HOME directory is always created for the user.
+For the SSH login, the user enters their Entra password and completes the configured MFA method. In this example, the terminal displays a two-digit number that the user enters in Microsoft Authenticator. Remote sessions continue to require an MFA-capable authentication path on subsequent logins. When the user logs in successfully for the first time, a `$HOME` directory is created.
 
-This part of the login must be performed by the user on every new Linux client on which the user logs in for the first time. However, the user can use the same PIN for each client. The system does not check whether the PIN is already being used on another client. This would not be possible anyway, as the information is encrypted on the client.
+Hello PIN enrollment happens during local desktop authentication, as described in the GUI section below. A Hello credential is bound to the device on which it was enrolled. Although administrators can opt into PIN-only remote authentication with `allow_remote_hello`, doing so weakens the remote authentication boundary and is strongly discouraged.
 
-For each subsequent login, only the PIN is now required, regardless of whether it is a local login or a login via ssh. Listing 8 shows another login using the PIN:
+Listing 8 shows a subsequent SSH login using Entra authentication and MFA:
 
 ```
 -------------Listing 8 --------------
-ssh user02@192.168.56.81                                                                                                                                                                                            
-(user02@192.168.56.81) Use the Linux Hello PIN for this device. 
-PIN:   
+ssh user02@192.168.56.81
+(user02@192.168.56.81) Use the password for your Office 365 or Microsoft online login.
+Entra Id Password:
+(user02@192.168.56.81) Open your Authenticator app, and enter the number '42' to sign in.
 ...
 user02@himmelblau:~$ 
 --------------------------- 
@@ -364,9 +355,10 @@ If a user who has an Entra ID but is not explicitly entered or is not a member o
 
 ```
 ----- Listing 16 -----
-ssh user02@192.168.56.81                                                                                                                                                                                              
-(user02@192.168.56.81) Use the Linux Hello PIN for this device. 
-PIN:  
+ssh user02@192.168.56.81
+(user02@192.168.56.81) Use the password for your Office 365 or Microsoft online login.
+Entra Id Password:
+(user02@192.168.56.81) Open your Authenticator app, and enter the number '27' to sign in.
 Connection closed by 192.168.56.81 port 22
 ------------------------
 ```
@@ -435,7 +427,7 @@ In the first step, the following two packages must also be installed:
 - himmelblau-sso_<version><distribution>
 - himmelblau-qr-greeter_<version><distribution> 	
 
-After installing all packages and setting up the configuration, a user can log in to the system with their Azure ID. The login process involves the same steps as described for the first login to the system without a GUI.
+After installing all packages and setting up the configuration, a user can log in to the system with their Entra ID. Unlike the remote SSH flow, the local graphical flow can enroll a device-bound Hello PIN after Entra authentication and MFA. That PIN is then used for subsequent local desktop logins.
 
 If you also want to enable the very first login of a completely new user, install the `himmelblau-qr-greeter` package. The extension is enabled automatically during installation.
 

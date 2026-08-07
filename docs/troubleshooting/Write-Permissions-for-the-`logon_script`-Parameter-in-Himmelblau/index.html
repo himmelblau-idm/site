@@ -1294,13 +1294,11 @@
 <li><strong>Locate the <code>himmelblaud-tasks.service</code> File</strong></li>
 <li>
 <p>On Rocky/SUSE Linux: </p>
-<div class="highlight"><pre><span></span><code>sudo vim /usr/lib/systemd/system/himmelblaud-tasks.service
-</code></pre></div>
+<p><code>sudo vim /usr/lib/systemd/system/himmelblaud-tasks.service</code></p>
 </li>
 <li>
 <p>On Debian/Ubuntu:</p>
-<div class="highlight"><pre><span></span><code>sudo nano /etc/systemd/system/himmelblaud-tasks.service
-</code></pre></div>
+<p><code>sudo nano /etc/systemd/system/himmelblaud-tasks.service</code></p>
 </li>
 <li>
 <p><strong>Edit the <code>ReadWritePaths</code> Directive</strong></p>
@@ -1308,9 +1306,8 @@
 <li>Add the paths that need write access for the script specified by <code>logon_script</code>. For example, if the script logs output to <code>/var/log</code>, include <code>/var/log</code> in <code>ReadWritePaths</code>.</li>
 <li>
 <p>Updated section of the service file:</p>
-<div class="highlight"><pre><span></span><code>[Service]
-ReadWritePaths=/home /var/run/himmelblaud /var/log
-</code></pre></div>
+<p><code>[Service]
+ ReadWritePaths=/home /var/run/himmelblaud /var/log</code></p>
 </li>
 <li>
 <p><strong>Save and Close the File</strong></p>
@@ -1320,13 +1317,11 @@ ReadWritePaths=/home /var/run/himmelblaud /var/log
 </li>
 <li>
 <p>Reload <code>systemd</code> to apply the changes:</p>
-<div class="highlight"><pre><span></span><code>sudo systemctl daemon-reload
-</code></pre></div>
+<p><code>sudo systemctl daemon-reload</code></p>
 </li>
 <li>
 <p>Restart the service:</p>
-<div class="highlight"><pre><span></span><code>sudo systemctl restart himmelblaud-tasks
-</code></pre></div>
+<p><code>sudo systemctl restart himmelblaud-tasks</code></p>
 </li>
 </ol>
 <p>Following these steps will ensure that the <code>logon_script</code> has the necessary permissions to write to the specified paths.</p>

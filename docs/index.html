@@ -1275,8 +1275,8 @@
 <p><strong>Himmelblau</strong> brings Microsoft Entra ID and OIDC (Google Workspace, Okta, Keycloak, etc) login, policy enforcement, and Hello PIN support to Linux.</p>
 <h2 id="install-himmelblau">Install Himmelblau</h2>
 <p>Run the bootstrap installer:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://himmelblau-idm.org/install<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
-</code></pre></div>
+<p><code>sh
+curl -fsSL https://himmelblau-idm.org/install | sh</code></p>
 <p>For most systems, that is all you need. The installer uses your native package manager, prompts for Microsoft Entra ID or generic OIDC settings, configures PAM and NSS, and starts the Himmelblau services.</p>
 <details class="hb-advanced-install">
 <summary>What the installer does</summary>
@@ -1308,22 +1308,25 @@ The `himmelblau.conf` configuration file uses the <a href="https://en.wikipedia.
 
 Set the primary domain of your Entra ID tenant in `/etc/himmelblau/himmelblau.conf`:
 
-<div class="highlight"><pre><span></span><code>[global]
+```conf
+[global]
 domain = example.onmicrosoft.com
-</code></pre></div>
+```
 
 For generic OIDC providers such as Google Workspace, Okta, or Keycloak, set the issuer URL and client ID:
 
-<div class="highlight"><pre><span></span><code>[global]
+```conf
+[global]
 oidc_issuer_url = https://keycloak.example.com/realms/himmelblau
 app_id = himmelblau-login
-</code></pre></div>
+```
 
 To enforce MDM Intune compliance, enable it:
 
-<div class="highlight"><pre><span></span><code>[global]
+```conf
+[global]
 apply_policy = true
-</code></pre></div>
+```
 
 For additional configuration options, see the <a href="reference/himmelblau-conf">himmelblau.conf man page</a>.
 
@@ -1336,13 +1339,15 @@ On most Linux distributions, PAM configuration happens automatically when you in
 
 On openSUSE or SUSE Linux Enterprise:
 
-<div class="highlight"><pre><span></span><code>sudo pam-config --add --himmelblau
-</code></pre></div>
+```
+sudo pam-config --add --himmelblau
+```
 
 On all other distros, you can run the manual config utility bundled with Himmelblau:
 
-<div class="highlight"><pre><span></span><code>sudo aad-tool configure-pam
-</code></pre></div>
+```
+sudo aad-tool configure-pam
+```
 
 For more detail, see <a href="configuration#pam-configuration">PAM configuration</a>.
 
@@ -1355,9 +1360,10 @@ On most Linux distributions, NSS configuration happens automatically when you in
 
 Add `himmelblau` to your `/etc/nsswitch.conf` to resolve Entra ID users and groups.
 
-<div class="highlight"><pre><span></span><code>passwd:     files himmelblau
+```conf
+passwd:     files himmelblau
 group:      files himmelblau
-</code></pre></div>
+```
 
 For more detail, see <a href="configuration#nss-configuration">NSS configuration</a>.
 
@@ -1368,9 +1374,10 @@ For more detail, see <a href="configuration#nss-configuration">NSS configuration
 
 The Himmelblau installer normally enables and starts the daemons for you. If you edit configuration manually, restart them:
 
-<div class="highlight"><pre><span></span><code>sudo systemctl enable himmelblaud himmelblaud-tasks
+```
+sudo systemctl enable himmelblaud himmelblaud-tasks
 sudo systemctl restart himmelblaud himmelblaud-tasks
-</code></pre></div>
+```
 
 </details>
 </details>

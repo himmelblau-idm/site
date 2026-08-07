@@ -2,6 +2,13 @@
 
 {% block extrahead %}
   {{ super() }}
+  {% if page and page.is_homepage %}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Himmelblau — Entra ID for Linux">
+  <meta property="og:description" content="MFA-secured SSH, Hello PIN desktop login, Intune compliance, and browser SSO for Linux.">
+  <meta property="og:image" content="{{ config.site_url }}/assets/minimalist-blue-white-wave-background.png">
+  <meta name="twitter:card" content="summary_large_image">
+  {% endif %}
   <script type="text/javascript" data-cmp-ab="1" src="https://cdn.consentmanager.net/delivery/autoblocking/8bffa521a2c48.js" data-cmp-host="c.delivery.consentmanager.net" data-cmp-cdn="cdn.consentmanager.net" data-cmp-codesrc="16"></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=AW-970745524"></script>
   <script>

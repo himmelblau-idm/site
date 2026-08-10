@@ -21,6 +21,7 @@ extra_css:
   - css/home.css
   - css/about.css
   - css/donations.css
+  - css/community.css
   - assets/feedback.css
 extra_javascript:
   - js/home.js

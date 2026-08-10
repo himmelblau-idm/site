@@ -19,6 +19,7 @@ theme:
 extra_css:
   - css/custom.css
   - css/home.css
+  - css/about.css
   - assets/feedback.css
 extra_javascript:
   - js/home.js

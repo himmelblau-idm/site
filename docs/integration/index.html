@@ -1372,21 +1372,21 @@
 <ol>
 <li>Add the schema extensions:</li>
 </ol>
-<p><code>bash
-   aad-tool application add-schema-extensions \
-     --client-id &lt;SCHEMA_CLIENT_ID&gt; \
-     --schema-app-object-id &lt;APPLICATION_OBJECT_ID&gt;</code></p>
+<div class="highlight"><pre><span></span><code><span class="w">   </span>aad-tool<span class="w"> </span>application<span class="w"> </span>add-schema-extensions<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--client-id<span class="w"> </span>&lt;SCHEMA_CLIENT_ID&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--schema-app-object-id<span class="w"> </span>&lt;APPLICATION_OBJECT_ID&gt;
+</code></pre></div>
 <ol>
 <li>Set attributes on users or groups:</li>
 </ol>
-<p><code>bash
-   aad-tool user set-posix-attrs \
-     --schema-client-id &lt;SCHEMA_CLIENT_ID&gt; \
-     --user-id &lt;USER_OBJECT_ID&gt; \
-     --uid &lt;UID&gt; \
-     --gid &lt;GID&gt; \
-     --home /home/example \
-     --shell /bin/bash</code></p>
+<div class="highlight"><pre><span></span><code><span class="w">   </span>aad-tool<span class="w"> </span>user<span class="w"> </span>set-posix-attrs<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--schema-client-id<span class="w"> </span>&lt;SCHEMA_CLIENT_ID&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--user-id<span class="w"> </span>&lt;USER_OBJECT_ID&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--uid<span class="w"> </span>&lt;UID&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--gid<span class="w"> </span>&lt;GID&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--home<span class="w"> </span>/home/example<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--shell<span class="w"> </span>/bin/bash
+</code></pre></div>
 <blockquote>
 <p>💡 POSIX attributes stored in Entra ID can be retrieved at login time, even before authentication completes — if Himmelblau is configured with Confidential Client Credentials.</p>
 </blockquote>
@@ -1395,34 +1395,34 @@
 <ul>
 <li>Use <code>aad-tool cred secret</code> or <code>aad-tool cred cert</code> to configure confidential client authentication:</li>
 </ul>
-<p>```bash
-  # Using a client secret
-  aad-tool cred secret \
-    --client-id <APP_ID> \
-    --domain <YOUR_DOMAIN> \
-    --secret <SECRET_VALUE></p>
-<p># Or using a self-signed client certificate
-  aad-tool cred cert \
-    --client-id <APP_ID> \
-    --domain <YOUR_DOMAIN> \
-    --valid-days 365 \
-    --cert-out /tmp/my-cert.pem
-```</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1"># Using a client secret</span>
+<span class="w">  </span>aad-tool<span class="w"> </span>cred<span class="w"> </span>secret<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--client-id<span class="w"> </span>&lt;APP_ID&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--domain<span class="w"> </span>&lt;YOUR_DOMAIN&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--secret<span class="w"> </span>&lt;SECRET_VALUE&gt;
+
+<span class="w">  </span><span class="c1"># Or using a self-signed client certificate</span>
+<span class="w">  </span>aad-tool<span class="w"> </span>cred<span class="w"> </span>cert<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--client-id<span class="w"> </span>&lt;APP_ID&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--domain<span class="w"> </span>&lt;YOUR_DOMAIN&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--valid-days<span class="w"> </span><span class="m">365</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--cert-out<span class="w"> </span>/tmp/my-cert.pem
+</code></pre></div>
 <p>These credentials allow Himmelblau to authenticate securely and perform Graph API lookups before any user logs in.</p>
 <h3 id="pre-caching-posix-attributes-optional">Pre-Caching POSIX Attributes (Optional)</h3>
 <p>If you haven’t configured confidential client credentials, UID/GID attributes won’t be available until after login.</p>
 <p>To avoid this, you can pre-cache attribute mappings using:</p>
-<p><code>bash
-aad-tool enumerate</code></p>
+<div class="highlight"><pre><span></span><code>aad-tool<span class="w"> </span>enumerate
+</code></pre></div>
 <p>This command fetches all users and groups with POSIX attributes from Entra ID and stores them locally for use during authentication.</p>
 <blockquote>
 <p>⚠️ <code>aad-tool enumerate</code> only works on devices that are already Entra ID–joined, and where the calling user has delegated Graph API access.</p>
 </blockquote>
 <h3 id="2-use-static-id-mapping-host-specific">2. Use Static ID Mapping (Host-Specific)</h3>
 <p>If UID/GID mappings vary by system or cannot be stored in Entra ID, use the static ID map cache instead:</p>
-<p><code>bash
-aad-tool idmap user-add --name user@domain --uid 10001 --gid 100
-aad-tool idmap group-add --name group@domain --gid 100</code></p>
+<div class="highlight"><pre><span></span><code>aad-tool<span class="w"> </span>idmap<span class="w"> </span>user-add<span class="w"> </span>--name<span class="w"> </span>user@domain<span class="w"> </span>--uid<span class="w"> </span><span class="m">10001</span><span class="w"> </span>--gid<span class="w"> </span><span class="m">100</span>
+aad-tool<span class="w"> </span>idmap<span class="w"> </span>group-add<span class="w"> </span>--name<span class="w"> </span>group@domain<span class="w"> </span>--gid<span class="w"> </span><span class="m">100</span>
+</code></pre></div>
 <p>These mappings are stored locally and applied consistently on the host during lookup.</p>
 <blockquote>
 <p>⚠️ This approach is best used when global consistency is not feasible.</p>

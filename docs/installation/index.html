@@ -1536,8 +1536,8 @@
 <h2 id="installation">Installation</h2>
 <h3 id="bootstrap-installer-recommended">Bootstrap Installer (Recommended)</h3>
 <p>For most users, install Himmelblau with the bootstrap installer:</p>
-<p><code>sh
-curl -fsSL https://himmelblau-idm.org/install | sh</code></p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://himmelblau-idm.org/install<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</code></pre></div>
 <p>The bootstrapper detects your distribution, offers the supported package sources, adds the trusted Himmelblau repository when needed, installs packages with your native package manager, and asks whether to configure Microsoft Entra ID or a generic OIDC provider such as Google Workspace, Okta, or Keycloak.</p>
 <p>For Entra ID, it writes a <code>domain</code> setting. For generic OIDC, it writes <code>oidc_issuer_url</code> and <code>app_id</code>. If <code>/etc/himmelblau/himmelblau.conf</code> already contains a complete identity provider configuration, the bootstrapper treats it as an upgrade or repair install and leaves the file unchanged.</p>
 <p>After package installation and configuration, the bootstrapper enables and starts both <code>himmelblaud</code> and <code>himmelblaud-tasks</code>.</p>
@@ -1561,15 +1561,19 @@ curl -fsSL https://himmelblau-idm.org/install | sh</code></p>
 The build system automatically detects your host distribution and uses either Podman or Docker for reproducible container builds.</p>
 <h4 id="steps">Steps</h4>
 <h5 id="1-clone-the-repository">1. Clone the repository:</h5>
-<p><code>git clone https://github.com/himmelblau-idm/himmelblau
-cd himmelblau</code></p>
+<div class="highlight"><pre><span></span><code>git clone https://github.com/himmelblau-idm/himmelblau
+cd himmelblau
+</code></pre></div>
 <h5 id="2-build-packages">2. Build packages:</h5>
-<p><code>make               # auto-detects host distro and builds matching packages</code></p>
+<div class="highlight"><pre><span></span><code>make               # auto-detects host distro and builds matching packages
+</code></pre></div>
 <p>or build explicitly for a target:</p>
-<p><code>make ubuntu24.04   # or debian13, rocky9, sle16, etc.</code></p>
+<div class="highlight"><pre><span></span><code>make ubuntu24.04   # or debian13, rocky9, sle16, etc.
+</code></pre></div>
 <p>Run <code>make help</code> for the full list of available targets.</p>
 <h5 id="3-install-on-your-current-host">3. Install on your current host:</h5>
-<p><code>sudo make install</code></p>
+<div class="highlight"><pre><span></span><code>sudo make install
+</code></pre></div>
 <p>This installs the locally built packages using the native package manager (apt / dnf / zypper).</p>
 <hr />
 <h3 id="need-another-distro">Need another distro?</h3>

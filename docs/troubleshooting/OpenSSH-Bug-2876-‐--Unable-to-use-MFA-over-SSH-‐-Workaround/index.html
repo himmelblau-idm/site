@@ -1143,21 +1143,6 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#note-the-mfa-push-notification-is-received-but-no-number-is-shown-to-complete-the-authentication" class="md-nav__link">
-    <span class="md-ellipsis">
-      Note: The MFA push notification is received, but no number is shown to complete the authentication.
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Note: The MFA push notification is received, but no number is shown to complete the authentication.">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
   <a href="#upstream-status" class="md-nav__link">
     <span class="md-ellipsis">
@@ -1202,15 +1187,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#note-the-user-must-now-press-enter-to-continue-the-mfa-authentication" class="md-nav__link">
-    <span class="md-ellipsis">
-      Note: The user must now press enter to continue the MFA authentication.
-    </span>
-  </a>
   
 </li>
       
@@ -1389,21 +1365,6 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#note-the-mfa-push-notification-is-received-but-no-number-is-shown-to-complete-the-authentication" class="md-nav__link">
-    <span class="md-ellipsis">
-      Note: The MFA push notification is received, but no number is shown to complete the authentication.
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Note: The MFA push notification is received, but no number is shown to complete the authentication.">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
   <a href="#upstream-status" class="md-nav__link">
     <span class="md-ellipsis">
@@ -1451,15 +1412,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#note-the-user-must-now-press-enter-to-continue-the-mfa-authentication" class="md-nav__link">
-    <span class="md-ellipsis">
-      Note: The user must now press enter to continue the MFA authentication.
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -1487,20 +1439,20 @@
 <p>When attempting to authenticate via SSH with an account that requires <strong>Microsoft Authenticator (Push) MFA</strong>, the prompt displaying the number to enter into the app is delayed or not shown until after the initial authentication fails. This leads to confusion, as the user receives the MFA push notification on their device but cannot complete the authentication due to the missing prompt.</p>
 <h4 id="local-login-working-as-expected">Local Login (Working as Expected)</h4>
 <p>When logging in locally (e.g., via <code>su -l</code>), the password prompt and the MFA number prompt are displayed as expected, and the user is able to complete the login process:
-<code>admin@dev01:~$ su -l user@domain.onmicrosoft.com
+<div class="highlight"><pre><span></span><code>admin@dev01:~$ su -l user@domain.onmicrosoft.com
 Password:
-Open your Authenticator app, and enter the number '73' to sign in.
+Open your Authenticator app, and enter the number &#39;73&#39; to sign in.
 user@domain.onmicrosoft.com@dev01:~$ whoami
-user@domain.onmicrosoft.com</code></p>
+user@domain.onmicrosoft.com
+</code></pre></div></p>
 <h4 id="remote-ssh-login-delayed-mfa-prompt">Remote SSH Login (Delayed MFA Prompt)</h4>
 <p>When logging in remotely via SSH, only the password prompt is shown initially, and the MFA number prompt is delayed until the authentication fails:
-```
-localuser@workstation:~$ ssh user@domain.onmicrosoft.com@dev01
-(user@domain.onmicrosoft.com@dev01) Password:</p>
-<h2 id="note-the-mfa-push-notification-is-received-but-no-number-is-shown-to-complete-the-authentication">Note: The MFA push notification is received, but no number is shown to complete the authentication.</h2>
-<p>(user@domain.onmicrosoft.com@dev01) Open your Authenticator app, and enter the number '59' to sign in.
+<div class="highlight"><pre><span></span><code>localuser@workstation:~$ ssh user@domain.onmicrosoft.com@dev01
+(user@domain.onmicrosoft.com@dev01) Password:
+## Note: The MFA push notification is received, but no number is shown to complete the authentication.
+(user@domain.onmicrosoft.com@dev01) Open your Authenticator app, and enter the number &#39;59&#39; to sign in.
 Password: ^C
-```</p>
+</code></pre></div></p>
 <p>This behavior disrupts the MFA flow, as the number needed to complete the login is not shown to the user until the session has already failed.</p>
 <h3 id="upstream-status">Upstream Status</h3>
 <p>The fix for this issue has been proposed in <a href="https://github.com/openssh/openssh-portable/pull/452">Pull Request 452 on GitHub</a>, but the upstream OpenSSH community has been slow to review and merge the patch. This means that users on most systems will continue to face this issue unless they apply the fix downstream.</p>
@@ -1518,7 +1470,8 @@ Password: ^C
 <p><strong>Add the <code>mfa_poll_prompt</code> Option</strong>:
     To avoid the prompt delay caused by Bug 2876, modify the PAM configuration for Himmelblau by adding the <code>mfa_poll_prompt</code> option to the <code>pam_himmelblau.so</code> module.</p>
 <p>Example PAM configuration:</p>
-<p><code>auth     required    pam_himmelblau.so   ignore_unknown_user mfa_poll_prompt</code></p>
+<div class="highlight"><pre><span></span><code>auth     required    pam_himmelblau.so   ignore_unknown_user mfa_poll_prompt
+</code></pre></div>
 </li>
 <li>
 <p><strong>Test the Setup</strong>:
@@ -1527,13 +1480,12 @@ Password: ^C
 </ol>
 <p>The <code>mfa_poll_prompt</code> option in the workaround introduces a "Press enter to continue" prompt during the MFA flow, which forces user interaction. This interaction triggers OpenSSH to flush its buffered output, causing the previously delayed MFA number prompt to be displayed. As a result, the user can view the MFA prompt and complete the authentication process without waiting for a failed login attempt.</p>
 <p>Here’s an example of what the login process will look like to the user with the workaround in place:</p>
-<p>```
-localuser@workstation:~$ ssh user@domain.onmicrosoft.com@dev01
+<div class="highlight"><pre><span></span><code>localuser@workstation:~$ ssh user@domain.onmicrosoft.com@dev01
 (user@domain.onmicrosoft.com@dev01) Password:
-Open your Authenticator app, and enter the number '59' to sign in.
-Press enter to continue</p>
-<h2 id="note-the-user-must-now-press-enter-to-continue-the-mfa-authentication">Note: The user must now press enter to continue the MFA authentication.</h2>
-<p>```</p>
+Open your Authenticator app, and enter the number &#39;59&#39; to sign in.
+Press enter to continue
+## Note: The user must now press enter to continue the MFA authentication.
+</code></pre></div>
 
 
 

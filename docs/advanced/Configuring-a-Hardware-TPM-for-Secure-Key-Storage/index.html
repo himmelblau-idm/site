@@ -1449,20 +1449,20 @@
 <h2 id="tpm-setup-instructions">🛠️ TPM Setup Instructions</h2>
 <h3 id="1-ensure-the-tpm-is-available-and-functional">1. Ensure the TPM Is Available and Functional</h3>
 <p>Check whether a TPM is exposed on your system by running:</p>
-<p><code>bash
-ls /dev/tpmrm0</code></p>
+<div class="highlight"><pre><span></span><code>ls<span class="w"> </span>/dev/tpmrm0
+</code></pre></div>
 <p>If that file exists, you likely have a usable TPM. For further inspection, you can optionally install TPM tools:</p>
 <ul>
 <li>On <strong>openSUSE</strong>:</li>
 </ul>
-<p><code>bash
-  sudo zypper install tpm2.0-tools</code>
+<p><div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>zypper<span class="w"> </span>install<span class="w"> </span>tpm2.0-tools
+</code></pre></div>
 * On <strong>Debian/Ubuntu</strong>:</p>
-<p><code>bash
-  sudo apt install tpm2-tools</code></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>tpm2-tools
+</code></pre></div>
 <p>Then run:</p>
-<p><code>bash
-sudo tpm2_getcap properties-fixed</code></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>tpm2_getcap<span class="w"> </span>properties-fixed
+</code></pre></div>
 <p>This should output a list of TPM capabilities. If not, verify:</p>
 <ul>
 <li>TPM is <strong>enabled</strong> in BIOS/UEFI</li>
@@ -1471,35 +1471,35 @@ sudo tpm2_getcap properties-fixed</code></p>
 <hr />
 <h3 id="2-configure-himmelblauconf">2. Configure <code>himmelblau.conf</code></h3>
 <p>Open <code>/etc/himmelblau/himmelblau.conf</code> and change the <code>hsm_type</code> setting:</p>
-<p><code>ini
-hsm_type = tpm</code></p>
+<div class="highlight"><pre><span></span><code><span class="na">hsm_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">tpm</span>
+</code></pre></div>
 <p>If you want to fall back to software HSM on systems without a TPM:</p>
-<p><code>ini
-hsm_type = tpm_if_possible</code></p>
+<div class="highlight"><pre><span></span><code><span class="na">hsm_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">tpm_if_possible</span>
+</code></pre></div>
 <blockquote>
 <p>ℹ️ You <strong>do not need to set</strong> <code>tpm_tcti_name</code> unless your TPM is exposed through a nonstandard interface. By default, Himmelblau uses:</p>
-<p><code>ini
-tpm_tcti_name = device:/dev/tpmrm0</code></p>
+<div class="highlight"><pre><span></span><code><span class="na">tpm_tcti_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">device:/dev/tpmrm0</span>
+</code></pre></div>
 </blockquote>
 <hr />
 <h3 id="3-restart-himmelblau-services">3. Restart Himmelblau Services</h3>
-<p><code>bash
-sudo systemctl restart himmelblaud
-sudo systemctl restart himmelblaud-tasks</code></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>himmelblaud
+sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>himmelblaud-tasks
+</code></pre></div>
 <hr />
 <h3 id="4-enroll-the-device">4. Enroll the Device</h3>
 <p>Once TPM is configured, proceed with Entra ID authentication and device enrollment. All future key material will be generated and bound to the TPM.</p>
 <hr />
 <h2 id="switching-to-tpm-after-enrollment">Switching to TPM After Enrollment</h2>
 <p>If you've already enrolled the device using <code>hsm_type = tpm_bound_soft_if_possible</code> or another non-TPM setting, you can still switch to full TPM storage, but you'll need to <strong>reset the local key cache</strong> and re-enroll:</p>
-<p><code>bash
-sudo aad-tool cache-clear --full</code></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>aad-tool<span class="w"> </span>cache-clear<span class="w"> </span>--full
+</code></pre></div>
 <p>Then update <code>himmelblau.conf</code> to use <code>hsm_type = tpm</code>, restart services, and begin re-enrollment.</p>
 <hr />
 <h2 id="verifying-tpm-usage">Verifying TPM Usage</h2>
 <p>Check the logs for TPM initialization:</p>
-<p><code>bash
-journalctl -u himmelblaud | grep -i tpm</code></p>
+<div class="highlight"><pre><span></span><code>journalctl<span class="w"> </span>-u<span class="w"> </span>himmelblaud<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>tpm
+</code></pre></div>
 <p>You should see messages indicating successful communication with the TPM and key creation/binding.</p>
 <hr />
 <h2 id="summary">Summary</h2>

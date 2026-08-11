@@ -1317,39 +1317,47 @@
 <li>
 <p><strong>Download <code>mitmproxy</code></strong>:</p>
 <p>Download <code>mitmproxy</code> from <a href="https://mitmproxy.org/">their website</a>, and extract the binaries.</p>
-<p><code>tar -xf mitmproxy-11.0.0-linux-x86_64.tar.gz</code></p>
+<div class="highlight"><pre><span></span><code>tar -xf mitmproxy-11.0.0-linux-x86_64.tar.gz
+</code></pre></div>
 </li>
 <li>
 <p><strong>Start <code>mitmweb</code></strong>:</p>
 <p>Run the following command to start <code>mitmweb</code>:</p>
-<p><code>./mitmweb</code></p>
+<div class="highlight"><pre><span></span><code>./mitmweb
+</code></pre></div>
 <p>This starts <code>mitmweb</code> and opens a web interface for monitoring HTTP and HTTPS traffic.</p>
 </li>
 <li>
 <p><strong>Install the mitmproxy CA Certificate</strong>:</p>
 <p>On Ubuntu,</p>
-<p><code>sudo cp $HOME/.mitmproxy/mitmproxy-ca-cert.pem /usr/local/share/ca-certificates/mitmproxy.crt
-sudo update-ca-certificates</code></p>
+<div class="highlight"><pre><span></span><code>sudo cp $HOME/.mitmproxy/mitmproxy-ca-cert.pem /usr/local/share/ca-certificates/mitmproxy.crt
+sudo update-ca-certificates
+</code></pre></div>
 <p>Or on Fedora,</p>
-<p><code>sudo cp $HOME/.mitmproxy/mitmproxy-ca-cert.pem /etc/pki/ca-trust/source/anchors/
-sudo update-ca-trust</code></p>
+<div class="highlight"><pre><span></span><code>sudo cp $HOME/.mitmproxy/mitmproxy-ca-cert.pem /etc/pki/ca-trust/source/anchors/
+sudo update-ca-trust
+</code></pre></div>
 <p>Or on openSUSE Leap,</p>
-<p><code>sudo cp $HOME/.mitmproxy/mitmproxy-ca-cert.pem /usr/share/pki/trust/anchors/mitmproxy.crt
-sudo update-ca-certificates</code></p>
+<div class="highlight"><pre><span></span><code>sudo cp $HOME/.mitmproxy/mitmproxy-ca-cert.pem /usr/share/pki/trust/anchors/mitmproxy.crt
+sudo update-ca-certificates
+</code></pre></div>
 </li>
 <li>
 <p><strong>Access the Web Interface</strong>:</p>
 <p>Open your web browser and go to:</p>
-<p><code>http://127.0.0.1:8081/</code></p>
+<div class="highlight"><pre><span></span><code>http://127.0.0.1:8081/
+</code></pre></div>
 <p>You should see the <code>mitmweb</code> dashboard for viewing captured traffic.</p>
 </li>
 <li>
 <p><strong>Run <code>cirrus-scope</code> with Proxy Enabled</strong>:</p>
 <p>Run the desired test command from <code>cirrus-scope</code>, routing its traffic through <code>mitmproxy</code> by setting the <code>HTTPS_PROXY</code> environment variable.</p>
 <p>Example:</p>
-<p><code>HTTPS_PROXY=http://127.0.0.1:8080 cirrus-scope auth-test --name your_user@example.com</code></p>
+<div class="highlight"><pre><span></span><code>HTTPS_PROXY=http://127.0.0.1:8080 cirrus-scope auth-test --name your_user@example.com
+</code></pre></div>
 <p>You will be prompted to enter credentials interactively. You can add <code>--debug</code> for detailed logs:</p>
-<p><code>HTTPS_PROXY=http://127.0.0.1:8080 cirrus-scope auth-test --name your_user@example.com --debug</code></p>
+<div class="highlight"><pre><span></span><code>HTTPS_PROXY=http://127.0.0.1:8080 cirrus-scope auth-test --name your_user@example.com --debug
+</code></pre></div>
 <p>Other available test commands include:</p>
 <ul>
 <li><code>enrollment-test</code>: Simulates device enrollment</li>
@@ -1369,8 +1377,8 @@ sudo update-ca-certificates</code></p>
 <p><strong>Obfuscate the capture using <code>cirrus-scope</code></strong>:</p>
 <p>To help protect sensitive information, run the built-in obfuscator on your captured flows file. This will automatically replace known tokens (like JWTs, Kerberos tickets, flow tokens, request blobs, and your tenant ID) with equal-length asterisk sequences so that the file remains structurally valid.</p>
 <p>Example:
-<code>bash
-cirrus-scope obfuscate -i flows -o flows.obfuscated</code></p>
+<div class="highlight"><pre><span></span><code>cirrus-scope<span class="w"> </span>obfuscate<span class="w"> </span>-i<span class="w"> </span>flows<span class="w"> </span>-o<span class="w"> </span>flows.obfuscated
+</code></pre></div></p>
 </li>
 </ol>
 <p>You can also specify explicit secrets to obfuscate using the <code>--custom</code> option, for example:</p>

@@ -1572,15 +1572,15 @@ Never use Group.Read.All instead of the GroupMember.Read.All permission, because
 <h3 id="option-a-using-confidential-client-credentials-recommended">Option A: Using Confidential Client Credentials (Recommended)</h3>
 <p>This method stores a <strong>client secret</strong> or <strong>client certificate</strong> securely in Himmelblau’s encrypted cache and removes the need to specify an <code>app_id</code> in <code>himmelblau.conf</code>.</p>
 <h4 id="store-a-client-secret">Store a client secret</h4>
-<p><code>bash
-aad-tool cred secret --client-id &lt;CLIENT_ID&gt; --domain &lt;DOMAIN&gt; --secret &lt;SECRET_VALUE&gt;</code></p>
+<div class="highlight"><pre><span></span><code>aad-tool<span class="w"> </span>cred<span class="w"> </span>secret<span class="w"> </span>--client-id<span class="w"> </span>&lt;CLIENT_ID&gt;<span class="w"> </span>--domain<span class="w"> </span>&lt;DOMAIN&gt;<span class="w"> </span>--secret<span class="w"> </span>&lt;SECRET_VALUE&gt;
+</code></pre></div>
 <ol>
 <li>In the Entra ID portal, under <strong>Certificates &amp; secrets</strong>, create a new <strong>Client secret</strong>.</li>
 <li>Copy the <strong>Value</strong> immediately (you won’t see it again) and use it with the above command.</li>
 </ol>
 <h4 id="or-set-up-a-client-certificate">Or set up a client certificate</h4>
-<p><code>bash
-aad-tool cred cert --client-id &lt;CLIENT_ID&gt; --domain &lt;DOMAIN&gt; --valid-days 365 --cert-out /tmp/my-cert.crt</code></p>
+<div class="highlight"><pre><span></span><code>aad-tool<span class="w"> </span>cred<span class="w"> </span>cert<span class="w"> </span>--client-id<span class="w"> </span>&lt;CLIENT_ID&gt;<span class="w"> </span>--domain<span class="w"> </span>&lt;DOMAIN&gt;<span class="w"> </span>--valid-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>--cert-out<span class="w"> </span>/tmp/my-cert.crt
+</code></pre></div>
 <ol>
 <li>Upload <code>/tmp/my-cert.crt</code> in the Entra ID portal under <strong>Certificates &amp; secrets &gt; Certificates</strong>.</li>
 </ol>
@@ -1592,9 +1592,9 @@ These credentials expire, and you'll need to repeat these steps <em>each</em> ti
 <hr />
 <h3 id="option-b-using-delegated-authentication">Option B: Using Delegated Authentication</h3>
 <p>If you do <strong>not</strong> configure confidential client credentials, add your application ID to <code>himmelblau.conf</code> for delegated authentication.</p>
-<p><code>ini
-[example.com]
-app_id = 98fa618b-e5d2-4697-b0fd-fe3ec5eecdd3</code></p>
+<div class="highlight"><pre><span></span><code><span class="k">[example.com]</span>
+<span class="na">app_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">98fa618b-e5d2-4697-b0fd-fe3ec5eecdd3</span>
+</code></pre></div>
 <p>Replace with your actual <strong>Application (client) ID</strong> found in the app’s <strong>Overview</strong> page.</p>
 <blockquote>
 <p><strong>Note:</strong> 
@@ -1603,26 +1603,26 @@ This method prevents the enumeration of rfc2307 attributes and group memberships
 <hr />
 <h3 id="5-restart-himmelblau-services">5. Restart Himmelblau Services</h3>
 <p>To apply changes, restart Himmelblau:</p>
-<p><code>bash
-sudo systemctl restart himmelblaud
-sudo systemctl restart himmelblaud-tasks</code></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>himmelblaud
+sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>himmelblaud-tasks
+</code></pre></div>
 <h2 id="6-option-a-only-pre-cache-uidgid-mappings">6. (<strong>Option A Only</strong>) Pre-cache UID/GID Mappings</h2>
 <p>You can optionally pre-fetch all users and groups with RFC2307 attributes:</p>
-<p><code>bash
-aad-tool enumerate</code></p>
+<div class="highlight"><pre><span></span><code>aad-tool<span class="w"> </span>enumerate
+</code></pre></div>
 <p>This avoids lookups being triggered on first login.</p>
 <p>User and group enumeration is <strong>only</strong> available when Confidential Client Credentials are configured (<strong>Option A</strong> above).</p>
 <h2 id="7-option-a-only-managing-credentials">7. (<strong>Option A Only</strong>) Managing Credentials</h2>
 <ul>
 <li>List stored credentials:</li>
 </ul>
-<p><code>bash
-aad-tool cred list --domain &lt;DOMAIN&gt;</code></p>
+<div class="highlight"><pre><span></span><code>aad-tool<span class="w"> </span>cred<span class="w"> </span>list<span class="w"> </span>--domain<span class="w"> </span>&lt;DOMAIN&gt;
+</code></pre></div>
 <ul>
 <li>Remove credentials if needed:</li>
 </ul>
-<p><code>bash
-aad-tool cred delete --domain &lt;DOMAIN&gt;</code></p>
+<div class="highlight"><pre><span></span><code>aad-tool<span class="w"> </span>cred<span class="w"> </span>delete<span class="w"> </span>--domain<span class="w"> </span>&lt;DOMAIN&gt;
+</code></pre></div>
 <h2 id="conclusion">Conclusion</h2>
 <p>By following these steps, Himmelblau will be able to retrieve group information necessary for accurate ID mapping using Entra ID. Ensure that the application has the necessary permissions and is correctly configured in <code>himmelblau.conf</code> for seamless integration.</p>
 

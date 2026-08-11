@@ -1151,16 +1151,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#usrbinenv-bash" class="md-nav__link">
-    <span class="md-ellipsis">
-      !/usr/bin/env bash
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="!/usr/bin/env bash">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#how-to-use" class="md-nav__link">
     <span class="md-ellipsis">
       How to use
@@ -1168,18 +1158,13 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#notes-for-himmelblau-versions" class="md-nav__link">
     <span class="md-ellipsis">
       Notes for Himmelblau versions
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1320,16 +1305,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#usrbinenv-bash" class="md-nav__link">
-    <span class="md-ellipsis">
-      !/usr/bin/env bash
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="!/usr/bin/env bash">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#how-to-use" class="md-nav__link">
     <span class="md-ellipsis">
       How to use
@@ -1337,18 +1312,13 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#notes-for-himmelblau-versions" class="md-nav__link">
     <span class="md-ellipsis">
       Notes for Himmelblau versions
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1371,9 +1341,12 @@
   
 
 
+  <h1>Removing all Hello PINs & cached PRTs on a Himmelblau host</h1>
+
 <h2 id="overview">Overview</h2>
 <p>Hello PINs (and associated keys) for Himmelblau are stored in the SQLite database:</p>
-<p><code>/var/cache/himmelblaud/himmelblau.cache.db</code></p>
+<div class="highlight"><pre><span></span><code>/var/cache/himmelblaud/himmelblau.cache.db
+</code></pre></div>
 <p>They are stored and encrypted as entries in the <code>hsm_data_t</code> table with keys like:</p>
 <ul>
 <li><code>&lt;user&gt;/hello</code></li>
@@ -1413,43 +1386,52 @@
 It requires root privileges because <code>/var/cache/himmelblaud/himmelblau.cache.db</code> is owned by the <code>himmelblaud</code> user.</p>
 <blockquote>
 <p>💡 <strong>Make sure the Himmelblau daemon is stopped while running this, to avoid database locking issues.</strong></p>
-<p><code>sudo systemctl stop himmelblaud</code></p>
+<div class="highlight"><pre><span></span><code>sudo systemctl stop himmelblaud
+</code></pre></div>
 </blockquote>
-<p>```</p>
-<h1 id="usrbinenv-bash">!/usr/bin/env bash</h1>
-<p>set -euo pipefail</p>
-<p>DB_PATH="/var/cache/himmelblaud/himmelblau.cache.db"</p>
-<p>if [[ ! -f "$DB_PATH" ]]; then
-     echo "Error: Database not found at $DB_PATH"
+<div class="highlight"><pre><span></span><code>#!/usr/bin/env bash
+set -euo pipefail
+
+DB_PATH=&quot;/var/cache/himmelblaud/himmelblau.cache.db&quot;
+
+if [[ ! -f &quot;$DB_PATH&quot; ]]; then
+     echo &quot;Error: Database not found at $DB_PATH&quot;
      exit 1
-fi</p>
-<p>echo "Removing all Hello PINs and cached PRTs from $DB_PATH ..."</p>
-<p>sqlite3 "$DB_PATH" &lt;&lt;EOF
-DELETE FROM hsm_data_t WHERE key LIKE '%/hello';
-DELETE FROM hsm_data_t WHERE key LIKE '%/hello_decoupled';
-DELETE FROM hsm_data_t WHERE key LIKE '%/hello_prt';
-EOF</p>
-<p>echo "Cleanup completed."
-```</p>
+fi
+
+echo &quot;Removing all Hello PINs and cached PRTs from $DB_PATH ...&quot;
+
+sqlite3 &quot;$DB_PATH&quot; &lt;&lt;EOF
+DELETE FROM hsm_data_t WHERE key LIKE &#39;%/hello&#39;;
+DELETE FROM hsm_data_t WHERE key LIKE &#39;%/hello_decoupled&#39;;
+DELETE FROM hsm_data_t WHERE key LIKE &#39;%/hello_prt&#39;;
+EOF
+
+echo &quot;Cleanup completed.&quot;
+</code></pre></div>
 <hr />
 <h2 id="how-to-use">How to use</h2>
 <ol>
 <li><strong>Save the script</strong> to a file, e.g. <code>remove_himmelblau_hello_pins.sh</code></li>
 <li>
 <p><strong>Make it executable:</strong></p>
-<p><code>chmod +x remove_himmelblau_hello_pins.sh</code></p>
+<div class="highlight"><pre><span></span><code>chmod +x remove_himmelblau_hello_pins.sh
+</code></pre></div>
 </li>
 <li>
 <p><strong>Stop Himmelblau daemon:</strong></p>
-<p><code>sudo systemctl stop himmelblaud</code></p>
+<div class="highlight"><pre><span></span><code>sudo systemctl stop himmelblaud
+</code></pre></div>
 </li>
 <li>
 <p><strong>Run the script:</strong></p>
-<p><code>sudo ./remove_himmelblau_hello_pins.sh</code></p>
+<div class="highlight"><pre><span></span><code>sudo ./remove_himmelblau_hello_pins.sh
+</code></pre></div>
 </li>
 <li>
 <p><strong>Restart Himmelblau daemon:</strong></p>
-<p><code>sudo systemctl start himmelblaud</code></p>
+<div class="highlight"><pre><span></span><code>sudo systemctl start himmelblaud
+</code></pre></div>
 </li>
 </ol>
 <hr />

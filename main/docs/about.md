@@ -103,7 +103,7 @@ hide:
           <article class="hb-era__card">
             <p class="hb-era__eyebrow">The ecosystem converges</p>
             <h3>Shared infrastructure wins</h3>
-            <p>Canonical archived aad-auth in May 2024 and replaced it with the broader Authd project. In 2025, Authd’s Entra broker began consuming libhimmelblau for device registration, building on the protocol work already completed by the Himmelblau and Samba communities.</p>
+            <p>Canonical archived aad-auth in May 2024 and replaced it with the broader Authd project. In 2025, Authd’s Entra broker began consuming libhimmelblau for device registration and native MFA, building on the protocol work already completed by the Himmelblau and Samba communities.</p>
             <p>The convergence was public and practical. In an <a href="https://github.com/canonical/authd/discussions/688">Authd community discussion</a>, a Canonical engineer described the goal of using libhimmelblau to bring Himmelblau’s device-registration work into Authd. A library born from one implementation was now improving another.</p>
 
             <div class="hb-ecosystem" aria-label="libhimmelblau ecosystem">

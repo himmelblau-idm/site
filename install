@@ -37,8 +37,8 @@ import urllib.parse
 import urllib.request
 
 
-VERSION = "2026.07.13"
-PLAN_VERSION = 2
+VERSION = "2026.08.11"
+PLAN_VERSION = 3
 SUPPORT_JS_URL = "https://himmelblau-idm.org/js/install.js"
 GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
 APT_KEYRING_DIR = "/etc/apt/keyrings"
@@ -46,6 +46,15 @@ APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
 BASE_STABLE_URL = "https://packages.himmelblau-idm.org/stable/latest"
 BASE_NIGHTLY_URL = "https://packages.himmelblau-idm.org/nightly/latest"
 CONFIG_PATH = "/etc/himmelblau/himmelblau.conf"
+SERVER_CONFIG_PATH = "/var/cache/himmelblaud/himmelblau.conf"
+MSA_TENANT_ID = "9188040d-6c67-4c5b-b112-36a304b66dad"
+CONSUMER_TENANT_IDS = {
+    MSA_TENANT_ID,
+    "9cd80435-793b-4f48-844b-6b3f37d1c1f3",
+}
+MSA_DISCOVERY_TENANT_IDS = CONSUMER_TENANT_IDS | {
+    "f8cdef31-a31e-4b4a-93e4-5f571e91255a",
+}
 LOG_PATH = os.path.expanduser("~/.cache/himmelblau-installer/install.log")
 CONFIG_BOOLEAN_DEFAULTS = {
     "enable_hello": True,
@@ -549,10 +558,12 @@ def validate_domain(domain):
         return False, "Enter an Entra ID domain."
     if len(domain) > 253:
         return False, "Domain is too long."
-    if not re.match(r"^[A-Za-z0-9][A-Za-z0-9.-]*[A-Za-z0-9]$", domain):
+    if not re.match(r"^[A-Za-z0-9.-]+$", domain):
         return False, "Use a DNS-style domain such as example.onmicrosoft.com."
     if "." not in domain:
         return False, "Use the full domain, for example example.onmicrosoft.com."
+    if any(not label or len(label) > 63 or not re.match(r"^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$", label) for label in domain.split(".")):
+        return False, "Use a DNS-style domain such as example.onmicrosoft.com."
     return True, ""
 
 
@@ -565,6 +576,44 @@ def validate_username(username):
     if not local or re.search(r"\s", local):
         return False, "Use a UPN such as user@example.com."
     return validate_domain(domain)
+
+
+def parse_msa_accounts(value):
+    text = str(value or "")
+    if not text.strip():
+        return None, "Enter at least one Microsoft account sign-in name."
+    accounts = []
+    seen = set()
+    for item in text.split(","):
+        entry = item.strip()
+        if not entry:
+            return None, "Remove empty entries from the Microsoft account list."
+        ok, _ = validate_username(entry)
+        if not ok:
+            return None, "Use complete Microsoft account sign-in names such as alice@outlook.com."
+        normalized = entry.lower()
+        if normalized in seen:
+            return None, "Remove duplicate Microsoft account sign-in names."
+        seen.add(normalized)
+        accounts.append(normalized)
+    return accounts, ""
+
+
+def validate_msa_accounts(value):
+    accounts, message = parse_msa_accounts(value)
+    return accounts is not None, message
+
+
+def msa_domains(accounts):
+    return sorted({account.rsplit("@", 1)[1] for account in accounts})
+
+
+def is_consumer_tenant_id(value):
+    return str(value or "").strip().lower() in CONSUMER_TENANT_IDS
+
+
+def is_msa_discovery_tenant_id(value):
+    return str(value or "").strip().lower() in MSA_DISCOVERY_TENANT_IDS
 
 
 def lookup_domain(input_mode, value):
@@ -608,11 +657,53 @@ def parse_config_bool(value, default=True):
     return default
 
 
-def existing_options_config(path=CONFIG_PATH):
-    parser = configparser.RawConfigParser()
+def read_ini_config(path):
+    parser = configparser.RawConfigParser(strict=False)
     try:
         parser.read(path)
-    except configparser.Error:
+    except (configparser.Error, OSError):
+        return None
+    return parser
+
+
+def configured_domains_from_parser(parser):
+    domains = []
+    if parser is None:
+        return domains
+    if parser.has_section("global"):
+        for key in ("domains", "domain"):
+            for value in parser.get("global", key, fallback="").split(","):
+                value = value.strip().lower()
+                if value and value not in domains:
+                    domains.append(value)
+    for section in parser.sections():
+        normalized = section.strip().lower()
+        if normalized not in ("global", "offline_breakglass") and normalized not in domains:
+            domains.append(normalized)
+    return domains
+
+
+def effective_pam_allow_groups(parser):
+    values = []
+    if parser is None:
+        return values
+    for section in parser.sections():
+        for value in parser.get(section, "pam_allow_groups", fallback="").split(","):
+            value = value.strip()
+            if value:
+                values.append(value)
+    return values
+
+
+def unexpected_cached_domains(config_path=CONFIG_PATH, cache_path=SERVER_CONFIG_PATH):
+    configured = set(configured_domains_from_parser(read_ini_config(config_path)))
+    cached = set(configured_domains_from_parser(read_ini_config(cache_path)))
+    return sorted(cached - configured)
+
+
+def existing_options_config(path=CONFIG_PATH):
+    parser = read_ini_config(path)
+    if parser is None:
         return {
             "pam_allow_groups": "",
             "enable_hello": True,
@@ -634,26 +725,52 @@ def existing_options_config(path=CONFIG_PATH):
 
 
 def existing_idp_config(path=CONFIG_PATH):
-    parser = configparser.RawConfigParser()
-    try:
-        parser.read(path)
-    except configparser.Error:
+    parser = read_ini_config(path)
+    if parser is None:
         return None
     if not parser.has_section("global"):
-        return None
-    domain = parser.get("global", "domain", fallback="").strip()
-    if domain:
-        return {"mode": "entra", "domain": domain}
-    oidc_issuer_url = parser.get("global", "oidc_issuer_url", fallback="").strip()
-    app_id = parser.get("global", "app_id", fallback="").strip()
+        oidc_issuer_url = ""
+        app_id = ""
+        domain = ""
+        domains_value = ""
+    else:
+        oidc_issuer_url = parser.get("global", "oidc_issuer_url", fallback="").strip()
+        app_id = parser.get("global", "app_id", fallback="").strip()
+        domain = parser.get("global", "domain", fallback="").strip()
+        domains_value = parser.get("global", "domains", fallback="").strip()
     if oidc_issuer_url and app_id:
         return {"mode": "oidc", "oidc_issuer_url": oidc_issuer_url, "app_id": app_id}
-    return None
+    if domain:
+        return {"mode": "entra", "domain": domain}
+    if domains_value:
+        return {"mode": "custom", "summary": "Multiple Entra ID domains: " + domains_value}
+
+    sections = [s for s in parser.sections() if s.lower() not in ("global", "offline_breakglass")]
+    if not sections:
+        return None
+    section_domains = []
+    for section in sections:
+        ok, _ = validate_domain(section.strip())
+        if not ok or not is_consumer_tenant_id(parser.get(section, "tenant_id", fallback="")):
+            return {"mode": "custom", "summary": "Custom or multiple identity providers"}
+        section_domains.append(section.strip().lower())
+    raw_accounts = effective_pam_allow_groups(parser)
+    accounts, _ = parse_msa_accounts(",".join(raw_accounts))
+    if accounts is None or set(msa_domains(accounts)) != set(section_domains):
+        return {"mode": "unsafe_msa", "summary": "Microsoft personal accounts require a valid explicit account allow-list"}
+    return {"mode": "msa", "accounts": accounts}
 
 
 def config_summary(config):
     if config["mode"] == "entra":
         return f"Entra ID domain: {config['domain']}"
+    if config["mode"] == "msa":
+        return "Microsoft personal accounts (%d account%s)" % (
+            len(config["accounts"]),
+            "" if len(config["accounts"]) == 1 else "s",
+        )
+    if config["mode"] in ("custom", "unsafe_msa"):
+        return config["summary"]
     return f"OIDC issuer: {config['oidc_issuer_url']} / app_id: {config['app_id']}"
 
 
@@ -667,7 +784,7 @@ def _open_json(url, timeout=IDP_DISCOVERY_TIMEOUT, accept="application/json"):
         return json.loads(response.read(256 * 1024).decode("utf-8"))
 
 
-def discover_entra_candidate(domain):
+def discover_microsoft_candidate(input_mode, identifier, domain):
     url = ENTRA_ODC_URL + "?" + urllib.parse.urlencode({"domain": domain})
     try:
         data = _open_json(url)
@@ -676,6 +793,24 @@ def discover_entra_candidate(domain):
         return None
     tenant_id = str(data.get("tenantId") or data.get("tenant_id") or "").strip()
     authority_host = str(data.get("authority_host") or data.get("authorityHost") or "").strip()
+    if is_msa_discovery_tenant_id(tenant_id):
+        if input_mode != "username":
+            log("Microsoft federation discovery identified %s as a consumer tenant, but no account UPN was provided" % domain)
+            return None
+        accounts, message = parse_msa_accounts(identifier)
+        if accounts is None or len(accounts) != 1:
+            log("Microsoft federation discovery returned a consumer tenant for an invalid account UPN: %s" % message)
+            return None
+        account = accounts[0]
+        log("Microsoft federation discovery identified %s as a consumer account" % account)
+        return {
+            "key": "discovered:msa",
+            "label": "Microsoft personal accounts (MSA): %s" % account,
+            "config": {"mode": "msa", "accounts": [account]},
+            "write_idp": True,
+            "requires_app_id": False,
+            "source": "Microsoft personal accounts",
+        }
     if not tenant_id or not authority_host:
         log("Entra federation discovery returned incomplete data for %s" % domain)
         return None
@@ -771,7 +906,7 @@ def discover_idp_candidates(input_mode, identifier, existing_config=None):
         return [], [message], None
     candidates = []
     messages = []
-    if existing_config:
+    if existing_config and existing_config.get("mode") != "unsafe_msa":
         candidates.append({
             "key": "existing",
             "label": "Keep existing configuration: " + config_summary(existing_config),
@@ -780,9 +915,9 @@ def discover_idp_candidates(input_mode, identifier, existing_config=None):
             "requires_app_id": False,
             "source": "Existing",
         })
-    entra_candidate = discover_entra_candidate(domain)
-    if entra_candidate:
-        candidates.append(entra_candidate)
+    microsoft_candidate = discover_microsoft_candidate(input_mode, identifier.strip(), domain)
+    if microsoft_candidate:
+        candidates.append(microsoft_candidate)
     oidc_candidates, oidc_messages = discover_oidc_candidates(input_mode, identifier.strip(), domain)
     candidates.extend(oidc_candidates)
     messages.extend(oidc_messages)
@@ -791,10 +926,26 @@ def discover_idp_candidates(input_mode, identifier, existing_config=None):
 
 
 def prompt_idp_config(ui):
-    provider_mode = ui.choose("Find identity provider by", [
-        {"label": "Domain name", "value": "domain"},
-        {"label": "UPN username", "value": "username"},
+    existing = existing_idp_config()
+    setup_choices = []
+    if existing and existing.get("mode") != "unsafe_msa" and not unexpected_cached_domains():
+        setup_choices.append({"label": "Keep existing configuration: " + config_summary(existing), "value": "existing"})
+    setup_choices.extend([
+        {"label": "Discover provider by domain name", "value": "domain"},
+        {"label": "Discover provider by UPN username", "value": "username"},
+        {"label": "Microsoft personal accounts (MSA)", "value": "msa"},
+        {"label": "Configure identity provider manually", "value": "manual"},
     ])
+    provider_mode = ui.choose("Choose identity provider setup", setup_choices)
+    if provider_mode == "existing":
+        return existing, False
+    if provider_mode == "msa":
+        ui.info("Personal Microsoft accounts use Microsoft's shared consumer identity service. For security, an explicit list of accounts permitted to sign in is required.")
+        value = ui.ask("Microsoft account sign-in names (comma-separated)", validator=validate_msa_accounts)
+        accounts, _ = parse_msa_accounts(value)
+        return {"mode": "msa", "accounts": accounts}, True
+    if provider_mode == "manual":
+        return prompt_manual_idp_config(ui), True
     if provider_mode == "username":
         identifier = ui.ask("Enter a UPN username", validator=validate_username)
     else:
@@ -851,33 +1002,82 @@ def validate_pam_allow_groups(value):
     return True, ""
 
 
-def option_entries(config, provider_mode):
+def option_entries(config, provider_config):
     entries = []
-    groups = config.get("pam_allow_groups", "").strip()
+    provider_mode = provider_config.get("mode") if isinstance(provider_config, dict) else provider_config
+    if provider_mode == "msa":
+        groups = ",".join(provider_config["accounts"])
+    else:
+        groups = config.get("pam_allow_groups", "").strip()
     if groups:
         entries.append(("pam_allow_groups", groups))
     else:
         entries.append(("pam_allow_groups", None))
     for key in ("enable_hello", "allow_console_password_only"):
         entries.append((key, "false" if not config.get(key, True) else None))
-    if provider_mode != "oidc":
+    if provider_mode == "msa":
+        entries.append(("apply_policy", "false"))
+    elif provider_mode != "oidc":
         entries.append(("apply_policy", "false" if not config.get("apply_policy", True) else None))
     return entries
+
+
+def remove_ini_sections(existing, remove_section):
+    lines = existing.splitlines(keepends=True)
+    output = []
+    removing = False
+    for line in lines:
+        match = re.match(r"^\s*\[([^]]+)\]\s*(?:[#;].*)?$", line)
+        if match:
+            removing = remove_section(match.group(1).strip())
+        if not removing:
+            output.append(line)
+    return "".join(output)
+
+
+def remove_ini_option(existing, option, skip_section=None):
+    lines = existing.splitlines(keepends=True)
+    output = []
+    section = None
+    option_line = re.compile(rf"^\s*{re.escape(option)}\s*=", re.I)
+    for line in lines:
+        match = re.match(r"^\s*\[([^]]+)\]\s*(?:[#;].*)?$", line)
+        if match:
+            section = match.group(1).strip().lower()
+        if option_line.match(line) and (skip_section is None or section != skip_section.lower()):
+            continue
+        output.append(line)
+    return "".join(output)
 
 
 def render_global_config(existing, idp_config=None, write_idp=True, options_config=None):
     entries = []
     if write_idp and idp_config:
+        existing = remove_ini_sections(
+            existing,
+            lambda section: section.lower() not in ("global", "offline_breakglass"),
+        )
+        entries.extend([("domain", None), ("domains", None), ("oidc_issuer_url", None), ("app_id", None)])
         if idp_config["mode"] == "entra":
             entries.append(("domain", idp_config["domain"]))
-        else:
+        elif idp_config["mode"] == "oidc":
             entries.extend([("oidc_issuer_url", idp_config["oidc_issuer_url"]), ("app_id", idp_config["app_id"])])
+        elif idp_config["mode"] != "msa":
+            raise InstallError("Unsupported identity provider mode.")
+    if idp_config and idp_config.get("mode") == "msa":
+        existing = remove_ini_option(existing, "pam_allow_groups", skip_section="global")
     if options_config is not None:
-        provider_mode = idp_config.get("mode") if idp_config else "entra"
-        entries.extend(option_entries(options_config, provider_mode))
+        provider_config = idp_config if idp_config else {"mode": "entra"}
+        entries.extend(option_entries(options_config, provider_config))
+    elif idp_config and idp_config.get("mode") == "msa":
+        entries.extend(option_entries(CONFIG_BOOLEAN_DEFAULTS, idp_config))
+    entries = list(dict(entries).items())
     if not existing:
         body = "".join(f"{key} = {value}\n" for key, value in entries if value is not None)
-        return f"[global]\n{body}"
+        rendered = f"[global]\n{body}"
+        if write_idp and idp_config and idp_config.get("mode") == "msa":
+            rendered += "".join("\n[%s]\ntenant_id = %s\n" % (domain, MSA_TENANT_ID) for domain in msa_domains(idp_config["accounts"]))
+        return rendered
 
     lines = existing.splitlines(keepends=True)
     global_header = None
@@ -894,7 +1094,10 @@ def render_global_config(existing, idp_config=None, write_idp=True, options_conf
     if global_header is None:
         separator = "" if existing.endswith("\n") else "\n"
         body = "".join(f"{key} = {value}\n" for key, value in entries if value is not None)
-        return existing + separator + f"\n[global]\n{body}"
+        rendered = existing + separator + f"\n[global]\n{body}"
+        if write_idp and idp_config and idp_config.get("mode") == "msa":
+            rendered += "".join("\n[%s]\ntenant_id = %s\n" % (domain, MSA_TENANT_ID) for domain in msa_domains(idp_config["accounts"]))
+        return rendered
 
     insert_at = global_header + 1
     for key, value in reversed(entries):
@@ -913,7 +1116,11 @@ def render_global_config(existing, idp_config=None, write_idp=True, options_conf
             if value is not None:
                 lines.insert(insert_at, f"{key} = {value}\n")
 
-    return "".join(lines)
+    rendered = "".join(lines)
+    if write_idp and idp_config and idp_config.get("mode") == "msa":
+        sections = "".join("\n[%s]\ntenant_id = %s\n" % (domain, MSA_TENANT_ID) for domain in msa_domains(idp_config["accounts"]))
+        rendered = rendered.rstrip("\n") + "\n" + sections
+    return rendered
 
 
 def render_idp_config(existing, config):
@@ -929,11 +1136,16 @@ def write_global_config(config, ui):
     except OSError:
         pass
 
+    rendered = render_global_config(existing, config.get("idp"), config.get("write_idp", True), config.get("options"))
     if existing:
         backup = f"{CONFIG_PATH}.bak.{int(time.time())}"
         run(prefix + ["cp", CONFIG_PATH, backup], ui)
 
-    rendered = render_global_config(existing, config.get("idp"), config.get("write_idp", True), config.get("options"))
+    if config.get("write_idp", True) and os.path.exists(SERVER_CONFIG_PATH):
+        backup = f"{SERVER_CONFIG_PATH}.bak.{int(time.time())}"
+        run(prefix + ["cp", SERVER_CONFIG_PATH, backup], ui)
+        run(prefix + ["rm", "-f", SERVER_CONFIG_PATH], ui)
+
     with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
         handle.write(rendered)
         temp_path = handle.name
@@ -1206,6 +1418,11 @@ def maybe_status(ui):
         run(sudo_prefix() + ["aad-tool", "status"], ui, check=False)
 
 
+def stop_services(ui):
+    if shutil.which("systemctl"):
+        run(sudo_prefix() + ["systemctl", "stop", "himmelblaud", "himmelblaud-tasks"], ui, check=False)
+
+
 def require_commands(commands):
     missing = [cmd for cmd in commands if not shutil.which(cmd)]
     if missing:
@@ -1231,6 +1448,7 @@ def build_install_plan(channel, target, idp_config, write_idp, options_config=No
         "best_effort_packages": best_effort_packages,
     })
     if idp_config or options_config is not None:
+        steps.append({"kind": "stop_services"})
         steps.append({
             "kind": "write_global_config",
             "config": {"idp": idp_config, "write_idp": write_idp, "options": options_config},
@@ -1254,6 +1472,36 @@ def build_package_only_plan(channel, target):
     return build_install_plan(channel, target, None, False, None)
 
 
+def validate_idp_config(config, write_idp=True):
+    if not config:
+        if write_idp:
+            raise InstallError("Invalid identity provider configuration.")
+        return True
+    mode = config.get("mode")
+    if not write_idp and mode in ("custom", "unsafe_msa"):
+        return True
+    if mode == "entra":
+        ok, message = validate_domain(config.get("domain", ""))
+    elif mode == "oidc":
+        ok, message = validate_oidc_issuer_url(config.get("oidc_issuer_url", ""))
+        if ok:
+            ok, message = validate_app_id(config.get("app_id", ""))
+    elif mode == "msa":
+        accounts = config.get("accounts")
+        if not isinstance(accounts, list):
+            ok, message = False, "Invalid Microsoft personal account list."
+        else:
+            parsed, message = parse_msa_accounts(",".join(str(account) for account in accounts))
+            ok = parsed is not None and parsed == accounts
+            if parsed is not None and parsed != accounts:
+                message = "Microsoft personal account entries must be normalized."
+    else:
+        ok, message = False, "Unsupported identity provider mode."
+    if not ok:
+        raise InstallError(message)
+    return True
+
+
 def validate_install_plan(plan):
     if not isinstance(plan, dict) or plan.get("version") != PLAN_VERSION:
         raise InstallError("Invalid install plan version.")
@@ -1269,6 +1517,7 @@ def validate_install_plan(plan):
         "zypper_repo",
         "dnf_repo",
         "install_packages",
+        "stop_services",
         "write_global_config",
         "write_idp_config",
         "configure_distro_provided",
@@ -1282,6 +1531,11 @@ def validate_install_plan(plan):
         if step.get("kind") == "install_packages":
             validate_package_list(step.get("packages"))
             validate_package_list(step.get("best_effort_packages"))
+        if step.get("kind") in ("write_global_config", "write_idp_config"):
+            config = step.get("config", {})
+            idp = config.get("idp") if step.get("kind") == "write_global_config" else config
+            write_idp = config.get("write_idp", True) if step.get("kind") == "write_global_config" else True
+            validate_idp_config(idp, write_idp)
     return True
 
 
@@ -1295,13 +1549,23 @@ def summary_lines(target, manager, channel, idp_config, write_config, options_co
         f"Config: {CONFIG_PATH}" + (" (unchanged)" if options_config is None and not write_config else ""),
     ]
     if options_config:
+        if idp_config.get("mode") == "msa":
+            lines.extend([
+                "Allowed accounts: " + ", ".join(idp_config["accounts"]),
+                "Login domains: " + ", ".join(msa_domains(idp_config["accounts"])),
+            ])
+        else:
+            lines.append("Permitted users/groups: " + (options_config.get("pam_allow_groups") or "All users"))
         lines.extend([
-            "Permitted users/groups: " + (options_config.get("pam_allow_groups") or "All users"),
             "Linux Hello PIN: " + ("Enabled" if options_config.get("enable_hello", True) else "Disabled"),
             "Console password-only: " + ("Enabled" if options_config.get("allow_console_password_only", True) else "Disabled"),
         ])
-        if idp_config.get("mode") != "oidc":
+        if idp_config.get("mode") == "msa":
+            lines.append("Intune compliance: Not applicable")
+        elif idp_config.get("mode") != "oidc":
             lines.append("Intune policy: " + ("Applied" if options_config.get("apply_policy", True) else "Not applied"))
+    if write_config:
+        lines.append("Generated provider cache: Will be reset after backup")
     if channel != "subscription":
         lines.append(f"Repository base: {base_url(channel)}")
     if packages:
@@ -1323,13 +1587,15 @@ import tempfile
 import time
 import urllib.request
 
-PLAN_VERSION = 2
+PLAN_VERSION = 3
 GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
 APT_KEYRING_DIR = "/etc/apt/keyrings"
 APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
 BASE_STABLE_URL = "https://packages.himmelblau-idm.org/stable/latest"
 BASE_NIGHTLY_URL = "https://packages.himmelblau-idm.org/nightly/latest"
 CONFIG_PATH = "/etc/himmelblau/himmelblau.conf"
+SERVER_CONFIG_PATH = "/var/cache/himmelblaud/himmelblau.conf"
+MSA_TENANT_ID = "9188040d-6c67-4c5b-b112-36a304b66dad"
 CONFIG_BOOLEAN_DEFAULTS = {
     "enable_hello": True,
     "allow_console_password_only": True,
@@ -1452,33 +1718,125 @@ def install_bytes(path, data, mode, event_log):
             pass
 
 
-def option_entries(config, provider_mode):
-    entries = []
-    groups = config.get("pam_allow_groups", "").strip()
-    if groups:
-        entries.append(("pam_allow_groups", groups))
+def validate_domain(domain):
+    return bool(
+        domain
+        and len(domain) <= 253
+        and "." in domain
+        and all(label and len(label) <= 63 and re.match(r"^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$", label) for label in domain.split("."))
+    )
+
+
+def parse_msa_accounts(value):
+    if not str(value or "").strip():
+        return None
+    accounts = []
+    seen = set()
+    for item in str(value).split(","):
+        entry = item.strip()
+        if entry.count("@") != 1:
+            return None
+        local, domain = entry.rsplit("@", 1)
+        if not local or re.search(r"[\s,]", local) or not validate_domain(domain):
+            return None
+        normalized = entry.lower()
+        if normalized in seen:
+            return None
+        seen.add(normalized)
+        accounts.append(normalized)
+    return accounts
+
+
+def msa_domains(accounts):
+    return sorted({account.rsplit("@", 1)[1] for account in accounts})
+
+
+def validate_idp_config(config, write_idp=True):
+    if not config:
+        if write_idp:
+            raise WorkerError("Invalid identity provider configuration.")
+        return
+    mode = config.get("mode")
+    if not write_idp and mode in ("custom", "unsafe_msa"):
+        return
+    if mode == "entra":
+        valid = validate_domain(config.get("domain", ""))
+    elif mode == "oidc":
+        valid = str(config.get("oidc_issuer_url", "")).startswith("https://") and bool(config.get("app_id"))
+    elif mode == "msa":
+        accounts = config.get("accounts")
+        parsed = parse_msa_accounts(",".join(str(account) for account in accounts)) if isinstance(accounts, list) else None
+        valid = parsed is not None and parsed == accounts
     else:
-        entries.append(("pam_allow_groups", None))
+        valid = False
+    if not valid:
+        raise WorkerError("Invalid identity provider configuration.")
+
+
+def option_entries(config, provider_config):
+    entries = []
+    provider_mode = provider_config.get("mode") if isinstance(provider_config, dict) else provider_config
+    groups = ",".join(provider_config["accounts"]) if provider_mode == "msa" else config.get("pam_allow_groups", "").strip()
+    entries.append(("pam_allow_groups", groups or None))
     for key in ("enable_hello", "allow_console_password_only"):
         entries.append((key, "false" if not config.get(key, True) else None))
-    if provider_mode != "oidc":
+    if provider_mode == "msa":
+        entries.append(("apply_policy", "false"))
+    elif provider_mode != "oidc":
         entries.append(("apply_policy", "false" if not config.get("apply_policy", True) else None))
     return entries
+
+
+def remove_ini_sections(existing, remove_section):
+    output = []
+    removing = False
+    for line in existing.splitlines(keepends=True):
+        match = re.match(r"^\s*\[([^]]+)\]\s*(?:[#;].*)?$", line)
+        if match:
+            removing = remove_section(match.group(1).strip())
+        if not removing:
+            output.append(line)
+    return "".join(output)
+
+
+def remove_ini_option(existing, option, skip_section=None):
+    output = []
+    section = None
+    option_line = re.compile(r"^\s*%s\s*=" % re.escape(option), re.I)
+    for line in existing.splitlines(keepends=True):
+        match = re.match(r"^\s*\[([^]]+)\]\s*(?:[#;].*)?$", line)
+        if match:
+            section = match.group(1).strip().lower()
+        if option_line.match(line) and (skip_section is None or section != skip_section.lower()):
+            continue
+        output.append(line)
+    return "".join(output)
 
 
 def render_global_config(existing, idp_config=None, write_idp=True, options_config=None):
     entries = []
     if write_idp and idp_config:
+        existing = remove_ini_sections(existing, lambda section: section.lower() not in ("global", "offline_breakglass"))
+        entries.extend([("domain", None), ("domains", None), ("oidc_issuer_url", None), ("app_id", None)])
         if idp_config["mode"] == "entra":
             entries.append(("domain", idp_config["domain"]))
-        else:
+        elif idp_config["mode"] == "oidc":
             entries.extend([("oidc_issuer_url", idp_config["oidc_issuer_url"]), ("app_id", idp_config["app_id"])])
+        elif idp_config["mode"] != "msa":
+            raise WorkerError("Unsupported identity provider mode.")
+    if idp_config and idp_config.get("mode") == "msa":
+        existing = remove_ini_option(existing, "pam_allow_groups", skip_section="global")
     if options_config is not None:
-        provider_mode = idp_config.get("mode") if idp_config else "entra"
-        entries.extend(option_entries(options_config, provider_mode))
+        entries.extend(option_entries(options_config, idp_config if idp_config else {"mode": "entra"}))
+    elif idp_config and idp_config.get("mode") == "msa":
+        entries.extend(option_entries(CONFIG_BOOLEAN_DEFAULTS, idp_config))
+    entries = list(dict(entries).items())
     if not existing:
         body = "".join("%s = %s\n" % (key, value) for key, value in entries if value is not None)
-        return "[global]\n%s" % body
+        rendered = "[global]\n%s" % body
+        if write_idp and idp_config and idp_config.get("mode") == "msa":
+            rendered += "".join("\n[%s]\ntenant_id = %s\n" % (domain, MSA_TENANT_ID) for domain in msa_domains(idp_config["accounts"]))
+        return rendered
     lines = existing.splitlines(keepends=True)
     global_header = None
     global_end = len(lines)
@@ -1492,24 +1850,29 @@ def render_global_config(existing, idp_config=None, write_idp=True, options_conf
     if global_header is None:
         separator = "" if existing.endswith("\n") else "\n"
         body = "".join("%s = %s\n" % (key, value) for key, value in entries if value is not None)
-        return existing + separator + "\n[global]\n" + body
-    insert_at = global_header + 1
-    for key, value in reversed(entries):
-        key_line = re.compile(r"^(\s*)%s\s*=.*$" % re.escape(key), re.I)
-        for index in range(global_header + 1, global_end):
-            match = key_line.match(lines[index].rstrip("\n"))
-            if match:
-                if value is None:
-                    del lines[index]
-                    global_end -= 1
-                else:
-                    newline = "\n" if lines[index].endswith("\n") else ""
-                    lines[index] = "%s%s = %s%s" % (match.group(1), key, value, newline)
-                break
-        else:
-            if value is not None:
-                lines.insert(insert_at, "%s = %s\n" % (key, value))
-    return "".join(lines)
+        rendered = existing + separator + "\n[global]\n" + body
+    else:
+        insert_at = global_header + 1
+        for key, value in reversed(entries):
+            key_line = re.compile(r"^(\s*)%s\s*=.*$" % re.escape(key), re.I)
+            for index in range(global_header + 1, global_end):
+                match = key_line.match(lines[index].rstrip("\n"))
+                if match:
+                    if value is None:
+                        del lines[index]
+                        global_end -= 1
+                    else:
+                        newline = "\n" if lines[index].endswith("\n") else ""
+                        lines[index] = "%s%s = %s%s" % (match.group(1), key, value, newline)
+                    break
+            else:
+                if value is not None:
+                    lines.insert(insert_at, "%s = %s\n" % (key, value))
+        rendered = "".join(lines)
+    if write_idp and idp_config and idp_config.get("mode") == "msa":
+        sections = "".join("\n[%s]\ntenant_id = %s\n" % (domain, MSA_TENANT_ID) for domain in msa_domains(idp_config["accounts"]))
+        rendered = rendered.rstrip("\n") + "\n" + sections
+    return rendered
 
 
 def write_global_config(config, event_log):
@@ -1519,10 +1882,14 @@ def write_global_config(config, event_log):
             existing = handle.read()
     except OSError:
         pass
+    rendered = render_global_config(existing, config.get("idp"), config.get("write_idp", True), config.get("options"))
     if existing:
         backup = "%s.bak.%d" % (CONFIG_PATH, int(time.time()))
         run(["cp", CONFIG_PATH, backup], event_log)
-    rendered = render_global_config(existing, config.get("idp"), config.get("write_idp", True), config.get("options"))
+    if config.get("write_idp", True) and os.path.exists(SERVER_CONFIG_PATH):
+        backup = "%s.bak.%d" % (SERVER_CONFIG_PATH, int(time.time()))
+        run(["cp", SERVER_CONFIG_PATH, backup], event_log)
+        os.unlink(SERVER_CONFIG_PATH)
     with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
         handle.write(rendered)
         temp_path = handle.name
@@ -1545,7 +1912,7 @@ def validate_plan(plan):
         raise WorkerError("Invalid install plan channel.")
     allowed = set([
         "apt_prereqs", "apt_repo", "zypper_repo", "dnf_repo", "install_packages",
-        "write_global_config", "write_idp_config", "configure_distro_provided", "enable_services", "maybe_status", "note"
+        "stop_services", "write_global_config", "write_idp_config", "configure_distro_provided", "enable_services", "maybe_status", "note"
     ])
     for step in plan.get("steps", []):
         if not isinstance(step, dict) or step.get("kind") not in allowed:
@@ -1553,6 +1920,11 @@ def validate_plan(plan):
         if step.get("kind") == "install_packages":
             validate_package_list(step.get("packages"))
             validate_package_list(step.get("best_effort_packages"))
+        if step.get("kind") in ("write_global_config", "write_idp_config"):
+            config = step.get("config", {})
+            idp = config.get("idp") if step.get("kind") == "write_global_config" else config
+            write_idp = config.get("write_idp", True) if step.get("kind") == "write_global_config" else True
+            validate_idp_config(idp, write_idp)
 
 
 def validate_package_list(packages):
@@ -1646,6 +2018,9 @@ def execute_step(step, event_log):
         dnf_repo_setup(step["channel"], step["target"], event_log)
     elif kind == "install_packages":
         install_packages(step["channel"], step["target"], event_log, step["packages"], step["best_effort_packages"])
+    elif kind == "stop_services":
+        if shutil.which("systemctl"):
+            run(["systemctl", "stop", "himmelblaud", "himmelblaud-tasks"], event_log, check=False)
     elif kind == "write_global_config":
         write_global_config(step["config"], event_log)
     elif kind == "write_idp_config":
@@ -1898,9 +2273,13 @@ def run_cli():
 
     channel = ui.choose("Choose installation source", choices)
     idp_config, write_config = prompt_idp_config(ui)
+    options_config = existing_options_config()
+    if idp_config.get("mode") == "msa":
+        options_config["pam_allow_groups"] = ",".join(idp_config["accounts"])
+        options_config["apply_policy"] = False
     packages, best_effort_packages = detected_package_selection(channel, target)
 
-    summary = summary_lines(target, manager, channel, idp_config, write_config, None, packages, best_effort_packages)
+    summary = summary_lines(target, manager, channel, idp_config, write_config, options_config, packages, best_effort_packages)
     if not ui.confirm("\n".join(summary) + "\n\nContinue?", default=False):
         raise InstallError("Installation cancelled.")
 
@@ -1909,8 +2288,8 @@ def run_cli():
         run(["sudo", "-v"], ui)
 
     install_packages(channel, target, ui, packages, best_effort_packages)
-    if write_config:
-        write_idp_config(idp_config, ui)
+    stop_services(ui)
+    write_global_config({"idp": idp_config, "write_idp": write_config, "options": options_config}, ui)
 
     if channel == "subscription":
         configure_distro_provided(target, ui)
@@ -2057,13 +2436,14 @@ class WizardCursesUi:
         self.mode = "entra"
         self.domain = ""
         self.username = ""
+        self.msa_accounts_text = ""
         self.issuer = ""
         self.appid = ""
         self.pam_allow_groups = ""
         self.enable_hello = True
         self.allow_console_password_only = True
         self.apply_policy = True
-        self.input_cursor = {"domain": 0, "username": 0, "issuer": 0, "appid": 0, "pam_allow_groups": 0}
+        self.input_cursor = {"domain": 0, "username": 0, "msa_accounts": 0, "issuer": 0, "appid": 0, "pam_allow_groups": 0}
         self.message = ""
         self.progress_text = "Requesting administrative authorization..."
         self.progress_percent = 0
@@ -2259,6 +2639,13 @@ class WizardCursesUi:
                 if self.choices:
                     self.channel = self.choices[0]["value"]
                 self.existing_config = existing_idp_config()
+                if self.existing_config and self.existing_config.get("mode") == "unsafe_msa":
+                    self.warnings.append(self.existing_config.get("summary"))
+                    self.existing_config = None
+                stale_domains = unexpected_cached_domains()
+                if stale_domains:
+                    self.warnings.append("Unexpected generated provider domains were found and must be replaced: " + ", ".join(stale_domains))
+                    self.existing_config = None
                 options = existing_options_config()
                 self.pam_allow_groups = options["pam_allow_groups"]
                 self.enable_hello = options["enable_hello"]
@@ -2272,6 +2659,10 @@ class WizardCursesUi:
                     self.appid = self.existing_config.get("app_id", "")
                     self.mode = self.existing_config.get("mode", "entra")
                     self.manual_mode = self.mode
+                    if self.mode == "msa":
+                        self.msa_accounts_text = ",".join(self.existing_config.get("accounts", []))
+                        self.input_mode = "msa"
+                        self.input_cursor["msa_accounts"] = len(self.msa_accounts_text)
                     self.input_cursor["domain"] = len(self.domain)
                     self.input_cursor["issuer"] = len(self.issuer)
                     self.input_cursor["appid"] = len(self.appid)
@@ -2491,33 +2882,39 @@ class WizardCursesUi:
         self._add_target(key, "checkbox", (y, x, 1, width), action)
         return y + 1
 
-    def _input(self, y, x, width, field, label):
+    def _input(self, y, x, width, field, label, stacked=False):
         value = self._field_value(field)
         key = "field:" + field
         if self.focus_key is None:
             self.focus_key = key
         focused = self._is_focused(key)
-        label_w = min(22, max(14, width // 3))
-        input_w = max(width - label_w - 1, 10)
+        if stacked:
+            input_y = y + 1
+            input_x = x
+            input_w = max(width - 2, 10)
+        else:
+            label_w = min(22, max(14, width // 3))
+            input_y = y
+            input_x = x + label_w - 1
+            input_w = max(width - label_w - 1, 10)
         cursor = min(self.input_cursor.get(field, len(value)), len(value))
         start = max(0, cursor - input_w + 2)
         shown = value[start:start + input_w]
         attr = self._attr("input_focus") if focused else self._attr("input")
         self._write(y, x, label, self._attr("muted"))
         if focused:
-            self._write(y, x + label_w - 1, self.glyphs["focus_l"], self._attr("button_focus"))
-            self._write(y, x + label_w, shown.ljust(input_w), attr)
-            self._write(y, x + label_w + input_w, self.glyphs["focus_r"], self._attr("button_focus"))
-            bounds = (y, x + label_w - 1, 1, input_w + 2)
+            self._write(input_y, input_x, self.glyphs["focus_l"], self._attr("button_focus"))
+            self._write(input_y, input_x + 1, shown.ljust(input_w), attr)
+            self._write(input_y, input_x + input_w + 1, self.glyphs["focus_r"], self._attr("button_focus"))
         else:
-            self._write(y, x + label_w - 1, self.glyphs["input_l"], attr)
-            self._write(y, x + label_w, shown.ljust(input_w), attr)
-            self._write(y, x + label_w + input_w, self.glyphs["input_r"], attr)
-            bounds = (y, x + label_w - 1, 1, input_w + 2)
+            self._write(input_y, input_x, self.glyphs["input_l"], attr)
+            self._write(input_y, input_x + 1, shown.ljust(input_w), attr)
+            self._write(input_y, input_x + input_w + 1, self.glyphs["input_r"], attr)
+        bounds = (input_y, input_x, 1, input_w + 2)
         self._add_target(key, "field", bounds, None, True, field)
         if focused:
-            self.cursor_position = (y, x + label_w + min(cursor - start, input_w - 1))
-        return y + 1
+            self.cursor_position = (input_y, input_x + 1 + min(cursor - start, input_w - 1))
+        return input_y + 1
 
     def render(self):
         self._remember_focus()
@@ -2591,8 +2988,11 @@ class WizardCursesUi:
     def _identity_items(self):
         items = []
         if self.identity_stage == "input":
-            items.extend(["input_domain", "input_username"])
-            items.append("domain" if self.input_mode == "domain" else "username")
+            items.extend(["input_domain", "input_username", "input_msa"])
+            if self.input_mode == "msa":
+                items.append("msa_accounts")
+            else:
+                items.append("domain" if self.input_mode == "domain" else "username")
             return items
         for candidate in self.discovery_candidates:
             items.append(candidate["key"])
@@ -2613,6 +3013,8 @@ class WizardCursesUi:
             return self.domain
         if item == "username":
             return self.username
+        if item == "msa_accounts":
+            return self.msa_accounts_text
         if item == "issuer":
             return self.issuer
         if item == "appid":
@@ -2626,6 +3028,8 @@ class WizardCursesUi:
             self.domain = value
         elif item == "username":
             self.username = value
+        elif item == "msa_accounts":
+            self.msa_accounts_text = value
         elif item == "issuer":
             self.issuer = value
         elif item == "appid":
@@ -2651,6 +3055,9 @@ class WizardCursesUi:
         elif config.get("mode") == "oidc":
             self.issuer = config.get("oidc_issuer_url", self.issuer)
             self.input_cursor["issuer"] = len(self.issuer)
+        elif config.get("mode") == "msa":
+            self.msa_accounts_text = ",".join(config.get("accounts", []))
+            self.input_cursor["msa_accounts"] = len(self.msa_accounts_text)
 
     def _set_input_mode(self, mode):
         self.input_mode = mode
@@ -2672,6 +3079,8 @@ class WizardCursesUi:
             self.input_cursor["domain"] = len(self.domain)
 
     def identity_lookup_value(self):
+        if getattr(self, "input_mode", "domain") == "msa":
+            return self.msa_accounts_text.strip()
         if getattr(self, "input_mode", "domain") == "username":
             return self.username.strip()
         return self.domain.strip()
@@ -2686,7 +3095,7 @@ class WizardCursesUi:
         return True
 
     def render_identity(self):
-        layout = self._begin_frame("Identity Provider", "Discover a provider from a domain or UPN, or configure one manually.")
+        layout = self._begin_frame("Identity Provider", "Discover a provider, configure Microsoft personal accounts, or enter settings manually.")
         y = layout["content_y"] + 1
         x = layout["content_x"] + 2
         width = layout["content_w"] - 4
@@ -2694,8 +3103,12 @@ class WizardCursesUi:
         if self.identity_stage == "input":
             y = self._radio(y, x, width, "input:domain", "Domain name", self.input_mode == "domain", lambda: self._set_input_mode("domain"))
             y = self._radio(y, x, width, "input:username", "UPN username", self.input_mode == "username", lambda: self._set_input_mode("username"))
+            y = self._radio(y, x, width, "input:msa", "Microsoft personal accounts (MSA)", self.input_mode == "msa", lambda: self._set_input_mode("msa"))
             y += 1
-            if self.input_mode == "username":
+            if self.input_mode == "msa":
+                y = self._draw_wrapped(y, x, "Personal Microsoft accounts use Microsoft's shared consumer identity service. For security, an explicit list of accounts permitted to sign in is required. These are complete Microsoft account sign-in names and may use non-Microsoft email domains.", width, self._attr("muted"))
+                y = self._input(y, x, width, "msa_accounts", "Sign-in names (comma-separated)", stacked=True)
+            elif self.input_mode == "username":
                 y = self._input(y, x, width, "username", "UPN username")
             else:
                 y = self._input(y, x, width, "domain", "Domain")
@@ -2722,7 +3135,7 @@ class WizardCursesUi:
                     y = self._input(y, x, width, "appid", "Application/client ID")
         if self.message:
             self._draw_wrapped(y + 1, x, self.message, width, self._attr("error"))
-        if self.identity_stage == "input" and not self.identity_lookup_value():
+        if self.identity_stage == "input" and self.input_mode != "msa" and not self.identity_lookup_value():
             primary_button = {"label": f"Skip {self.glyphs['next']}", "key_label": "Skip", "action": self.skip_identity_discovery, "primary": True}
         else:
             primary_button = {"label": f"Next {self.glyphs['next']}", "key_label": "Next", "action": self.next_page, "primary": True}
@@ -2742,16 +3155,23 @@ class WizardCursesUi:
         x = layout["content_x"] + 2
         width = layout["content_w"] - 4
         self._draw_box(layout["content_y"], layout["content_x"], layout["content_h"], layout["content_w"], "himmelblau.conf options", self._attr("panel"))
-        self._write(y, x, "Permitted users and groups", self._attr("muted"))
-        y += 1
-        y = self._draw_wrapped(
-            y,
-            x,
-            "Optional. Leave blank to allow all users. Use comma-separated user UPNs and group Object ID GUIDs; group names are not valid.",
-            width,
-            self._attr("panel"),
-        )
-        y = self._input(y, x, width, "pam_allow_groups", "Allowed")
+        if self.selected_provider_mode() == "msa":
+            accounts = self.selected_idp()[0]["accounts"]
+            self._write(y, x, "Allowed Microsoft accounts", self._attr("muted"))
+            y += 1
+            y = self._draw_wrapped(y, x, ", ".join(accounts), width, self._attr("panel"))
+            y = self._draw_wrapped(y, x, "Configured on the Identity page. Return there to edit this required list.", width, self._attr("muted"))
+        else:
+            self._write(y, x, "Permitted users and groups", self._attr("muted"))
+            y += 1
+            y = self._draw_wrapped(
+                y,
+                x,
+                "Optional. Leave blank to allow all users. Use comma-separated user UPNs and group Object ID GUIDs; group names are not valid.",
+                width,
+                self._attr("panel"),
+            )
+            y = self._input(y, x, width, "pam_allow_groups", "Allowed")
         y += 1
         y = self._checkbox(
             y,
@@ -2773,7 +3193,9 @@ class WizardCursesUi:
             lambda: setattr(self, "allow_console_password_only", not self.allow_console_password_only),
         )
         y = self._draw_wrapped(y, x + 2, "Default: enabled. Remote authentication still requires MFA unless other remote Hello options apply.", width - 2, self._attr("muted"))
-        if self.selected_provider_mode() != "oidc":
+        if self.selected_provider_mode() == "msa":
+            y = self._draw_wrapped(y, x, "Intune device compliance: Not applicable to Microsoft personal accounts.", width, self._attr("muted"))
+        elif self.selected_provider_mode() != "oidc":
             y = self._checkbox(
                 y,
                 x,
@@ -2860,21 +3282,32 @@ class WizardCursesUi:
             if candidate.get("requires_app_id"):
                 config["app_id"] = self.appid.strip()
             return config, candidate.get("write_idp", True)
+        if getattr(self, "identity_stage", "results") == "input" and getattr(self, "input_mode", "domain") == "msa":
+            accounts, _ = parse_msa_accounts(self.msa_accounts_text)
+            return {"mode": "msa", "accounts": accounts or []}, True
         if getattr(self, "manual_mode", getattr(self, "mode", "entra")) == "entra":
             return {"mode": "entra", "domain": self.domain.strip()}, True
         return {"mode": "oidc", "oidc_issuer_url": self.issuer.strip(), "app_id": self.appid.strip()}, True
 
     def selected_options(self):
+        idp_config, _ = self.selected_idp()
+        groups = self.pam_allow_groups.strip()
+        apply_policy = self.apply_policy
+        if idp_config.get("mode") == "msa":
+            groups = ",".join(idp_config["accounts"])
+            apply_policy = False
         return {
-            "pam_allow_groups": self.pam_allow_groups.strip(),
+            "pam_allow_groups": groups,
             "enable_hello": self.enable_hello,
             "allow_console_password_only": self.allow_console_password_only,
-            "apply_policy": self.apply_policy,
+            "apply_policy": apply_policy,
         }
 
     def validate_identity(self):
         if getattr(self, "identity_stage", "results") == "input":
             input_mode = getattr(self, "input_mode", "domain")
+            if input_mode == "msa":
+                return validate_msa_accounts(self.msa_accounts_text)
             identifier = self.username.strip() if input_mode == "username" else self.domain.strip()
             if input_mode == "username":
                 return validate_username(identifier)
@@ -2882,12 +3315,18 @@ class WizardCursesUi:
         config, _ = self.selected_idp()
         if config["mode"] == "entra":
             return validate_domain(config.get("domain", ""))
+        if config["mode"] == "msa":
+            return validate_msa_accounts(",".join(config.get("accounts", [])))
+        if config["mode"] == "custom":
+            return True, ""
         ok, message = validate_oidc_issuer_url(config.get("oidc_issuer_url", ""))
         if not ok:
             return ok, message
         return validate_app_id(config.get("app_id", ""))
 
     def validate_options(self):
+        if self.selected_provider_mode() == "msa":
+            return True, ""
         return validate_pam_allow_groups(self.pam_allow_groups)
 
     def on_event(self, event):
@@ -2944,7 +3383,10 @@ class WizardCursesUi:
             if ok:
                 self.message = ""
                 if getattr(self, "identity_stage", "results") == "input":
-                    self.run_identity_discovery()
+                    if getattr(self, "input_mode", "domain") == "msa":
+                        self.page = "options"
+                    else:
+                        self.run_identity_discovery()
                 else:
                     self.page = "options"
             else:

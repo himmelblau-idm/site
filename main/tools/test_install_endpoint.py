@@ -553,7 +553,7 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertIsNone(domain)
         self.assertIn("UPN", message)
 
-    def test_entra_discovery_uses_static_odc_endpoint(self):
+    def test_microsoft_discovery_uses_static_odc_endpoint_for_entra(self):
         calls = []
         old_open_json = installer._open_json
         try:
@@ -562,12 +562,61 @@ class InstallEndpointTests(unittest.TestCase):
                 return {"tenantId": "tenant-123", "authority_host": "login.microsoftonline.com"}
 
             installer._open_json = fake_open_json
-            candidate = installer.discover_entra_candidate("example.com")
+            candidate = installer.discover_microsoft_candidate("domain", "example.com", "example.com")
             self.assertEqual(candidate["config"], {"mode": "entra", "domain": "example.com"})
             self.assertEqual(candidate["source"], "Entra ID")
             parsed = urllib.parse.urlparse(calls[0])
             self.assertEqual(parsed.scheme + "://" + parsed.netloc + parsed.path, installer.ENTRA_ODC_URL)
             self.assertEqual(urllib.parse.parse_qs(parsed.query), {"domain": ["example.com"]})
+        finally:
+            installer._open_json = old_open_json
+
+    def test_upn_discovery_recognizes_msa_tenant_ids(self):
+        old_open_json = installer._open_json
+        try:
+            for tenant_id in installer.MSA_DISCOVERY_TENANT_IDS:
+                with self.subTest(tenant_id=tenant_id):
+                    installer._open_json = lambda *args, tenant_id=tenant_id, **kwargs: {
+                        "tenantId": tenant_id,
+                    }
+                    candidate = installer.discover_microsoft_candidate(
+                        "username", "Alice@Outlook.com", "outlook.com"
+                    )
+                    self.assertEqual(candidate["key"], "discovered:msa")
+                    self.assertEqual(candidate["config"], {"mode": "msa", "accounts": ["alice@outlook.com"]})
+                    self.assertIn("alice@outlook.com", candidate["label"])
+        finally:
+            installer._open_json = old_open_json
+
+    def test_msa_passthrough_tenant_is_discovery_only(self):
+        passthrough_tenant = "f8cdef31-a31e-4b4a-93e4-5f571e91255a"
+        self.assertTrue(installer.is_msa_discovery_tenant_id(passthrough_tenant))
+        self.assertFalse(installer.is_consumer_tenant_id(passthrough_tenant))
+
+    def test_domain_discovery_does_not_create_msa_without_account_allow_list(self):
+        old_open_json = installer._open_json
+        try:
+            installer._open_json = lambda *args, **kwargs: {"tenantId": installer.MSA_TENANT_ID}
+            self.assertIsNone(installer.discover_microsoft_candidate("domain", "outlook.com", "outlook.com"))
+        finally:
+            installer._open_json = old_open_json
+
+    def test_upn_discovery_offers_msa_instead_of_entra(self):
+        old_open_json = installer._open_json
+        try:
+            def fake_open_json(url, *args, **kwargs):
+                if url.startswith(installer.ENTRA_ODC_URL):
+                    return {"tenantId": "9cd80435-793b-4f48-844b-6b3f37d1c1f3"}
+                raise urllib.error.URLError("missing")
+
+            installer._open_json = fake_open_json
+            candidates, messages, domain = installer.discover_idp_candidates(
+                "username", "Alice@Gmail.com"
+            )
+            self.assertEqual(domain, "gmail.com")
+            self.assertEqual(messages, [])
+            self.assertEqual([candidate["key"] for candidate in candidates], ["discovered:msa", "manual"])
+            self.assertEqual(candidates[0]["config"], {"mode": "msa", "accounts": ["alice@gmail.com"]})
         finally:
             installer._open_json = old_open_json
 
@@ -727,7 +776,7 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertIn("# keep me\n", rendered)
         self.assertIn("# keep this too\n", rendered)
         self.assertIn("apply_policy = true\n", rendered)
-        self.assertIn("[other]\nvalue = 1\n", rendered)
+        self.assertNotIn("[other]", rendered)
         self.assertIn("[global]\ndomain = example.onmicrosoft.com\n# keep this too", rendered)
 
     def test_render_entra_config_replaces_existing_domain_only(self):
@@ -763,7 +812,7 @@ class InstallEndpointTests(unittest.TestCase):
         )
         self.assertIn("# keep me\n", rendered)
         self.assertIn("apply_policy = true\n", rendered)
-        self.assertIn("[other]\nvalue = 1\n", rendered)
+        self.assertNotIn("[other]", rendered)
         self.assertIn("oidc_issuer_url = https://keycloak.example.com/realms/himmelblau\napp_id = himmelblau-login\n", rendered)
         self.assertNotIn("old-client", rendered)
 
@@ -809,7 +858,7 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertIn("# keep me\n", rendered)
         self.assertIn("domain = new.example.com\n", rendered)
         self.assertIn("debug = true\n", rendered)
-        self.assertIn("[other]\nvalue = 1\n", rendered)
+        self.assertNotIn("[other]", rendered)
         self.assertNotIn("pam_allow_groups", rendered)
         self.assertNotIn("enable_hello", rendered)
         self.assertNotIn("allow_console_password_only", rendered)
@@ -846,6 +895,117 @@ class InstallEndpointTests(unittest.TestCase):
         ok, _ = installer.validate_pam_allow_groups("admin@example.com,,ops@example.com")
         self.assertFalse(ok)
 
+    def test_msa_account_validation_normalizes_and_rejects_unsafe_lists(self):
+        accounts, message = installer.parse_msa_accounts(" Alice@Outlook.com, bob@gmail.com ")
+        self.assertEqual(accounts, ["alice@outlook.com", "bob@gmail.com"])
+        self.assertEqual(message, "")
+        invalid = ["", "alice", "@outlook.com", "alice@", "alice @outlook.com", "alice@outlook..com", "alice@-outlook.com", "alice@outlook.com,", "Alice@Outlook.com,alice@outlook.com"]
+        for value in invalid:
+            with self.subTest(value=value):
+                accounts, message = installer.parse_msa_accounts(value)
+                self.assertIsNone(accounts)
+                self.assertTrue(message)
+
+    def test_msa_domains_are_unique_and_sorted(self):
+        self.assertEqual(
+            installer.msa_domains(["alice@gmail.com", "bob@outlook.com", "charlie@gmail.com"]),
+            ["gmail.com", "outlook.com"],
+        )
+
+    def test_render_msa_config_is_exact_and_idempotent(self):
+        existing = (
+            "# preserve\n[global]\n"
+            "domain = old.example.com\n"
+            "oidc_issuer_url = https://old.example.com\n"
+            "app_id = old-client\n"
+            "pam_allow_groups = old@example.com\n"
+            "debug = true\n\n"
+            "[old.example.com]\n"
+            "tenant_id = old-tenant\n"
+            "pam_allow_groups = extra@example.com\n\n"
+            "[offline_breakglass]\n"
+            "ttl = 1h\n"
+        )
+        idp = {"mode": "msa", "accounts": ["alice@gmail.com", "bob@outlook.com", "charlie@gmail.com"]}
+        options = {
+            "pam_allow_groups": "ignored@example.com",
+            "enable_hello": True,
+            "allow_console_password_only": False,
+            "apply_policy": True,
+        }
+        rendered = installer.render_global_config(existing, idp, True, options)
+        self.assertIn("# preserve\n", rendered)
+        self.assertIn("debug = true\n", rendered)
+        self.assertIn("[offline_breakglass]\nttl = 1h\n", rendered)
+        self.assertIn("pam_allow_groups = alice@gmail.com,bob@outlook.com,charlie@gmail.com\n", rendered)
+        self.assertIn("apply_policy = false\n", rendered)
+        self.assertIn("allow_console_password_only = false\n", rendered)
+        self.assertEqual(rendered.count("tenant_id = " + installer.MSA_TENANT_ID), 2)
+        self.assertNotIn("old.example.com", rendered)
+        self.assertNotIn("extra@example.com", rendered)
+        self.assertEqual(rendered, installer.render_global_config(rendered, idp, True, options))
+
+    def test_existing_idp_config_detects_safe_msa_and_rejects_empty_allow_list(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "himmelblau.conf"
+            path.write_text(
+                "[global]\npam_allow_groups = Alice@Gmail.com,bob@outlook.com\n"
+                "[gmail.com]\ntenant_id = 9188040d-6c67-4c5b-b112-36a304b66dad\n"
+                "[outlook.com]\ntenant_id = 9cd80435-793b-4f48-844b-6b3f37d1c1f3\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                installer.existing_idp_config(path),
+                {"mode": "msa", "accounts": ["alice@gmail.com", "bob@outlook.com"]},
+            )
+            path.write_text("[gmail.com]\ntenant_id = %s\n" % installer.MSA_TENANT_ID, encoding="utf-8")
+            self.assertEqual(installer.existing_idp_config(path)["mode"], "unsafe_msa")
+
+    def test_existing_idp_config_does_not_treat_arbitrary_section_as_msa(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "himmelblau.conf"
+            path.write_text(
+                "[global]\npam_allow_groups = alice@gmail.com\n"
+                "[telemetry]\ntenant_id = %s\n" % installer.MSA_TENANT_ID,
+                encoding="utf-8",
+            )
+            self.assertEqual(installer.existing_idp_config(path)["mode"], "custom")
+
+    def test_unexpected_cached_domains_compares_authoritative_scope(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config_path = pathlib.Path(directory) / "etc.conf"
+            cache_path = pathlib.Path(directory) / "cache.conf"
+            config_path.write_text("[global]\ndomain = example.com\n", encoding="utf-8")
+            cache_path.write_text("[example.com]\ntenant_id = good\n[evil.example]\ntenant_id = bad\n", encoding="utf-8")
+            self.assertEqual(installer.unexpected_cached_domains(config_path, cache_path), ["evil.example"])
+
+    def test_install_plan_rejects_empty_or_non_normalized_msa_accounts(self):
+        old_detected = installer.detected_package_selection
+        installer.detected_package_selection = lambda channel, target: (["himmelblau"], [])
+        try:
+            for accounts in ([], ["Alice@Outlook.com"]):
+                with self.subTest(accounts=accounts):
+                    plan = installer.build_install_plan(
+                        "stable", "ubuntu24.04", {"mode": "msa", "accounts": accounts}, True,
+                        {"pam_allow_groups": "", "enable_hello": True, "allow_console_password_only": True, "apply_policy": False},
+                    )
+                    with self.assertRaises(installer.InstallError):
+                        installer.validate_install_plan(plan)
+        finally:
+            installer.detected_package_selection = old_detected
+
+    def test_msa_summary_lists_accounts_domains_and_intune_status(self):
+        lines = installer.summary_lines(
+            "ubuntu24.04", "apt", "stable",
+            {"mode": "msa", "accounts": ["alice@gmail.com", "bob@outlook.com"]},
+            True,
+            {"pam_allow_groups": "", "enable_hello": True, "allow_console_password_only": True, "apply_policy": True},
+        )
+        self.assertIn("Identity provider: Microsoft personal accounts (2 accounts)", lines)
+        self.assertIn("Allowed accounts: alice@gmail.com, bob@outlook.com", lines)
+        self.assertIn("Login domains: gmail.com, outlook.com", lines)
+        self.assertIn("Intune compliance: Not applicable", lines)
+
     def test_build_install_plan_uses_known_step_kinds(self):
         old_detected = installer.detected_package_selection
         try:
@@ -868,11 +1028,11 @@ class InstallEndpointTests(unittest.TestCase):
             self.assertEqual(plan["version"], installer.PLAN_VERSION)
             self.assertEqual(
                 [step["kind"] for step in plan["steps"]],
-                ["apt_prereqs", "apt_repo", "install_packages", "write_global_config", "note", "enable_services", "maybe_status"],
+                ["apt_prereqs", "apt_repo", "install_packages", "stop_services", "write_global_config", "note", "enable_services", "maybe_status"],
             )
             self.assertEqual(plan["steps"][2]["packages"], ["himmelblau", "pam-himmelblau", "nss-himmelblau", "himmelblau-sso"])
             self.assertEqual(plan["steps"][2]["best_effort_packages"], ["himmelblau-selinux"])
-            self.assertEqual(plan["steps"][3]["config"]["write_idp"], True)
+            self.assertEqual(plan["steps"][4]["config"]["write_idp"], True)
             self.assertTrue(installer.validate_install_plan(plan))
         finally:
             installer.detected_package_selection = old_detected
@@ -1430,6 +1590,76 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertIn("Allow password-only local console logins", labels)
         self.assertNotIn("Apply Intune device compliance policies", labels)
 
+    def test_curses_msa_state_requires_accounts_and_forces_safe_options(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        ui.identity_stage = "input"
+        ui.input_mode = "msa"
+        ui.msa_accounts_text = ""
+        ui.pam_allow_groups = "unrelated@example.com"
+        ui.enable_hello = True
+        ui.allow_console_password_only = True
+        ui.apply_policy = True
+        ok, message = ui.validate_identity()
+        self.assertFalse(ok)
+        self.assertIn("at least one", message)
+
+        ui.msa_accounts_text = " Alice@Gmail.com,bob@outlook.com "
+        ok, message = ui.validate_identity()
+        self.assertTrue(ok, message)
+        idp, write_idp = ui.selected_idp()
+        self.assertEqual(idp, {"mode": "msa", "accounts": ["alice@gmail.com", "bob@outlook.com"]})
+        self.assertTrue(write_idp)
+        self.assertEqual(
+            ui.selected_options(),
+            {
+                "pam_allow_groups": "alice@gmail.com,bob@outlook.com",
+                "enable_hello": True,
+                "allow_console_password_only": True,
+                "apply_policy": False,
+            },
+        )
+
+    def test_curses_msa_identity_next_skips_network_discovery(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        ui.page = "identity"
+        ui.identity_stage = "input"
+        ui.input_mode = "msa"
+        ui.msa_accounts_text = "alice@gmail.com"
+        ui.message = ""
+        ui.pam_allow_groups = ""
+        ui.enable_hello = True
+        ui.allow_console_password_only = True
+        ui.apply_policy = True
+        ui.run_identity_discovery = lambda: self.fail("MSA must not use provider discovery")
+        self.assertTrue(ui.next_page())
+        self.assertEqual(ui.page, "options")
+
+    def test_curses_discovered_msa_uses_submitted_upn_as_safe_allow_list(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        candidate = {
+            "key": "discovered:msa",
+            "label": "Microsoft personal accounts (MSA): alice@gmail.com",
+            "config": {"mode": "msa", "accounts": ["alice@gmail.com"]},
+            "write_idp": True,
+            "requires_app_id": False,
+        }
+        ui.discovery_candidates = [candidate]
+        ui.selected_candidate_key = candidate["key"]
+        ui.mode = "entra"
+        ui.msa_accounts_text = ""
+        ui.input_cursor = {"msa_accounts": 0}
+        ui.pam_allow_groups = "unrelated@example.com"
+        ui.enable_hello = True
+        ui.allow_console_password_only = True
+        ui.apply_policy = True
+
+        ui._choose_candidate(candidate)
+
+        self.assertEqual(ui.msa_accounts_text, "alice@gmail.com")
+        self.assertEqual(ui.selected_idp(), ({"mode": "msa", "accounts": ["alice@gmail.com"]}, True))
+        self.assertEqual(ui.selected_options()["pam_allow_groups"], "alice@gmail.com")
+        self.assertFalse(ui.selected_options()["apply_policy"])
+
     def test_curses_theme_falls_back_without_color_support(self):
         ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
         ui.curses = types.SimpleNamespace(A_BOLD=1, A_REVERSE=2, has_colors=lambda: False)
@@ -1710,6 +1940,41 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertTrue(any(write[2] == "▕" for write in ui.stdscr.writes))
         self.assertEqual(ui.mouse_targets[0]["bounds"], (5, 17, 1, 35))
         self.assertIsNone(ui.cursor_position)
+
+    def test_curses_stacked_input_places_full_width_field_below_label(self):
+        class FakeScreen:
+            def __init__(self):
+                self.writes = []
+
+            def getmaxyx(self):
+                return (24, 80)
+
+            def addnstr(self, y, x, text, limit, attr):
+                self.writes.append((y, x, text[:limit], attr))
+
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        ui.stdscr = FakeScreen()
+        ui.curses = types.SimpleNamespace(error=Exception, A_BOLD=1, A_REVERSE=2)
+        ui.colors = {"muted": 0, "input_focus": 10, "input": 9, "button_focus": 11}
+        ui.glyphs = {"focus_l": "▶", "focus_r": "◀", "input_l": "▏", "input_r": "▕"}
+        ui.focusables = []
+        ui.mouse_targets = []
+        ui.focus_index = 0
+        ui.focus_key = "field:msa_accounts"
+        ui.msa_accounts_text = "alice@example.com"
+        ui.input_cursor = {"msa_accounts": 3}
+        ui.cursor_position = None
+
+        next_y = ui._input(
+            5, 2, 50, "msa_accounts", "Sign-in names (comma-separated)", stacked=True
+        )
+
+        self.assertIn((5, 2, "Sign-in names (comma-separated)", 0), ui.stdscr.writes)
+        self.assertTrue(any(write[0:3] == (6, 2, "▶") for write in ui.stdscr.writes))
+        self.assertTrue(any(write[0:3] == (6, 51, "◀") for write in ui.stdscr.writes))
+        self.assertEqual(ui.mouse_targets[0]["bounds"], (6, 2, 1, 50))
+        self.assertEqual(ui.cursor_position, (6, 6))
+        self.assertEqual(next_y, 7)
 
     def test_terminal_launcher_prefers_xdg_terminal_exec(self):
         available = {"xdg-terminal-exec", "x-terminal-emulator", "gnome-terminal"}

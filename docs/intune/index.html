@@ -1496,7 +1496,32 @@ then appear in the list of previously created policies.</p>
 for a long time are removed from Entra Id management. The device must
 then be re-added the next time it logs in.</p>
 <h2 id="use-of-custom-scripts-for-compliance-testing">Use of custom scripts for compliance testing</h2>
-<p>Custom policies for compliance testing are not currently possible.</p>
+<p>Custom compliance policies can be used with Himmelblau in all supported
+versions. This is useful when Intune's built-in Linux compliance options
+do not cover the local requirement that should be enforced. A custom
+policy can check almost any condition that can be tested from a script
+on the client, such as installed packages, service state, configuration
+files, security settings, distribution versions, or site-specific
+baseline rules.</p>
+<p>For custom compliance, Intune uses two files:</p>
+<ul>
+<li>a discovery script that runs on the Linux client and writes a JSON
+  object to standard output</li>
+<li>a JSON rules file that tells Intune which values from the discovery
+  script represent a compliant device</li>
+</ul>
+<p>For example, a discovery script can test whether a required service is
+enabled, whether a security setting has the expected value, or whether
+the device matches an approved operating-system baseline. The script
+returns named values such as <code>ServiceEnabled</code> or <code>BaselineCompliant</code>,
+and the rules file defines the required values. If a value does not
+match, the device is marked non-compliant and the failed custom rule is
+visible in Intune compliance reports.</p>
+<p>When creating the Linux compliance policy in Intune, enable <strong>Custom
+Compliance</strong>, upload the discovery script and the matching rules file,
+then assign the policy to the required Linux device groups. The script
+output must be valid JSON, and the setting names in the rules file must
+match the property names returned by the script.</p>
 
 
 

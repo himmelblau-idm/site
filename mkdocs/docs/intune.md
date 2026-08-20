@@ -238,4 +238,31 @@ then be re-added the next time it logs in.
 
 ## Use of custom scripts for compliance testing
 
-Custom policies for compliance testing are not currently possible.
+Custom compliance policies can be used with Himmelblau in all supported
+versions. This is useful when Intune's built-in Linux compliance options
+do not cover the local requirement that should be enforced. A custom
+policy can check almost any condition that can be tested from a script
+on the client, such as installed packages, service state, configuration
+files, security settings, distribution versions, or site-specific
+baseline rules.
+
+For custom compliance, Intune uses two files:
+
+* a discovery script that runs on the Linux client and writes a JSON
+  object to standard output
+* a JSON rules file that tells Intune which values from the discovery
+  script represent a compliant device
+
+For example, a discovery script can test whether a required service is
+enabled, whether a security setting has the expected value, or whether
+the device matches an approved operating-system baseline. The script
+returns named values such as `ServiceEnabled` or `BaselineCompliant`,
+and the rules file defines the required values. If a value does not
+match, the device is marked non-compliant and the failed custom rule is
+visible in Intune compliance reports.
+
+When creating the Linux compliance policy in Intune, enable **Custom
+Compliance**, upload the discovery script and the matching rules file,
+then assign the policy to the required Linux device groups. The script
+output must be valid JSON, and the setting names in the rules file must
+match the property names returned by the script.

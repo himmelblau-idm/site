@@ -211,6 +211,7 @@ body[data-home="true"] .md-footer { margin-top: 0; }
 .hb-command button { flex: 0 0 auto; margin: 0; padding: .7rem 1rem; color: #061326; border: 0; border-radius: .7rem; background: #73d5ff; font-weight: 800; }
 .hb-command button:hover { background: #a1e5ff; }
 .hb-install__note { margin-top: .7rem !important; color: #829ab2; font-size: .75rem; }
+.hb-install__note a { color: inherit; text-decoration: underline; }
 .hb-distros { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; margin-top: 3rem; }
 .hb-distros span { padding: .45rem .75rem; color: #b8cbdd; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; background: rgba(255,255,255,.04); font-size: .76rem; }
 

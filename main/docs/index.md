@@ -15,6 +15,7 @@ hide:
     <div class="hb-shell hb-hero__content">
       <h1>Cloud identity for Linux</h1>
       <p class="hb-hero__lede">SSO, MFA, compliance, and TPM-backed keys across Entra ID/Intune and OIDC providers such as Keycloak and Okta — with a practical path toward sovereign cloud identity.</p>
+      <p class="hb-hero__lede">Native Okta MFA preview — try it in Community Nightly. <a class="hb-text-link" href="/docs/okta/">Explore Okta setup →</a></p>
       <div class="hb-actions">
         <a class="hb-button hb-button--primary" href="#install" data-hb-event="hero-install">Start installation</a>
         <a class="hb-button hb-button--ghost" href="#ssh">See how it works <span aria-hidden="true">↓</span></a>
@@ -220,6 +221,7 @@ hide:
       <div class="hb-command"><code>curl -fsSL https://himmelblau-idm.org/install | sh</code><button type="button" data-hb-copy aria-label="Copy installation command"><span data-hb-copy-label>Copy</span></button></div>
       <p class="hb-install__note">Review scripts before running them in your environment.</p>
       <div class="hb-actions hb-actions--center"><a class="hb-button hb-button--primary" href="/downloads/" data-hb-event="install-options">Package options</a><a class="hb-button hb-button--ghost-light" href="/docs/" data-hb-event="install-docs">Deployment documentation</a></div>
+      <p class="hb-install__note">Using Okta? <a href="/docs/okta/">Try the Okta native MFA preview.</a></p>
       <div class="hb-distros" aria-label="Supported Linux families"><span>SUSE</span><span>openSUSE</span><span>Ubuntu</span><span>Mint</span><span>Debian</span><span>Fedora</span><span>RHEL</span><span>Rocky</span><span>Oracle</span><span>Alma</span><span>Amazon</span><span>NixOS</span></div>
     </div>
   </section>

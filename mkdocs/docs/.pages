@@ -9,6 +9,7 @@ nav:
   - Device Registration: registration.md
   - Migration from On-Prem: integration.md
   - Evolution Mail Integration: mail_integration.md
+  - Using Himmelblau with Okta: okta.md
   - Ecosystem: ecosystem.md
   - Architecture: architecture.md
   - About: about.md

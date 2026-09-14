@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://himmelblau-idm.org/docs/architecture/">
+        <link rel="canonical" href="https://himmelblau-idm.org/docs/okta/">
       
       
-        <link rel="prev" href="../ecosystem/">
+        <link rel="prev" href="../mail_integration/">
       
       
-        <link rel="next" href="../about/">
+        <link rel="next" href="../ecosystem/">
       
       
       <link rel="icon" href="../../assets/favicon.ico">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Architecture - Himmelblau Documentation</title>
+        <title>Using Himmelblau with Okta - Himmelblau Documentation</title>
       
     
     
@@ -77,7 +77,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#understanding-himmelblau-architecture" class="md-skip">
+        <a href="#using-himmelblau-with-okta" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Architecture
+              Using Himmelblau with Okta
             
           </span>
         </div>
@@ -450,10 +450,32 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../okta/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Using Himmelblau with Okta
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -464,6 +486,137 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enable-interaction-code-for-the-organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enable Interaction Code for the Organization
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-the-okta-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create the Okta Application
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-the-authorization-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure the Authorization Server
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configure the Authorization Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#confirm-the-issuer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Confirm the Issuer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#allow-the-application-and-grant" class="md-nav__link">
+    <span class="md-ellipsis">
+      Allow the Application and Grant
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assign-users-and-check-the-mfa-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assign Users and Check the MFA Policy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-himmelblau" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure Himmelblau
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#apply-the-configuration-and-test-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      Apply the Configuration and Test Login
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Apply the Configuration and Test Login">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-local-hello-pin" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional Local Hello PIN
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -494,32 +647,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Architecture
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
         
   
   
@@ -530,86 +661,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#key-components" class="md-nav__link">
-    <span class="md-ellipsis">
-      Key Components
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Key Components">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#himmelblaud-authentication-daemon" class="md-nav__link">
-    <span class="md-ellipsis">
-      himmelblaud: Authentication Daemon
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#himmelblau-broker-sso-interface" class="md-nav__link">
-    <span class="md-ellipsis">
-      himmelblau-broker: SSO Interface
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#himmelblaud-tasks-background-worker" class="md-nav__link">
-    <span class="md-ellipsis">
-      himmelblaud-tasks: Background Worker
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#etchimmelblauhimmelblauconf-configuration-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      /etc/himmelblau/himmelblau.conf: Configuration File
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1319,55 +1370,55 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
+      Prerequisites
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-components" class="md-nav__link">
+  <a href="#enable-interaction-code-for-the-organization" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Components
+      Enable Interaction Code for the Organization
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Key Components">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-the-okta-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create the Okta Application
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-the-authorization-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure the Authorization Server
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configure the Authorization Server">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#himmelblaud-authentication-daemon" class="md-nav__link">
+  <a href="#confirm-the-issuer" class="md-nav__link">
     <span class="md-ellipsis">
-      himmelblaud: Authentication Daemon
+      Confirm the Issuer
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#himmelblau-broker-sso-interface" class="md-nav__link">
+  <a href="#allow-the-application-and-grant" class="md-nav__link">
     <span class="md-ellipsis">
-      himmelblau-broker: SSO Interface
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#himmelblaud-tasks-background-worker" class="md-nav__link">
-    <span class="md-ellipsis">
-      himmelblaud-tasks: Background Worker
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#etchimmelblauhimmelblauconf-configuration-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      /etc/himmelblau/himmelblau.conf: Configuration File
+      Allow the Application and Grant
     </span>
   </a>
   
@@ -1375,6 +1426,57 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assign-users-and-check-the-mfa-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assign Users and Check the MFA Policy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-himmelblau" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure Himmelblau
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#apply-the-configuration-and-test-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      Apply the Configuration and Test Login
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Apply the Configuration and Test Login">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-local-hello-pin" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional Local Hello PIN
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
   
 </li>
       
@@ -1397,67 +1499,242 @@
   
 
 
-<h1 id="understanding-himmelblau-architecture">Understanding Himmelblau Architecture</h1>
-<h2 id="overview">Overview</h2>
-<p>Himmelblau’s architecture is modular, scalable, and designed to integrate deeply with both Linux system services and Microsoft Azure Entra ID. Its core components work together to authenticate users, manage tokens, provide session services, and bridge cloud-based identity with traditional POSIX environments.</p>
-<hr />
-<h2 id="key-components">Key Components</h2>
-<h3 id="himmelblaud-authentication-daemon"><code>himmelblaud</code>: Authentication Daemon</h3>
-<p>The central daemon responsible for:</p>
+<h1 id="using-himmelblau-with-okta">Using Himmelblau with Okta</h1>
+<p>This guide walks IT administrators through configuring an Okta application and a Linux host for native Okta IDX login. Users complete supported credential and MFA prompts through the Linux login interface. Okta calls the grant used by this flow <strong>Interaction Code</strong>.</p>
+<div class="admonition note">
+<p class="admonition-title">Experimental</p>
+<p>Native Okta IDX login is available only in nightly builds containing this feature until Himmelblau 5.0 is released.</p>
+</div>
+<h2 id="prerequisites">Prerequisites</h2>
 <ul>
-<li>Initiating and processing Entra Id authentication flows</li>
-<li>Requesting Primary Refresh Tokens (PRTs) and access tokens</li>
-<li>Managing token lifecycles: storage, renewal, expiration</li>
-<li>Securely communicating with other services via UNIX sockets</li>
-<li>Integrating with:<ul>
-<li>PAM (authentication/account/session/password stacks)</li>
-<li>NSS (for user/group resolution)</li>
+<li>An <strong>Okta Identity Engine</strong> organization.</li>
+<li>Permission to manage applications and authorization server policies. Enabling Interaction Code for the organization requires <strong>Super Admin</strong> permission.</li>
+<li>Access to the <strong>default custom authorization server</strong>. Okta includes this in Integrator Free Plan organizations; custom authorization servers require <strong>API Access Management</strong> in production. See <a href="https://developer.okta.com/docs/concepts/auth-servers/">Okta's authorization server guidance</a>.</li>
+<li>A test user with existing MFA enrollment and an authentication policy that permits a supported native method, such as an Okta Verify push or verification code.</li>
+<li>A Linux host with Himmelblau installed, PAM and NSS configured, and HTTPS connectivity to Okta. See <a href="../installation.md">Installation</a> and <a href="../configuration.md">Configuration</a>.</li>
 </ul>
-</li>
-</ul>
-<p>All authentication events funnel through <code>himmelblaud</code>, whether invoked via login, SSH, or user switching.</p>
-<hr />
-<h3 id="himmelblau-broker-sso-interface"><code>himmelblau-broker</code>: SSO Interface</h3>
-<p>A DBus-based service that:</p>
-<ul>
-<li>Exposes authentication tokens to applications and browser plugins</li>
-<li>Supports automatic token refresh for SSO continuity</li>
-<li>Bridges the gap between system-level login and application-level authentication</li>
-</ul>
-<p>Used primarily in desktop environments or with SSO-capable CLI tools.</p>
-<hr />
-<h3 id="himmelblaud-tasks-background-worker"><code>himmelblaud-tasks</code>: Background Worker</h3>
-<p>This helper service performs actions that are triggered post-authentication:</p>
-<ul>
-<li>Requests cloud-based Kerberos TGTs and stores them in <code>krb5cc</code> caches</li>
-<li>Creates and initializes user home directories</li>
-<li>Enforces Intune policies (if enabled).</li>
-</ul>
-<p>It runs as a system service alongside <code>himmelblaud</code>.</p>
-<hr />
-<h3 id="etchimmelblauhimmelblauconf-configuration-file"><code>/etc/himmelblau/himmelblau.conf</code>: Configuration File</h3>
-<p>Defines the global and per-domain settings used by Himmelblau:</p>
-<ul>
-<li>Entra ID domain (automatically associated with the tenant)</li>
-<li>Logging and debugging options</li>
-<li>POSIX mapping preferences</li>
-<li>Allowed groups for login authorization</li>
-<li>Session environment behavior</li>
-</ul>
-<p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">[global]</span>
-<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">example.com</span>
-<span class="na">pam_allow_groups</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">00000000-1111-2222-3333-444444444444</span>
-<span class="na">home_attr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">CN</span>
-<span class="na">use_etc_skel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+<p>On the <a href="https://himmelblau-idm.org/downloads">Downloads page</a>, expand <strong>Advanced manual package repository instructions</strong>, select <strong>Community Nightly</strong>, and follow the instructions for your distribution.</p>
+<p>The examples use these values. Replace the organization domain and client ID with your own:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Application name</td>
+<td><code>Himmelblau</code></td>
+</tr>
+<tr>
+<td>Authorization server</td>
+<td><code>default</code></td>
+</tr>
+<tr>
+<td>Issuer URL</td>
+<td><code>https://your-org.okta.com/oauth2/default</code></td>
+</tr>
+<tr>
+<td>Client ID</td>
+<td><code>YOUR_OKTA_CLIENT_ID</code></td>
+</tr>
+<tr>
+<td>Sign-in redirect URI</td>
+<td><code>http://127.0.0.1:8765/callback</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="enable-interaction-code-for-the-organization">Enable Interaction Code for the Organization</h2>
+<p>In the Okta Admin Console:</p>
+<ol>
+<li>Open <strong>Settings → Account</strong>.</li>
+<li>Find <strong>Embedded widget sign-in support</strong> and select <strong>Edit</strong>.</li>
+<li>Select <strong>Interaction Code</strong> and save. If it is already selected, leave it enabled.</li>
+</ol>
+<p><img alt="Okta Settings → Account, with Interaction Code selected in Embedded widget sign-in support" src="01_org_interaction_code.png" /></p>
+<p><em>Enable Interaction Code for the organization before configuring the application and authorization server.</em></p>
+<p>This organization setting makes Interaction Code available in application settings and authorization server rules. Despite the panel's name, it also applies to Himmelblau's native client. See <a href="https://help.okta.com/oie/en-us/content/topics/settings/embedded-sign-in-support.htm">Configure embedded sign-in support</a>.</p>
+<h2 id="create-the-okta-application">Create the Okta Application</h2>
+<ol>
+<li>Open <strong>Applications and Resources → Applications</strong>. Some consoles label this <strong>Applications → Applications</strong>.</li>
+<li>Select <strong>Create App Integration</strong>. If offered a choice of creation experiences, choose <strong>Classic experience</strong> to access the integration wizard.</li>
+<li>Select <strong>OIDC – OpenID Connect</strong> as the sign-in method and <strong>Native Application</strong> as the application type, then select <strong>Next</strong>.</li>
+</ol>
+<p><img alt="Create app integration dialog with OIDC – OpenID Connect and Native Application selected" src="02_create_native_app.png" /></p>
+<p><em>Create a native OIDC application for Himmelblau.</em></p>
+<p>Configure the application:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>App integration name</td>
+<td><code>Himmelblau</code></td>
+</tr>
+<tr>
+<td>Grant types</td>
+<td>Retain <strong>Authorization Code</strong>, enable <strong>Refresh Token</strong>, and enable <strong>Interaction Code</strong> under <strong>Advanced</strong></td>
+</tr>
+<tr>
+<td>Sign-in redirect URIs</td>
+<td><code>http://127.0.0.1:8765/callback</code></td>
+</tr>
+<tr>
+<td>Controlled access</td>
+<td>Select <strong>Skip group assignment for now</strong>; assign the intended users or groups below</td>
+</tr>
+</tbody>
+</table>
+<p>If <strong>Interaction Code</strong> is missing, check the organization setting from the previous section. Save the application.</p>
+<p><img alt="Himmelblau native application with Authorization Code, Refresh Token, and Interaction Code enabled, redirect URI http://127.0.0.1:8765/callback, and group assignment deferred" src="03_grants_and_redirect.png" /></p>
+<p><em>Enable the application grants and register the exact callback URI used by Himmelblau.</em></p>
+<p>On the application's <strong>General</strong> tab, copy the <strong>Client ID</strong> from <strong>Client Credentials</strong>. This is the value for Himmelblau's <code>app_id</code>; it is not the application display name. Confirm that <strong>Client authentication</strong> is <strong>None</strong> and <strong>Require PKCE as additional validation</strong> is selected. Himmelblau uses PKCE and does not use a client secret.</p>
+<p><img alt="Himmelblau Client Credentials panel with the Client ID obscured, Client authentication set to None, and PKCE required" src="04_client_settings.png" /></p>
+<p><em>Copy your application's Client ID for <code>app_id</code>; keep public-client authentication with PKCE.</em></p>
+<p>For an existing native application, edit its <strong>General Settings</strong> to enable the grants above and register the same redirect URI. Okta documents both creation and updates in its <a href="https://developer.okta.com/docs/guides/implement-grant-type/interactioncode/main/">Interaction Code setup guide</a>.</p>
+<h2 id="configure-the-authorization-server">Configure the Authorization Server</h2>
+<h3 id="confirm-the-issuer">Confirm the Issuer</h3>
+<p>Open <strong>Security → API → Authorization Servers</strong> and select <strong>default</strong>. On the <strong>Settings</strong> tab, confirm its issuer URL:</p>
+<div class="highlight"><pre><span></span><code>https://your-org.okta.com/oauth2/default
 </code></pre></div>
-<blockquote>
-<p>📘 <strong>See Also:</strong></p>
-<ul>
-<li>The himmelblau.conf man page for detailed configuration options</li>
-<li>The <code>aad-tool</code> man page for command-line configuration and diagnostics</li>
-</ul>
-</blockquote>
+<p><img alt="Settings for the active default authorization server, showing an issuer ending in /oauth2/default with the organization hostname obscured" src="05_authorization_server.png" /></p>
+<p><em>Use the Issuer value, including <code>/oauth2/default</code>.</em></p>
+<p>Copy the complete issuer, including <code>/oauth2/default</code>. This is the value for Himmelblau's <code>oidc_issuer_url</code>.</p>
+<h3 id="allow-the-application-and-grant">Allow the Application and Grant</h3>
+<ol>
+<li>Open the server's <strong>Access Policies</strong> tab.</li>
+<li>
+<p>Select a policy whose <strong>Assign to</strong> setting includes the Himmelblau application. If none exists, select <strong>Add Policy</strong>, name it <code>Himmelblau</code>, provide a description, and assign it to the Himmelblau client using <strong>The following clients</strong>. Create the policy.</p>
+<p><img alt="Add Policy dialog naming the policy Himmelblau and assigning it to the Himmelblau client using The following clients" src="06_access_policy.png" /></p>
+<p><em>Assign the access policy to the Himmelblau application.</em></p>
+</li>
+<li>
+<p>Edit the matching rule, or select <strong>Add Rule</strong> and name the new rule <code>Himmelblau IDX</code>.</p>
+</li>
+<li>Under <strong>IF Grant type is</strong>, retain <strong>Authorization Code</strong>, expand <strong>Advanced</strong>, and select <strong>Interaction Code</strong> in <strong>Other grants</strong>.</li>
+<li>Under <strong>AND User is</strong>, select <strong>Any user assigned the app</strong>, or restrict the condition to the intended assigned groups.</li>
+<li>Ensure the scope condition allows all scopes requested by Himmelblau: <code>openid</code>, <code>profile</code>, <code>email</code>, and <code>offline_access</code>. If the rule uses <strong>The following scopes</strong>, include all four; an existing <strong>Any scopes</strong> condition also covers them.</li>
+<li>Use your organization's token lifetime settings and save with <strong>Create Rule</strong> or <strong>Update Rule</strong>.</li>
+</ol>
+<p><img alt="Himmelblau IDX access rule with Interaction Code enabled under Other grants, Any user assigned the app selected, and openid, profile, email, and offline_access scopes listed" src="07_access_policy_rule.png" /></p>
+<p><em>Allow Interaction Code for assigned users and the four requested scopes. The additional Client Credentials and Device Authorization selections shown are not required for native IDX login. Token lifetimes shown are examples; use your organization's settings.</em></p>
+<p>Check policy and rule order: Okta evaluates them in priority order, and an earlier match may determine the result. A policy without a matching rule does not authorize the request. See <a href="https://help.okta.com/oie/en-us/content/topics/security/api-config-access-policies.htm">Create access policies</a>.</p>
+<p>This access policy controls token issuance. The application's authentication policy separately controls the credentials and MFA required during login.</p>
+<h2 id="assign-users-and-check-the-mfa-policy">Assign Users and Check the MFA Policy</h2>
+<p>Return to <strong>Applications and Resources → Applications → Himmelblau</strong>:</p>
+<ol>
+<li>Open <strong>Assignments → Assign</strong>.</li>
+<li>Choose <strong>Assign to People</strong> or <strong>Assign to Groups</strong>.</li>
+<li>Assign the intended test users or group and select <strong>Done</strong>.</li>
+</ol>
+<p><img alt="Himmelblau Assignments tab showing two individual assignments, with account identifiers obscured" src="08_assignments.png" /></p>
+<p><em>Confirm that the intended users or groups are assigned to the application.</em></p>
+<p>See <a href="https://help.okta.com/oie/en-us/content/topics/apps/apps-assign-applications.htm">Assign app integrations</a> for details.</p>
+<p>On the <strong>Sign On</strong> tab, locate <strong>User authentication</strong> and check the assigned authentication policy. Use your existing MFA policy and confirm that the test user is enrolled in a method it permits.</p>
+<p><img alt="User authentication panel showing the Any two factors authentication policy and View policy details link" src="09_authentication_policy.png" /></p>
+<p><em>This example uses the Any two factors policy. Follow </em><em>View policy details</em><em> to check your application's existing policy.</em></p>
+<p>Native login can present supported prompts such as verification-code entry or approval of an Okta Verify push. A policy requiring an external browser redirect or an unsupported step must offer a supported native alternative. Configuring new authenticators is outside this guide.</p>
+<h2 id="configure-himmelblau">Configure Himmelblau</h2>
+<p>Edit <code>/etc/himmelblau/himmelblau.conf</code>. Add or update these settings in the existing <code>[global]</code> section, preserving any other host-specific settings:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[global]</span>
+<span class="na">oidc_issuer_url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">https://your-org.okta.com/oauth2/default</span>
+<span class="na">app_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">YOUR_OKTA_CLIENT_ID</span>
+<span class="na">oidc_force_interaction_code</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+<span class="na">oidc_redirect_uri</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">http://127.0.0.1:8765/callback</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>oidc_issuer_url</code></td>
+<td>The complete issuer URL from the selected authorization server.</td>
+</tr>
+<tr>
+<td><code>app_id</code></td>
+<td>The Client ID from the native application's General tab.</td>
+</tr>
+<tr>
+<td><code>oidc_force_interaction_code</code></td>
+<td>Require native IDX login and prevent fallback to device authorization or the browser orchestrator.</td>
+</tr>
+<tr>
+<td><code>oidc_redirect_uri</code></td>
+<td>The exact sign-in redirect URI registered on the application.</td>
+</tr>
+</tbody>
+</table>
+<p>With <code>oidc_force_interaction_code = false</code> (the default), Himmelblau probes compatible providers and can select the standard OIDC flow when native authentication is unavailable and fallback is supported. This guide sets it to <code>true</code> so a configuration problem cannot silently select another flow. Backend selection lasts until the daemon restarts; temporary network outages defer selection.</p>
+<p>Native IDX login does not require the Himmelblau orchestrator or <code>orchestrator_enabled = true</code>.</p>
+<h2 id="apply-the-configuration-and-test-login">Apply the Configuration and Test Login</h2>
+<p>Restart the services after changing the configuration:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>himmelblaud<span class="w"> </span>himmelblaud-tasks
+</code></pre></div>
+<p>Test with the assigned user's account identifier:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>aad-tool<span class="w"> </span>auth-test<span class="w"> </span>--name<span class="w"> </span>user@example.com
+</code></pre></div>
+<p>Replace <code>user@example.com</code> with the account identifier for your Okta user. Complete the credential and MFA prompts required by the policy. For example, enter the requested verification code or approve an Okta Verify push. The exact prompts depend on the user's enrolled authenticators and policy.</p>
+<p>After the authentication test succeeds, test a Linux console or graphical login with the same user to verify PAM, NSS, and session integration. An authentication test alone does not verify the full desktop login.</p>
+<h3 id="optional-local-hello-pin">Optional Local Hello PIN</h3>
+<p>When <code>enable_hello = true</code> (the default), a successful sign-in can lead to local Hello PIN enrollment. This is a Himmelblau credential on the Linux host. Keep <strong>Refresh Token</strong> enabled and allow <code>offline_access</code> so Himmelblau can obtain the refresh token needed for Hello. Follow any additional local enrollment prompts presented by the host's configuration.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>What to check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Interaction Code is missing in the portal</td>
+<td>Enable it under <strong>Settings → Account → Embedded widget sign-in support</strong> with Super Admin permissions.</td>
+</tr>
+<tr>
+<td>Client is not authorized for the grant</td>
+<td>Check Interaction Code at all three levels: organization, application, and matching authorization server rule. Re-enabling the organization setting does not automatically restore grants previously disabled on apps and servers.</td>
+</tr>
+<tr>
+<td>No matching policy or access denied</td>
+<td>Check application assignment, access-policy client assignment, rule users and scopes, rule priority, and the application's MFA policy.</td>
+</tr>
+<tr>
+<td>Discovery fails or issuer mismatch is reported</td>
+<td>Use the issuer shown for the selected server, including <code>/oauth2/default</code>, and check HTTPS connectivity.</td>
+</tr>
+<tr>
+<td>Invalid client or redirect URI</td>
+<td>Copy the Client ID from the native application. Verify public-client authentication and the exact <code>http://127.0.0.1:8765/callback</code> registration.</td>
+</tr>
+<tr>
+<td>A device-code or browser login appears</td>
+<td>Confirm that the installed nightly contains IDX support and <code>oidc_force_interaction_code = true</code> is in <code>[global]</code>. Restart the daemon.</td>
+</tr>
+<tr>
+<td>External or unsupported authentication step</td>
+<td>Use a supported native method permitted by the policy. The registered redirect URI does not provide a browser callback service.</td>
+</tr>
+<tr>
+<td>Hello enrollment cannot complete</td>
+<td>Check that refresh tokens and <code>offline_access</code> are permitted for this application and user.</td>
+</tr>
+</tbody>
+</table>
+<p>Read daemon logs with:</p>
+<div class="highlight"><pre><span></span><code>journalctl<span class="w"> </span>-u<span class="w"> </span>himmelblaud
+</code></pre></div>
+<p>For more detail, temporarily set <code>debug = true</code> in <code>[global]</code>, restart <code>himmelblaud</code>, and repeat the test. Look for <strong>OIDC provider selection completed</strong> with <code>selection=InteractionCode</code>. This confirms native backend selection; the authentication test must still succeed. Restore your usual logging setting afterward.</p>
+<p>Restart <code>himmelblaud</code> after correcting portal settings too, so it can repeat backend selection.</p>
+<!-- Maintainer validation: Based on PR #1697 at 9f7d30e4bb0ffdeb43b5309aa86749894a123ca8. All nine supplied portal screenshots were reviewed and incorporated. A live nightly login test remains unverified. -->
 
 
 

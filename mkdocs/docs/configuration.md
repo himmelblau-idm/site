@@ -33,6 +33,8 @@ oidc_issuer_url = https://keycloak.example.com/realms/himmelblau
 app_id = himmelblau-login
 ```
 
+For native Okta IDX login, follow [Using Okta with Himmelblau](advanced/okta.md) to configure the Okta application, authorization server, and Himmelblau client. This experimental flow requires a nightly build containing the feature until Himmelblau 5.0 is released.
+
 ### Key Options
 
 | Key                   | Description|

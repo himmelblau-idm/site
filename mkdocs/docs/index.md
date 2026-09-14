@@ -1,6 +1,6 @@
 # Quickstart
 
-**Himmelblau** brings Microsoft Entra ID and OIDC (Google Workspace, Okta, Keycloak, etc) login, policy enforcement, and Hello PIN support to Linux.
+**Himmelblau** brings native Microsoft Entra ID, Okta, and OIDC (Google Workspace, Keycloak, etc) login, policy enforcement, and Hello PIN support to Linux.
 
 ## Install Himmelblau
 
@@ -29,7 +29,7 @@ For manual repository setup or source builds, see <a href="installation">Install
 
 </details>
 
-After installation, log in with your Entra ID or OIDC credentials.
+After installation, log in with your Entra ID, Okta, or OIDC credentials.
 
 <details class="hb-advanced-install">
 <summary>Optional: manual config, PAM, NSS, and service restart</summary>

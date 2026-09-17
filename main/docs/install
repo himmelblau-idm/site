@@ -59,8 +59,8 @@ OIDC_WEBFINGER_REL_HTTPS = "https://openid.net/specs/connect/1.0/issuer"
 IDP_DISCOVERY_TIMEOUT = 5
 
 FALLBACK_REPO_SUPPORT = {
-    "stable": {"include": [], "exclude": ["fedora44"]},
-    "nightly": {"include": [], "exclude": ["fedora42"]},
+    "stable": {"include": [], "exclude": []},
+    "nightly": {"include": [], "exclude": []},
     "subscription": {"include": ["sle15sp7", "sle16", "tumbleweed"], "exclude": []},
 }
 
@@ -72,7 +72,6 @@ DISTRO_LABELS = {
     "rocky8": "RHEL/Rocky/Alma/Oracle Linux 8",
     "rocky9": "RHEL/Rocky/Alma/Oracle Linux 9",
     "rocky10": "RHEL/Rocky/Alma/Oracle Linux 10",
-    "fedora42": "Fedora 42",
     "fedora43": "Fedora 43",
     "fedora44": "Fedora 44",
     "rawhide": "Fedora Rawhide",
@@ -1347,7 +1346,6 @@ DISTRO_LABELS = {
     "rocky8": "RHEL/Rocky/Alma/Oracle Linux 8",
     "rocky9": "RHEL/Rocky/Alma/Oracle Linux 9",
     "rocky10": "RHEL/Rocky/Alma/Oracle Linux 10",
-    "fedora42": "Fedora 42",
     "fedora43": "Fedora 43",
     "fedora44": "Fedora 44",
     "rawhide": "Fedora Rawhide",

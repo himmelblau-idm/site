@@ -10,11 +10,11 @@
 const REPO_SUPPORT = {
 	stable: {
 		include: [],
-		exclude: ["fedora44"],
+		exclude: [],
 	},
 	nightly: {
 		include: [],
-		exclude: ["fedora42"],
+		exclude: [],
 	},
 	subscription: {
 		include: ['sle15sp7', 'sle16', 'tumbleweed'],

@@ -126,6 +126,16 @@ hide:
             <p>In 2026, browser-orchestrated MFA brought richer, provider-agnostic authentication into native Linux sign-in. What began as an Entra ID interoperability project had grown into a broader open platform for cloud identity.</p>
           </article>
         </li>
+
+        <li class="hb-era">
+          <div class="hb-era__date"><span>September 2026</span></div>
+          <article class="hb-era__card">
+            <p class="hb-era__eyebrow">Native Okta integration</p>
+            <h3>Okta MFA comes directly to Linux login</h3>
+            <p>Native Okta MFA integration was proposed on September 9 and <a href="https://github.com/himmelblau-idm/himmelblau/pull/1697">merged on September 14, 2026</a>. Building on the new <a href="https://github.com/himmelblau-idm/okta-auth-rs">okta-auth-rs</a> library, Himmelblau could now drive Okta Identity Engine’s Interaction Code flow directly through PAM, presenting password and MFA prompts in the Linux login interface.</p>
+            <p>The integration added push verification, security-key authentication, and authenticator enrollment with QR codes in terminals and GDM. It superseded the earlier browser-orchestrated OIDC work with a native Okta protocol implementation, initially available in nightly builds ahead of Himmelblau 5.0.</p>
+          </article>
+        </li>
       </ol>
     </div>
   </section>

@@ -20,9 +20,12 @@ fi
 
 exec python3 - "$@" <<'PYTHON_PAYLOAD'
 #!/usr/bin/env python3
+import base64
 import configparser
 import json
 import locale
+import argparse
+import getpass
 import os
 import re
 import shlex
@@ -37,20 +40,20 @@ import urllib.parse
 import urllib.request
 
 
-VERSION = "2026.07.13"
-PLAN_VERSION = 2
+VERSION = "2026.09.18"
+PLAN_VERSION = 3
 SUPPORT_JS_URL = "https://himmelblau-idm.org/js/install.js"
+STABLE_SUBSCRIPTION_URL = "https://himmelblau-idm.org/stable-repositories/"
 GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
 APT_KEYRING_DIR = "/etc/apt/keyrings"
 APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
-BASE_STABLE_URL = "https://packages.himmelblau-idm.org/stable/latest"
 BASE_NIGHTLY_URL = "https://packages.himmelblau-idm.org/nightly/latest"
 CONFIG_PATH = "/etc/himmelblau/himmelblau.conf"
 LOG_PATH = os.path.expanduser("~/.cache/himmelblau-installer/install.log")
 CONFIG_BOOLEAN_DEFAULTS = {
     "enable_hello": True,
     "allow_console_password_only": True,
-    "apply_policy": True,
+    "apply_policy": False,
 }
 CONFIG_OPTION_KEYS = set(CONFIG_BOOLEAN_DEFAULTS) | {"pam_allow_groups"}
 ENTRA_ODC_URL = "https://odc.officeapps.live.com/odc/v2.1/federationProvider"
@@ -59,7 +62,7 @@ OIDC_WEBFINGER_REL_HTTPS = "https://openid.net/specs/connect/1.0/issuer"
 IDP_DISCOVERY_TIMEOUT = 5
 
 FALLBACK_REPO_SUPPORT = {
-    "stable": {"include": [], "exclude": []},
+    "stable": {"include": [], "exclude": ["nixos"]},
     "nightly": {"include": [], "exclude": []},
     "subscription": {"include": ["sle15sp7", "sle16", "tumbleweed"], "exclude": []},
 }
@@ -128,6 +131,131 @@ class InstallError(Exception):
 
 class ElevationError(InstallError):
     pass
+
+
+# Entitlement tokens are credentials. This code is also embedded in the root worker.
+STABLE_DESTINATIONS = {
+    "ubuntu22.04": ("ubuntu", "jammy"), "ubuntu24.04": ("ubuntu", "noble"),
+    "ubuntu25.10": ("ubuntu", "questing"), "ubuntu26.04": ("ubuntu", "resolute"),
+    "debian12": ("debian", "bookworm"), "debian13": ("debian", "trixie"),
+    "rocky8": ("el", "8"), "rocky9": ("el", "9"), "rocky10": ("el", "10"),
+    "fedora42": ("fedora", "42"), "fedora43": ("fedora", "43"), "fedora44": ("fedora", "44"),
+    "rawhide": ("fedora", "46"),
+    "amzn2023": ("amzn", "2023"), "tumbleweed": ("opensuse", "tumbleweed"),
+    "sle15sp6": ("opensuse", "15.6"), "sle15sp7": ("sles", "15"), "sle16": ("sles", "16"),
+}
+SECRET_VALUES = set()
+STABLE_APT_SOURCE_PATH = "/etc/apt/sources.list.d/himmelblau.list"
+STABLE_APT_PREFERENCES_PATH = "/etc/apt/preferences.d/himmelblau-stable"
+STABLE_APT_DEB822_PATH = "/etc/apt/sources.list.d/himmelblau.sources"
+STABLE_RPM_DIRS = {"dnf": "/etc/yum.repos.d", "zypper": "/etc/zypp/repos.d"}
+STABLE_RPM_KEYS = {"dnf": "/etc/pki/rpm-gpg/himmelblau-stable.asc", "zypper": "/etc/zypp/himmelblau-stable.asc"}
+
+
+def redact(value):
+    text = str(value)
+    text = re.sub(r"https://dl\.cloudsmith\.io/[^/\s\"']+/himmelblau/", "https://dl.cloudsmith.io/REDACTED/himmelblau/", text)
+    for secret in sorted(SECRET_VALUES, key=len, reverse=True):
+        text = text.replace(secret, "REDACTED")
+    return text
+
+
+def normalize_entitlement_token(value):
+    if not isinstance(value, str):
+        raise ValueError("Enter the entitlement token from your subscription email.")
+    token = value.strip()
+    if not re.fullmatch(r"[A-Za-z0-9_-]{8,}", token) or token.lower() in ("public", "basic"):
+        raise ValueError("Enter a valid entitlement token, not a repository URL.")
+    SECRET_VALUES.add(token)
+    return token
+
+
+def stable_root(token, stream):
+    token = normalize_entitlement_token(token)
+    if str(stream) not in ("3", "4"):
+        raise ValueError("Unsupported stable repository stream.")
+    return "https://dl.cloudsmith.io/%s/himmelblau/himmelblau-%s" % (token, stream)
+
+
+def stable_destination(target):
+    if target not in STABLE_DESTINATIONS:
+        raise ValueError("Stable packages are unavailable for this distribution. Choose another source explicitly.")
+    return STABLE_DESTINATIONS[target]
+
+
+def fetch_stable_data(url, unavailable_ok=False):
+    try:
+        with urllib.request.urlopen(url, timeout=30) as response:
+            return response.read()
+    except urllib.error.HTTPError as err:
+        if unavailable_ok and err.code in (401, 403, 404):
+            return None
+        if err.code in (401, 403):
+            raise ValueError("Repository access was denied. Check your entitlement token or contact dmulder@himmelblau-idm.org with proof of subscription.")
+        if err.code == 404:
+            raise ValueError("The selected stream does not contain packages for this distribution or architecture.")
+        raise ValueError("Unable to read the stable repository (HTTP %s)." % err.code)
+    except (OSError, urllib.error.URLError):
+        raise ValueError("Unable to reach the stable repository. Check your connection and retry.")
+
+
+def validate_source_steps(plan):
+    channel, target = plan.get("channel"), plan.get("target")
+    steps = plan.get("steps")
+    if not isinstance(steps, list):
+        raise ValueError("Invalid installation steps.")
+    for step in steps:
+        if not isinstance(step, dict):
+            raise ValueError("Invalid installation step.")
+        if "channel" in step and step["channel"] != channel:
+            raise ValueError("Installation step changes the selected package source.")
+        if "target" in step and step["target"] != target:
+            raise ValueError("Installation step changes the selected distribution.")
+    repo_steps = [step.get("kind") for step in steps if step.get("kind") in ("stable_repo", "apt_repo", "dnf_repo", "zypper_repo")]
+    if channel == "stable" and repo_steps != ["stable_repo"]:
+        raise ValueError("Stable installation requires exactly one authenticated repository setup step.")
+    if any(step.get("kind") == "vendor_repo" for step in steps) and channel != "subscription":
+        raise ValueError("Vendor repository setup requires the vendor channel.")
+    if channel != "stable" and "stable_repo" in repo_steps:
+        raise ValueError("Stable repository setup requires the stable channel.")
+
+
+def native_stable_config(root, distro, version, architecture, manager):
+    if architecture not in ("amd64", "arm64", "x86_64", "aarch64"):
+        raise ValueError("Stable repositories support x86-64 and ARM64 only.")
+    if manager == "apt":
+        if architecture not in ("amd64", "arm64"):
+            raise ValueError("Unsupported Debian architecture.")
+        source = "deb [arch=%s signed-by=%s] %s/deb/%s %s main\n" % (architecture, APT_KEYRING_PATH, root, distro, version)
+        metadata = "%s/deb/%s/dists/%s/main/binary-%s/Packages.gz" % (root, distro, version, architecture)
+        return source, metadata
+    rpm_arch = {"amd64": "x86_64", "arm64": "aarch64"}.get(architecture, architecture)
+    if distro == "el" and version == "8" and rpm_arch == "aarch64":
+        raise ValueError("Stable packages for Enterprise Linux 8 are available for x86-64 only.")
+    base = "%s/rpm/%s/%s" % (root, distro, version)
+    key_path = "file://" + STABLE_RPM_KEYS[manager]
+    config = ""
+    for name, arch in (("himmelblau-stable", rpm_arch), ("himmelblau-stable-noarch", "noarch")):
+        config += "[%s]\nname=Himmelblau Stable\nbaseurl=%s/%s\nenabled=1\npriority=1\ngpgcheck=1\ngpgkey=%s\n\n" % (name, base, arch, key_path)
+    return config, base + "/" + rpm_arch + "/repodata/repomd.xml"
+
+
+def resolve_stable_repository(token, target, architecture, manager):
+    token = normalize_entitlement_token(token)
+    distro, version = stable_destination(target)
+    matches = []
+    for stream in ("4", "3"):
+        root = stable_root(token, stream)
+        config, metadata_url = native_stable_config(root, distro, version, architecture, manager)
+        if fetch_stable_data(metadata_url, unavailable_ok=True) is not None:
+            matches.append((stream, root, distro, version, config))
+    if not matches:
+        raise ValueError("The entitlement token does not provide an accessible stable repository for this distribution and architecture.")
+    if len(matches) != 1:
+        raise ValueError("The entitlement token provides access to multiple stable streams. Contact dmulder@himmelblau-idm.org for a stream-specific token.")
+    return matches[0]
+
+
 
 
 class Ui:
@@ -250,6 +378,7 @@ class LogUi(Ui):
 
 
 def log(message):
+    message = redact(message)
     try:
         os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
         with open(LOG_PATH, "a", encoding="utf-8") as handle:
@@ -307,7 +436,7 @@ def has_interactive_terminal():
 
 def run(argv, ui, check=True, input_text=None):
     log("$ " + shell_join(argv))
-    ui.info("Running: " + shell_join(argv))
+    ui.info("Running: " + redact(shell_join(argv)))
     try:
         proc = subprocess.run(
             argv,
@@ -324,9 +453,9 @@ def run(argv, ui, check=True, input_text=None):
         for line in output.splitlines()[-80:]:
             log(line)
     if check and proc.returncode != 0:
-        tail = "\n".join(output.splitlines()[-20:])
-        detail = f"\n\nLast command output:\n{tail}" if tail else ""
-        raise InstallError(f"Command failed with exit code {proc.returncode}: {shell_join(argv)}{detail}")
+        tail = redact("\n".join(output.splitlines()[-20:]))
+        detail = f"\n\nLast command output:\n{redact(tail)}" if tail else ""
+        raise InstallError(f"Command failed with exit code {proc.returncode}: {redact(shell_join(argv))}{detail}")
     return proc
 
 
@@ -482,7 +611,11 @@ def is_supported(matrix, channel, target):
 
 
 def base_url(channel):
-    return BASE_NIGHTLY_URL if channel == "nightly" else BASE_STABLE_URL
+    if channel == "stable":
+        raise ValueError("Stable repository setup requires an entitlement token.")
+    if channel != "nightly":
+        raise ValueError("Vendor packages use the distribution package channels.")
+    return BASE_NIGHTLY_URL
 
 
 def extract_repo_support(js_text):
@@ -528,19 +661,20 @@ def load_repo_support(ui):
 
 def channel_choices(matrix, target):
     choices = []
-    if is_supported(matrix, "stable", target):
-        choices.append({"label": "Community Stable repository", "value": "stable"})
+    if is_supported(matrix, "subscription", target):
+        choices.append({"label": "Vendor Packages", "value": "subscription"})
+    if target in STABLE_DESTINATIONS and is_supported(matrix, "stable", target):
+        choices.append({"label": "Stable Repositories (entitlement token required)", "value": "stable"})
     if is_supported(matrix, "nightly", target):
         choices.append({"label": "Community Nightly repository", "value": "nightly"})
     return choices
 
 
 def default_community_channel(matrix, target):
-    if is_supported(matrix, "stable", target):
-        return "stable", None
+    # Free packages must be selected explicitly.
     if is_supported(matrix, "nightly", target):
-        return "nightly", "Community Stable packages are not available for this distribution; using Community Nightly packages."
-    raise InstallError("Himmelblau community packages are not available for this distribution. Use the downloads page for manual repository options.")
+        return "nightly", None
+    raise InstallError("Community Nightly packages are unavailable for this distribution.")
 
 
 def validate_domain(domain):
@@ -1211,11 +1345,15 @@ def require_commands(commands):
         raise InstallError("Required commands are missing: " + ", ".join(missing))
 
 
-def build_install_plan(channel, target, idp_config, write_idp, options_config=None):
+def build_install_plan(channel, target, idp_config, write_idp, options_config=None, entitlement_token=None):
     manager = package_manager(target)
     packages, best_effort_packages = detected_package_selection(channel, target)
     steps = []
-    if channel != "subscription":
+    if channel == "stable":
+        steps.append({"kind": "stable_repo", "target": target})
+    elif channel == "subscription":
+        steps.append({"kind": "vendor_repo", "target": target})
+    else:
         if manager == "apt":
             steps.extend([{"kind": "apt_prereqs"}, {"kind": "apt_repo", "channel": channel, "target": target}])
         elif manager == "zypper":
@@ -1241,6 +1379,7 @@ def build_install_plan(channel, target, idp_config, write_idp, options_config=No
     steps.extend([{"kind": "enable_services"}, {"kind": "maybe_status"}])
     return {
         "version": PLAN_VERSION,
+        "entitlement_token": entitlement_token if channel == "stable" else None,
         "channel": channel,
         "target": target,
         "manager": manager,
@@ -1249,8 +1388,8 @@ def build_install_plan(channel, target, idp_config, write_idp, options_config=No
     }
 
 
-def build_package_only_plan(channel, target):
-    return build_install_plan(channel, target, None, False, None)
+def build_package_only_plan(channel, target, entitlement_token=None):
+    return build_install_plan(channel, target, None, False, None, entitlement_token)
 
 
 def validate_install_plan(plan):
@@ -1262,7 +1401,19 @@ def validate_install_plan(plan):
         raise InstallError("Invalid install plan target.")
     if channel not in ("subscription", "stable", "nightly"):
         raise InstallError("Invalid install plan channel.")
+    if channel == "stable":
+        try:
+            normalize_entitlement_token(plan.get("entitlement_token"))
+            stable_destination(target)
+        except ValueError as err:
+            raise InstallError(str(err))
+    try:
+        validate_source_steps(plan)
+    except ValueError as err:
+        raise InstallError(str(err))
     allowed = {
+        "stable_repo",
+        "vendor_repo",
         "apt_prereqs",
         "apt_repo",
         "zypper_repo",
@@ -1301,7 +1452,9 @@ def summary_lines(target, manager, channel, idp_config, write_config, options_co
         ])
         if idp_config.get("mode") != "oidc":
             lines.append("Intune policy: " + ("Applied" if options_config.get("apply_policy", True) else "Not applied"))
-    if channel != "subscription":
+    if channel == "stable":
+        lines.append("Repository: Stable Repositories (entitlement token hidden)")
+    elif channel != "subscription":
         lines.append(f"Repository base: {base_url(channel)}")
     if packages:
         lines.append("Packages: " + ", ".join(packages))
@@ -1321,12 +1474,13 @@ import sys
 import tempfile
 import time
 import urllib.request
+import urllib.parse
+import urllib.error
 
-PLAN_VERSION = 2
+PLAN_VERSION = 3
 GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
 APT_KEYRING_DIR = "/etc/apt/keyrings"
 APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
-BASE_STABLE_URL = "https://packages.himmelblau-idm.org/stable/latest"
 BASE_NIGHTLY_URL = "https://packages.himmelblau-idm.org/nightly/latest"
 CONFIG_PATH = "/etc/himmelblau/himmelblau.conf"
 CONFIG_BOOLEAN_DEFAULTS = {
@@ -1363,7 +1517,133 @@ class WorkerError(Exception):
     pass
 
 
+# Entitlement tokens are credentials. This code is also embedded in the root worker.
+STABLE_DESTINATIONS = {
+    "ubuntu22.04": ("ubuntu", "jammy"), "ubuntu24.04": ("ubuntu", "noble"),
+    "ubuntu25.10": ("ubuntu", "questing"), "ubuntu26.04": ("ubuntu", "resolute"),
+    "debian12": ("debian", "bookworm"), "debian13": ("debian", "trixie"),
+    "rocky8": ("el", "8"), "rocky9": ("el", "9"), "rocky10": ("el", "10"),
+    "fedora42": ("fedora", "42"), "fedora43": ("fedora", "43"), "fedora44": ("fedora", "44"),
+    "rawhide": ("fedora", "46"),
+    "amzn2023": ("amzn", "2023"), "tumbleweed": ("opensuse", "tumbleweed"),
+    "sle15sp6": ("opensuse", "15.6"), "sle15sp7": ("sles", "15"), "sle16": ("sles", "16"),
+}
+SECRET_VALUES = set()
+STABLE_APT_SOURCE_PATH = "/etc/apt/sources.list.d/himmelblau.list"
+STABLE_APT_PREFERENCES_PATH = "/etc/apt/preferences.d/himmelblau-stable"
+STABLE_APT_DEB822_PATH = "/etc/apt/sources.list.d/himmelblau.sources"
+STABLE_RPM_DIRS = {"dnf": "/etc/yum.repos.d", "zypper": "/etc/zypp/repos.d"}
+STABLE_RPM_KEYS = {"dnf": "/etc/pki/rpm-gpg/himmelblau-stable.asc", "zypper": "/etc/zypp/himmelblau-stable.asc"}
+
+
+def redact(value):
+    text = str(value)
+    text = re.sub(r"https://dl\.cloudsmith\.io/[^/\s\"']+/himmelblau/", "https://dl.cloudsmith.io/REDACTED/himmelblau/", text)
+    for secret in sorted(SECRET_VALUES, key=len, reverse=True):
+        text = text.replace(secret, "REDACTED")
+    return text
+
+
+def normalize_entitlement_token(value):
+    if not isinstance(value, str):
+        raise ValueError("Enter the entitlement token from your subscription email.")
+    token = value.strip()
+    if not re.fullmatch(r"[A-Za-z0-9_-]{8,}", token) or token.lower() in ("public", "basic"):
+        raise ValueError("Enter a valid entitlement token, not a repository URL.")
+    SECRET_VALUES.add(token)
+    return token
+
+
+def stable_root(token, stream):
+    token = normalize_entitlement_token(token)
+    if str(stream) not in ("3", "4"):
+        raise ValueError("Unsupported stable repository stream.")
+    return "https://dl.cloudsmith.io/%s/himmelblau/himmelblau-%s" % (token, stream)
+
+
+def stable_destination(target):
+    if target not in STABLE_DESTINATIONS:
+        raise ValueError("Stable packages are unavailable for this distribution. Choose another source explicitly.")
+    return STABLE_DESTINATIONS[target]
+
+
+def fetch_stable_data(url, unavailable_ok=False):
+    try:
+        with urllib.request.urlopen(url, timeout=30) as response:
+            return response.read()
+    except urllib.error.HTTPError as err:
+        if unavailable_ok and err.code in (401, 403, 404):
+            return None
+        if err.code in (401, 403):
+            raise ValueError("Repository access was denied. Check your entitlement token or contact dmulder@himmelblau-idm.org with proof of subscription.")
+        if err.code == 404:
+            raise ValueError("The selected stream does not contain packages for this distribution or architecture.")
+        raise ValueError("Unable to read the stable repository (HTTP %s)." % err.code)
+    except (OSError, urllib.error.URLError):
+        raise ValueError("Unable to reach the stable repository. Check your connection and retry.")
+
+
+def validate_source_steps(plan):
+    channel, target = plan.get("channel"), plan.get("target")
+    steps = plan.get("steps")
+    if not isinstance(steps, list):
+        raise ValueError("Invalid installation steps.")
+    for step in steps:
+        if not isinstance(step, dict):
+            raise ValueError("Invalid installation step.")
+        if "channel" in step and step["channel"] != channel:
+            raise ValueError("Installation step changes the selected package source.")
+        if "target" in step and step["target"] != target:
+            raise ValueError("Installation step changes the selected distribution.")
+    repo_steps = [step.get("kind") for step in steps if step.get("kind") in ("stable_repo", "apt_repo", "dnf_repo", "zypper_repo")]
+    if channel == "stable" and repo_steps != ["stable_repo"]:
+        raise ValueError("Stable installation requires exactly one authenticated repository setup step.")
+    if any(step.get("kind") == "vendor_repo" for step in steps) and channel != "subscription":
+        raise ValueError("Vendor repository setup requires the vendor channel.")
+    if channel != "stable" and "stable_repo" in repo_steps:
+        raise ValueError("Stable repository setup requires the stable channel.")
+
+
+def native_stable_config(root, distro, version, architecture, manager):
+    if architecture not in ("amd64", "arm64", "x86_64", "aarch64"):
+        raise ValueError("Stable repositories support x86-64 and ARM64 only.")
+    if manager == "apt":
+        if architecture not in ("amd64", "arm64"):
+            raise ValueError("Unsupported Debian architecture.")
+        source = "deb [arch=%s signed-by=%s] %s/deb/%s %s main\n" % (architecture, APT_KEYRING_PATH, root, distro, version)
+        metadata = "%s/deb/%s/dists/%s/main/binary-%s/Packages.gz" % (root, distro, version, architecture)
+        return source, metadata
+    rpm_arch = {"amd64": "x86_64", "arm64": "aarch64"}.get(architecture, architecture)
+    if distro == "el" and version == "8" and rpm_arch == "aarch64":
+        raise ValueError("Stable packages for Enterprise Linux 8 are available for x86-64 only.")
+    base = "%s/rpm/%s/%s" % (root, distro, version)
+    key_path = "file://" + STABLE_RPM_KEYS[manager]
+    config = ""
+    for name, arch in (("himmelblau-stable", rpm_arch), ("himmelblau-stable-noarch", "noarch")):
+        config += "[%s]\nname=Himmelblau Stable\nbaseurl=%s/%s\nenabled=1\npriority=1\ngpgcheck=1\ngpgkey=%s\n\n" % (name, base, arch, key_path)
+    return config, base + "/" + rpm_arch + "/repodata/repomd.xml"
+
+
+def resolve_stable_repository(token, target, architecture, manager):
+    token = normalize_entitlement_token(token)
+    distro, version = stable_destination(target)
+    matches = []
+    for stream in ("4", "3"):
+        root = stable_root(token, stream)
+        config, metadata_url = native_stable_config(root, distro, version, architecture, manager)
+        if fetch_stable_data(metadata_url, unavailable_ok=True) is not None:
+            matches.append((stream, root, distro, version, config))
+    if not matches:
+        raise ValueError("The entitlement token does not provide an accessible stable repository for this distribution and architecture.")
+    if len(matches) != 1:
+        raise ValueError("The entitlement token provides access to multiple stable streams. Contact dmulder@himmelblau-idm.org for a stream-specific token.")
+    return matches[0]
+
+
+
+
 def emit(event_log, event):
+    event = json.loads(redact(json.dumps(event)))
     event["time"] = time.time()
     with open(event_log, "a", encoding="utf-8") as handle:
         handle.write(json.dumps(event, sort_keys=True) + "\n")
@@ -1384,9 +1664,9 @@ def run(argv, event_log, check=True):
     for line in output.splitlines():
         emit(event_log, {"type": "output", "text": line})
     if check and proc.returncode != 0:
-        tail = "\n".join(output.splitlines()[-20:])
+        tail = redact("\n".join(output.splitlines()[-20:]))
         detail = "\n\nLast command output:\n" + tail if tail else ""
-        raise WorkerError("Command failed with exit code %s: %s%s" % (proc.returncode, shell_join(argv), detail))
+        raise WorkerError("Command failed with exit code %s: %s%s" % (proc.returncode, redact(shell_join(argv)), detail))
     return proc
 
 
@@ -1421,7 +1701,11 @@ def is_suse(target):
 
 
 def base_url(channel):
-    return BASE_NIGHTLY_URL if channel == "nightly" else BASE_STABLE_URL
+    if channel == "stable":
+        raise ValueError("Stable repository setup requires an entitlement token.")
+    if channel != "nightly":
+        raise ValueError("Vendor packages use the distribution package channels.")
+    return BASE_NIGHTLY_URL
 
 
 def install_text(path, text, mode, event_log):
@@ -1541,8 +1825,18 @@ def validate_plan(plan):
         raise WorkerError("Invalid install plan target.")
     if plan.get("channel") not in ("subscription", "stable", "nightly"):
         raise WorkerError("Invalid install plan channel.")
+    if plan.get("channel") == "stable":
+        try:
+            normalize_entitlement_token(plan.get("entitlement_token"))
+            stable_destination(plan.get("target"))
+        except ValueError as err:
+            raise WorkerError(str(err))
+    try:
+        validate_source_steps(plan)
+    except ValueError as err:
+        raise WorkerError(str(err))
     allowed = set([
-        "apt_prereqs", "apt_repo", "zypper_repo", "dnf_repo", "install_packages",
+        "stable_repo", "vendor_repo", "apt_prereqs", "apt_repo", "zypper_repo", "dnf_repo", "install_packages",
         "write_global_config", "write_idp_config", "configure_distro_provided", "enable_services", "maybe_status", "note"
     ])
     for step in plan.get("steps", []):
@@ -1602,7 +1896,7 @@ def zypper_repo_setup(channel, target, event_log):
 def dnf_repo_setup(channel, target, event_log):
     repo_url = "%s/rpm/%s" % (base_url(channel), target)
     name = "himmelblau-%s" % channel
-    repo = "[%s]\nname=Himmelblau %s\nbaseurl=%s\nenabled=1\ngpgcheck=1\ngpgkey=%s\n" % (name, channel, repo_url, GPG_KEY_URL)
+    repo = "[%s]\nname=Himmelblau %s\nbaseurl=%s\nenabled=1\npriority=1\ngpgcheck=1\ngpgkey=%s\n" % (name, channel, repo_url, GPG_KEY_URL)
     run(["rpm", "--import", GPG_KEY_URL], event_log)
     install_text("/etc/yum.repos.d/%s.repo" % name, repo, "0644", event_log)
     run(["dnf", "makecache", "--refresh", "-y"], event_log)
@@ -1615,7 +1909,7 @@ def package_install_command(manager, channel, target, packages):
     if manager == "zypper":
         if channel == "subscription":
             return ["zypper", "--non-interactive", "install", "-y"] + packages
-        return ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel] + packages
+        return ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel] + (["--from", "himmelblau-stable-noarch"] if channel == "stable" else []) + packages
     if manager == "dnf":
         return ["dnf", "install", "-y"] + packages
     raise WorkerError("NixOS is not supported by this bootstrap installer.")
@@ -1631,17 +1925,184 @@ def install_packages(channel, target, event_log, packages, best_effort_packages)
             emit(event_log, {"type": "warning", "text": "Optional package %s could not be installed; continuing." % package})
 
 
-def execute_step(step, event_log):
+def setup_stable_repository(plan, event_log):
+    target = plan["target"]
+    manager = package_manager(target)
+    try:
+        architecture = apt_architecture(event_log) if manager == "apt" else run(["rpm", "--eval", "%{_arch}"], event_log).stdout.strip()
+        stream, root, distro, version, config = resolve_stable_repository(plan["entitlement_token"], target, architecture, manager)
+        emit(event_log, {"type": "info", "text": "Entitlement token grants access to the stable %s.x repository." % stream})
+        key_data = fetch_stable_data(root + "/gpg.key")
+    except ValueError as err:
+        raise WorkerError(str(err))
+    check_stable_major(stream, manager)
+    key_path = APT_KEYRING_PATH if manager == "apt" else STABLE_RPM_KEYS[manager]
+    path = STABLE_APT_SOURCE_PATH if manager == "apt" else STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo"
+    candidates = [path, STABLE_APT_DEB822_PATH] if manager == "apt" else [path, os.path.dirname(path) + "/himmelblau-nightly.repo"]
+    # Inspect all conflicting paths before replacing any file.
+    originals = []
+    for candidate in candidates:
+        if not os.path.isfile(candidate):
+            continue
+        with open(candidate) as handle:
+            previous = handle.read()
+        if "packages.himmelblau-idm.org/" in previous or "/himmelblau/himmelblau-" in previous or "himmelblau-idm.org/deb" in previous:
+            backup = candidate + ".himmelblau-disabled"
+            if os.path.exists(backup):
+                raise WorkerError("A repository backup already exists. Review the previous installation before retrying.")
+            originals.append((candidate, backup, os.stat(candidate).st_mode & 0o777))
+        elif candidate == path:
+            raise WorkerError("The repository filename is already used by another source. Review it before continuing.")
+    old_key = None
+    if os.path.isfile(key_path):
+        with open(key_path, "rb") as handle:
+            old_key = handle.read()
+    old_preferences = None
+    if manager == "apt" and os.path.isfile(STABLE_APT_PREFERENCES_PATH):
+        with open(STABLE_APT_PREFERENCES_PATH, "rb") as handle:
+            old_preferences = handle.read()
+    preferences_written = False
+    key_written = False
+    wrote_source = False
+    backups = []
+    try:
+        if manager == "apt":
+            run(apt_get_command("install", "-y", "ca-certificates", "curl", "gnupg"), event_log)
+            key_data = dearmor_apt_key(key_data)
+        run(["install", "-d", "-m", "0755", os.path.dirname(key_path)], event_log)
+        key_written = True
+        install_bytes(key_path, key_data, "0644", event_log)
+        if manager != "apt":
+            run(["rpm", "--import", key_path], event_log)
+        for candidate, backup, mode in originals:
+            os.rename(candidate, backup)
+            backups.append((candidate, backup, mode))
+            os.chmod(backup, 0o600)
+        wrote_source = True
+        install_text(path, config, "0600", event_log)
+        if manager == "apt":
+            preferences_written = True
+            install_text(STABLE_APT_PREFERENCES_PATH, "Package: himmelblau* pam-himmelblau nss-himmelblau o365\nPin: origin dl.cloudsmith.io\nPin-Priority: 990\n", "0644", event_log)
+            run(apt_get_command("update"), event_log)
+        elif manager == "dnf":
+            run(["dnf", "makecache", "--refresh", "-y", "--disablerepo=*", "--enablerepo=himmelblau-stable", "--enablerepo=himmelblau-stable-noarch"], event_log)
+        else:
+            run(["zypper", "--non-interactive", "--gpg-auto-import-keys", "refresh", "himmelblau-stable", "himmelblau-stable-noarch"], event_log)
+    except Exception:
+        if wrote_source and os.path.exists(path):
+            os.unlink(path)
+        for candidate, backup, mode in backups:
+            os.rename(backup, candidate)
+            os.chmod(candidate, mode)
+        if preferences_written:
+            if old_preferences is None:
+                if os.path.exists(STABLE_APT_PREFERENCES_PATH):
+                    os.unlink(STABLE_APT_PREFERENCES_PATH)
+            else:
+                install_bytes(STABLE_APT_PREFERENCES_PATH, old_preferences, "0644", event_log)
+        if key_written:
+            if old_key is None:
+                os.unlink(key_path)
+            else:
+                install_bytes(key_path, old_key, "0644", event_log)
+        raise
+    for candidate, backup, mode in backups:
+        # Keep disabled non-stable sources for recovery. Old credential-bearing sources
+        # are removed once the selected stable source successfully refreshes.
+        if candidate == path:
+            os.unlink(backup)
+
+
+
+def check_stable_major(stream, manager):
+    command = ["dpkg-query", "-W", "-f=${Version}", "himmelblau"] if manager == "apt" else ["rpm", "-q", "--qf", "%{VERSION}", "himmelblau"]
+    proc = subprocess.run(command, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    match = re.match(r"(?:[0-9]+:)?([0-9]+)\.", proc.stdout or "") if proc.returncode == 0 else None
+    if match and int(match.group(1)) > int(stream):
+        raise WorkerError("The selected stable stream would downgrade the installed major version. Downgrades require manual migration.")
+
+
+def setup_nightly_repository(step, event_log):
+    target = step["target"]
+    manager = package_manager(target)
+    if manager == "apt":
+        paths = [STABLE_APT_SOURCE_PATH, STABLE_APT_DEB822_PATH]
+        output_path = STABLE_APT_SOURCE_PATH
+        key_path = APT_KEYRING_PATH
+    else:
+        paths = [STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo", STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"]
+        output_path = paths[1]
+        key_path = None
+    originals = []
+    for path in paths:
+        if not os.path.isfile(path):
+            continue
+        with open(path) as handle:
+            text = handle.read()
+        if "/himmelblau/himmelblau-" in text or "packages.himmelblau-idm.org/" in text:
+            backup = path + ".himmelblau-disabled"
+            if os.path.exists(backup):
+                raise WorkerError("A repository backup already exists. Review it before changing package sources.")
+            originals.append((path, backup, os.stat(path).st_mode & 0o777))
+        elif path == output_path:
+            raise WorkerError("The repository filename is already used by another source.")
+    old_key = None
+    if key_path and os.path.isfile(key_path):
+        with open(key_path, "rb") as handle:
+            old_key = handle.read()
+    backups = []
+    try:
+        for path, backup, mode in originals:
+            os.rename(path, backup)
+            backups.append((path, backup, mode))
+            os.chmod(backup, 0o600)
+        {"apt": apt_repo_setup, "dnf": dnf_repo_setup, "zypper": zypper_repo_setup}[manager]("nightly", target, event_log)
+    except Exception:
+        if os.path.exists(output_path):
+            os.unlink(output_path)
+        for path, backup, mode in backups:
+            os.rename(backup, path)
+            os.chmod(path, mode)
+        if key_path and old_key is not None:
+            install_bytes(key_path, old_key, "0644", event_log)
+        raise
+    # Keep old paid source disabled for recovery, and remove replaced nightly sources.
+    for path, backup, mode in backups:
+        with open(backup) as handle:
+            if "/himmelblau/himmelblau-" not in handle.read():
+                os.unlink(backup)
+
+
+def setup_vendor_repositories(target):
+    manager = package_manager(target)
+    paths = [STABLE_APT_SOURCE_PATH, STABLE_APT_DEB822_PATH] if manager == "apt" else [STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo", STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"]
+    originals = []
+    for path in paths:
+        if not os.path.isfile(path):
+            continue
+        with open(path) as handle:
+            text = handle.read()
+        if "/himmelblau/himmelblau-" in text or "packages.himmelblau-idm.org/" in text:
+            backup = path + ".himmelblau-disabled"
+            if os.path.exists(backup):
+                raise WorkerError("A repository backup already exists. Review it before choosing vendor packages.")
+            originals.append((path, backup))
+    for path, backup in originals:
+        os.rename(path, backup)
+        os.chmod(backup, 0o600)
+
+
+def execute_step(step, event_log, plan=None):
     kind = step["kind"]
-    if kind == "apt_prereqs":
+    if kind == "stable_repo":
+        setup_stable_repository(plan, event_log)
+    elif kind == "vendor_repo":
+        setup_vendor_repositories(step["target"])
+    elif kind == "apt_prereqs":
         run(apt_get_command("update"), event_log)
         run(apt_get_command("install", "-y", "ca-certificates", "curl", "gnupg"), event_log)
-    elif kind == "apt_repo":
-        apt_repo_setup(step["channel"], step["target"], event_log)
-    elif kind == "zypper_repo":
-        zypper_repo_setup(step["channel"], step["target"], event_log)
-    elif kind == "dnf_repo":
-        dnf_repo_setup(step["channel"], step["target"], event_log)
+    elif kind in ("apt_repo", "zypper_repo", "dnf_repo"):
+        setup_nightly_repository(step, event_log)
     elif kind == "install_packages":
         install_packages(step["channel"], step["target"], event_log, step["packages"], step["best_effort_packages"])
     elif kind == "write_global_config":
@@ -1686,7 +2147,7 @@ def main():
         emit(event_log, {"type": "started", "total": len(steps)})
         for index, step in enumerate(steps, 1):
             emit(event_log, {"type": "step", "index": index, "total": len(steps), "kind": step["kind"]})
-            execute_step(step, event_log)
+            execute_step(step, event_log, plan)
         emit(event_log, {"type": "done"})
         return 0
     except Exception as err:
@@ -1869,57 +2330,29 @@ def run_elevated_plan(plan, on_event=None, prefer_gui=True, non_interactive=Fals
         shutil.rmtree(work_dir, ignore_errors=True)
 
 
+def prompt_stable_access(ui, existing=None):
+    if existing:
+        return existing[1]
+    while True:
+        try:
+            token = getpass.getpass("Entitlement token: ", stream=ui._out())
+            return normalize_entitlement_token(token)
+        except ValueError as err:
+            ui.warn(str(err))
+
+
 def run_cli():
     ui = CliUi()
-    ui.info(f"Himmelblau bootstrap installer {VERSION}")
-    ui.info("This installer adds the trusted Himmelblau repository and installs packages with your native package manager.")
-
-    info = read_os_release()
-    target = distro_target(info)
-    if target == "nixos":
-        raise InstallError("NixOS is not supported by this bootstrap installer. Use the advanced NixOS instructions on the downloads page.")
-    if not target or target not in DISTRO_LABELS:
-        pretty = info.get("PRETTY_NAME", "this Linux distribution")
-        raise InstallError(f"{pretty} is not supported by this installer yet.")
-
-    manager = package_manager(target)
-    require_commands([required_manager_command(target)])
-
-    matrix = load_repo_support(ui)
-    choices = channel_choices(matrix, target)
-    if not choices:
-        raise InstallError(f"Himmelblau does not currently publish packages for {DISTRO_LABELS[target]}.")
-
-    ui.info(f"Detected: {DISTRO_LABELS[target]}")
-    if himmelblau_installed(target):
-        ui.info("Himmelblau appears to already be installed; this will update or repair the installation.")
-
-    channel = ui.choose("Choose installation source", choices)
+    target = distro_target(read_os_release())
+    if not target or target not in DISTRO_LABELS or target == "nixos":
+        raise InstallError("This distribution requires the manual installation instructions on the downloads page.")
+    channel = ui.choose("Choose installation source", channel_choices(load_repo_support(ui), target))
+    token = prompt_stable_access(ui, existing_stable_access()) if channel == "stable" else None
     idp_config, write_config = prompt_idp_config(ui)
-    packages, best_effort_packages = detected_package_selection(channel, target)
-
-    summary = summary_lines(target, manager, channel, idp_config, write_config, None, packages, best_effort_packages)
-    if not ui.confirm("\n".join(summary) + "\n\nContinue?", default=False):
+    if not ui.confirm("\n".join(summary_lines(target, package_manager(target), channel, idp_config, write_config)) + "\nContinue?", default=False):
         raise InstallError("Installation cancelled.")
-
-    if os.geteuid() != 0:
-        require_commands(["sudo"])
-        run(["sudo", "-v"], ui)
-
-    install_packages(channel, target, ui, packages, best_effort_packages)
-    if write_config:
-        write_idp_config(idp_config, ui)
-
-    if channel == "subscription":
-        configure_distro_provided(target, ui)
-    else:
-        ui.info("Skipping explicit PAM/NSS setup; Himmelblau community packages configure integration at install time.")
-
-    enable_services(ui)
-    maybe_status(ui)
-
-    ui.info("Himmelblau installation completed.")
-    ui.info("Detected optional packages were installed when available.")
+    plan = build_install_plan(channel, target, idp_config, write_config, entitlement_token=token)
+    run_elevated_plan(plan, on_event=print_headless_event, prefer_gui=False)
 
 
 def print_headless_event(event):
@@ -1932,41 +2365,59 @@ def print_headless_event(event):
         print(text, flush=True)
 
 
-def run_headless_install():
-    ui = LogUi()
-    ui.info(f"Himmelblau bootstrap installer {VERSION}")
-    ui.info("No interactive terminal detected; running package-only install.")
-    ui.info("Identity provider configuration will not be changed.")
-
-    info = read_os_release()
-    target = distro_target(info)
-    if target == "nixos":
-        raise InstallError("NixOS is not supported by this bootstrap installer. Use the advanced NixOS instructions on the downloads page.")
-    if not target or target not in DISTRO_LABELS:
-        pretty = info.get("PRETTY_NAME", "this Linux distribution")
-        raise InstallError(f"{pretty} is not supported by this installer yet.")
-
-    manager = package_manager(target)
-    require_commands([required_manager_command(target)])
-
-    matrix = load_repo_support(ui)
-    channel, fallback_message = default_community_channel(matrix, target)
-    ui.info(f"Detected: {DISTRO_LABELS[target]}")
-    ui.info(f"Package manager: {manager}")
-    if fallback_message:
-        ui.warn(fallback_message)
-    elif channel == "stable":
-        ui.info("Using Community Stable packages.")
-    else:
-        ui.info("Using Community Nightly packages.")
-    ui.info(f"Repository base: {base_url(channel)}")
-    ui.info(f"Config: {CONFIG_PATH} (unchanged)")
-
-    plan = build_package_only_plan(channel, target)
+def run_headless_install(options=None):
+    if options is None:
+        options = parse_install_options([])
+    target = distro_target(read_os_release())
+    if not target or target not in DISTRO_LABELS or target == "nixos":
+        raise InstallError("This distribution requires the manual installation instructions on the downloads page.")
+    existing = existing_stable_access()
+    channel = options.channel or ("stable" if existing else None)
+    if not channel:
+        raise InstallError("Choose --channel stable, nightly, or vendor. Stable setup also requires --entitlement-token-file PATH. See https://himmelblau-idm.org/stable-repositories/.")
+    channel = "subscription" if channel == "vendor" else channel
+    if not is_supported(load_repo_support(LogUi()), channel, target):
+        raise InstallError("The selected source is unavailable for this distribution. Choose another source explicitly.")
+    token = read_entitlement_token_file(options.entitlement_token_file) if options.entitlement_token_file else (existing[1] if existing else None)
+    if channel == "stable" and not token:
+        raise InstallError("Stable installation requires --entitlement-token-file PATH containing the entitlement token.")
+    plan = build_package_only_plan(channel, target, token)
     run_elevated_plan(plan, on_event=print_headless_event, prefer_gui=False, non_interactive=True)
 
-    ui.info("Himmelblau package installation completed.")
-    ui.info("Configure identity provider settings in /etc/himmelblau/himmelblau.conf when ready.")
+
+def parse_install_options(argv):
+    parser = argparse.ArgumentParser(description="Install Himmelblau with your native package manager.")
+    parser.add_argument("--channel", choices=("stable", "nightly", "vendor"))
+    parser.add_argument("--entitlement-token-file", metavar="PATH", help="Private file containing the stable repository entitlement token")
+    options = parser.parse_args(argv)
+    if options.entitlement_token_file and options.channel not in (None, "stable"):
+        parser.error("The entitlement token option requires --channel stable.")
+    return options
+
+
+def read_entitlement_token_file(path):
+    try:
+        with open(path) as handle:
+            return normalize_entitlement_token(handle.read())
+    except (OSError, ValueError) as err:
+        raise InstallError("Unable to use the entitlement token file: " + redact(str(err)))
+
+
+def existing_stable_access(paths=None):
+    paths = paths or ["/etc/apt/sources.list.d/himmelblau.list", "/etc/apt/sources.list.d/himmelblau.sources", "/etc/yum.repos.d/himmelblau-stable.repo", "/etc/zypp/repos.d/himmelblau-stable.repo"]
+    found = set()
+    for path in paths:
+        try:
+            with open(path) as handle:
+                text = handle.read()
+        except OSError:
+            continue
+        for match in re.finditer(r"https://dl\.cloudsmith\.io/([A-Za-z0-9_-]+)/himmelblau/himmelblau-([34])", text):
+            token, stream = match.groups()
+            found.add((stream, normalize_entitlement_token(token)))
+    if len(found) > 1:
+        raise InstallError("Multiple stable subscriptions are configured. Review your repository configuration before installing.")
+    return next(iter(found)) if found else None
 
 
 CURSES_STARTUP_EXIT = 75
@@ -2023,6 +2474,7 @@ class WizardCursesUi:
     STEPS = [
         ("preflight", "Preflight"),
         ("source", "Source"),
+        ("stable", "Stable access"),
         ("identity", "Identity"),
         ("options", "Options"),
         ("review", "Review"),
@@ -2045,6 +2497,8 @@ class WizardCursesUi:
         self.existing_config = None
         self.installed = False
         self.channel = None
+        self.entitlement_token = ""
+        self.original_channel = None
         self.identity_stage = "input"
         self.input_mode = "domain"
         self.lookup_domain = ""
@@ -2061,8 +2515,9 @@ class WizardCursesUi:
         self.enable_hello = True
         self.allow_console_password_only = True
         self.apply_policy = True
-        self.input_cursor = {"domain": 0, "username": 0, "issuer": 0, "appid": 0, "pam_allow_groups": 0}
+        self.input_cursor = {"domain": 0, "username": 0, "issuer": 0, "appid": 0, "pam_allow_groups": 0, "entitlement_token": 0}
         self.message = ""
+        self.clipboard_notice = ""
         self.progress_text = "Requesting administrative authorization..."
         self.progress_percent = 0
         self.transcript = []
@@ -2263,6 +2718,13 @@ class WizardCursesUi:
                 self.allow_console_password_only = options["allow_console_password_only"]
                 self.apply_policy = options["apply_policy"]
                 self.input_cursor["pam_allow_groups"] = len(self.pam_allow_groups)
+                access = existing_stable_access()
+                if access:
+                    _, self.entitlement_token = access
+                    self.channel = "stable"
+                    self.original_channel = "stable"
+                    self.choice_index = next((i for i, c in enumerate(self.choices) if c["value"] == "stable"), 0)
+                    self.input_cursor["entitlement_token"] = len(self.entitlement_token)
                 self.installed = himmelblau_installed(self.target)
                 if self.existing_config:
                     self.domain = self.existing_config.get("domain", "")
@@ -2442,6 +2904,19 @@ class WizardCursesUi:
         self._add_target(key, "button", (y, x, 1, len(text)), action, enabled)
         return len(text)
 
+    def _write_terminal_clipboard(self, text):
+        payload = base64.b64encode(text.encode("utf-8")).decode("ascii")
+        sys.stdout.write("\033]52;c;" + payload + "\a")
+        sys.stdout.flush()
+
+    def copy_subscription_url(self):
+        try:
+            self._write_terminal_clipboard(STABLE_SUBSCRIPTION_URL)
+            self.clipboard_notice = "Copy request sent to terminal."
+        except Exception:
+            self.clipboard_notice = "Unable to send copy request."
+        return True
+
     def _footer_buttons(self, layout, buttons):
         y = layout["footer_y"]
         right = layout["win_x"] + layout["win_w"] - 3
@@ -2499,7 +2974,7 @@ class WizardCursesUi:
         input_w = max(width - label_w - 1, 10)
         cursor = min(self.input_cursor.get(field, len(value)), len(value))
         start = max(0, cursor - input_w + 2)
-        shown = value[start:start + input_w]
+        shown = ("*" * len(value) if field == "entitlement_token" else value)[start:start + input_w]
         attr = self._attr("input_focus") if focused else self._attr("input")
         self._write(y, x, label, self._attr("muted"))
         if focused:
@@ -2525,6 +3000,8 @@ class WizardCursesUi:
             self.render_preflight()
         elif self.page == "source":
             self.render_source()
+        elif self.page == "stable":
+            self.render_stable_access()
         elif self.page == "identity":
             self.render_identity()
         elif self.page == "options":
@@ -2586,6 +3063,27 @@ class WizardCursesUi:
             {"label": f"Next {self.glyphs['next']}", "key_label": "Next", "action": self.next_page, "primary": True},
         ])
 
+    def render_stable_access(self):
+        layout = self._begin_frame("Stable repository access", "Enter the entitlement token from your subscription email.")
+        y, x = layout["content_y"] + 1, layout["content_x"] + 2
+        width = layout["content_w"] - 4
+        y = self._input(y, x, width, "entitlement_token", "Entitlement token")
+        y = self._draw_wrapped(y + 1, x, "The installer will identify the stable stream authorized by this token.", width, self._attr("panel"))
+        y = self._draw_wrapped(y, x, "Need access? Subscribe at:", width, self._attr("muted"))
+        self._write(y, x, STABLE_SUBSCRIPTION_URL, self._attr("accent"))
+        y += 1
+        button_width = self._button(y, x, "Copy URL", self.copy_subscription_url)
+        if self.clipboard_notice:
+            self._write(y, x + button_width + 1, self.clipboard_notice, self._attr("muted"))
+        y = self._draw_wrapped(y + 1, x, "Missing email? Contact dmulder@himmelblau-idm.org with proof of subscription; expect a response within one business day. Technical support is not included.", width, self._attr("muted"))
+        if self.message:
+            self._draw_wrapped(y + 1, x, self.message, width, self._attr("error"))
+        self._footer_buttons(layout, [
+            {"label": "Back", "action": self.back_page},
+            {"label": "Cancel", "action": self.cancel},
+            {"label": "Next", "action": self.next_page, "primary": True},
+        ])
+
     def _identity_items(self):
         items = []
         if self.identity_stage == "input":
@@ -2607,6 +3105,8 @@ class WizardCursesUi:
         return items
 
     def _field_value(self, item):
+        if item == "entitlement_token":
+            return self.entitlement_token
         if item == "domain":
             return self.domain
         if item == "username":
@@ -2620,6 +3120,9 @@ class WizardCursesUi:
         return ""
 
     def _set_field_value(self, item, value):
+        if item == "entitlement_token":
+            self.entitlement_token = value
+            return
         if item == "domain":
             self.domain = value
         elif item == "username":
@@ -2804,6 +3307,8 @@ class WizardCursesUi:
                 y = self._row(y, x, width, label, value)
             else:
                 y = self._draw_wrapped(y, x, line, width, self._attr("accent"))
+        if self.channel == "stable":
+            y = self._row(y, x, width, "Stable stream", "Determined from entitlement token")
         y += 1
         self._draw_wrapped(y, x, "Administrative authorization will be requested when installation begins.", width, self._attr("muted"))
         self._footer_buttons(layout, [
@@ -2913,14 +3418,14 @@ class WizardCursesUi:
             authorize_sudo_for_curses(self.curses)
             self._enable_mouse()
             idp_config, write_config = self.selected_idp()
-            plan = build_install_plan(self.channel, self.target, idp_config, write_config, self.selected_options())
+            plan = build_install_plan(self.channel, self.target, idp_config, write_config, self.selected_options(), self.entitlement_token)
             run_elevated_plan(plan, on_event=self.on_event, prefer_gui=False, non_interactive=True)
             self.install_ok = True
             self.final_message = "Himmelblau installation completed."
         except Exception as err:
             self._enable_mouse()
             self.install_ok = False
-            self.final_message = str(err)
+            self.final_message = redact(str(err))
         self.exit_code = 0 if self.install_ok else 1
         self.page = "done"
         self.render()
@@ -2936,6 +3441,16 @@ class WizardCursesUi:
         if self.page == "preflight" and not self.blockers:
             self.page = "source"
         elif self.page == "source":
+            self.page = "stable" if self.channel == "stable" else "identity"
+        elif self.page == "stable":
+            try:
+                self.entitlement_token = normalize_entitlement_token(self.entitlement_token)
+                stable_destination(self.target)
+            except ValueError as err:
+                self.message = str(err)
+                return True
+            self.message = ""
+            self.clipboard_notice = ""
             self.page = "identity"
         elif self.page == "identity":
             ok, message = self.validate_identity()
@@ -2960,12 +3475,15 @@ class WizardCursesUi:
         self.message = ""
         if self.page == "source":
             self.page = "preflight"
+        elif self.page == "stable":
+            self.clipboard_notice = ""
+            self.page = "source"
         elif self.page == "identity":
             if getattr(self, "identity_stage", "input") == "results":
                 self.identity_stage = "input"
                 self.message = ""
             else:
-                self.page = "source"
+                self.page = "stable" if self.channel == "stable" else "source"
         elif self.page == "options":
             self.page = "identity"
         elif self.page == "review":
@@ -3137,7 +3655,11 @@ def run_curses_terminal_child():
     return 1
 
 
-def main():
+def main(argv=None):
+    options = parse_install_options(sys.argv[1:] if argv is None else argv)
+    if options.channel or options.entitlement_token_file:
+        run_headless_install(options)
+        return
     if not has_interactive_terminal():
         run_headless_install()
         return
@@ -3154,10 +3676,10 @@ if __name__ == "__main__":
     except InstallError as err:
         try:
             ui = CliUi()
-            ui.error(str(err))
+            ui.error(redact(str(err)))
             ui.info(f"Log: {LOG_PATH}")
         except Exception:
-            print("error: " + str(err), file=sys.stderr)
+            print("error: " + redact(str(err)), file=sys.stderr)
         sys.exit(1)
     except KeyboardInterrupt:
         print("\nInstallation cancelled.", file=sys.stderr)

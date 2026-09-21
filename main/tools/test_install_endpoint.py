@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import contextlib
+import base64
 import io
 import json
 import pathlib
@@ -210,30 +211,24 @@ class InstallEndpointTests(unittest.TestCase):
 
     def test_extracts_current_repo_support_object(self):
         matrix = installer.extract_repo_support(INSTALL_JS_PATH.read_text(encoding="utf-8"))
-        self.assertEqual(matrix["stable"]["exclude"], ["fedora44"])
-        self.assertEqual(matrix["nightly"]["exclude"], ["fedora42"])
+        self.assertEqual(matrix["stable"]["exclude"], ["nixos"])
+        self.assertEqual(matrix["nightly"]["exclude"], [])
         self.assertIn("sle16", matrix["subscription"]["include"])
+        self.assertEqual(matrix, installer.FALLBACK_REPO_SUPPORT)
 
     def test_channel_choices_are_recommendation_ordered(self):
         matrix = installer.extract_repo_support(INSTALL_JS_PATH.read_text(encoding="utf-8"))
-        self.assertEqual(
-            [choice["value"] for choice in installer.channel_choices(matrix, "sle16")],
-            ["stable", "nightly"],
-        )
-        self.assertEqual(
-            [choice["value"] for choice in installer.channel_choices(matrix, "fedora42")],
-            ["stable"],
-        )
-        self.assertEqual(
-            [choice["value"] for choice in installer.channel_choices(matrix, "fedora44")],
-            ["nightly"],
-        )
-        self.assertNotIn("subscription", [choice["value"] for choice in installer.channel_choices(matrix, "sle16")])
+        self.assertEqual([c["value"] for c in installer.channel_choices(matrix, "sle16")], ["subscription", "stable", "nightly"])
+        self.assertEqual([c["value"] for c in installer.channel_choices(matrix, "fedora43")], ["stable", "nightly"])
+        self.assertEqual([c["value"] for c in installer.channel_choices(matrix, "rawhide")], ["stable", "nightly"])
+        self.assertEqual([c["value"] for c in installer.channel_choices(matrix, "nixos")], ["nightly"])
 
     def test_distro_mapping(self):
         cases = [
             ({"ID": "ubuntu", "VERSION_ID": "24.04"}, "ubuntu24.04"),
+            ({"ID": "linuxmint", "VERSION_ID": "21.3"}, "ubuntu22.04"),
             ({"ID": "linuxmint", "VERSION_ID": "22"}, "ubuntu24.04"),
+            ({"ID": "linuxmint", "VERSION_ID": "23"}, "ubuntu26.04"),
             ({"ID": "debian", "VERSION_ID": "13"}, "debian13"),
             ({"ID": "fedora", "VERSION_ID": "43"}, "fedora43"),
             ({"ID": "fedora", "VERSION_ID": "rawhide"}, "rawhide"),
@@ -242,11 +237,17 @@ class InstallEndpointTests(unittest.TestCase):
             ({"ID": "fedora", "VERSION_ID": "45", "REDHAT_BUGZILLA_PRODUCT_VERSION": "rawhide"}, "rawhide"),
             ({"ID": "fedora", "VERSION_ID": "45", "REDHAT_SUPPORT_PRODUCT_VERSION": "rawhide"}, "rawhide"),
             ({"ID": "fedora", "VERSION_ID": "45"}, "fedora45"),
+            ({"ID": "rhel", "VERSION_ID": "8.10"}, "rocky8"),
             ({"ID": "rocky", "VERSION_ID": "9.5"}, "rocky9"),
             ({"ID": "almalinux", "VERSION_ID": "10"}, "rocky10"),
+            ({"ID": "ol", "VERSION_ID": "9.5"}, "rocky9"),
             ({"ID": "amzn", "VERSION_ID": "2023"}, "amzn2023"),
             ({"ID": "opensuse-tumbleweed", "VERSION_ID": "20260701"}, "tumbleweed"),
+            ({"ID": "opensuse-leap", "VERSION_ID": "15.6"}, "sle15sp6"),
+            ({"ID": "sles", "VERSION_ID": "15-SP6"}, "sle15sp6"),
             ({"ID": "sles", "VERSION_ID": "15-SP7"}, "sle15sp7"),
+            ({"ID": "opensuse-leap", "VERSION_ID": "16.0"}, "sle16"),
+            ({"ID": "sles", "VERSION_ID": "16.0"}, "sle16"),
             ({"ID": "nixos", "VERSION_ID": "25.05"}, "nixos"),
         ]
         for info, expected in cases:
@@ -308,7 +309,7 @@ class InstallEndpointTests(unittest.TestCase):
             installer.os.geteuid = lambda: 0
             installer.apt_repo_setup = lambda channel, target, ui: calls.append(["repo", channel, target])
             installer.run = lambda argv, ui, check=True, input_text=None: calls.append(argv) or types.SimpleNamespace(stdout="")
-            installer.install_packages("stable", "debian13", object(), installer.COMMUNITY_PACKAGES, [])
+            installer.install_packages("nightly", "debian13", object(), installer.COMMUNITY_PACKAGES, [])
             install_calls = [call for call in calls if isinstance(call, list) and call[:3] == ["env", "DEBIAN_FRONTEND=noninteractive", "apt-get"] and "install" in call]
             self.assertTrue(install_calls)
             self.assertIn("Dpkg::Options::=--force-confdef", install_calls[-1])
@@ -326,7 +327,7 @@ class InstallEndpointTests(unittest.TestCase):
         try:
             installer.os.geteuid = lambda: 0
             installer.run = lambda argv, ui, check=True, input_text=None: calls.append(argv) or types.SimpleNamespace(stdout="")
-            installer.install_packages("stable", "tumbleweed", object(), installer.COMMUNITY_PACKAGES, [])
+            installer.install_packages("nightly", "tumbleweed", object(), installer.COMMUNITY_PACKAGES, [])
             self.assertIn(
                 [
                     "zypper",
@@ -335,7 +336,7 @@ class InstallEndpointTests(unittest.TestCase):
                     "install",
                     "-y",
                     "--from",
-                    "himmelblau-stable",
+                    "himmelblau-nightly",
                     "himmelblau",
                     "pam-himmelblau",
                     "nss-himmelblau",
@@ -369,7 +370,7 @@ class InstallEndpointTests(unittest.TestCase):
 
     def test_root_worker_zypper_community_install_uses_himmelblau_repo_without_refreshing_all_repos(self):
         source = installer.ROOT_WORKER_SOURCE
-        self.assertIn('["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel] + packages', source)
+        self.assertIn('["--from", "himmelblau-stable-noarch"] if channel == "stable" else []', source)
         self.assertIn('["zypper", "--non-interactive", "install", "-y"] + packages', source)
 
     def test_detected_package_selection_includes_contextual_packages(self):
@@ -449,7 +450,7 @@ class InstallEndpointTests(unittest.TestCase):
 
             installer.run = fake_run
             installer.install_packages(
-                "stable",
+                "nightly",
                 "fedora43",
                 ui,
                 ["himmelblau", "pam-himmelblau", "nss-himmelblau", "himmelblau-sso"],
@@ -497,7 +498,7 @@ class InstallEndpointTests(unittest.TestCase):
 
             installer.wait_with_events = fake_wait
             with self.assertRaises(installer.InstallError) as raised:
-                installer.run_elevated_plan(installer.build_package_only_plan("stable", "ubuntu24.04"), non_interactive=True)
+                installer.run_elevated_plan(installer.build_package_only_plan("nightly", "ubuntu24.04"), non_interactive=True)
             self.assertEqual(str(raised.exception), "zypper failed")
             self.assertNotIsInstance(raised.exception, installer.ElevationError)
         finally:
@@ -517,7 +518,7 @@ class InstallEndpointTests(unittest.TestCase):
             installer.subprocess.Popen = lambda argv: object()
             installer.wait_with_events = lambda proc, event_log, on_event: 1
             with self.assertRaises(installer.ElevationError) as raised:
-                installer.run_elevated_plan(installer.build_package_only_plan("stable", "ubuntu24.04"), non_interactive=True)
+                installer.run_elevated_plan(installer.build_package_only_plan("nightly", "ubuntu24.04"), non_interactive=True)
             self.assertIn("requires root or passwordless sudo", str(raised.exception))
         finally:
             installer.os.geteuid = old_geteuid
@@ -854,7 +855,7 @@ class InstallEndpointTests(unittest.TestCase):
                 ["himmelblau-selinux"],
             )
             plan = installer.build_install_plan(
-                "stable",
+                "nightly",
                 "ubuntu24.04",
                 {"mode": "entra", "domain": "example.onmicrosoft.com"},
                 True,
@@ -881,7 +882,7 @@ class InstallEndpointTests(unittest.TestCase):
         old_detected = installer.detected_package_selection
         installer.detected_package_selection = lambda channel, target: (["himmelblau", "pam-himmelblau", "nss-himmelblau"], [])
         plan = installer.build_install_plan(
-            "stable",
+            "nightly",
             "ubuntu24.04",
             {"mode": "entra", "domain": "example.onmicrosoft.com"},
             False,
@@ -897,7 +898,7 @@ class InstallEndpointTests(unittest.TestCase):
         old_detected = installer.detected_package_selection
         try:
             installer.detected_package_selection = lambda channel, target: (["himmelblau", "bad package"], [])
-            plan = installer.build_package_only_plan("stable", "ubuntu24.04")
+            plan = installer.build_package_only_plan("nightly", "ubuntu24.04")
             with self.assertRaises(installer.InstallError):
                 installer.validate_install_plan(plan)
         finally:
@@ -907,7 +908,7 @@ class InstallEndpointTests(unittest.TestCase):
         old_detected = installer.detected_package_selection
         try:
             installer.detected_package_selection = lambda channel, target: (["himmelblau", "pam-himmelblau", "nss-himmelblau"], [])
-            plan = installer.build_package_only_plan("stable", "ubuntu24.04")
+            plan = installer.build_package_only_plan("nightly", "ubuntu24.04")
             kinds = [step["kind"] for step in plan["steps"]]
             self.assertNotIn("write_idp_config", kinds)
             self.assertNotIn("write_global_config", kinds)
@@ -916,21 +917,32 @@ class InstallEndpointTests(unittest.TestCase):
         finally:
             installer.detected_package_selection = old_detected
 
-    def test_rawhide_plan_uses_rawhide_dnf_repo_target(self):
-        plan = installer.build_package_only_plan("nightly", "rawhide")
-        self.assertEqual(plan["target"], "rawhide")
-        self.assertEqual(plan["manager"], "dnf")
-        self.assertIn({"kind": "dnf_repo", "channel": "nightly", "target": "rawhide"}, plan["steps"])
+    def test_nightly_plans_preserve_canonical_repository_targets(self):
+        cases = {
+            "ubuntu24.04": "apt_repo",
+            "rocky9": "dnf_repo",
+            "rawhide": "dnf_repo",
+            "sle16": "zypper_repo",
+        }
+        old_detected = installer.detected_package_selection
+        try:
+            installer.detected_package_selection = lambda channel, target: (["himmelblau"], [])
+            for target, repo_kind in cases.items():
+                with self.subTest(target=target):
+                    plan = installer.build_package_only_plan("nightly", target)
+                    self.assertIn({"kind": repo_kind, "channel": "nightly", "target": target}, plan["steps"])
+        finally:
+            installer.detected_package_selection = old_detected
 
-    def test_default_community_channel_prefers_stable(self):
+    def test_free_community_channel_is_nightly(self):
         matrix = installer.extract_repo_support(INSTALL_JS_PATH.read_text(encoding="utf-8"))
-        self.assertEqual(installer.default_community_channel(matrix, "fedora42"), ("stable", None))
+        self.assertEqual(installer.default_community_channel(matrix, "fedora43"), ("nightly", None))
 
-    def test_default_community_channel_falls_back_to_nightly(self):
+    def test_nightly_selection_ignores_stable_availability(self):
         matrix = installer.extract_repo_support(INSTALL_JS_PATH.read_text(encoding="utf-8"))
         channel, message = installer.default_community_channel(matrix, "fedora44")
         self.assertEqual(channel, "nightly")
-        self.assertIn("Community Stable packages are not available", message)
+        self.assertIsNone(message)
 
     def test_default_community_channel_fails_without_community_support(self):
         matrix = {
@@ -1069,7 +1081,7 @@ class InstallEndpointTests(unittest.TestCase):
             installer.has_interactive_terminal = lambda: True
             installer.run_curses_terminal_child = lambda: calls.append("curses") or 0
             installer.run_headless_install = lambda: calls.append("headless")
-            installer.main()
+            installer.main([])
             self.assertEqual(calls, ["curses"])
         finally:
             installer.has_interactive_terminal = old_has_interactive_terminal
@@ -1085,7 +1097,7 @@ class InstallEndpointTests(unittest.TestCase):
             installer.has_interactive_terminal = lambda: False
             installer.run_curses_terminal_child = lambda: calls.append("curses") or 0
             installer.run_headless_install = lambda: calls.append("headless")
-            installer.main()
+            installer.main([])
             self.assertEqual(calls, ["headless"])
         finally:
             installer.has_interactive_terminal = old_has_interactive_terminal
@@ -1102,7 +1114,7 @@ class InstallEndpointTests(unittest.TestCase):
             installer.run_curses_terminal_child = lambda: calls.append("curses") or installer.CURSES_STARTUP_EXIT
             installer.run_headless_install = lambda: calls.append("headless")
             with self.assertRaises(installer.InstallError):
-                installer.main()
+                installer.main([])
             self.assertEqual(calls, ["curses"])
         finally:
             installer.has_interactive_terminal = old_has_interactive_terminal
@@ -1161,7 +1173,7 @@ class InstallEndpointTests(unittest.TestCase):
             installer.os.dup2 = old_dup2
 
     def test_non_interactive_elevation_uses_sudo_n(self):
-        plan = installer.build_package_only_plan("stable", "ubuntu24.04")
+        plan = installer.build_package_only_plan("nightly", "ubuntu24.04")
         calls = []
         events = []
 
@@ -1203,7 +1215,8 @@ class InstallEndpointTests(unittest.TestCase):
             reset_prog_mode=lambda: None,
             curs_set=lambda value: None,
         )
-        ui.channel = "stable"
+        ui.channel = "nightly"
+        ui.entitlement_token = ""
         ui.target = "ubuntu24.04"
         ui.existing_config = None
         ui.mode = "entra"
@@ -1558,6 +1571,55 @@ class InstallEndpointTests(unittest.TestCase):
         ui.focus_index = 0
         self.assertFalse(ui._activate_focused())
         self.assertEqual(calls, ["next"])
+
+    def test_curses_copy_subscription_url_uses_osc52(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        output = io.StringIO()
+        encoded = base64.b64encode(installer.STABLE_SUBSCRIPTION_URL.encode("utf-8")).decode("ascii")
+
+        with contextlib.redirect_stdout(output):
+            ui._write_terminal_clipboard(installer.STABLE_SUBSCRIPTION_URL)
+
+        self.assertEqual(output.getvalue(), "\033]52;c;" + encoded + "\a")
+
+    def test_curses_copy_subscription_url_reports_request(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        copied = []
+        ui.clipboard_notice = ""
+        ui._write_terminal_clipboard = copied.append
+
+        self.assertTrue(ui.copy_subscription_url())
+        self.assertEqual(copied, [installer.STABLE_SUBSCRIPTION_URL])
+        self.assertEqual(ui.clipboard_notice, "Copy request sent to terminal.")
+
+    def test_curses_stable_access_renders_copy_control(self):
+        ui = installer.WizardCursesUi.__new__(installer.WizardCursesUi)
+        writes = []
+        buttons = []
+        ui.message = ""
+        ui.clipboard_notice = "Copy request sent to terminal."
+        ui._attr = lambda name, extra=0: 0
+        ui._begin_frame = lambda title, subtitle: {
+            "content_y": 0,
+            "content_x": 0,
+            "content_w": 80,
+        }
+        ui._input = lambda y, x, width, field, label: y + 1
+        ui._draw_wrapped = lambda y, x, text, width, attr=0: y + 1
+        ui._write = lambda y, x, text, attr=0: writes.append(text)
+
+        def fake_button(y, x, label, action, primary=False, enabled=True, key_label=None):
+            buttons.append((label, action))
+            return len(label) + 8
+
+        ui._button = fake_button
+        ui._footer_buttons = lambda layout, buttons: None
+
+        ui.render_stable_access()
+
+        self.assertIn(installer.STABLE_SUBSCRIPTION_URL, writes)
+        self.assertIn("Copy request sent to terminal.", writes)
+        self.assertEqual(buttons, [("Copy URL", ui.copy_subscription_url)])
 
     def test_curses_button_renders_focus_markers(self):
         class FakeScreen:

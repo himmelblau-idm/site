@@ -1488,7 +1488,7 @@ To obtain one:</p>
 <div class="highlight"><pre><span></span><code>sudo nano /usr/lib/systemd/system/himmelblaud.service
 </code></pre></div>
 <p>Make sure it includes, and that the HTTPS_PROXY setting is correct for your mitmproxy instance:</p>
-<div class="highlight"><pre><span></span><code>Environment=&quot;HTTPS_PROXY=http://127.0.0.1:8080&quot;
+<div class="highlight"><pre><span></span><code>Environment="HTTPS_PROXY=http://127.0.0.1:8080"
 </code></pre></div>
 <p>Then reload systemd and restart <code>himmelblaud</code>:</p>
 <div class="highlight"><pre><span></span><code>sudo systemctl daemon-reload
@@ -1545,8 +1545,8 @@ sudo update-ca-certificates
 <p>This automatically masks known sensitive data like JWTs, flow tokens, tenant IDs, etc.</p>
 <p>You can also specify explicit items to redact (emails, passwords, etc):</p>
 <div class="highlight"><pre><span></span><code>cirrus-scope obfuscate -i flows -o flows.obfuscated \
-    --custom &quot;admin@contoso.com&quot; \
-    --custom &quot;SuperSecretPassword&quot;
+    --custom "admin@contoso.com" \
+    --custom "SuperSecretPassword"
 </code></pre></div>
 <hr />
 <h2 id="done">Done!</h2>

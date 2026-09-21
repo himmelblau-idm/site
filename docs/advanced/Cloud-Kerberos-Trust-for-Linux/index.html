@@ -1445,7 +1445,7 @@
 <span class="nv">$domain</span> <span class="p">=</span> <span class="nv">$env:USERDNSDOMAIN</span>
 
 <span class="c"># Enter a UPN of an Azure Active Directory global administrator</span>
-<span class="nv">$userPrincipalName</span> <span class="p">=</span> <span class="s2">&quot;administrator@contoso.onmicrosoft.com&quot;</span>
+<span class="nv">$userPrincipalName</span> <span class="p">=</span> <span class="s2">"administrator@contoso.onmicrosoft.com"</span>
 
 <span class="c"># Enter a domain administrator username and password.</span>
 <span class="nv">$domainCred</span> <span class="p">=</span> <span class="nb">Get-Credential</span>
@@ -1485,15 +1485,15 @@ Valid starting       Expires              Service principal
 <p>Himmelblau currently issues Kerberos tickets into a keyring credential cache. File-based credential caches such as <code>FILE:/tmp/krb5cc_&lt;uid&gt;</code> are not supported by Himmelblau.</p>
 <h3 id="step-4-mount-azure-files-with-kerberos">Step 4: Mount Azure Files with Kerberos</h3>
 <p>After the user has logged in and <code>klist</code> shows the cloud TGT, mount the Azure Files share with <code>sec=krb5</code>, the user's numeric UID as <code>cruid</code>, and the same numeric UID as <code>username</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">uid</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span><span class="s2">&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">uid</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span><span class="s2">"</span>
 sudo<span class="w"> </span>mount.cifs<span class="w"> </span>//&lt;storage-account&gt;.file.core.windows.net/&lt;share&gt;<span class="w"> </span>&lt;mount-point&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-o<span class="w"> </span><span class="nv">sec</span><span class="o">=</span>krb5,cruid<span class="o">=</span><span class="s2">&quot;</span><span class="nv">$uid</span><span class="s2">&quot;</span>,username<span class="o">=</span><span class="s2">&quot;</span><span class="nv">$uid</span><span class="s2">&quot;</span>
+<span class="w">    </span>-o<span class="w"> </span><span class="nv">sec</span><span class="o">=</span>krb5,cruid<span class="o">=</span><span class="s2">"</span><span class="nv">$uid</span><span class="s2">"</span>,username<span class="o">=</span><span class="s2">"</span><span class="nv">$uid</span><span class="s2">"</span>
 </code></pre></div>
 <p>For example:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">uid</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span><span class="s2">&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">uid</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span><span class="s2">"</span>
 sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/mnt/azfiles
 sudo<span class="w"> </span>mount.cifs<span class="w"> </span>//contosostorage.file.core.windows.net/files<span class="w"> </span>/mnt/azfiles<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-o<span class="w"> </span><span class="nv">sec</span><span class="o">=</span>krb5,cruid<span class="o">=</span><span class="s2">&quot;</span><span class="nv">$uid</span><span class="s2">&quot;</span>,username<span class="o">=</span><span class="s2">&quot;</span><span class="nv">$uid</span><span class="s2">&quot;</span>
+<span class="w">    </span>-o<span class="w"> </span><span class="nv">sec</span><span class="o">=</span>krb5,cruid<span class="o">=</span><span class="s2">"</span><span class="nv">$uid</span><span class="s2">"</span>,username<span class="o">=</span><span class="s2">"</span><span class="nv">$uid</span><span class="s2">"</span>
 </code></pre></div>
 <p>Important details:</p>
 <ul>
@@ -1529,7 +1529,7 @@ CIFS: VFS: \\&lt;storage-account&gt;.file.core.windows.net failed to create a ne
 <div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="m">7</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/proc/fs/cifs/cifsFYI
 </code></pre></div>
 <p>Then try to mount the share again and check the logs:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dmesg<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;STATUS_|SessSetup|cifs_mount&quot;</span>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dmesg<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">"STATUS_|SessSetup|cifs_mount"</span>
 <span class="c1"># Disable debug output</span>
 <span class="nb">echo</span><span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/proc/fs/cifs/cifsFYI
 </code></pre></div>

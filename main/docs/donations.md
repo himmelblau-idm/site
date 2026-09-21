@@ -19,6 +19,7 @@ hide:
         <p class="hb-donations-hero__lede">Himmelblau brings cloud authentication, MFA, device compliance, and single sign-on to Linux. Financial support helps the community maintain that infrastructure and keep moving it forward.</p>
         <div class="hb-actions">
           <a class="hb-button hb-button--primary" href="https://opencollective.com/himmelblau/contribute/sponsors-84876/checkout" target="_blank" rel="noopener">Sponsor on Open Collective</a>
+          <a class="hb-button hb-button--hero-ghost" href="/stable-repositories/">Subscribe for Stable Packages</a>
           <a class="hb-button hb-button--hero-ghost" href="#backers">Explore the Backer’s Program <span aria-hidden="true">↓</span></a>
         </div>
       </div>

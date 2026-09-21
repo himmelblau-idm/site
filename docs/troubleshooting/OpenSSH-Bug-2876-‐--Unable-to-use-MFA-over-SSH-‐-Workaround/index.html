@@ -1463,7 +1463,7 @@
 <p>When logging in locally (e.g., via <code>su -l</code>), the password prompt and the MFA number prompt are displayed as expected, and the user is able to complete the login process:
 <div class="highlight"><pre><span></span><code>admin@dev01:~$ su -l user@domain.onmicrosoft.com
 Password:
-Open your Authenticator app, and enter the number &#39;73&#39; to sign in.
+Open your Authenticator app, and enter the number '73' to sign in.
 user@domain.onmicrosoft.com@dev01:~$ whoami
 user@domain.onmicrosoft.com
 </code></pre></div></p>
@@ -1472,7 +1472,7 @@ user@domain.onmicrosoft.com
 <div class="highlight"><pre><span></span><code>localuser@workstation:~$ ssh user@domain.onmicrosoft.com@dev01
 (user@domain.onmicrosoft.com@dev01) Password:
 ## Note: The MFA push notification is received, but no number is shown to complete the authentication.
-(user@domain.onmicrosoft.com@dev01) Open your Authenticator app, and enter the number &#39;59&#39; to sign in.
+(user@domain.onmicrosoft.com@dev01) Open your Authenticator app, and enter the number '59' to sign in.
 Password: ^C
 </code></pre></div></p>
 <p>This behavior disrupts the MFA flow, as the number needed to complete the login is not shown to the user until the session has already failed.</p>
@@ -1504,7 +1504,7 @@ Password: ^C
 <p>Here’s an example of what the login process will look like to the user with the workaround in place:</p>
 <div class="highlight"><pre><span></span><code>localuser@workstation:~$ ssh user@domain.onmicrosoft.com@dev01
 (user@domain.onmicrosoft.com@dev01) Password:
-Open your Authenticator app, and enter the number &#39;59&#39; to sign in.
+Open your Authenticator app, and enter the number '59' to sign in.
 Press enter to continue
 ## Note: The user must now press enter to continue the MFA authentication.
 </code></pre></div>

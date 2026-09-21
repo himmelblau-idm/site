@@ -1,4 +1,5 @@
 ---
+title: Ubuntu and Debian Repositories
 hide:
   - navigation
   - toc
@@ -6,75 +7,8 @@ hide:
 
 # Ubuntu and Debian Repositories
 
-Himmelblau packages for Debian and Ubuntu are distributed through public APT repositories:
+For maintained, versioned DEB release packages, subscribe to [Stable Repositories](/stable-repositories/). Your subscription email provides separate entitlement tokens for the 3.x and 4.x streams. All subscription tiers include both streams, with no per-host limits or feature restrictions. Technical support is not included.
 
-- ✅ **Official Repository** – Maintained by the Himmelblau project
-- 💡 **Community Mirror** – Maintained independently by a contributor
+For freely available development packages, choose [Community Nightly](/downloads/?channel=nightly).
 
----
-
-## ✅ Official Repository (GitHub-hosted)
-
-```
-https://himmelblau-idm.org/deb
-```
-
-- **Maintained by:** Himmelblau Project
-- **Bandwidth:** Limited — may be slower during high demand
-- **Key:** [`https://himmelblau-idm.org/himmelblau.asc`](https://himmelblau-idm.org/himmelblau.asc)
-
-### 🛠️ Setup Instructions
-
-```bash
-# Install the official GPG key
-curl -fsSL https://himmelblau-idm.org/himmelblau.asc \
-  | gpg --dearmor \
-  | sudo tee /usr/share/keyrings/himmelblau.gpg > /dev/null
-
-# Add the APT source
-echo "deb [signed-by=/usr/share/keyrings/himmelblau.gpg] https://himmelblau-idm.org/deb ubuntu24.04 main" \
-  | sudo tee /etc/apt/sources.list.d/himmelblau.list
-```
-
----
-
-## 💡 Community Mirror (archiesbytes.xyz)
-
-```
-https://deb.archiesbytes.xyz/himmelblau/
-```
-
-* **Maintained by:** Community contributor [@iLikeToCode](https://github.com/iLikeToCode)
-* **Bandwidth:** Generously hosted — may offer better performance in Europe
-- **Key:** [`https://himmelblau-idm.org/himmelblau.asc`](https://himmelblau-idm.org/himmelblau.asc)
-
-### 🛠️ Setup Instructions
-
-```bash
-# Install the official GPG key
-curl -fsSL https://himmelblau-idm.org/himmelblau.asc \
-  | gpg --dearmor \
-  | sudo tee /usr/share/keyrings/himmelblau.gpg > /dev/null
-
-# Add the APT source
-echo "deb [signed-by=/usr/share/keyrings/himmelblau.gpg] https://deb.archiesbytes.xyz/himmelblau/ ubuntu24.04 main" \
-  | sudo tee /etc/apt/sources.list.d/himmelblau.list
-```
-
----
-
-## 📌 Notes
-
-* Replace `ubuntu24.04` with your system's codename if needed (e.g., `bookworm`, `noble`, etc.).
-* Package contents are identical between mirrors.
-* Community mirrors are offered as-is and availability may vary.
-
----
-
-## 📚 See Also
-
-* [Installation Guide](../docs/installation/)
-
----
-
-Interested in hosting a mirror? [Let us know](../community).
+Use the [Downloads page](/downloads/) or [installation guide](/docs/installation/) for current setup instructions. Keep your entitlement tokens private.

@@ -1876,10 +1876,10 @@ authentication failures.</p>
 <p>Example Script:</p>
 <div class="highlight"><pre><span></span><code>#!/bin/bash
     # Convert CN to UPN, or return the input name if unrecognized
-    if [[ &quot;$1&quot; =~ ^[a-zA-Z0-9._-]+$ ]]; then
-        echo &quot;$1@example.com&quot;
+    if [[ "$1" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+        echo "$1@example.com"
     else
-        echo &quot;$1&quot;
+        echo "$1"
     fi
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>name_mapping_script = /path/to/mapping_script.sh

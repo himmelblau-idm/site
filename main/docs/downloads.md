@@ -16,6 +16,8 @@ hide:
   <p class="hb-install-note">Uses your native package manager and signed Himmelblau packages. <a href="https://himmelblau-idm.org/install">Review the installer</a>.</p>
 </div>
 
+<p>Choose <a href="/stable-repositories/">Stable Repositories</a> for maintained release packages, Community Nightly for free development packages, or vendor packages where available. Stable installation requires the Entitlement token from your subscription email.</p>
+
 <p class="hb-install-help">Need manual repository commands? Use the advanced section below.</p>
 
 <details class="hb-advanced-install">
@@ -25,8 +27,8 @@ Use these instructions if you manage repositories with configuration management,
 
 <div class="download-selector">
 <div id="channel-buttons" class="channel-buttons">
-  <button data-value="subscription" class="channel-btn active">Vendor Supported<sup class="footnote-mark">*</sup></button>
-  <button data-value="stable" class="channel-btn">Community Stable</button>
+  <button data-value="subscription" class="channel-btn active">Vendor Packages<sup class="footnote-mark">*</sup></button>
+  <button data-value="stable" class="channel-btn">Stable Repositories</button>
   <button data-value="nightly" class="channel-btn">Community Nightly</button>
 </div>
 <select id="linux-distro" class="linux-distro-select">
@@ -66,8 +68,8 @@ Use these instructions if you manage repositories with configuration management,
 </select>
 </div>
 <select id="channel" style="display:none;">
-    <option value="subscription" selected>Vendor Supported</option>
-    <option value="stable">Community Stable</option>
+    <option value="subscription" selected>Vendor Packages</option>
+    <option value="stable">Stable Repositories</option>
     <option value="nightly">Community Nightly</option>
 </select>
 <div id="download-links" style="margin-top: 20px;"></div>
@@ -76,7 +78,7 @@ Use these instructions if you manage repositories with configuration management,
 
 <p class="footnote">
   <span class="footnote-mark">*</span>
-  Vendor-supported packages are installed using your distribution’s subscription channels (e.g. SLE, Rocky Linux).
+  Vendor packages come from your distribution’s package channels. Availability and support terms are determined by the distribution, separately from Himmelblau Stable Repositories.
 </p>
 
 </details>

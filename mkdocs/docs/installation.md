@@ -67,7 +67,45 @@ After package installation and configuration, the bootstrapper enables and start
 
 The bootstrapper does **not** download or install Himmelblau binaries directly. It delegates installation to `apt`, `dnf`, or `zypper`, and relies on package repositories and package signatures.
 
-> This is the **recommended** installation method for production systems and most users.
+Choose **Stable Repositories** for maintained, versioned release packages, **Community Nightly** for free development packages, or **Vendor Packages** where available. Stable access does not include technical support.
+
+### Stable Repositories
+
+[Subscribe through Open Collective](https://himmelblau-idm.org/stable-repositories/) using Personal or Organization contributions, monthly or yearly. All four choices provide identical access to both 3.x and 4.x, with no per-host limits or feature restrictions. Amounts are shown at checkout and contributions use the honor system.
+
+You should receive separate entitlement tokens for both streams automatically by email. In the installer, choose Stable Repositories and paste the token for the stream you want. The installer identifies the authorized repository automatically; use the 4.x token for new deployments unless you specifically need 3.x. The token is masked in the terminal and omitted from installer logs. Keep it private.
+
+If your email does not arrive, contact [dmulder@himmelblau-idm.org](mailto:dmulder@himmelblau-idm.org) with proof of subscription. You should receive a response within one business day. This assistance concerns repository access; technical support is not included.
+
+The installer checks the token against the known stable streams and verifies package availability for your distribution and architecture before configuring signed packages with `apt`, `dnf`, or `zypper`. An invalid token or unavailable repository produces an error; it does not silently switch to Nightly. Rawhide is available through Nightly; NixOS uses a separate source-build path.
+
+For upgrades and repairs, the installer reuses the entitlement token from the configured stable repository. Downgrading from a newer installed major release remains blocked and requires manual migration.
+
+#### Automated installation
+
+Save the selected stream's entitlement token in a private file readable by the installer, then run:
+
+```sh
+chmod 600 /path/to/entitlement-token
+curl -fsSL https://himmelblau-idm.org/install | sh -s -- \
+  --channel stable --entitlement-token-file /path/to/entitlement-token
+```
+
+Use the token issued for 3.x when that stream is required. The token is read from the file rather than supplied as a command-line argument, keeping it out of shell history and process listings. Automated installation installs packages without changing identity provider configuration.
+
+For a new free development installation, explicitly select Nightly:
+
+```sh
+curl -fsSL https://himmelblau-idm.org/install | sh -s -- --channel nightly
+```
+
+Use `--channel vendor` for distribution packages where available. A new noninteractive installation without a selected channel stops with guidance. An existing stable subscription can be reused without supplying its URL again.
+
+#### Manual configuration management
+
+Use the installer with the entitlement token issued for the required stream. It determines the distribution-specific repository, installs the repository signing key, and retains signature verification. Each stream has a separate access credential.
+
+Configuration management can run the installer with `--channel stable` and a protected `--entitlement-token-file` as shown above. No entitlement token needs to be entered into the website.
 
 ---
 
@@ -81,7 +119,7 @@ Use the manual repository instructions if you manage repositories with configura
 - View the correct repository setup commands for your system
 - Copy package-manager commands for `apt`, `dnf`, or `zypper`
 
-The downloads page is kept in sync with the latest release metadata and support matrix used by the bootstrap installer.
+The downloads page uses the support matrix shared with the bootstrap installer. Stable setup requires the entitlement token for your chosen major stream.
 
 ---
 
@@ -97,7 +135,10 @@ The build system automatically detects your host distribution and uses either Po
 ```
 git clone https://github.com/himmelblau-idm/himmelblau
 cd himmelblau
+git checkout stable-4.x
 ```
+
+Choose `stable-3.x` instead for the 3.x source stream, or `main` for development builds. Building from source remains freely available.
 
 ##### 2. Build packages:
 

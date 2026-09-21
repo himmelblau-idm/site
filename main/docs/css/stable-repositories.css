@@ -1,0 +1,38 @@
+body[data-stable-repositories="true"] { background: #fff; color: #16324f; }
+body[data-stable-repositories="true"]::after { display: none; }
+body[data-stable-repositories="true"] .md-main { background: #fff; }
+body[data-stable-repositories="true"] .md-main__inner { max-width: none; }
+body[data-stable-repositories="true"] .md-content { min-width: 0; }
+body[data-stable-repositories="true"] .md-content__inner {
+  margin: 0; padding: 0; background: none; border-radius: 0; box-shadow: none;
+}
+.hb-stable {
+  width: 100vw; margin-left: calc(50% - 50vw); padding-bottom: 4rem;
+  overflow: clip; background: #fff; color: #16324f;
+}
+.hb-stable *, .hb-stable *::before, .hb-stable *::after { box-sizing: border-box; }
+.hb-stable-hero { padding-top: 4rem; padding-bottom: 2rem; max-width: 960px; }
+.hb-stable h1 { color: #102b46; font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.15; font-weight: 700; }
+.hb-stable-lede { font-size: 1.3rem; line-height: 1.6; }
+.hb-stable-note { font-size: .9rem; color: #475569; }
+.hb-stable-section { padding-top: 2rem; }
+.hb-stable-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+.hb-stable-card { padding: 2rem; border: 1px solid #d6e3ee; border-radius: 1rem; background: #f5f9fc; }
+.hb-stable-card h3 { margin-top: 0; font-size: 1.5rem; }
+.hb-stable .hb-actions { flex-wrap: wrap; }
+.hb-stable-card .hb-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.hb-stable-card .hb-button { white-space: normal; text-align: center; }
+.hb-stable .hb-button--ghost, .hb-release-channels .hb-button--ghost {
+  color: #16324f !important; border-color: #b8cbdc; background: #fff;
+}
+.hb-stable a:focus-visible { outline: 3px solid #1689ff; outline-offset: .25rem; }
+.hb-stable pre { overflow-x: auto; padding: 1rem; background: #edf3f8; border-radius: .5rem; }
+.hb-release-channels { padding: 4rem 0; background: #f5f9fc; }
+.hb-release-channels h2 { color: #102b46; }
+.hb-release-channels p { max-width: 800px; }
+@media (max-width: 760px) {
+  .hb-stable-grid { grid-template-columns: 1fr; }
+  .hb-stable-hero { padding-top: 2rem; }
+  .hb-stable-card { padding: 1.25rem; }
+  .hb-stable-card .hb-actions { grid-template-columns: 1fr; }
+}

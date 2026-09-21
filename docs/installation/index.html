@@ -430,6 +430,39 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#stable-repositories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Stable Repositories
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Stable Repositories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automated-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automated installation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-configuration-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual configuration management
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#manual-repository-setup-advanced" class="md-nav__link">
     <span class="md-ellipsis">
       Manual Repository Setup (Advanced)
@@ -1413,6 +1446,39 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#stable-repositories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Stable Repositories
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Stable Repositories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automated-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automated installation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-configuration-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual configuration management
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#manual-repository-setup-advanced" class="md-nav__link">
     <span class="md-ellipsis">
       Manual Repository Setup (Advanced)
@@ -1564,9 +1630,27 @@
 <p>For Entra ID, it writes a <code>domain</code> setting. For generic OIDC, it writes <code>oidc_issuer_url</code> and <code>app_id</code>. If <code>/etc/himmelblau/himmelblau.conf</code> already contains a complete identity provider configuration, the bootstrapper treats it as an upgrade or repair install and leaves the file unchanged.</p>
 <p>After package installation and configuration, the bootstrapper enables and starts both <code>himmelblaud</code> and <code>himmelblaud-tasks</code>.</p>
 <p>The bootstrapper does <strong>not</strong> download or install Himmelblau binaries directly. It delegates installation to <code>apt</code>, <code>dnf</code>, or <code>zypper</code>, and relies on package repositories and package signatures.</p>
-<blockquote>
-<p>This is the <strong>recommended</strong> installation method for production systems and most users.</p>
-</blockquote>
+<p>Choose <strong>Stable Repositories</strong> for maintained, versioned release packages, <strong>Community Nightly</strong> for free development packages, or <strong>Vendor Packages</strong> where available. Stable access does not include technical support.</p>
+<h3 id="stable-repositories">Stable Repositories</h3>
+<p><a href="https://himmelblau-idm.org/stable-repositories/">Subscribe through Open Collective</a> using Personal or Organization contributions, monthly or yearly. All four choices provide identical access to both 3.x and 4.x, with no per-host limits or feature restrictions. Amounts are shown at checkout and contributions use the honor system.</p>
+<p>You should receive separate entitlement tokens for both streams automatically by email. In the installer, choose Stable Repositories and paste the token for the stream you want. The installer identifies the authorized repository automatically; use the 4.x token for new deployments unless you specifically need 3.x. The token is masked in the terminal and omitted from installer logs. Keep it private.</p>
+<p>If your email does not arrive, contact <a href="mailto:dmulder@himmelblau-idm.org">dmulder@himmelblau-idm.org</a> with proof of subscription. You should receive a response within one business day. This assistance concerns repository access; technical support is not included.</p>
+<p>The installer checks the token against the known stable streams and verifies package availability for your distribution and architecture before configuring signed packages with <code>apt</code>, <code>dnf</code>, or <code>zypper</code>. An invalid token or unavailable repository produces an error; it does not silently switch to Nightly. Rawhide is available through Nightly; NixOS uses a separate source-build path.</p>
+<p>For upgrades and repairs, the installer reuses the entitlement token from the configured stable repository. Downgrading from a newer installed major release remains blocked and requires manual migration.</p>
+<h4 id="automated-installation">Automated installation</h4>
+<p>Save the selected stream's entitlement token in a private file readable by the installer, then run:</p>
+<div class="highlight"><pre><span></span><code>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/path/to/entitlement-token
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://himmelblau-idm.org/install<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--channel<span class="w"> </span>stable<span class="w"> </span>--entitlement-token-file<span class="w"> </span>/path/to/entitlement-token
+</code></pre></div>
+<p>Use the token issued for 3.x when that stream is required. The token is read from the file rather than supplied as a command-line argument, keeping it out of shell history and process listings. Automated installation installs packages without changing identity provider configuration.</p>
+<p>For a new free development installation, explicitly select Nightly:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://himmelblau-idm.org/install<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--channel<span class="w"> </span>nightly
+</code></pre></div>
+<p>Use <code>--channel vendor</code> for distribution packages where available. A new noninteractive installation without a selected channel stops with guidance. An existing stable subscription can be reused without supplying its URL again.</p>
+<h4 id="manual-configuration-management">Manual configuration management</h4>
+<p>Use the installer with the entitlement token issued for the required stream. It determines the distribution-specific repository, installs the repository signing key, and retains signature verification. Each stream has a separate access credential.</p>
+<p>Configuration management can run the installer with <code>--channel stable</code> and a protected <code>--entitlement-token-file</code> as shown above. No entitlement token needs to be entered into the website.</p>
 <hr />
 <h3 id="manual-repository-setup-advanced">Manual Repository Setup (Advanced)</h3>
 <p>Use the manual repository instructions if you manage repositories with configuration management, need to audit each command before running it, want to install optional packages explicitly, or need vendor-supported distribution packages.</p>
@@ -1576,7 +1660,7 @@
 <li>View the correct repository setup commands for your system</li>
 <li>Copy package-manager commands for <code>apt</code>, <code>dnf</code>, or <code>zypper</code></li>
 </ul>
-<p>The downloads page is kept in sync with the latest release metadata and support matrix used by the bootstrap installer.</p>
+<p>The downloads page uses the support matrix shared with the bootstrap installer. Stable setup requires the entitlement token for your chosen major stream.</p>
 <hr />
 <h3 id="building-from-source-advanced-developer-use">Building from Source (Advanced / Developer Use)</h3>
 <p>If you prefer to build Himmelblau locally — for testing, development, or packaging validation — use the included <code>Makefile</code>.<br />
@@ -1585,7 +1669,9 @@ The build system automatically detects your host distribution and uses either Po
 <h5 id="1-clone-the-repository">1. Clone the repository:</h5>
 <div class="highlight"><pre><span></span><code>git clone https://github.com/himmelblau-idm/himmelblau
 cd himmelblau
+git checkout stable-4.x
 </code></pre></div>
+<p>Choose <code>stable-3.x</code> instead for the 3.x source stream, or <code>main</code> for development builds. Building from source remains freely available.</p>
 <h5 id="2-build-packages">2. Build packages:</h5>
 <div class="highlight"><pre><span></span><code>make               # auto-detects host distro and builds matching packages
 </code></pre></div>

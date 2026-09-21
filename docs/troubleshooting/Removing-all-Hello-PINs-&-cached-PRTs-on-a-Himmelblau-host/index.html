@@ -1414,22 +1414,22 @@ It requires root privileges because <code>/var/cache/himmelblaud/himmelblau.cach
 <div class="highlight"><pre><span></span><code>#!/usr/bin/env bash
 set -euo pipefail
 
-DB_PATH=&quot;/var/cache/himmelblaud/himmelblau.cache.db&quot;
+DB_PATH="/var/cache/himmelblaud/himmelblau.cache.db"
 
-if [[ ! -f &quot;$DB_PATH&quot; ]]; then
-     echo &quot;Error: Database not found at $DB_PATH&quot;
+if [[ ! -f "$DB_PATH" ]]; then
+     echo "Error: Database not found at $DB_PATH"
      exit 1
 fi
 
-echo &quot;Removing all Hello PINs and cached PRTs from $DB_PATH ...&quot;
+echo "Removing all Hello PINs and cached PRTs from $DB_PATH ..."
 
-sqlite3 &quot;$DB_PATH&quot; &lt;&lt;EOF
-DELETE FROM hsm_data_t WHERE key LIKE &#39;%/hello&#39;;
-DELETE FROM hsm_data_t WHERE key LIKE &#39;%/hello_decoupled&#39;;
-DELETE FROM hsm_data_t WHERE key LIKE &#39;%/hello_prt&#39;;
+sqlite3 "$DB_PATH" &lt;&lt;EOF
+DELETE FROM hsm_data_t WHERE key LIKE '%/hello';
+DELETE FROM hsm_data_t WHERE key LIKE '%/hello_decoupled';
+DELETE FROM hsm_data_t WHERE key LIKE '%/hello_prt';
 EOF
 
-echo &quot;Cleanup completed.&quot;
+echo "Cleanup completed."
 </code></pre></div>
 <hr />
 <h2 id="how-to-use">How to use</h2>

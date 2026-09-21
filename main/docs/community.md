@@ -95,7 +95,7 @@ hide:
       <div>
         <p class="hb-kicker">Support the work</p>
         <h2 id="hb-community-support-title">Not every contribution is code.</h2>
-        <p>Financial support helps sustain maintenance, development, documentation, and the infrastructure behind the project.</p>
+        <p>Financial support helps sustain maintenance, development, documentation, and the infrastructure behind the project. For maintained release packages, <a href="/stable-repositories/">subscribe to Stable Repositories</a>; repository access does not include technical support.</p>
       </div>
       <a class="hb-button hb-button--dark" href="/donations/">Support Himmelblau <span aria-hidden="true">→</span></a>
     </div>

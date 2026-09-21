@@ -22,6 +22,31 @@ const REPO_SUPPORT = {
 	},
 };
 
+// Keep these destinations in sync with STABLE_DESTINATIONS in /install.
+const STABLE_DESTINATIONS = {
+	'ubuntu22.04': ['ubuntu', 'jammy'],
+	'ubuntu24.04': ['ubuntu', 'noble'],
+	'ubuntu25.10': ['ubuntu', 'questing'],
+	'ubuntu26.04': ['ubuntu', 'resolute'],
+	debian12: ['debian', 'bookworm'],
+	debian13: ['debian', 'trixie'],
+	rocky8: ['el', '8'],
+	rocky9: ['el', '9'],
+	rocky10: ['el', '10'],
+	fedora42: ['fedora', '42'],
+	fedora43: ['fedora', '43'],
+	fedora44: ['fedora', '44'],
+	rawhide: ['fedora', '46'],
+	amzn2023: ['amzn', '2023'],
+	tumbleweed: ['opensuse', 'tumbleweed'],
+	sle15sp6: ['opensuse', '15.6'],
+	sle15sp7: ['sles', '15'],
+	sle16: ['sles', '16'],
+};
+
+const STABLE_REPO_ROOT =
+	'https://dl.cloudsmith.io/ENTITLEMENT_TOKEN/himmelblau/himmelblau-4';
+
 const channelSelect   = document.getElementById('channel');
 const channelButtons  = document.querySelectorAll('#channel-buttons .channel-btn');
 
@@ -61,7 +86,7 @@ function isFedora(d) {
 function baseUrlFor(channel) {
 	return channel === 'nightly'
 		? 'https://packages.himmelblau-idm.org/nightly/latest'
-		: 'https://packages.himmelblau-idm.org/stable/latest';
+		: '';
 }
 
 function isSupported(channel, distro) {
@@ -200,6 +225,13 @@ async function provideRepoInstructions() {
 
 	linksContainer.appendChild(title);
 	linksContainer.appendChild(intro);
+
+	if (channel === 'stable' && !isNix(distro)) {
+		const entitlementNote = document.createElement('p');
+		entitlementNote.textContent =
+			'Replace ENTITLEMENT_TOKEN in each repository URL below with the 4.x entitlement token from your subscription email. For the 3.x stream, use its matching token and replace himmelblau-4 with himmelblau-3. Keep entitlement tokens private.';
+		linksContainer.appendChild(entitlementNote);
+	}
 
 	// Warn if we requested "subscription" but had to fall back
 	if (fallback && fallback.from === 'subscription' && fallback.to) {
@@ -389,7 +421,72 @@ async function provideRepoInstructions() {
 		'2. Add the Himmelblau repository and import the signing key';
 	linksContainer.appendChild(repoSection);
 
-	if (isUbuntu(distro) || distro === 'debian12') {
+	if (channel === 'stable') {
+		const [repoDistro, repoVersion] = STABLE_DESTINATIONS[distro];
+
+		if (isDeb(distro)) {
+			const sourcePath = '/etc/apt/sources.list.d/himmelblau.list';
+			[
+				`sudo apt install curl && curl -fsSL ${gpgKeyUrl} | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/himmelblau.gpg`,
+				`echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/trusted.gpg.d/himmelblau.gpg] ${STABLE_REPO_ROOT}/deb/${repoDistro} ${repoVersion} main" | sudo tee ${sourcePath} > /dev/null`,
+				`sudo chmod 600 ${sourcePath}`,
+				'sudo apt update',
+			].forEach((cmd) =>
+				linksContainer.appendChild(
+					Object.assign(document.createElement('pre'), {
+						textContent: cmd,
+					}),
+				),
+			);
+		} else if (distro.startsWith('sle') || distro === 'tumbleweed') {
+			const repoBase = `${STABLE_REPO_ROOT}/rpm/${repoDistro}/${repoVersion}`;
+			[
+				`sudo rpm --import ${gpgKeyUrl}`,
+				`sudo zypper addrepo ${repoBase}/$(rpm --eval '%{_arch}') himmelblau-stable`,
+				`sudo zypper addrepo ${repoBase}/noarch himmelblau-stable-noarch`,
+				'sudo chmod 600 /etc/zypp/repos.d/himmelblau-stable.repo /etc/zypp/repos.d/himmelblau-stable-noarch.repo',
+				'sudo zypper refresh',
+			].forEach((cmd) =>
+				linksContainer.appendChild(
+					Object.assign(document.createElement('pre'), {
+						textContent: cmd,
+					}),
+				),
+			);
+		} else {
+			const repoBase = `${STABLE_REPO_ROOT}/rpm/${repoDistro}/${repoVersion}`;
+			const repoPath = '/etc/yum.repos.d/himmelblau-stable.repo';
+			const repoConfig = `sudo tee ${repoPath} > /dev/null <<'EOF'
+[himmelblau-stable]
+name=Himmelblau Stable
+baseurl=${repoBase}/$basearch
+enabled=1
+priority=1
+gpgcheck=1
+gpgkey=${gpgKeyUrl}
+
+[himmelblau-stable-noarch]
+name=Himmelblau Stable
+baseurl=${repoBase}/noarch
+enabled=1
+priority=1
+gpgcheck=1
+gpgkey=${gpgKeyUrl}
+EOF`;
+			[
+				`sudo rpm --import ${gpgKeyUrl}`,
+				repoConfig,
+				`sudo chmod 600 ${repoPath}`,
+				'sudo dnf makecache',
+			].forEach((cmd) =>
+				linksContainer.appendChild(
+					Object.assign(document.createElement('pre'), {
+						textContent: cmd,
+					}),
+				),
+			);
+		}
+	} else if (isUbuntu(distro) || distro === 'debian12') {
 		[
 			`sudo apt install curl && curl -fsSL ${gpgKeyUrl} | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/himmelblau.gpg`,
 			`sudo add-apt-repository "deb [arch=amd64] ${baseUrl}/deb/${distro}/ ./"`,

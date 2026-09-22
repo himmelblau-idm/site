@@ -40,7 +40,7 @@ import urllib.parse
 import urllib.request
 
 
-VERSION = "2026.09.18"
+VERSION = "2026.09.22"
 PLAN_VERSION = 3
 SUPPORT_JS_URL = "https://himmelblau-idm.org/js/install.js"
 STABLE_SUBSCRIPTION_URL = "https://himmelblau-idm.org/stable-repositories/"
@@ -154,7 +154,7 @@ STABLE_RPM_KEYS = {"dnf": "/etc/pki/rpm-gpg/himmelblau-stable.asc", "zypper": "/
 
 def redact(value):
     text = str(value)
-    text = re.sub(r"https://dl\.cloudsmith\.io/[^/\s\"']+/himmelblau/", "https://dl.cloudsmith.io/REDACTED/himmelblau/", text)
+    text = re.sub(r"https://repo\.himmelblau-idm\.org/[^/\s\"']+/himmelblau/", "https://repo.himmelblau-idm.org/REDACTED/himmelblau/", text)
     for secret in sorted(SECRET_VALUES, key=len, reverse=True):
         text = text.replace(secret, "REDACTED")
     return text
@@ -174,7 +174,7 @@ def stable_root(token, stream):
     token = normalize_entitlement_token(token)
     if str(stream) not in ("3", "4"):
         raise ValueError("Unsupported stable repository stream.")
-    return "https://dl.cloudsmith.io/%s/himmelblau/himmelblau-%s" % (token, stream)
+    return "https://repo.himmelblau-idm.org/%s/himmelblau/v_%s" % (token, stream)
 
 
 def stable_destination(target):
@@ -1538,7 +1538,7 @@ STABLE_RPM_KEYS = {"dnf": "/etc/pki/rpm-gpg/himmelblau-stable.asc", "zypper": "/
 
 def redact(value):
     text = str(value)
-    text = re.sub(r"https://dl\.cloudsmith\.io/[^/\s\"']+/himmelblau/", "https://dl.cloudsmith.io/REDACTED/himmelblau/", text)
+    text = re.sub(r"https://repo\.himmelblau-idm\.org/[^/\s\"']+/himmelblau/", "https://repo.himmelblau-idm.org/REDACTED/himmelblau/", text)
     for secret in sorted(SECRET_VALUES, key=len, reverse=True):
         text = text.replace(secret, "REDACTED")
     return text
@@ -1558,7 +1558,7 @@ def stable_root(token, stream):
     token = normalize_entitlement_token(token)
     if str(stream) not in ("3", "4"):
         raise ValueError("Unsupported stable repository stream.")
-    return "https://dl.cloudsmith.io/%s/himmelblau/himmelblau-%s" % (token, stream)
+    return "https://repo.himmelblau-idm.org/%s/himmelblau/v_%s" % (token, stream)
 
 
 def stable_destination(target):
@@ -1946,7 +1946,7 @@ def setup_stable_repository(plan, event_log):
             continue
         with open(candidate) as handle:
             previous = handle.read()
-        if "packages.himmelblau-idm.org/" in previous or "/himmelblau/himmelblau-" in previous or "himmelblau-idm.org/deb" in previous:
+        if "packages.himmelblau-idm.org/" in previous or "/himmelblau/v_" in previous or "himmelblau-idm.org/deb" in previous:
             backup = candidate + ".himmelblau-disabled"
             if os.path.exists(backup):
                 raise WorkerError("A repository backup already exists. Review the previous installation before retrying.")
@@ -1982,7 +1982,7 @@ def setup_stable_repository(plan, event_log):
         install_text(path, config, "0600", event_log)
         if manager == "apt":
             preferences_written = True
-            install_text(STABLE_APT_PREFERENCES_PATH, "Package: himmelblau* pam-himmelblau nss-himmelblau o365\nPin: origin dl.cloudsmith.io\nPin-Priority: 990\n", "0644", event_log)
+            install_text(STABLE_APT_PREFERENCES_PATH, "Package: himmelblau* pam-himmelblau nss-himmelblau o365\nPin: origin repo.himmelblau-idm.org\nPin-Priority: 990\n", "0644", event_log)
             run(apt_get_command("update"), event_log)
         elif manager == "dnf":
             run(["dnf", "makecache", "--refresh", "-y", "--disablerepo=*", "--enablerepo=himmelblau-stable", "--enablerepo=himmelblau-stable-noarch"], event_log)
@@ -2039,7 +2039,7 @@ def setup_nightly_repository(step, event_log):
             continue
         with open(path) as handle:
             text = handle.read()
-        if "/himmelblau/himmelblau-" in text or "packages.himmelblau-idm.org/" in text:
+        if "/himmelblau/v_" in text or "packages.himmelblau-idm.org/" in text:
             backup = path + ".himmelblau-disabled"
             if os.path.exists(backup):
                 raise WorkerError("A repository backup already exists. Review it before changing package sources.")
@@ -2069,7 +2069,7 @@ def setup_nightly_repository(step, event_log):
     # Keep old paid source disabled for recovery, and remove replaced nightly sources.
     for path, backup, mode in backups:
         with open(backup) as handle:
-            if "/himmelblau/himmelblau-" not in handle.read():
+            if "/himmelblau/v_" not in handle.read():
                 os.unlink(backup)
 
 
@@ -2082,7 +2082,7 @@ def setup_vendor_repositories(target):
             continue
         with open(path) as handle:
             text = handle.read()
-        if "/himmelblau/himmelblau-" in text or "packages.himmelblau-idm.org/" in text:
+        if "/himmelblau/v_" in text or "packages.himmelblau-idm.org/" in text:
             backup = path + ".himmelblau-disabled"
             if os.path.exists(backup):
                 raise WorkerError("A repository backup already exists. Review it before choosing vendor packages.")
@@ -2412,7 +2412,7 @@ def existing_stable_access(paths=None):
                 text = handle.read()
         except OSError:
             continue
-        for match in re.finditer(r"https://dl\.cloudsmith\.io/([A-Za-z0-9_-]+)/himmelblau/himmelblau-([34])", text):
+        for match in re.finditer(r"https://repo\.himmelblau-idm\.org/([A-Za-z0-9_-]+)/himmelblau/v_([34])", text):
             token, stream = match.groups()
             found.add((stream, normalize_entitlement_token(token)))
     if len(found) > 1:

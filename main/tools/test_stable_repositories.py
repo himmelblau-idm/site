@@ -12,7 +12,7 @@ from unittest import mock
 from test_install_endpoint import installer
 
 TOKEN = "synthetic-subscriber-credential"
-ROOT = "https://dl.cloudsmith.io/" + TOKEN + "/himmelblau/himmelblau-4"
+ROOT = "https://repo.himmelblau-idm.org/" + TOKEN + "/himmelblau/v_4"
 
 
 def worker_module():
@@ -38,7 +38,7 @@ class StableRepositoryTests(unittest.TestCase):
         for module in (installer, self.worker):
             self.assertEqual(module.normalize_entitlement_token("  " + TOKEN + "\n"), TOKEN)
             self.assertEqual(module.stable_root(TOKEN, "4"), ROOT)
-            self.assertEqual(module.stable_root(TOKEN, "3"), ROOT.replace("himmelblau-4", "himmelblau-3"))
+            self.assertEqual(module.stable_root(TOKEN, "3"), ROOT.replace("v_4", "v_3"))
 
     def test_rejects_urls_and_malformed_tokens(self):
         invalid = [ROOT, "short", "public", "basic", TOKEN + " second", TOKEN + "/path", TOKEN + "\nmalformed", None]
@@ -134,17 +134,17 @@ class StableRepositoryTests(unittest.TestCase):
     def test_repository_discovery_requires_one_accessible_stream(self):
         for module in (installer, self.worker):
             def only_four(url, unavailable_ok=False):
-                return b"metadata" if "/himmelblau-4/" in url else None
+                return b"metadata" if "/v_4/" in url else None
             with mock.patch.object(module, "fetch_stable_data", side_effect=only_four):
                 stream, root, distro, version, config = module.resolve_stable_repository(TOKEN, "ubuntu24.04", "amd64", "apt")
             self.assertEqual((stream, root, distro, version), ("4", ROOT, "ubuntu", "noble"))
             self.assertIn(ROOT, config)
             def only_three(url, unavailable_ok=False):
-                return b"metadata" if "/himmelblau-3/" in url else None
+                return b"metadata" if "/v_3/" in url else None
             with mock.patch.object(module, "fetch_stable_data", side_effect=only_three):
                 stream, root, _, _, _ = module.resolve_stable_repository(TOKEN, "rocky9", "x86_64", "dnf")
             self.assertEqual(stream, "3")
-            self.assertTrue(root.endswith("/himmelblau-3"))
+            self.assertTrue(root.endswith("/v_3"))
             with mock.patch.object(module, "fetch_stable_data", return_value=None):
                 with self.assertRaisesRegex(ValueError, "does not provide"):
                     module.resolve_stable_repository(TOKEN, "ubuntu24.04", "amd64", "apt")
@@ -165,7 +165,7 @@ class StableRepositoryTests(unittest.TestCase):
         def fetch(url, unavailable_ok=False):
             if url.endswith("gpg.key"):
                 return b"new-key"
-            return b"index" if "/himmelblau-4/" in url else None
+            return b"index" if "/v_4/" in url else None
         self.patch(w, "fetch_stable_data", fetch)
         def save(path, data, mode, event_log):
             pathlib.Path(path).write_bytes(data if isinstance(data, bytes) else data.encode())
@@ -189,12 +189,14 @@ class StableRepositoryTests(unittest.TestCase):
                 self.assertEqual(source.stat().st_mode & 0o777, 0o600)
                 self.assertNotEqual(key.read_bytes(), b"old-key")
                 self.assertNotIn("stable/latest", source.read_text())
+                if manager == "apt":
+                    self.assertIn("Pin: origin repo.himmelblau-idm.org", (folder / "preferences").read_text())
 
     def test_failed_refresh_restores_previous_repository_and_signing_key(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = pathlib.Path(tmp)
             source, key = self.configure_fake_system("apt", folder)
-            previous = "deb " + ROOT.replace("himmelblau-4", "himmelblau-3") + "/deb/ubuntu noble main"
+            previous = "deb " + ROOT.replace("v_4", "v_3") + "/deb/ubuntu noble main"
             source.write_text(previous)
             source.chmod(0o644)
             key.write_bytes(b"previous-key")
@@ -266,7 +268,7 @@ class StableRepositoryTests(unittest.TestCase):
             path = pathlib.Path(tmp) / "source"
             path.write_text("deb " + ROOT + "/deb/ubuntu noble main")
             self.assertEqual(installer.existing_stable_access([str(path)]), ("4", TOKEN))
-            path.write_text(ROOT + "\n" + ROOT.replace("himmelblau-4", "himmelblau-3"))
+            path.write_text(ROOT + "\n" + ROOT.replace("v_4", "v_3"))
             with self.assertRaisesRegex(installer.InstallError, "Multiple"):
                 installer.existing_stable_access([str(path)])
 

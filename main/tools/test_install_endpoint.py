@@ -216,6 +216,11 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertIn("sle16", matrix["subscription"]["include"])
         self.assertEqual(matrix, installer.FALLBACK_REPO_SUPPORT)
 
+    def test_manual_stable_repository_urls_use_project_domain(self):
+        source = INSTALL_JS_PATH.read_text(encoding="utf-8")
+        self.assertIn("https://repo.himmelblau-idm.org/ENTITLEMENT_TOKEN/himmelblau/v_4", source)
+        self.assertIn("replace v_4 with v_3", source)
+
     def test_channel_choices_are_recommendation_ordered(self):
         matrix = installer.extract_repo_support(INSTALL_JS_PATH.read_text(encoding="utf-8"))
         self.assertEqual([c["value"] for c in installer.channel_choices(matrix, "sle16")], ["subscription", "stable", "nightly"])

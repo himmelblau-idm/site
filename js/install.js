@@ -45,7 +45,7 @@ const STABLE_DESTINATIONS = {
 };
 
 const STABLE_REPO_ROOT =
-	'https://dl.cloudsmith.io/ENTITLEMENT_TOKEN/himmelblau/himmelblau-4';
+	'https://repo.himmelblau-idm.org/ENTITLEMENT_TOKEN/himmelblau/v_4';
 
 const channelSelect   = document.getElementById('channel');
 const channelButtons  = document.querySelectorAll('#channel-buttons .channel-btn');
@@ -229,7 +229,7 @@ async function provideRepoInstructions() {
 	if (channel === 'stable' && !isNix(distro)) {
 		const entitlementNote = document.createElement('p');
 		entitlementNote.textContent =
-			'Replace ENTITLEMENT_TOKEN in each repository URL below with the 4.x entitlement token from your subscription email. For the 3.x stream, use its matching token and replace himmelblau-4 with himmelblau-3. Keep entitlement tokens private.';
+			'Replace ENTITLEMENT_TOKEN in each repository URL below with the 4.x entitlement token from your subscription email. For the 3.x stream, use its matching token and replace v_4 with v_3. Keep entitlement tokens private.';
 		linksContainer.appendChild(entitlementNote);
 	}
 

@@ -1249,6 +1249,13 @@ def apt_source_line(repo_url, architecture):
     return f"deb [arch={architecture} signed-by={APT_KEYRING_PATH}] {repo_url} ./\n"
 
 
+def nightly_apt_repo_url(channel, target, architecture):
+    if architecture not in ("amd64", "arm64"):
+        raise ValueError("Nightly Debian packages support amd64 and arm64 only.")
+    suffix = "-arm64" if architecture == "arm64" else ""
+    return f"{base_url(channel)}/deb/{target}{suffix}"
+
+
 def dearmor_apt_key(key_data):
     proc = subprocess.run(["gpg", "--dearmor"], input=key_data, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if proc.returncode != 0:
@@ -1257,9 +1264,12 @@ def dearmor_apt_key(key_data):
 
 
 def apt_repo_setup(channel, target, ui):
-    repo_url = f"{base_url(channel)}/deb/{target}"
     apt_install_prereqs(ui)
     architecture = apt_architecture(ui)
+    try:
+        repo_url = nightly_apt_repo_url(channel, target, architecture)
+    except ValueError as err:
+        raise InstallError(str(err))
     run(sudo_prefix() + ["install", "-d", "-m", "0755", APT_KEYRING_DIR], ui)
     key_proc = subprocess.run(["curl", "-fsSL", GPG_KEY_URL], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if key_proc.returncode != 0:
@@ -1271,6 +1281,8 @@ def apt_repo_setup(channel, target, ui):
 
 
 def zypper_repo_setup(channel, target, ui):
+    if run(sudo_prefix() + ["rpm", "--eval", "%{_arch}"], ui).stdout.strip() == "aarch64":
+        raise InstallError("Community Nightly RPM packages are unavailable for ARM64. Choose the Stable repository with an entitlement token.")
     repo_url = f"{base_url(channel)}/rpm/{target}"
     run(sudo_prefix() + ["rpm", "--import", GPG_KEY_URL], ui)
     run(sudo_prefix() + ["zypper", "--non-interactive", "addrepo", "--check", "--gpgcheck", repo_url, f"himmelblau-{channel}"], ui, check=False)
@@ -1278,6 +1290,8 @@ def zypper_repo_setup(channel, target, ui):
 
 
 def dnf_repo_setup(channel, target, ui):
+    if run(sudo_prefix() + ["rpm", "--eval", "%{_arch}"], ui).stdout.strip() == "aarch64":
+        raise InstallError("Community Nightly RPM packages are unavailable for ARM64. Choose the Stable repository with an entitlement token.")
     repo_url = f"{base_url(channel)}/rpm/{target}"
     name = f"himmelblau-{channel}"
     repo = f"""[{name}]
@@ -1867,6 +1881,13 @@ def apt_source_line(repo_url, architecture):
     return "deb [arch=%s signed-by=%s] %s ./\n" % (architecture, APT_KEYRING_PATH, repo_url)
 
 
+def nightly_apt_repo_url(channel, target, architecture):
+    if architecture not in ("amd64", "arm64"):
+        raise ValueError("Nightly Debian packages support amd64 and arm64 only.")
+    suffix = "-arm64" if architecture == "arm64" else ""
+    return "%s/deb/%s%s" % (base_url(channel), target, suffix)
+
+
 def dearmor_apt_key(key_data):
     proc = subprocess.run(["gpg", "--dearmor"], input=key_data, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if proc.returncode != 0:
@@ -1875,8 +1896,8 @@ def dearmor_apt_key(key_data):
 
 
 def apt_repo_setup(channel, target, event_log):
-    repo_url = "%s/deb/%s" % (base_url(channel), target)
     architecture = apt_architecture(event_log)
+    repo_url = nightly_apt_repo_url(channel, target, architecture)
     run(["install", "-d", "-m", "0755", APT_KEYRING_DIR], event_log)
     with urllib.request.urlopen(GPG_KEY_URL, timeout=30) as response:
         key_data = response.read(128 * 1024)
@@ -2030,6 +2051,8 @@ def setup_nightly_repository(step, event_log):
         output_path = STABLE_APT_SOURCE_PATH
         key_path = APT_KEYRING_PATH
     else:
+        if run(["rpm", "--eval", "%{_arch}"], event_log).stdout.strip() == "aarch64":
+            raise WorkerError("Community Nightly RPM packages are unavailable for ARM64. Choose the Stable repository with an entitlement token.")
         paths = [STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo", STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"]
         output_path = paths[1]
         key_path = None

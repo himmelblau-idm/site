@@ -10,6 +10,7 @@ import types
 import unittest
 import urllib.parse
 import urllib.error
+from unittest import mock
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -31,6 +32,12 @@ def load_installer_module():
 
 
 installer = load_installer_module()
+
+
+def load_worker_module():
+    module = types.ModuleType("himmelblau_install_worker")
+    exec(compile(installer.ROOT_WORKER_SOURCE, "root-worker", "exec"), module.__dict__)
+    return module
 
 
 APT_CONFFILE_OPTIONS = [
@@ -284,13 +291,55 @@ class InstallEndpointTests(unittest.TestCase):
             installer.os.geteuid = old_geteuid
 
     def test_apt_source_line_uses_detected_arch_and_dearmored_keyring(self):
-        source = installer.apt_source_line("https://packages.example/deb/ubuntu24.04", "arm64")
+        source = installer.apt_source_line("https://packages.example/deb/ubuntu24.04-arm64", "arm64")
         self.assertEqual(
             source,
-            "deb [arch=arm64 signed-by=/etc/apt/keyrings/himmelblau.gpg] https://packages.example/deb/ubuntu24.04 ./\n",
+            "deb [arch=arm64 signed-by=/etc/apt/keyrings/himmelblau.gpg] https://packages.example/deb/ubuntu24.04-arm64 ./\n",
         )
         self.assertNotIn("arch=amd64", source)
         self.assertNotIn("himmelblau.asc", source)
+
+    def test_nightly_apt_repository_matches_native_architecture(self):
+        for module in (installer, load_worker_module()):
+            for architecture, suffix in (("amd64", ""), ("arm64", "-arm64")):
+                with self.subTest(module=module.__name__, architecture=architecture):
+                    self.assertEqual(
+                        module.nightly_apt_repo_url("nightly", "ubuntu26.04", architecture),
+                        module.BASE_NIGHTLY_URL + "/deb/ubuntu26.04" + suffix,
+                    )
+                    self.assertEqual(
+                        module.nightly_apt_repo_url("nightly", "debian13", architecture),
+                        module.BASE_NIGHTLY_URL + "/deb/debian13" + suffix,
+                    )
+            with self.assertRaisesRegex(ValueError, "amd64 and arm64"):
+                module.nightly_apt_repo_url("nightly", "ubuntu26.04", "i386")
+
+    def test_worker_writes_arm64_nightly_apt_source(self):
+        worker = load_worker_module()
+        sources = []
+        commands = []
+
+        def fake_run(argv, event_log, check=True):
+            commands.append(argv)
+            return types.SimpleNamespace(stdout="arm64\n" if argv[0] == "dpkg" else "", returncode=0)
+
+        with mock.patch.object(worker, "run", side_effect=fake_run), \
+                mock.patch.object(worker.urllib.request, "urlopen", return_value=io.BytesIO(b"key")), \
+                mock.patch.object(worker, "dearmor_apt_key", return_value=b"dearmored"), \
+                mock.patch.object(worker, "install_bytes"), \
+                mock.patch.object(worker, "install_text", side_effect=lambda path, value, mode, log: sources.append((path, value))):
+            worker.apt_repo_setup("nightly", "ubuntu26.04", "events")
+
+        self.assertEqual(commands[0], ["dpkg", "--print-architecture"])
+        self.assertEqual(sources, [(
+            "/etc/apt/sources.list.d/himmelblau.list",
+            worker.apt_source_line(worker.BASE_NIGHTLY_URL + "/deb/ubuntu26.04-arm64", "arm64"),
+        )])
+
+    def test_manual_nightly_apt_commands_use_native_architecture(self):
+        source = INSTALL_JS_PATH.read_text(encoding="utf-8")
+        self.assertNotIn("arch=amd64", source)
+        self.assertIn('if [ "$arch" = arm64 ]; then repo_target=${distro}-arm64; fi', source)
 
     def test_root_worker_apt_setup_uses_detected_arch_and_dearmored_keyring(self):
         source = installer.ROOT_WORKER_SOURCE

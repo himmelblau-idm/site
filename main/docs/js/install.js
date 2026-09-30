@@ -489,7 +489,7 @@ EOF`;
 	} else if (isUbuntu(distro) || distro === 'debian12') {
 		[
 			`sudo apt install curl && curl -fsSL ${gpgKeyUrl} | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/himmelblau.gpg`,
-			`sudo add-apt-repository "deb [arch=amd64] ${baseUrl}/deb/${distro}/ ./"`,
+			`arch=$(dpkg --print-architecture); repo_target=${distro}; if [ "$arch" = arm64 ]; then repo_target=${distro}-arm64; fi; sudo add-apt-repository "deb [arch=$arch] ${baseUrl}/deb/$repo_target/ ./"`,
 		].forEach((cmd) =>
 			linksContainer.appendChild(
 				Object.assign(document.createElement('pre'), {
@@ -500,7 +500,7 @@ EOF`;
 	} else if (isDeb(distro)) {
 		[
 			`sudo apt install curl && curl -fsSL ${gpgKeyUrl} | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/himmelblau.gpg`,
-			`echo 'deb [signed-by=/etc/apt/trusted.gpg.d/himmelblau.gpg] ${baseUrl}/deb/${distro} ./ ' | sudo tee /etc/apt/sources.list.d/himmelblau.list`,
+			`arch=$(dpkg --print-architecture); repo_target=${distro}; if [ "$arch" = arm64 ]; then repo_target=${distro}-arm64; fi; echo "deb [arch=$arch signed-by=/etc/apt/trusted.gpg.d/himmelblau.gpg] ${baseUrl}/deb/$repo_target ./" | sudo tee /etc/apt/sources.list.d/himmelblau.list`,
 			"sudo apt update",
 		].forEach((cmd) =>
 			linksContainer.appendChild(

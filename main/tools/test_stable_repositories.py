@@ -152,7 +152,7 @@ class StableRepositoryTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "multiple stable streams"):
                     module.resolve_stable_repository(TOKEN, "ubuntu24.04", "amd64", "apt")
 
-    def configure_fake_system(self, manager, folder):
+    def configure_fake_system(self, manager, folder, architecture=None):
         w = self.worker
         self.patch(w, "STABLE_APT_SOURCE_PATH", str(folder / "himmelblau.list"))
         self.patch(w, "STABLE_APT_PREFERENCES_PATH", str(folder / "preferences"))
@@ -173,7 +173,7 @@ class StableRepositoryTests(unittest.TestCase):
         self.patch(w, "install_bytes", save)
         self.patch(w, "install_text", save)
         def run(argv, event_log, check=True):
-            return types.SimpleNamespace(stdout="amd64" if argv[0] == "dpkg" else "x86_64", returncode=0)
+            return types.SimpleNamespace(stdout=architecture or ("amd64" if argv[0] == "dpkg" else "x86_64"), returncode=0)
         self.patch(w, "run", run)
         return folder / ("himmelblau.list" if manager == "apt" else "himmelblau-stable.repo"), folder / ("key.gpg" if manager == "apt" else "key.asc")
 
@@ -191,6 +191,27 @@ class StableRepositoryTests(unittest.TestCase):
                 self.assertNotIn("stable/latest", source.read_text())
                 if manager == "apt":
                     self.assertIn("Pin: origin repo.himmelblau-idm.org", (folder / "preferences").read_text())
+
+    def test_stable_rpm_setup_uses_aarch64_repository(self):
+        for manager, target in (("dnf", "rocky9"), ("zypper", "sle16")):
+            with self.subTest(manager=manager), tempfile.TemporaryDirectory() as tmp:
+                folder = pathlib.Path(tmp)
+                source, _ = self.configure_fake_system(manager, folder, "aarch64")
+                self.worker.setup_stable_repository(self.plan(target=target), str(folder / "events"))
+                config = source.read_text()
+                self.assertIn("/aarch64", config)
+                self.assertIn("/noarch", config)
+                self.assertNotIn("/x86_64", config)
+
+    def test_nightly_rpm_arm64_does_not_replace_existing_source(self):
+        for manager, target in (("dnf", "rocky9"), ("zypper", "sle16")):
+            with self.subTest(manager=manager), tempfile.TemporaryDirectory() as tmp:
+                folder = pathlib.Path(tmp)
+                source, _ = self.configure_fake_system(manager, folder, "aarch64")
+                source.write_text("existing repository\n")
+                with self.assertRaisesRegex(self.worker.WorkerError, "Stable repository"):
+                    self.worker.setup_nightly_repository({"channel": "nightly", "target": target}, str(folder / "events"))
+                self.assertEqual(source.read_text(), "existing repository\n")
 
     def test_failed_refresh_restores_previous_repository_and_signing_key(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -6,9 +6,8 @@
 #   curl -fsSL https://himmelblau-idm.org/install | sh
 #
 # The shell portion only finds Python 3 and passes control to the Python
-# bootstrapper below. The Python code adds trusted package repositories and
-# installs Himmelblau with the native package manager. It does not download or
-# install Himmelblau binaries directly.
+# bootstrapper below. The Python code installs Himmelblau with the native
+# package manager, either from a repository or packages built from stable-4.x.
 
 set -u
 
@@ -26,7 +25,9 @@ import json
 import locale
 import argparse
 import getpass
+import glob
 import os
+import pty
 import re
 import shlex
 import shutil
@@ -40,10 +41,12 @@ import urllib.parse
 import urllib.request
 
 
-VERSION = "2026.09.22"
-PLAN_VERSION = 3
+VERSION = "2026.10.01"
+PLAN_VERSION = 4
 SUPPORT_JS_URL = "https://himmelblau-idm.org/js/install.js"
 STABLE_SUBSCRIPTION_URL = "https://himmelblau-idm.org/stable-repositories/"
+STABLE_SOURCE_URL = "https://github.com/himmelblau-idm/himmelblau.git"
+STABLE_SOURCE_BRANCH = "stable-4.x"
 GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
 APT_KEYRING_DIR = "/etc/apt/keyrings"
 APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
@@ -212,8 +215,10 @@ def validate_source_steps(plan):
         if "target" in step and step["target"] != target:
             raise ValueError("Installation step changes the selected distribution.")
     repo_steps = [step.get("kind") for step in steps if step.get("kind") in ("stable_repo", "apt_repo", "dnf_repo", "zypper_repo")]
-    if channel == "stable" and repo_steps != ["stable_repo"]:
-        raise ValueError("Stable installation requires exactly one authenticated repository setup step.")
+    if channel == "stable":
+        expected = [] if plan.get("stable_source") == "self-built" else ["stable_repo"]
+        if repo_steps != expected:
+            raise ValueError("Invalid stable package source steps.")
     if any(step.get("kind") == "vendor_repo" for step in steps) and channel != "subscription":
         raise ValueError("Vendor repository setup requires the vendor channel.")
     if channel != "stable" and "stable_repo" in repo_steps:
@@ -610,6 +615,31 @@ def is_supported(matrix, channel, target):
     return target not in exclude
 
 
+def self_build_supported(info, target):
+    # Plain `make` in stable-4.x currently selects these targets on x86-64.
+    if os.uname().machine not in ("x86_64", "amd64"):
+        return False
+    if target not in STABLE_DESTINATIONS or target.startswith("sle"):
+        return False
+    distro_id = info.get("ID", "").lower()
+    version = info.get("VERSION_ID", "")
+    if target.startswith("ubuntu"):
+        return distro_id == "ubuntu" or (distro_id == "linuxmint" and not version.startswith("23"))
+    if target.startswith("debian"):
+        return distro_id == "debian"
+    if target.startswith("rocky"):
+        return distro_id in {"rocky", "almalinux", "rhel", "ol", "oraclelinux", "centos", "centos_stream", "centos-stream"}
+    if target in ("fedora43", "fedora44", "rawhide"):
+        return distro_id == "fedora"
+    if target == "amzn2023":
+        return distro_id == "amzn"
+    return target == "tumbleweed" and distro_id == "opensuse-tumbleweed"
+
+
+def self_build_directory():
+    return os.path.join(os.path.expanduser("~"), ".local", "share", "himmelblau", STABLE_SOURCE_BRANCH)
+
+
 def base_url(channel):
     if channel == "stable":
         raise ValueError("Stable repository setup requires an entitlement token.")
@@ -659,12 +689,12 @@ def load_repo_support(ui):
         return FALLBACK_REPO_SUPPORT
 
 
-def channel_choices(matrix, target):
+def channel_choices(matrix, target, info=None):
     choices = []
     if is_supported(matrix, "subscription", target):
         choices.append({"label": "Vendor Packages", "value": "subscription"})
-    if target in STABLE_DESTINATIONS and is_supported(matrix, "stable", target):
-        choices.append({"label": "Stable Repositories (entitlement token required)", "value": "stable"})
+    if target in STABLE_DESTINATIONS and (is_supported(matrix, "stable", target) or (info and self_build_supported(info, target))):
+        choices.append({"label": "Stable 4.x packages", "value": "stable"})
     if is_supported(matrix, "nightly", target):
         choices.append({"label": "Community Nightly repository", "value": "nightly"})
     return choices
@@ -1359,12 +1389,14 @@ def require_commands(commands):
         raise InstallError("Required commands are missing: " + ", ".join(missing))
 
 
-def build_install_plan(channel, target, idp_config, write_idp, options_config=None, entitlement_token=None):
+def build_install_plan(channel, target, idp_config, write_idp, options_config=None, entitlement_token=None, stable_source="repository", source_dir=None):
     manager = package_manager(target)
     packages, best_effort_packages = detected_package_selection(channel, target)
     steps = []
-    if channel == "stable":
+    if channel == "stable" and stable_source == "repository":
         steps.append({"kind": "stable_repo", "target": target})
+    elif channel == "stable" and stable_source == "self-built":
+        pass
     elif channel == "subscription":
         steps.append({"kind": "vendor_repo", "target": target})
     else:
@@ -1374,13 +1406,16 @@ def build_install_plan(channel, target, idp_config, write_idp, options_config=No
             steps.append({"kind": "zypper_repo", "channel": channel, "target": target})
         elif manager == "dnf":
             steps.append({"kind": "dnf_repo", "channel": channel, "target": target})
-    steps.append({
-        "kind": "install_packages",
-        "channel": channel,
-        "target": target,
-        "packages": packages,
-        "best_effort_packages": best_effort_packages,
-    })
+    if stable_source == "self-built" and channel == "stable":
+        steps.append({"kind": "install_self_built"})
+    else:
+        steps.append({
+            "kind": "install_packages",
+            "channel": channel,
+            "target": target,
+            "packages": packages,
+            "best_effort_packages": best_effort_packages,
+        })
     if idp_config or options_config is not None:
         steps.append({
             "kind": "write_global_config",
@@ -1393,7 +1428,9 @@ def build_install_plan(channel, target, idp_config, write_idp, options_config=No
     steps.extend([{"kind": "enable_services"}, {"kind": "maybe_status"}])
     return {
         "version": PLAN_VERSION,
-        "entitlement_token": entitlement_token if channel == "stable" else None,
+        "entitlement_token": entitlement_token if channel == "stable" and stable_source == "repository" else None,
+        "stable_source": stable_source if channel == "stable" else None,
+        "source_dir": source_dir if channel == "stable" and stable_source == "self-built" else None,
         "channel": channel,
         "target": target,
         "manager": manager,
@@ -1402,8 +1439,17 @@ def build_install_plan(channel, target, idp_config, write_idp, options_config=No
     }
 
 
-def build_package_only_plan(channel, target, entitlement_token=None):
-    return build_install_plan(channel, target, None, False, None, entitlement_token)
+def build_package_only_plan(channel, target, entitlement_token=None, stable_source="repository", source_dir=None):
+    return build_install_plan(channel, target, None, False, None, entitlement_token, stable_source, source_dir)
+
+
+def build_self_build_prereq_plan(target):
+    return {
+        "version": PLAN_VERSION, "channel": "stable", "stable_source": "self-built",
+        "entitlement_token": None, "source_dir": None, "target": target,
+        "manager": package_manager(target), "config_path": CONFIG_PATH,
+        "steps": [{"kind": "build_prereqs", "target": target}],
+    }
 
 
 def validate_install_plan(plan):
@@ -1417,8 +1463,18 @@ def validate_install_plan(plan):
         raise InstallError("Invalid install plan channel.")
     if channel == "stable":
         try:
-            normalize_entitlement_token(plan.get("entitlement_token"))
             stable_destination(target)
+            if plan.get("stable_source", "repository") == "repository":
+                normalize_entitlement_token(plan.get("entitlement_token"))
+            elif plan.get("stable_source") == "self-built":
+                if plan.get("entitlement_token"):
+                    raise ValueError("Self-built installation does not use an entitlement token.")
+                if any(s.get("kind") == "install_self_built" for s in plan.get("steps", []) if isinstance(s, dict)):
+                    source_dir = plan.get("source_dir")
+                    if not isinstance(source_dir, str) or not os.path.isabs(source_dir):
+                        raise ValueError("Invalid self-built source directory.")
+            else:
+                raise ValueError("Invalid stable package source.")
         except ValueError as err:
             raise InstallError(str(err))
     try:
@@ -1427,6 +1483,8 @@ def validate_install_plan(plan):
         raise InstallError(str(err))
     allowed = {
         "stable_repo",
+        "build_prereqs",
+        "install_self_built",
         "vendor_repo",
         "apt_prereqs",
         "apt_repo",
@@ -1449,7 +1507,7 @@ def validate_install_plan(plan):
     return True
 
 
-def summary_lines(target, manager, channel, idp_config, write_config, options_config=None, packages=None, best_effort_packages=None):
+def summary_lines(target, manager, channel, idp_config, write_config, options_config=None, packages=None, best_effort_packages=None, stable_source="repository"):
     lines = [
         "Ready to install Himmelblau.",
         f"Distribution: {DISTRO_LABELS[target]}",
@@ -1466,13 +1524,18 @@ def summary_lines(target, manager, channel, idp_config, write_config, options_co
         ])
         if idp_config.get("mode") != "oidc":
             lines.append("Intune policy: " + ("Applied" if options_config.get("apply_policy", True) else "Not applied"))
-    if channel == "stable":
+    if channel == "stable" and stable_source == "self-built":
+        lines.append("Source checkout: " + self_build_directory())
+        lines.append("Updates: Rebuild and install each release; packages are unsigned")
+    elif channel == "stable":
         lines.append("Repository: Stable Repositories (entitlement token hidden)")
     elif channel != "subscription":
         lines.append(f"Repository base: {base_url(channel)}")
-    if packages:
+    if channel == "stable" and stable_source == "self-built":
+        lines.append("Packages: All locally built packages from ./packaging")
+    elif packages:
         lines.append("Packages: " + ", ".join(packages))
-    if best_effort_packages:
+    if best_effort_packages and not (channel == "stable" and stable_source == "self-built"):
         lines.append("Best-effort packages: " + ", ".join(best_effort_packages))
     return lines
 
@@ -1491,7 +1554,7 @@ import urllib.request
 import urllib.parse
 import urllib.error
 
-PLAN_VERSION = 3
+PLAN_VERSION = 4
 GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
 APT_KEYRING_DIR = "/etc/apt/keyrings"
 APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
@@ -1610,8 +1673,10 @@ def validate_source_steps(plan):
         if "target" in step and step["target"] != target:
             raise ValueError("Installation step changes the selected distribution.")
     repo_steps = [step.get("kind") for step in steps if step.get("kind") in ("stable_repo", "apt_repo", "dnf_repo", "zypper_repo")]
-    if channel == "stable" and repo_steps != ["stable_repo"]:
-        raise ValueError("Stable installation requires exactly one authenticated repository setup step.")
+    if channel == "stable":
+        expected = [] if plan.get("stable_source") == "self-built" else ["stable_repo"]
+        if repo_steps != expected:
+            raise ValueError("Invalid stable package source steps.")
     if any(step.get("kind") == "vendor_repo" for step in steps) and channel != "subscription":
         raise ValueError("Vendor repository setup requires the vendor channel.")
     if channel != "stable" and "stable_repo" in repo_steps:
@@ -1841,8 +1906,18 @@ def validate_plan(plan):
         raise WorkerError("Invalid install plan channel.")
     if plan.get("channel") == "stable":
         try:
-            normalize_entitlement_token(plan.get("entitlement_token"))
             stable_destination(plan.get("target"))
+            if plan.get("stable_source", "repository") == "repository":
+                normalize_entitlement_token(plan.get("entitlement_token"))
+            elif plan.get("stable_source") == "self-built":
+                if plan.get("entitlement_token"):
+                    raise ValueError("Self-built installation does not use an entitlement token.")
+                if any(s.get("kind") == "install_self_built" for s in plan.get("steps", []) if isinstance(s, dict)):
+                    source_dir = plan.get("source_dir")
+                    if not isinstance(source_dir, str) or not os.path.isabs(source_dir):
+                        raise ValueError("Invalid self-built source directory.")
+            else:
+                raise ValueError("Invalid stable package source.")
         except ValueError as err:
             raise WorkerError(str(err))
     try:
@@ -1850,7 +1925,7 @@ def validate_plan(plan):
     except ValueError as err:
         raise WorkerError(str(err))
     allowed = set([
-        "stable_repo", "vendor_repo", "apt_prereqs", "apt_repo", "zypper_repo", "dnf_repo", "install_packages",
+        "stable_repo", "vendor_repo", "apt_prereqs", "apt_repo", "zypper_repo", "dnf_repo", "install_packages", "build_prereqs", "install_self_built",
         "write_global_config", "write_idp_config", "configure_distro_provided", "enable_services", "maybe_status", "note"
     ])
     for step in plan.get("steps", []):
@@ -2119,6 +2194,22 @@ def execute_step(step, event_log, plan=None):
     kind = step["kind"]
     if kind == "stable_repo":
         setup_stable_repository(plan, event_log)
+    elif kind == "build_prereqs":
+        manager = plan["manager"]
+        if manager == "apt":
+            run(apt_get_command("update"), event_log)
+            run(apt_get_command("install", "-y", "git", "podman", "make"), event_log)
+        elif manager == "dnf":
+            run(["dnf", "install", "-y", "git", "podman", "make"], event_log)
+        elif manager == "zypper":
+            run(["zypper", "--non-interactive", "install", "-y", "git", "podman", "make"], event_log)
+        else:
+            raise WorkerError("Unsupported package manager for self-built installation.")
+    elif kind == "install_self_built":
+        source_dir = plan["source_dir"]
+        if not os.path.isfile(os.path.join(source_dir, "Makefile")):
+            raise WorkerError("Self-built source checkout is missing its Makefile.")
+        run(["make", "-C", source_dir, "install"], event_log)
     elif kind == "vendor_repo":
         setup_vendor_repositories(step["target"])
     elif kind == "apt_prereqs":
@@ -2364,18 +2455,122 @@ def prompt_stable_access(ui, existing=None):
             ui.warn(str(err))
 
 
+def self_build_notice(source_dir):
+    return (
+        "Building stable-4.x locally can take a long time. The packages are unsigned and "
+        "will not receive automatic stable updates. For each release, rerun this installer "
+        "or update the checkout and repeat make and sudo make install. Source: " + source_dir
+    )
+
+
+def checkout_self_build(on_event):
+    source_dir = self_build_directory()
+    parent = os.path.dirname(source_dir)
+    os.makedirs(parent, mode=0o700, exist_ok=True)
+    if os.path.lexists(source_dir):
+        if os.path.islink(source_dir) or not os.path.isdir(source_dir):
+            raise InstallError("The self-built source path is not a directory: " + source_dir)
+        checks = [
+            (["git", "-C", source_dir, "rev-parse", "--show-toplevel"], source_dir),
+            (["git", "-C", source_dir, "remote", "get-url", "origin"], STABLE_SOURCE_URL),
+            (["git", "-C", source_dir, "symbolic-ref", "--short", "HEAD"], STABLE_SOURCE_BRANCH),
+            (["git", "-C", source_dir, "status", "--porcelain", "--untracked-files=no"], ""),
+        ]
+        for argv, expected in checks:
+            proc = subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            if proc.returncode or proc.stdout.strip() != expected:
+                raise InstallError("Existing self-built checkout has a different remote, branch, or tracked changes: " + source_dir)
+        commands = [
+            ["git", "-C", source_dir, "fetch", "origin", STABLE_SOURCE_BRANCH],
+            ["git", "-C", source_dir, "merge", "--ff-only", "FETCH_HEAD"],
+        ]
+    else:
+        commands = [["git", "clone", "--branch", STABLE_SOURCE_BRANCH, "--single-branch", STABLE_SOURCE_URL, source_dir]]
+    for argv in commands:
+        on_event({"type": "command", "text": shell_join(argv)})
+        proc = subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+        if proc.stdout:
+            on_event({"type": "output", "text": proc.stdout.strip()})
+        if proc.returncode:
+            if argv[1] == "clone":
+                shutil.rmtree(source_dir, ignore_errors=True)
+            raise InstallError("Source checkout failed: " + shell_join(argv))
+    return source_dir
+
+
+def build_self_build(source_dir, on_event):
+    for pattern in ("*.deb", "*.rpm"):
+        for artifact in glob.glob(os.path.join(source_dir, "packaging", pattern)):
+            if os.path.isfile(artifact) and not os.path.islink(artifact):
+                os.unlink(artifact)
+    on_event({"type": "command", "text": "make (in " + source_dir + ")"})
+    master, slave = pty.openpty()
+    try:
+        proc = subprocess.Popen(["make"], cwd=source_dir, stdin=slave, stdout=slave, stderr=slave, close_fds=True)
+    finally:
+        os.close(slave)
+    pending = ""
+    try:
+        while True:
+            try:
+                data = os.read(master, 4096)
+            except OSError:
+                break
+            if not data:
+                break
+            pending += data.decode("utf-8", errors="replace").replace("\r", "")
+            lines = pending.split("\n")
+            pending = lines.pop()
+            for line in lines:
+                if line:
+                    on_event({"type": "output", "text": line})
+        if pending:
+            on_event({"type": "output", "text": pending})
+    finally:
+        os.close(master)
+    if proc.wait() != 0:
+        raise InstallError("The stable-4.x package build failed. Review the build output above.")
+
+
+def run_self_build_install(plan, on_event, non_interactive=False):
+    target = plan["target"]
+    run_elevated_plan(build_self_build_prereq_plan(target), on_event=on_event, prefer_gui=False, non_interactive=non_interactive)
+    on_event({"type": "phase", "text": "Checking out and building stable-4.x packages..."})
+    source_dir = checkout_self_build(on_event)
+    build_self_build(source_dir, on_event)
+    on_event({"type": "phase", "text": "Installing locally built packages..."})
+    plan["source_dir"] = source_dir
+    run_elevated_plan(plan, on_event=on_event, prefer_gui=False, non_interactive=non_interactive)
+    on_event({"type": "info", "text": "Source retained at " + source_dir + ". For updates, rerun this installer or run: cd " + shell_join([source_dir]) + " && git pull --ff-only && make && sudo make install"})
+
+
 def run_cli():
     ui = CliUi()
-    target = distro_target(read_os_release())
+    info = read_os_release()
+    target = distro_target(info)
     if not target or target not in DISTRO_LABELS or target == "nixos":
         raise InstallError("This distribution requires the manual installation instructions on the downloads page.")
-    channel = ui.choose("Choose installation source", channel_choices(load_repo_support(ui), target))
-    token = prompt_stable_access(ui, existing_stable_access()) if channel == "stable" else None
+    matrix = load_repo_support(ui)
+    channel = ui.choose("Choose installation source", channel_choices(matrix, target, info))
+    stable_source = "repository"
+    if channel == "stable":
+        sources = []
+        if is_supported(matrix, "stable", target):
+            sources.append({"label": "Authenticated stable repository", "value": "repository"})
+        if self_build_supported(info, target):
+            sources.append({"label": "Build stable 4.x locally", "value": "self-built"})
+        stable_source = ui.choose("Choose stable package source", sources)
+    token = prompt_stable_access(ui, existing_stable_access()) if channel == "stable" and stable_source == "repository" else None
+    if stable_source == "self-built":
+        ui.info(self_build_notice(self_build_directory()))
     idp_config, write_config = prompt_idp_config(ui)
-    if not ui.confirm("\n".join(summary_lines(target, package_manager(target), channel, idp_config, write_config)) + "\nContinue?", default=False):
+    if not ui.confirm("\n".join(summary_lines(target, package_manager(target), channel, idp_config, write_config, stable_source=stable_source)) + "\nContinue?", default=False):
         raise InstallError("Installation cancelled.")
-    plan = build_install_plan(channel, target, idp_config, write_config, entitlement_token=token)
-    run_elevated_plan(plan, on_event=print_headless_event, prefer_gui=False)
+    plan = build_install_plan(channel, target, idp_config, write_config, entitlement_token=token, stable_source=stable_source)
+    if stable_source == "self-built" and channel == "stable":
+        run_self_build_install(plan, print_headless_event)
+    else:
+        run_elevated_plan(plan, on_event=print_headless_event, prefer_gui=False)
 
 
 def print_headless_event(event):
@@ -2391,30 +2586,45 @@ def print_headless_event(event):
 def run_headless_install(options=None):
     if options is None:
         options = parse_install_options([])
-    target = distro_target(read_os_release())
+    info = read_os_release()
+    target = distro_target(info)
     if not target or target not in DISTRO_LABELS or target == "nixos":
         raise InstallError("This distribution requires the manual installation instructions on the downloads page.")
-    existing = existing_stable_access()
+    existing = None if options.stable_source == "self-built" else existing_stable_access()
     channel = options.channel or ("stable" if existing else None)
     if not channel:
-        raise InstallError("Choose --channel stable, nightly, or vendor. Stable setup also requires --entitlement-token-file PATH. See https://himmelblau-idm.org/stable-repositories/.")
+        raise InstallError("Choose --channel stable, nightly, or vendor. Stable repository setup requires --entitlement-token-file PATH; self-build uses --stable-source self-built.")
     channel = "subscription" if channel == "vendor" else channel
-    if not is_supported(load_repo_support(LogUi()), channel, target):
+    matrix = load_repo_support(LogUi())
+    stable_source = options.stable_source or "repository"
+    if channel == "stable" and stable_source == "self-built":
+        if not self_build_supported(info, target):
+            raise InstallError("Plain make on stable-4.x is not supported for this host.")
+    elif not is_supported(matrix, channel, target):
         raise InstallError("The selected source is unavailable for this distribution. Choose another source explicitly.")
     token = read_entitlement_token_file(options.entitlement_token_file) if options.entitlement_token_file else (existing[1] if existing else None)
-    if channel == "stable" and not token:
+    if channel == "stable" and stable_source == "repository" and not token:
         raise InstallError("Stable installation requires --entitlement-token-file PATH containing the entitlement token.")
-    plan = build_package_only_plan(channel, target, token)
-    run_elevated_plan(plan, on_event=print_headless_event, prefer_gui=False, non_interactive=True)
+    plan = build_package_only_plan(channel, target, token, stable_source)
+    if channel == "stable" and stable_source == "self-built":
+        print(self_build_notice(self_build_directory()), flush=True)
+        run_self_build_install(plan, print_headless_event, non_interactive=True)
+    else:
+        run_elevated_plan(plan, on_event=print_headless_event, prefer_gui=False, non_interactive=True)
 
 
 def parse_install_options(argv):
     parser = argparse.ArgumentParser(description="Install Himmelblau with your native package manager.")
     parser.add_argument("--channel", choices=("stable", "nightly", "vendor"))
+    parser.add_argument("--stable-source", choices=("repository", "self-built"), help="Use an authenticated stable repository or build stable-4.x locally")
     parser.add_argument("--entitlement-token-file", metavar="PATH", help="Private file containing the stable repository entitlement token")
     options = parser.parse_args(argv)
     if options.entitlement_token_file and options.channel not in (None, "stable"):
         parser.error("The entitlement token option requires --channel stable.")
+    if options.stable_source and options.channel != "stable":
+        parser.error("--stable-source requires --channel stable.")
+    if options.stable_source == "self-built" and options.entitlement_token_file:
+        parser.error("Self-built stable packages do not use an entitlement token.")
     return options
 
 
@@ -2520,6 +2730,9 @@ class WizardCursesUi:
         self.existing_config = None
         self.installed = False
         self.channel = None
+        self.stable_source = "repository"
+        self.stable_repository_available = False
+        self.self_build_available = False
         self.entitlement_token = ""
         self.original_channel = None
         self.identity_stage = "input"
@@ -2544,6 +2757,7 @@ class WizardCursesUi:
         self.progress_text = "Requesting administrative authorization..."
         self.progress_percent = 0
         self.transcript = []
+        self._last_event_render = 0.0
         self.install_ok = False
         self.final_message = ""
         self.focusables = []
@@ -2729,7 +2943,11 @@ class WizardCursesUi:
                     self.blockers.append(f"Required command not found: {required_command}")
                 matrix = load_repo_support(collector)
                 self.warnings.extend(collector.warnings)
-                self.choices = channel_choices(matrix, self.target)
+                self.stable_repository_available = is_supported(matrix, "stable", self.target)
+                self.self_build_available = self_build_supported(self.info, self.target)
+                self.choices = channel_choices(matrix, self.target, self.info)
+                if not self.stable_repository_available and self.self_build_available:
+                    self.stable_source = "self-built"
                 if not self.choices:
                     self.blockers.append(f"Himmelblau does not currently publish packages for {DISTRO_LABELS[self.target]}.")
                 if self.choices:
@@ -3087,18 +3305,26 @@ class WizardCursesUi:
         ])
 
     def render_stable_access(self):
-        layout = self._begin_frame("Stable repository access", "Enter the entitlement token from your subscription email.")
+        layout = self._begin_frame("Stable 4.x packages", "Choose how to obtain stable packages.")
         y, x = layout["content_y"] + 1, layout["content_x"] + 2
         width = layout["content_w"] - 4
-        y = self._input(y, x, width, "entitlement_token", "Entitlement token")
-        y = self._draw_wrapped(y + 1, x, "The installer will identify the stable stream authorized by this token.", width, self._attr("panel"))
-        y = self._draw_wrapped(y, x, "Need access? Subscribe at:", width, self._attr("muted"))
-        self._write(y, x, STABLE_SUBSCRIPTION_URL, self._attr("accent"))
+        if getattr(self, "stable_repository_available", False):
+            y = self._radio(y, x, width, "stable:repository", "Authenticated stable repository", getattr(self, "stable_source", "repository") == "repository", lambda: setattr(self, "stable_source", "repository"))
+        if getattr(self, "self_build_available", False):
+            y = self._radio(y, x, width, "stable:self-built", "Build stable 4.x locally", getattr(self, "stable_source", "repository") == "self-built", lambda: setattr(self, "stable_source", "self-built"))
         y += 1
-        button_width = self._button(y, x, "Copy URL", self.copy_subscription_url)
-        if self.clipboard_notice:
-            self._write(y, x + button_width + 1, self.clipboard_notice, self._attr("muted"))
-        y = self._draw_wrapped(y + 1, x, "Missing email? Contact dmulder@himmelblau-idm.org with proof of subscription; expect a response within one business day. Technical support is not included.", width, self._attr("muted"))
+        if getattr(self, "stable_source", "repository") == "repository":
+            y = self._input(y, x, width, "entitlement_token", "Entitlement token")
+            y = self._draw_wrapped(y + 1, x, "The installer will identify the stable stream authorized by this token.", width, self._attr("panel"))
+            y = self._draw_wrapped(y, x, "Need access? Subscribe at:", width, self._attr("muted"))
+            self._write(y, x, STABLE_SUBSCRIPTION_URL, self._attr("accent"))
+            y += 1
+            button_width = self._button(y, x, "Copy URL", self.copy_subscription_url)
+            if self.clipboard_notice:
+                self._write(y, x + button_width + 1, self.clipboard_notice, self._attr("muted"))
+            y = self._draw_wrapped(y + 1, x, "Missing email? Contact dmulder@himmelblau-idm.org with proof of subscription; expect a response within one business day. Technical support is not included.", width, self._attr("muted"))
+        else:
+            y = self._draw_wrapped(y, x, self_build_notice(self_build_directory()), width, self._attr("muted"))
         if self.message:
             self._draw_wrapped(y + 1, x, self.message, width, self._attr("error"))
         self._footer_buttons(layout, [
@@ -3324,13 +3550,13 @@ class WizardCursesUi:
         self._draw_box(layout["content_y"], layout["content_x"], layout["content_h"], layout["content_w"], "Summary", self._attr("panel"))
         idp_config, write_config = self.selected_idp()
         packages, best_effort_packages = detected_package_selection(self.channel, self.target)
-        for line in summary_lines(self.target, self.manager, self.channel, idp_config, write_config, self.selected_options(), packages, best_effort_packages):
+        for line in summary_lines(self.target, self.manager, self.channel, idp_config, write_config, self.selected_options(), packages, best_effort_packages, getattr(self, "stable_source", "repository")):
             if ": " in line:
                 label, value = line.split(": ", 1)
                 y = self._row(y, x, width, label, value)
             else:
                 y = self._draw_wrapped(y, x, line, width, self._attr("accent"))
-        if self.channel == "stable":
+        if self.channel == "stable" and getattr(self, "stable_source", "repository") == "repository":
             y = self._row(y, x, width, "Stable stream", "Determined from entitlement token")
         y += 1
         self._draw_wrapped(y, x, "Administrative authorization will be requested when installation begins.", width, self._attr("muted"))
@@ -3424,6 +3650,9 @@ class WizardCursesUi:
             index = event.get("index", 1)
             self.progress_percent = (index - 1) * 100.0 / total
             self.progress_text = "Step %s of %s: %s" % (index, total, event.get("kind", ""))
+        elif etype == "phase":
+            self.progress_text = event.get("text", "")
+            self.progress_percent = 50.0
         elif etype == "done":
             self.progress_percent = 100
             self.progress_text = "Finishing..."
@@ -3431,6 +3660,11 @@ class WizardCursesUi:
             text = event.get("text", "")
             if text:
                 self.transcript.append(text)
+                if len(self.transcript) > 500:
+                    del self.transcript[:-500]
+        if etype == "output" and time.monotonic() - getattr(self, "_last_event_render", 0) < 0.1:
+            return
+        self._last_event_render = time.monotonic()
         self.render()
 
     def start_install(self):
@@ -3441,8 +3675,12 @@ class WizardCursesUi:
             authorize_sudo_for_curses(self.curses)
             self._enable_mouse()
             idp_config, write_config = self.selected_idp()
-            plan = build_install_plan(self.channel, self.target, idp_config, write_config, self.selected_options(), self.entitlement_token)
-            run_elevated_plan(plan, on_event=self.on_event, prefer_gui=False, non_interactive=True)
+            stable_source = getattr(self, "stable_source", "repository")
+            plan = build_install_plan(self.channel, self.target, idp_config, write_config, self.selected_options(), self.entitlement_token, stable_source)
+            if self.channel == "stable" and stable_source == "self-built":
+                run_self_build_install(plan, self.on_event, non_interactive=True)
+            else:
+                run_elevated_plan(plan, on_event=self.on_event, prefer_gui=False, non_interactive=True)
             self.install_ok = True
             self.final_message = "Himmelblau installation completed."
         except Exception as err:
@@ -3466,12 +3704,13 @@ class WizardCursesUi:
         elif self.page == "source":
             self.page = "stable" if self.channel == "stable" else "identity"
         elif self.page == "stable":
-            try:
-                self.entitlement_token = normalize_entitlement_token(self.entitlement_token)
-                stable_destination(self.target)
-            except ValueError as err:
-                self.message = str(err)
-                return True
+            if getattr(self, "stable_source", "repository") == "repository":
+                try:
+                    self.entitlement_token = normalize_entitlement_token(self.entitlement_token)
+                    stable_destination(self.target)
+                except ValueError as err:
+                    self.message = str(err)
+                    return True
             self.message = ""
             self.clipboard_notice = ""
             self.page = "identity"

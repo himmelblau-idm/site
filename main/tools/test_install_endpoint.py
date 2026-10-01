@@ -1867,5 +1867,79 @@ class InstallEndpointTests(unittest.TestCase):
             shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+class SelfBuildTests(unittest.TestCase):
+    def test_self_build_host_gating_matches_plain_make(self):
+        with mock.patch.object(installer.os, "uname", return_value=types.SimpleNamespace(machine="x86_64")):
+            self.assertTrue(installer.self_build_supported({"ID": "ubuntu", "VERSION_ID": "24.04"}, "ubuntu24.04"))
+            self.assertFalse(installer.self_build_supported({"ID": "linuxmint", "VERSION_ID": "23"}, "ubuntu26.04"))
+            self.assertFalse(installer.self_build_supported({"ID": "opensuse-leap", "VERSION_ID": "16"}, "sle16"))
+            self.assertFalse(installer.self_build_supported({"ID": "sles", "VERSION_ID": "15.7"}, "sle15sp7"))
+            self.assertFalse(installer.self_build_supported({"ID": "oracle", "VERSION_ID": "9", "ID_LIKE": "rhel"}, "rocky9"))
+        with mock.patch.object(installer.os, "uname", return_value=types.SimpleNamespace(machine="aarch64")):
+            self.assertFalse(installer.self_build_supported({"ID": "ubuntu", "VERSION_ID": "24.04"}, "ubuntu24.04"))
+
+    def test_self_build_plan_uses_local_install_without_token_or_repository(self):
+        with mock.patch.object(installer, "detected_package_selection", return_value=(["himmelblau"], [])):
+            plan = installer.build_package_only_plan("stable", "ubuntu24.04", stable_source="self-built", source_dir="/home/user/.local/share/himmelblau/stable-4.x")
+        self.assertTrue(installer.validate_install_plan(plan))
+        worker = load_worker_module()
+        worker.validate_plan(plan)
+        self.assertEqual([step["kind"] for step in plan["steps"][:1]], ["install_self_built"])
+        self.assertIsNone(plan["entitlement_token"])
+        for bad in (None, "relative/path"):
+            broken = dict(plan, source_dir=bad)
+            with self.assertRaises(installer.InstallError):
+                installer.validate_install_plan(broken)
+            with self.assertRaises(worker.WorkerError):
+                worker.validate_plan(broken)
+
+    def test_self_build_prerequisites_and_install_command(self):
+        worker = load_worker_module()
+        plan = installer.build_self_build_prereq_plan("ubuntu24.04")
+        worker.validate_plan(plan)
+        commands = []
+        with mock.patch.object(worker, "run", side_effect=lambda argv, log: commands.append(argv)):
+            worker.execute_step(plan["steps"][0], "events", plan)
+        self.assertEqual(commands[1][-3:], ["git", "podman", "make"])
+        with tempfile.TemporaryDirectory() as tmp:
+            pathlib.Path(tmp, "Makefile").touch()
+            commands.clear()
+            with mock.patch.object(worker, "run", side_effect=lambda argv, log: commands.append(argv)):
+                worker.execute_step({"kind": "install_self_built"}, "events", {"source_dir": tmp})
+            self.assertEqual(commands, [["make", "-C", tmp, "install"]])
+
+    def test_headless_self_build_requires_supported_host_and_no_token(self):
+        info = {"ID": "ubuntu", "VERSION_ID": "24.04"}
+        with mock.patch.object(installer, "read_os_release", return_value=info), \
+             mock.patch.object(installer, "existing_stable_access", return_value=None), \
+             mock.patch.object(installer, "load_repo_support", return_value=installer.FALLBACK_REPO_SUPPORT), \
+             mock.patch.object(installer, "self_build_supported", return_value=True), \
+             mock.patch.object(installer, "detected_package_selection", return_value=(["himmelblau"], [])), \
+             mock.patch.object(installer, "run_self_build_install") as run_build:
+            installer.run_headless_install(installer.parse_install_options(["--channel", "stable", "--stable-source", "self-built"]))
+            self.assertEqual(run_build.call_args[0][0]["stable_source"], "self-built")
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            installer.parse_install_options(["--channel", "stable", "--stable-source", "self-built", "--entitlement-token-file", "/tmp/token"])
+
+    def test_checkout_refuses_wrong_existing_branch(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(installer, "self_build_directory", return_value=tmp):
+            with mock.patch.object(installer.subprocess, "run", return_value=types.SimpleNamespace(returncode=0, stdout="wrong\n")):
+                with self.assertRaises(installer.InstallError):
+                    installer.checkout_self_build(lambda event: None)
+
+    def test_self_build_orders_prerequisites_build_and_install(self):
+        calls = []
+        plan = installer.build_package_only_plan("stable", "ubuntu24.04", stable_source="self-built")
+        with mock.patch.object(installer, "run_elevated_plan", side_effect=lambda p, **kwargs: calls.append(("privileged", p["steps"][0]["kind"]))), \
+             mock.patch.object(installer, "checkout_self_build", side_effect=lambda event: calls.append(("checkout",)) or "/tmp/stable-4.x"), \
+             mock.patch.object(installer, "build_self_build", side_effect=lambda path, event: calls.append(("build", path))):
+            installer.run_self_build_install(plan, lambda event: None, non_interactive=True)
+        self.assertEqual(calls, [
+            ("privileged", "build_prereqs"), ("checkout",),
+            ("build", "/tmp/stable-4.x"), ("privileged", "install_self_built"),
+        ])
+        self.assertEqual(plan["source_dir"], "/tmp/stable-4.x")
+
+
 if __name__ == "__main__":
     unittest.main()

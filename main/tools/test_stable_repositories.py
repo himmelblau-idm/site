@@ -158,8 +158,8 @@ class StableRepositoryTests(unittest.TestCase):
         self.patch(w, "STABLE_APT_PREFERENCES_PATH", str(folder / "preferences"))
         self.patch(w, "STABLE_APT_DEB822_PATH", str(folder / "himmelblau.sources"))
         self.patch(w, "APT_KEYRING_PATH", str(folder / "key.gpg"))
-        self.patch(w, "STABLE_RPM_DIRS", {"dnf": str(folder), "zypper": str(folder)})
-        self.patch(w, "STABLE_RPM_KEYS", {"dnf": str(folder / "key.asc"), "zypper": str(folder / "key.asc")})
+        self.patch(w, "STABLE_RPM_DIRS", {"dnf": str(folder), "rpm-ostree": str(folder), "zypper": str(folder)})
+        self.patch(w, "STABLE_RPM_KEYS", {"dnf": str(folder / "key.asc"), "rpm-ostree": str(folder / "key.asc"), "zypper": str(folder / "key.asc")})
         self.patch(w, "check_stable_major", lambda *args: None)
         self.patch(w, "dearmor_apt_key", lambda data: b"new-dearmored-key")
         def fetch(url, unavailable_ok=False):
@@ -202,6 +202,23 @@ class StableRepositoryTests(unittest.TestCase):
                 self.assertIn("/aarch64", config)
                 self.assertIn("/noarch", config)
                 self.assertNotIn("/x86_64", config)
+
+    def test_silverblue_stable_repo_uses_local_key_without_mutable_rpmdb(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = pathlib.Path(tmp)
+            source, key = self.configure_fake_system("rpm-ostree", folder)
+            commands = []
+            def record(argv, event_log, check=True):
+                commands.append(argv)
+                return types.SimpleNamespace(stdout="x86_64", returncode=0)
+            self.patch(self.worker, "run", record)
+            plan = self.plan(target="fedora44")
+            plan["manager"] = "rpm-ostree"
+            self.worker.setup_stable_repository(plan, str(folder / "events"))
+            self.assertIn("/rpm/fedora/44/x86_64", source.read_text())
+            self.assertIn("gpgkey=file://" + str(key), source.read_text())
+            self.assertTrue(key.exists())
+            self.assertFalse(any(argv[:2] == ["rpm", "--import"] or argv[0] == "dnf" for argv in commands))
 
     def test_nightly_rpm_arm64_does_not_replace_existing_source(self):
         for manager, target in (("dnf", "rocky9"), ("zypper", "sle16")):

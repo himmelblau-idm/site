@@ -36,6 +36,8 @@ const STABLE_DESTINATIONS = {
 	fedora42: ['fedora', '42'],
 	fedora43: ['fedora', '43'],
 	fedora44: ['fedora', '44'],
+	silverblue43: ['fedora', '43'],
+	silverblue44: ['fedora', '44'],
 	rawhide: ['fedora', '46'],
 	amzn2023: ['amzn', '2023'],
 	tumbleweed: ['opensuse', 'tumbleweed'],
@@ -80,7 +82,13 @@ function isNix(d) {
 	return d === 'nixos';
 }
 function isFedora(d) {
-  return d === 'fedora42' || d === 'fedora43' || d === 'rawhide';
+  return d === 'fedora42' || d === 'fedora43' || d === 'fedora44' || d === 'rawhide';
+}
+function isSilverblue(d) {
+  return d === 'silverblue43' || d === 'silverblue44';
+}
+function packageTarget(d) {
+  return isSilverblue(d) ? `fedora${d.slice('silverblue'.length)}` : d;
 }
 
 function baseUrlFor(channel) {
@@ -90,6 +98,7 @@ function baseUrlFor(channel) {
 }
 
 function isSupported(channel, distro) {
+	distro = packageTarget(distro);
 	const cfg = REPO_SUPPORT[channel] || { include: [], exclude: [] };
 	// If include list is populated, only those are supported.
 	if (cfg.include.length > 0) {
@@ -256,6 +265,8 @@ async function provideRepoInstructions() {
 		updateCmd = 'sudo nixos-rebuild switch --upgrade';
 	} else if (distro.startsWith('sle') || distro === 'tumbleweed') {
 		updateCmd = 'sudo zypper update';
+	} else if (isSilverblue(distro)) {
+		updateCmd = 'sudo rpm-ostree upgrade';
 	} else if (isFedora(distro)) {
 		// DNF5 everywhere for our Fedora targets
 		updateCmd = 'sudo dnf upgrade --refresh';
@@ -453,6 +464,31 @@ async function provideRepoInstructions() {
 					}),
 				),
 			);
+		} else if (isSilverblue(distro)) {
+			const repoBase = `${STABLE_REPO_ROOT}/rpm/${repoDistro}/${repoVersion}`;
+			const keyPath = '/etc/pki/rpm-gpg/himmelblau-stable.asc';
+			const repoPath = '/etc/yum.repos.d/himmelblau-stable.repo';
+			[
+				`sudo install -d -m 0755 /etc/pki/rpm-gpg`,
+				`sudo curl -fsSL -o ${keyPath} ${STABLE_REPO_ROOT}/gpg.key`,
+				`sudo chmod 0644 ${keyPath}`,
+				`sudo tee ${repoPath} > /dev/null <<'EOF'
+[himmelblau-stable]
+name=Himmelblau Stable
+baseurl=${repoBase}/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=file://${keyPath}
+
+[himmelblau-stable-noarch]
+name=Himmelblau Stable
+baseurl=${repoBase}/noarch
+enabled=1
+gpgcheck=1
+gpgkey=file://${keyPath}
+EOF`,
+				`sudo chmod 0600 ${repoPath}`,
+			].forEach((cmd) => linksContainer.appendChild(Object.assign(document.createElement('pre'), { textContent: cmd })));
 		} else {
 			const repoBase = `${STABLE_REPO_ROOT}/rpm/${repoDistro}/${repoVersion}`;
 			const repoPath = '/etc/yum.repos.d/himmelblau-stable.repo';
@@ -521,6 +557,22 @@ EOF`;
 				}),
 			),
 		);
+	} else if (isSilverblue(distro)) {
+		const keyPath = '/etc/pki/rpm-gpg/himmelblau-nightly.asc';
+		const repoPath = '/etc/yum.repos.d/himmelblau-nightly.repo';
+		[
+			'sudo install -d -m 0755 /etc/pki/rpm-gpg',
+			`sudo curl -fsSL -o ${keyPath} ${gpgKeyUrl}`,
+			`sudo chmod 0644 ${keyPath}`,
+			`sudo tee ${repoPath} > /dev/null <<'EOF'
+[himmelblau-nightly]
+name=Himmelblau Nightly
+baseurl=${baseUrl}/rpm/${packageTarget(distro)}
+enabled=1
+gpgcheck=1
+gpgkey=file://${keyPath}
+EOF`,
+		].forEach((cmd) => linksContainer.appendChild(Object.assign(document.createElement('pre'), { textContent: cmd })));
 	} else if (isFedora(distro)) {
 		const repoFileUrl = `${baseUrl}/rpm/${distro}/himmelblau.repo`;
 		[
@@ -552,7 +604,9 @@ EOF`;
 	linksContainer.appendChild(installSection);
 
 	const installPre = document.createElement('pre');
-	installPre.textContent = isDeb(distro)
+	installPre.textContent = isSilverblue(distro)
+		? 'sudo rpm-ostree install -y himmelblau pam-himmelblau nss-himmelblau'
+		: isDeb(distro)
 		? 'sudo apt install -y himmelblau pam-himmelblau nss-himmelblau'
 		: distro.startsWith('sle') || distro === 'tumbleweed'
 			? 'sudo zypper in -y himmelblau pam-himmelblau nss-himmelblau'
@@ -562,6 +616,13 @@ EOF`;
 	const opt = document.createElement('p');
 	opt.textContent = 'Optional packages: himmelblau-sshd-config (for SSH integration), himmelblau-qr-greeter (for DAG QR integration in GDM), himmelblau-sso (for browser single sign-on), o365 (Office 365 web apps), and himmelblau-selinux (SELinux module).';
 	linksContainer.appendChild(opt);
+	if (isSilverblue(distro)) {
+		const reboot = document.createElement('p');
+		reboot.textContent = 'Reboot to activate the layered packages, then enable and start the services:';
+		linksContainer.appendChild(reboot);
+		linksContainer.appendChild(Object.assign(document.createElement('pre'), { textContent: 'sudo systemctl reboot' }));
+		linksContainer.appendChild(Object.assign(document.createElement('pre'), { textContent: 'sudo systemctl enable --now himmelblaud himmelblaud-tasks' }));
+	}
 
 	addCopyButtons();
 }

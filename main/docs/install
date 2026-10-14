@@ -41,8 +41,8 @@ import urllib.parse
 import urllib.request
 
 
-VERSION = "2026.10.01"
-PLAN_VERSION = 4
+VERSION = "2026.10.09"
+PLAN_VERSION = 5
 SUPPORT_JS_URL = "https://himmelblau-idm.org/js/install.js"
 STABLE_SUBSCRIPTION_URL = "https://himmelblau-idm.org/stable-repositories/"
 STABLE_SOURCE_URL = "https://github.com/himmelblau-idm/himmelblau.git"
@@ -151,8 +151,8 @@ SECRET_VALUES = set()
 STABLE_APT_SOURCE_PATH = "/etc/apt/sources.list.d/himmelblau.list"
 STABLE_APT_PREFERENCES_PATH = "/etc/apt/preferences.d/himmelblau-stable"
 STABLE_APT_DEB822_PATH = "/etc/apt/sources.list.d/himmelblau.sources"
-STABLE_RPM_DIRS = {"dnf": "/etc/yum.repos.d", "zypper": "/etc/zypp/repos.d"}
-STABLE_RPM_KEYS = {"dnf": "/etc/pki/rpm-gpg/himmelblau-stable.asc", "zypper": "/etc/zypp/himmelblau-stable.asc"}
+STABLE_RPM_DIRS = {"dnf": "/etc/yum.repos.d", "rpm-ostree": "/etc/yum.repos.d", "zypper": "/etc/zypp/repos.d"}
+STABLE_RPM_KEYS = {"dnf": "/etc/pki/rpm-gpg/himmelblau-stable.asc", "rpm-ostree": "/etc/pki/rpm-gpg/himmelblau-stable.asc", "zypper": "/etc/zypp/himmelblau-stable.asc"}
 
 
 def redact(value):
@@ -592,6 +592,14 @@ def package_manager(target):
     return "dnf"
 
 
+def host_package_manager(info, target):
+    if info.get("ID", "").lower() == "fedora" and info.get("VARIANT_ID", "").lower() == "silverblue":
+        if not os.path.exists("/run/ostree-booted"):
+            raise InstallError("Fedora Silverblue must be run on the booted host, not in a toolbox or container.")
+        return "rpm-ostree"
+    return package_manager(target)
+
+
 def required_manager_command(target):
     if target.startswith("ubuntu") or target.startswith("debian"):
         return "apt-get"
@@ -616,6 +624,8 @@ def is_supported(matrix, channel, target):
 
 
 def self_build_supported(info, target):
+    if info.get("VARIANT_ID", "").lower() == "silverblue":
+        return False
     # Plain `make` in stable-4.x currently selects these targets on x86-64.
     if os.uname().machine not in ("x86_64", "amd64"):
         return False
@@ -1251,6 +1261,8 @@ def package_install_command(manager, channel, target, packages):
         return sudo_prefix() + ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", f"himmelblau-{channel}"] + packages
     if manager == "dnf":
         return sudo_prefix() + ["dnf", "install", "-y"] + packages
+    if manager == "rpm-ostree":
+        return sudo_prefix() + ["rpm-ostree", "install", "-y"] + packages
     raise InstallError("NixOS is not supported by this bootstrap installer. Use the advanced manual instructions.")
 
 
@@ -1336,8 +1348,23 @@ gpgkey={GPG_KEY_URL}
     run(sudo_prefix() + ["dnf", "makecache", "--refresh", "-y"], ui)
 
 
-def install_packages(channel, target, ui, packages=None, best_effort_packages=None):
-    manager = package_manager(target)
+def ostree_repo_setup(channel, target, ui):
+    if run(sudo_prefix() + ["rpm", "--eval", "%{_arch}"], ui).stdout.strip() == "aarch64":
+        raise InstallError("Community Nightly RPM packages are unavailable for ARM64. Choose the Stable repository with an entitlement token.")
+    key_path = "/etc/pki/rpm-gpg/himmelblau-nightly.asc"
+    with urllib.request.urlopen(GPG_KEY_URL, timeout=30) as response:
+        key_data = response.read(128 * 1024)
+    if not key_data:
+        raise InstallError("Unable to download the Himmelblau package signing key.")
+    run(sudo_prefix() + ["install", "-d", "-m", "0755", os.path.dirname(key_path)], ui)
+    install_bytes(key_path, key_data, "0644", ui)
+    name = f"himmelblau-{channel}"
+    repo = f"[{name}]\nname=Himmelblau {channel}\nbaseurl={base_url(channel)}/rpm/{target}\nenabled=1\ngpgcheck=1\ngpgkey=file://{key_path}\n"
+    install_text(f"/etc/yum.repos.d/{name}.repo", repo, "0644", ui)
+
+
+def install_packages(channel, target, ui, packages=None, best_effort_packages=None, manager=None):
+    manager = manager or package_manager(target)
     if channel != "subscription":
         if manager == "apt":
             apt_repo_setup(channel, target, ui)
@@ -1345,6 +1372,8 @@ def install_packages(channel, target, ui, packages=None, best_effort_packages=No
             zypper_repo_setup(channel, target, ui)
         elif manager == "dnf":
             dnf_repo_setup(channel, target, ui)
+        elif manager == "rpm-ostree":
+            ostree_repo_setup(channel, target, ui)
 
     if packages is None or best_effort_packages is None:
         packages, best_effort_packages = detected_package_selection(channel, target)
@@ -1389,8 +1418,8 @@ def require_commands(commands):
         raise InstallError("Required commands are missing: " + ", ".join(missing))
 
 
-def build_install_plan(channel, target, idp_config, write_idp, options_config=None, entitlement_token=None, stable_source="repository", source_dir=None):
-    manager = package_manager(target)
+def build_install_plan(channel, target, idp_config, write_idp, options_config=None, entitlement_token=None, stable_source="repository", source_dir=None, manager=None):
+    manager = manager or package_manager(target)
     packages, best_effort_packages = detected_package_selection(channel, target)
     steps = []
     if channel == "stable" and stable_source == "repository":
@@ -1404,7 +1433,7 @@ def build_install_plan(channel, target, idp_config, write_idp, options_config=No
             steps.extend([{"kind": "apt_prereqs"}, {"kind": "apt_repo", "channel": channel, "target": target}])
         elif manager == "zypper":
             steps.append({"kind": "zypper_repo", "channel": channel, "target": target})
-        elif manager == "dnf":
+        elif manager in ("dnf", "rpm-ostree"):
             steps.append({"kind": "dnf_repo", "channel": channel, "target": target})
     if stable_source == "self-built" and channel == "stable":
         steps.append({"kind": "install_self_built"})
@@ -1416,16 +1445,29 @@ def build_install_plan(channel, target, idp_config, write_idp, options_config=No
             "packages": packages,
             "best_effort_packages": best_effort_packages,
         })
+    postboot = []
     if idp_config or options_config is not None:
-        steps.append({
+        postboot.append({
             "kind": "write_global_config",
             "config": {"idp": idp_config, "write_idp": write_idp, "options": options_config},
         })
     if channel == "subscription":
-        steps.append({"kind": "configure_distro_provided", "target": target})
+        postboot.append({"kind": "configure_distro_provided", "target": target})
+        note = None
     else:
-        steps.append({"kind": "note", "message": "Community packages configure PAM/NSS integration during package installation."})
-    steps.extend([{"kind": "enable_services"}, {"kind": "maybe_status"}])
+        note = {"kind": "note", "message": "Community packages configure PAM/NSS integration during package installation."}
+    postboot.extend([{"kind": "enable_services"}, {"kind": "maybe_status"}])
+    if manager == "rpm-ostree":
+        if note:
+            steps.append(note)
+        steps.append({"kind": "stage_postboot", "steps": postboot})
+    else:
+        if note:
+            steps.extend(postboot[:-2])
+            steps.append(note)
+            steps.extend(postboot[-2:])
+        else:
+            steps.extend(postboot)
     return {
         "version": PLAN_VERSION,
         "entitlement_token": entitlement_token if channel == "stable" and stable_source == "repository" else None,
@@ -1439,8 +1481,8 @@ def build_install_plan(channel, target, idp_config, write_idp, options_config=No
     }
 
 
-def build_package_only_plan(channel, target, entitlement_token=None, stable_source="repository", source_dir=None):
-    return build_install_plan(channel, target, None, False, None, entitlement_token, stable_source, source_dir)
+def build_package_only_plan(channel, target, entitlement_token=None, stable_source="repository", source_dir=None, manager=None):
+    return build_install_plan(channel, target, None, False, None, entitlement_token, stable_source, source_dir, manager)
 
 
 def build_self_build_prereq_plan(target):
@@ -1461,6 +1503,9 @@ def validate_install_plan(plan):
         raise InstallError("Invalid install plan target.")
     if channel not in ("subscription", "stable", "nightly"):
         raise InstallError("Invalid install plan channel.")
+    manager = plan.get("manager")
+    if manager != package_manager(target) and not (manager == "rpm-ostree" and target.startswith("fedora")):
+        raise InstallError("Invalid package manager for this distribution.")
     if channel == "stable":
         try:
             stable_destination(target)
@@ -1497,6 +1542,7 @@ def validate_install_plan(plan):
         "enable_services",
         "maybe_status",
         "note",
+        "stage_postboot",
     }
     for step in plan.get("steps", []):
         if not isinstance(step, dict) or step.get("kind") not in allowed:
@@ -1504,6 +1550,9 @@ def validate_install_plan(plan):
         if step.get("kind") == "install_packages":
             validate_package_list(step.get("packages"))
             validate_package_list(step.get("best_effort_packages"))
+        if step.get("kind") == "stage_postboot":
+            if manager != "rpm-ostree" or [s.get("kind") for s in step.get("steps", [])] not in (["write_global_config", "enable_services", "maybe_status"], ["enable_services", "maybe_status"]):
+                raise InstallError("Invalid Silverblue post-boot plan.")
     return True
 
 
@@ -1554,7 +1603,7 @@ import urllib.request
 import urllib.parse
 import urllib.error
 
-PLAN_VERSION = 4
+PLAN_VERSION = 5
 GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
 APT_KEYRING_DIR = "/etc/apt/keyrings"
 APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
@@ -1609,8 +1658,13 @@ SECRET_VALUES = set()
 STABLE_APT_SOURCE_PATH = "/etc/apt/sources.list.d/himmelblau.list"
 STABLE_APT_PREFERENCES_PATH = "/etc/apt/preferences.d/himmelblau-stable"
 STABLE_APT_DEB822_PATH = "/etc/apt/sources.list.d/himmelblau.sources"
-STABLE_RPM_DIRS = {"dnf": "/etc/yum.repos.d", "zypper": "/etc/zypp/repos.d"}
-STABLE_RPM_KEYS = {"dnf": "/etc/pki/rpm-gpg/himmelblau-stable.asc", "zypper": "/etc/zypp/himmelblau-stable.asc"}
+STABLE_RPM_DIRS = {"dnf": "/etc/yum.repos.d", "rpm-ostree": "/etc/yum.repos.d", "zypper": "/etc/zypp/repos.d"}
+STABLE_RPM_KEYS = {"dnf": "/etc/pki/rpm-gpg/himmelblau-stable.asc", "rpm-ostree": "/etc/pki/rpm-gpg/himmelblau-stable.asc", "zypper": "/etc/zypp/himmelblau-stable.asc"}
+POSTBOOT_DIR = "/var/lib/himmelblau-installer"
+POSTBOOT_UNIT = "/etc/systemd/system/himmelblau-install-finish.service"
+POSTBOOT_PLAN = POSTBOOT_DIR + "/postboot.json"
+POSTBOOT_WORKER = POSTBOOT_DIR + "/worker.py"
+POSTBOOT_LOG = POSTBOOT_DIR + "/postboot.jsonl"
 
 
 def redact(value):
@@ -1902,6 +1956,18 @@ def validate_plan(plan):
         raise WorkerError("Invalid install plan version.")
     if plan.get("target") not in DISTRO_LABELS:
         raise WorkerError("Invalid install plan target.")
+    manager = plan.get("manager")
+    if manager != package_manager(plan["target"]) and not (manager == "rpm-ostree" and plan["target"].startswith("fedora")):
+        raise WorkerError("Invalid package manager for this distribution.")
+    if plan.get("phase") == "postboot":
+        if manager != "rpm-ostree" or plan.get("entitlement_token") is not None:
+            raise WorkerError("Invalid Silverblue post-boot plan.")
+        kinds = [step.get("kind") for step in plan.get("steps", []) if isinstance(step, dict)]
+        if kinds not in (["write_global_config", "enable_services", "maybe_status"], ["enable_services", "maybe_status"]):
+            raise WorkerError("Invalid Silverblue post-boot steps.")
+        if len(kinds) != len(plan.get("steps", [])):
+            raise WorkerError("Invalid Silverblue post-boot steps.")
+        return
     if plan.get("channel") not in ("subscription", "stable", "nightly"):
         raise WorkerError("Invalid install plan channel.")
     if plan.get("channel") == "stable":
@@ -1926,7 +1992,7 @@ def validate_plan(plan):
         raise WorkerError(str(err))
     allowed = set([
         "stable_repo", "vendor_repo", "apt_prereqs", "apt_repo", "zypper_repo", "dnf_repo", "install_packages", "build_prereqs", "install_self_built",
-        "write_global_config", "write_idp_config", "configure_distro_provided", "enable_services", "maybe_status", "note"
+        "write_global_config", "write_idp_config", "configure_distro_provided", "enable_services", "maybe_status", "note", "stage_postboot"
     ])
     for step in plan.get("steps", []):
         if not isinstance(step, dict) or step.get("kind") not in allowed:
@@ -1934,6 +2000,10 @@ def validate_plan(plan):
         if step.get("kind") == "install_packages":
             validate_package_list(step.get("packages"))
             validate_package_list(step.get("best_effort_packages"))
+        if step.get("kind") == "stage_postboot":
+            kinds = [s.get("kind") for s in step.get("steps", []) if isinstance(s, dict)]
+            if manager != "rpm-ostree" or kinds not in (["write_global_config", "enable_services", "maybe_status"], ["enable_services", "maybe_status"]):
+                raise WorkerError("Invalid Silverblue post-boot steps.")
 
 
 def validate_package_list(packages):
@@ -1998,6 +2068,19 @@ def dnf_repo_setup(channel, target, event_log):
     run(["dnf", "makecache", "--refresh", "-y"], event_log)
 
 
+def ostree_repo_setup(channel, target, event_log):
+    key_path = "/etc/pki/rpm-gpg/himmelblau-nightly.asc"
+    with urllib.request.urlopen(GPG_KEY_URL, timeout=30) as response:
+        key_data = response.read(128 * 1024)
+    if not key_data:
+        raise WorkerError("Unable to download the Himmelblau package signing key.")
+    run(["install", "-d", "-m", "0755", os.path.dirname(key_path)], event_log)
+    install_bytes(key_path, key_data, "0644", event_log)
+    name = "himmelblau-%s" % channel
+    repo = "[%s]\nname=Himmelblau %s\nbaseurl=%s/rpm/%s\nenabled=1\ngpgcheck=1\ngpgkey=file://%s\n" % (name, channel, base_url(channel), target, key_path)
+    install_text("/etc/yum.repos.d/%s.repo" % name, repo, "0644", event_log)
+
+
 def package_install_command(manager, channel, target, packages):
     packages = list(packages)
     if manager == "apt":
@@ -2008,11 +2091,13 @@ def package_install_command(manager, channel, target, packages):
         return ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel] + (["--from", "himmelblau-stable-noarch"] if channel == "stable" else []) + packages
     if manager == "dnf":
         return ["dnf", "install", "-y"] + packages
+    if manager == "rpm-ostree":
+        return ["rpm-ostree", "install", "-y"] + packages
     raise WorkerError("NixOS is not supported by this bootstrap installer.")
 
 
-def install_packages(channel, target, event_log, packages, best_effort_packages):
-    manager = package_manager(target)
+def install_packages(channel, target, event_log, packages, best_effort_packages, manager=None):
+    manager = manager or package_manager(target)
     if packages:
         run(package_install_command(manager, channel, target, packages), event_log)
     for package in best_effort_packages:
@@ -2023,7 +2108,7 @@ def install_packages(channel, target, event_log, packages, best_effort_packages)
 
 def setup_stable_repository(plan, event_log):
     target = plan["target"]
-    manager = package_manager(target)
+    manager = plan["manager"]
     try:
         architecture = apt_architecture(event_log) if manager == "apt" else run(["rpm", "--eval", "%{_arch}"], event_log).stdout.strip()
         stream, root, distro, version, config = resolve_stable_repository(plan["entitlement_token"], target, architecture, manager)
@@ -2068,7 +2153,7 @@ def setup_stable_repository(plan, event_log):
         run(["install", "-d", "-m", "0755", os.path.dirname(key_path)], event_log)
         key_written = True
         install_bytes(key_path, key_data, "0644", event_log)
-        if manager != "apt":
+        if manager not in ("apt", "rpm-ostree"):
             run(["rpm", "--import", key_path], event_log)
         for candidate, backup, mode in originals:
             os.rename(candidate, backup)
@@ -2082,6 +2167,8 @@ def setup_stable_repository(plan, event_log):
             run(apt_get_command("update"), event_log)
         elif manager == "dnf":
             run(["dnf", "makecache", "--refresh", "-y", "--disablerepo=*", "--enablerepo=himmelblau-stable", "--enablerepo=himmelblau-stable-noarch"], event_log)
+        elif manager == "rpm-ostree":
+            emit(event_log, {"type": "info", "text": "Signed repository configured for rpm-ostree package layering."})
         else:
             run(["zypper", "--non-interactive", "--gpg-auto-import-keys", "refresh", "himmelblau-stable", "himmelblau-stable-noarch"], event_log)
     except Exception:
@@ -2118,9 +2205,9 @@ def check_stable_major(stream, manager):
         raise WorkerError("The selected stable stream would downgrade the installed major version. Downgrades require manual migration.")
 
 
-def setup_nightly_repository(step, event_log):
+def setup_nightly_repository(step, event_log, manager=None):
     target = step["target"]
-    manager = package_manager(target)
+    manager = manager or package_manager(target)
     if manager == "apt":
         paths = [STABLE_APT_SOURCE_PATH, STABLE_APT_DEB822_PATH]
         output_path = STABLE_APT_SOURCE_PATH
@@ -2130,7 +2217,7 @@ def setup_nightly_repository(step, event_log):
             raise WorkerError("Community Nightly RPM packages are unavailable for ARM64. Choose the Stable repository with an entitlement token.")
         paths = [STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo", STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"]
         output_path = paths[1]
-        key_path = None
+        key_path = "/etc/pki/rpm-gpg/himmelblau-nightly.asc" if manager == "rpm-ostree" else None
     originals = []
     for path in paths:
         if not os.path.isfile(path):
@@ -2154,15 +2241,18 @@ def setup_nightly_repository(step, event_log):
             os.rename(path, backup)
             backups.append((path, backup, mode))
             os.chmod(backup, 0o600)
-        {"apt": apt_repo_setup, "dnf": dnf_repo_setup, "zypper": zypper_repo_setup}[manager]("nightly", target, event_log)
+        {"apt": apt_repo_setup, "dnf": dnf_repo_setup, "rpm-ostree": ostree_repo_setup, "zypper": zypper_repo_setup}[manager]("nightly", target, event_log)
     except Exception:
         if os.path.exists(output_path):
             os.unlink(output_path)
         for path, backup, mode in backups:
             os.rename(backup, path)
             os.chmod(path, mode)
-        if key_path and old_key is not None:
-            install_bytes(key_path, old_key, "0644", event_log)
+        if key_path:
+            if old_key is not None:
+                install_bytes(key_path, old_key, "0644", event_log)
+            elif os.path.exists(key_path):
+                os.unlink(key_path)
         raise
     # Keep old paid source disabled for recovery, and remove replaced nightly sources.
     for path, backup, mode in backups:
@@ -2171,8 +2261,8 @@ def setup_nightly_repository(step, event_log):
                 os.unlink(backup)
 
 
-def setup_vendor_repositories(target):
-    manager = package_manager(target)
+def setup_vendor_repositories(target, manager=None):
+    manager = manager or package_manager(target)
     paths = [STABLE_APT_SOURCE_PATH, STABLE_APT_DEB822_PATH] if manager == "apt" else [STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo", STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"]
     originals = []
     for path in paths:
@@ -2188,6 +2278,44 @@ def setup_vendor_repositories(target):
     for path, backup in originals:
         os.rename(path, backup)
         os.chmod(backup, 0o600)
+
+
+def stage_postboot(plan, steps, event_log):
+    run(["install", "-d", "-m", "0700", POSTBOOT_DIR], event_log)
+    shutil.copyfile(sys.argv[0], POSTBOOT_WORKER)
+    os.chmod(POSTBOOT_WORKER, 0o700)
+    postboot = {
+        "version": PLAN_VERSION,
+        "phase": "postboot",
+        "target": plan["target"],
+        "manager": "rpm-ostree",
+        "channel": plan["channel"],
+        "entitlement_token": None,
+        "steps": steps,
+    }
+    validate_plan(postboot)
+    handle = tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=POSTBOOT_DIR, delete=False)
+    try:
+        json.dump(postboot, handle, sort_keys=True)
+        handle.close()
+        os.chmod(handle.name, 0o600)
+        os.replace(handle.name, POSTBOOT_PLAN)
+    finally:
+        if os.path.exists(handle.name):
+            os.unlink(handle.name)
+    unit = "[Unit]\nDescription=Finish Himmelblau installation after Silverblue reboot\nConditionPathExists=%s\nAfter=local-fs.target\nBefore=display-manager.service\n\n[Service]\nType=oneshot\nExecStart=/usr/bin/python3 %s %s %s\n\n[Install]\nWantedBy=multi-user.target\n" % (POSTBOOT_PLAN, POSTBOOT_WORKER, POSTBOOT_PLAN, POSTBOOT_LOG)
+    install_text(POSTBOOT_UNIT, unit, "0644", event_log)
+    run(["systemctl", "daemon-reload"], event_log)
+    run(["systemctl", "enable", os.path.basename(POSTBOOT_UNIT)], event_log)
+    emit(event_log, {"type": "info", "text": "Post-boot setup staged. Reboot to complete Himmelblau installation automatically."})
+
+
+def complete_postboot(plan_path, event_log):
+    unit_name = os.path.basename(POSTBOOT_UNIT)
+    run(["systemctl", "disable", unit_name], event_log)
+    for path in (POSTBOOT_UNIT, POSTBOOT_WORKER, plan_path):
+        if os.path.exists(path):
+            os.unlink(path)
 
 
 def execute_step(step, event_log, plan=None):
@@ -2211,14 +2339,16 @@ def execute_step(step, event_log, plan=None):
             raise WorkerError("Self-built source checkout is missing its Makefile.")
         run(["make", "-C", source_dir, "install"], event_log)
     elif kind == "vendor_repo":
-        setup_vendor_repositories(step["target"])
+        setup_vendor_repositories(step["target"], plan["manager"])
     elif kind == "apt_prereqs":
         run(apt_get_command("update"), event_log)
         run(apt_get_command("install", "-y", "ca-certificates", "curl", "gnupg"), event_log)
     elif kind in ("apt_repo", "zypper_repo", "dnf_repo"):
-        setup_nightly_repository(step, event_log)
+        setup_nightly_repository(step, event_log, plan["manager"])
     elif kind == "install_packages":
-        install_packages(step["channel"], step["target"], event_log, step["packages"], step["best_effort_packages"])
+        install_packages(step["channel"], step["target"], event_log, step["packages"], step["best_effort_packages"], plan["manager"])
+    elif kind == "stage_postboot":
+        stage_postboot(plan, step["steps"], event_log)
     elif kind == "write_global_config":
         write_global_config(step["config"], event_log)
     elif kind == "write_idp_config":
@@ -2238,8 +2368,17 @@ def execute_step(step, event_log, plan=None):
             emit(event_log, {"type": "warning", "text": "aad-tool was not found; review manual PAM configuration."})
     elif kind == "enable_services":
         if shutil.which("systemctl"):
-            run(["systemctl", "enable", "--now", "himmelblaud", "himmelblaud-tasks"], event_log)
+            if plan and plan.get("phase") == "postboot":
+                run(["systemctl", "enable", "himmelblaud", "himmelblaud-tasks"], event_log)
+                run(["systemctl", "start", "himmelblaud"], event_log)
+                run(["systemctl", "is-active", "--quiet", "himmelblaud"], event_log)
+                run(["systemctl", "start", "himmelblaud-tasks"], event_log)
+                run(["systemctl", "is-active", "--quiet", "himmelblaud-tasks"], event_log)
+            else:
+                run(["systemctl", "enable", "--now", "himmelblaud", "himmelblaud-tasks"], event_log)
         else:
+            if plan and plan.get("phase") == "postboot":
+                raise WorkerError("systemctl is required to finish the Silverblue installation.")
             emit(event_log, {"type": "warning", "text": "systemctl was not found; start services with your init system."})
     elif kind == "maybe_status":
         if shutil.which("aad-tool"):
@@ -2257,15 +2396,28 @@ def main():
         with open(plan_path, encoding="utf-8") as handle:
             plan = json.load(handle)
         validate_plan(plan)
+        if plan.get("phase") == "postboot":
+            try:
+                for package in COMMUNITY_PACKAGES:
+                    run(["rpm", "-q", package], event_log)
+            except WorkerError:
+                raise WorkerError("Layered Himmelblau packages are not active in this boot. Check rpm-ostree status and boot the staged deployment.")
         steps = plan.get("steps", [])
         emit(event_log, {"type": "started", "total": len(steps)})
         for index, step in enumerate(steps, 1):
             emit(event_log, {"type": "step", "index": index, "total": len(steps), "kind": step["kind"]})
             execute_step(step, event_log, plan)
+        if plan.get("phase") == "postboot":
+            complete_postboot(plan_path, event_log)
         emit(event_log, {"type": "done"})
+        if plan.get("phase") == "postboot":
+            print("Himmelblau post-boot setup completed.")
         return 0
     except Exception as err:
         emit(event_log, {"type": "error", "text": str(err)})
+        if "plan" in locals() and isinstance(plan, dict) and plan.get("phase") == "postboot":
+            print("Himmelblau post-boot setup failed: " + redact(str(err)), file=sys.stderr)
+            print("Details: " + event_log, file=sys.stderr)
         return 1
 
 
@@ -2564,13 +2716,18 @@ def run_cli():
     if stable_source == "self-built":
         ui.info(self_build_notice(self_build_directory()))
     idp_config, write_config = prompt_idp_config(ui)
-    if not ui.confirm("\n".join(summary_lines(target, package_manager(target), channel, idp_config, write_config, stable_source=stable_source)) + "\nContinue?", default=False):
+    manager = host_package_manager(info, target)
+    if manager == "rpm-ostree":
+        require_commands(["rpm-ostree", "rpm", "systemctl"])
+    if not ui.confirm("\n".join(summary_lines(target, manager, channel, idp_config, write_config, stable_source=stable_source)) + "\nContinue?", default=False):
         raise InstallError("Installation cancelled.")
-    plan = build_install_plan(channel, target, idp_config, write_config, entitlement_token=token, stable_source=stable_source)
+    plan = build_install_plan(channel, target, idp_config, write_config, entitlement_token=token, stable_source=stable_source, manager=manager)
     if stable_source == "self-built" and channel == "stable":
         run_self_build_install(plan, print_headless_event)
     else:
         run_elevated_plan(plan, on_event=print_headless_event, prefer_gui=False)
+    if manager == "rpm-ostree":
+        print("Packages staged. Reboot to complete Himmelblau installation automatically.", flush=True)
 
 
 def print_headless_event(event):
@@ -2605,12 +2762,17 @@ def run_headless_install(options=None):
     token = read_entitlement_token_file(options.entitlement_token_file) if options.entitlement_token_file else (existing[1] if existing else None)
     if channel == "stable" and stable_source == "repository" and not token:
         raise InstallError("Stable installation requires --entitlement-token-file PATH containing the entitlement token.")
-    plan = build_package_only_plan(channel, target, token, stable_source)
+    manager = host_package_manager(info, target)
+    if manager == "rpm-ostree":
+        require_commands(["rpm-ostree", "rpm", "systemctl"])
+    plan = build_package_only_plan(channel, target, token, stable_source, manager=manager)
     if channel == "stable" and stable_source == "self-built":
         print(self_build_notice(self_build_directory()), flush=True)
         run_self_build_install(plan, print_headless_event, non_interactive=True)
     else:
         run_elevated_plan(plan, on_event=print_headless_event, prefer_gui=False, non_interactive=True)
+    if manager == "rpm-ostree":
+        print("Packages staged. Reboot to complete Himmelblau installation automatically.", flush=True)
 
 
 def parse_install_options(argv):
@@ -2937,10 +3099,11 @@ class WizardCursesUi:
                 pretty = self.info.get("PRETTY_NAME", "this Linux distribution")
                 self.blockers.append(f"{pretty} is not supported by this installer yet.")
             else:
-                self.manager = package_manager(self.target)
-                required_command = required_manager_command(self.target)
-                if not shutil.which(required_command):
-                    self.blockers.append(f"Required command not found: {required_command}")
+                self.manager = host_package_manager(self.info, self.target)
+                required_commands = ["rpm-ostree", "rpm", "systemctl"] if self.manager == "rpm-ostree" else [required_manager_command(self.target)]
+                for required_command in required_commands:
+                    if not shutil.which(required_command):
+                        self.blockers.append(f"Required command not found: {required_command}")
                 matrix = load_repo_support(collector)
                 self.warnings.extend(collector.warnings)
                 self.stable_repository_available = is_supported(matrix, "stable", self.target)
@@ -3676,13 +3839,14 @@ class WizardCursesUi:
             self._enable_mouse()
             idp_config, write_config = self.selected_idp()
             stable_source = getattr(self, "stable_source", "repository")
-            plan = build_install_plan(self.channel, self.target, idp_config, write_config, self.selected_options(), self.entitlement_token, stable_source)
+            manager = getattr(self, "manager", None) or package_manager(self.target)
+            plan = build_install_plan(self.channel, self.target, idp_config, write_config, self.selected_options(), self.entitlement_token, stable_source, manager=manager)
             if self.channel == "stable" and stable_source == "self-built":
                 run_self_build_install(plan, self.on_event, non_interactive=True)
             else:
                 run_elevated_plan(plan, on_event=self.on_event, prefer_gui=False, non_interactive=True)
             self.install_ok = True
-            self.final_message = "Himmelblau installation completed."
+            self.final_message = "Packages staged. Reboot to complete Himmelblau installation automatically." if manager == "rpm-ostree" else "Himmelblau installation completed."
         except Exception as err:
             self._enable_mouse()
             self.install_ok = False

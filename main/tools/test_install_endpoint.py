@@ -273,6 +273,103 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertEqual(installer.required_manager_command("fedora43"), "dnf")
         self.assertEqual(installer.required_manager_command("sle16"), "zypper")
 
+    def test_silverblue_uses_ostree_without_changing_fedora_target(self):
+        info = {"ID": "fedora", "VERSION_ID": "44", "VARIANT_ID": "silverblue"}
+        self.assertEqual(installer.distro_target(info), "fedora44")
+        with mock.patch.object(installer.os.path, "exists", return_value=True):
+            self.assertEqual(installer.host_package_manager(info, "fedora44"), "rpm-ostree")
+        with mock.patch.object(installer.os.path, "exists", return_value=False):
+            with self.assertRaisesRegex(installer.InstallError, "booted host"):
+                installer.host_package_manager(info, "fedora44")
+        self.assertEqual(installer.host_package_manager({"ID": "fedora", "VERSION_ID": "44"}, "fedora44"), "dnf")
+        self.assertFalse(installer.self_build_supported(info, "fedora44"))
+
+    def test_silverblue_plan_defers_configuration_and_services(self):
+        with mock.patch.object(installer, "detected_package_selection", return_value=(installer.COMMUNITY_PACKAGES, [])):
+            plan = installer.build_install_plan(
+                "nightly", "fedora44", {"mode": "entra", "domain": "example.com"}, True,
+                manager="rpm-ostree",
+            )
+        self.assertTrue(installer.validate_install_plan(plan))
+        kinds = [step["kind"] for step in plan["steps"]]
+        self.assertEqual(kinds, ["dnf_repo", "install_packages", "note", "stage_postboot"])
+        self.assertEqual([step["kind"] for step in plan["steps"][-1]["steps"]],
+                         ["write_global_config", "enable_services", "maybe_status"])
+        worker = load_worker_module()
+        worker.validate_plan(plan)
+        self.assertEqual(worker.package_install_command("rpm-ostree", "nightly", "fedora44", installer.COMMUNITY_PACKAGES),
+                         ["rpm-ostree", "install", "-y"] + installer.COMMUNITY_PACKAGES)
+
+    def test_silverblue_postboot_plan_is_private_and_removed_after_success(self):
+        worker = load_worker_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = pathlib.Path(tmp)
+            commands = []
+            plan = installer.build_package_only_plan("nightly", "fedora44", manager="rpm-ostree")
+            step = next(step for step in plan["steps"] if step["kind"] == "stage_postboot")
+            with mock.patch.object(worker, "POSTBOOT_DIR", tmp), \
+                    mock.patch.object(worker, "POSTBOOT_PLAN", str(folder / "postboot.json")), \
+                    mock.patch.object(worker, "POSTBOOT_WORKER", str(folder / "worker.py")), \
+                    mock.patch.object(worker, "POSTBOOT_UNIT", str(folder / "finish.service")), \
+                    mock.patch.object(worker, "POSTBOOT_LOG", str(folder / "postboot.jsonl")), \
+                    mock.patch.object(worker.sys, "argv", [str(INSTALL_PATH)]), \
+                    mock.patch.object(worker, "run", side_effect=lambda argv, log: commands.append(argv)), \
+                    mock.patch.object(worker, "emit"), \
+                    mock.patch.object(worker, "install_text", side_effect=lambda path, value, mode, log: pathlib.Path(path).write_text(value)):
+                worker.stage_postboot(plan, step["steps"], "events")
+                saved = json.loads((folder / "postboot.json").read_text())
+                worker.validate_plan(saved)
+                self.assertIsNone(saved["entitlement_token"])
+                self.assertEqual((folder / "postboot.json").stat().st_mode & 0o777, 0o600)
+                self.assertIn("ConditionPathExists=", (folder / "finish.service").read_text())
+                self.assertIn(["systemctl", "enable", "finish.service"], commands)
+                worker.complete_postboot(str(folder / "postboot.json"), "events")
+                self.assertFalse((folder / "postboot.json").exists())
+                self.assertFalse((folder / "finish.service").exists())
+
+    def test_silverblue_nightly_repo_uses_local_key_and_no_dnf(self):
+        worker = load_worker_module()
+        commands = []
+        saved = []
+        def fake_run(argv, event_log, check=True):
+            commands.append(argv)
+            return types.SimpleNamespace(stdout="x86_64", returncode=0)
+        with mock.patch.object(worker, "run", side_effect=fake_run), \
+                mock.patch.object(worker.urllib.request, "urlopen", return_value=io.BytesIO(b"key")), \
+                mock.patch.object(worker, "install_bytes", side_effect=lambda *args: saved.append(args)), \
+                mock.patch.object(worker, "install_text", side_effect=lambda *args: saved.append(args)):
+            worker.ostree_repo_setup("nightly", "fedora44", "events")
+        repo = next(value for path, value, mode, log in saved if path.endswith(".repo"))
+        self.assertIn("/rpm/fedora44", repo)
+        self.assertIn("gpgkey=file:///etc/pki/rpm-gpg/himmelblau-nightly.asc", repo)
+        self.assertFalse(any(argv[0] == "dnf" or argv[:2] == ["rpm", "--import"] for argv in commands))
+
+    def test_silverblue_postboot_waits_for_booted_packages_and_retries(self):
+        worker = load_worker_module()
+        postboot = {
+            "version": worker.PLAN_VERSION, "phase": "postboot", "target": "fedora44",
+            "manager": "rpm-ostree", "channel": "nightly", "entitlement_token": None,
+            "steps": [{"kind": "enable_services"}, {"kind": "maybe_status"}],
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            plan_path = pathlib.Path(tmp) / "postboot.json"
+            event_path = pathlib.Path(tmp) / "events.jsonl"
+            plan_path.write_text(json.dumps(postboot))
+            with mock.patch.object(worker.sys, "argv", ["worker.py", str(plan_path), str(event_path)]), \
+                    mock.patch.object(worker, "complete_postboot") as complete, \
+                    mock.patch.object(worker, "run", side_effect=worker.WorkerError("package missing")):
+                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                    self.assertEqual(worker.main(), 1)
+                self.assertTrue(plan_path.exists())
+                complete.assert_not_called()
+            with mock.patch.object(worker.sys, "argv", ["worker.py", str(plan_path), str(event_path)]), \
+                    mock.patch.object(worker, "complete_postboot") as complete, \
+                    mock.patch.object(worker.shutil, "which", return_value="/usr/bin/tool"), \
+                    mock.patch.object(worker, "run", return_value=types.SimpleNamespace(stdout="", returncode=0)):
+                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                    self.assertEqual(worker.main(), 0)
+                complete.assert_called_once_with(str(plan_path), str(event_path))
+
     def test_apt_get_command_sets_noninteractive_debconf_frontend(self):
         old_geteuid = installer.os.geteuid
         try:

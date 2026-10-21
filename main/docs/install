@@ -1462,6 +1462,14 @@ def build_install_plan(channel, target, idp_config, write_idp, options_config=No
             steps.append(note)
         steps.append({"kind": "stage_postboot", "steps": postboot})
     else:
+        # Package scripts may activate PAM/NSS and start the daemon. Write the
+        # selected provider first so a fresh install cannot enter a socket-driven
+        # restart loop while the package manager waits for SSH service ordering.
+        if postboot and postboot[0]["kind"] == "write_global_config":
+            config_step = postboot.pop(0)
+            package_index = next(i for i, step in enumerate(steps)
+                                 if step["kind"] in ("install_packages", "install_self_built"))
+            steps.insert(package_index, config_step)
         if note:
             steps.extend(postboot[:-2])
             steps.append(note)

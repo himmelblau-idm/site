@@ -1020,14 +1020,32 @@ class InstallEndpointTests(unittest.TestCase):
             self.assertEqual(plan["version"], installer.PLAN_VERSION)
             self.assertEqual(
                 [step["kind"] for step in plan["steps"]],
-                ["apt_prereqs", "apt_repo", "install_packages", "write_global_config", "note", "enable_services", "maybe_status"],
+                ["apt_prereqs", "apt_repo", "write_global_config", "install_packages", "note", "enable_services", "maybe_status"],
             )
-            self.assertEqual(plan["steps"][2]["packages"], ["himmelblau", "pam-himmelblau", "nss-himmelblau", "himmelblau-sso"])
-            self.assertEqual(plan["steps"][2]["best_effort_packages"], ["himmelblau-selinux"])
-            self.assertEqual(plan["steps"][3]["config"]["write_idp"], True)
+            self.assertEqual(plan["steps"][3]["packages"], ["himmelblau", "pam-himmelblau", "nss-himmelblau", "himmelblau-sso"])
+            self.assertEqual(plan["steps"][3]["best_effort_packages"], ["himmelblau-selinux"])
+            self.assertEqual(plan["steps"][2]["config"]["write_idp"], True)
             self.assertTrue(installer.validate_install_plan(plan))
         finally:
             installer.detected_package_selection = old_detected
+
+    def test_provider_written_before_package_scripts_can_activate_daemon(self):
+        # Includes both providers and the self-built package installation path.
+        for provider in ({"mode": "entra", "domain": "example.com"},
+                         {"mode": "oidc", "oidc_issuer_url": "https://id.example.com", "app_id": "linux"}):
+            for target, source in (("fedora44", "repository"),
+                                   ("ubuntu24.04", "repository"),
+                                   ("fedora44", "self-built")):
+                with self.subTest(provider=provider, target=target, source=source), \
+                     mock.patch.object(installer, "detected_package_selection", return_value=(["himmelblau"], [])):
+                    plan = installer.build_install_plan(
+                        "stable", target, provider, True, stable_source=source,
+                        entitlement_token="test-token", source_dir="/tmp/himmelblau")
+                    kinds = [step["kind"] for step in plan["steps"]]
+                    install = "install_self_built" if source == "self-built" else "install_packages"
+                    self.assertLess(kinds.index("write_global_config"), kinds.index(install))
+                    self.assertLess(kinds.index(install), kinds.index("enable_services"))
+                    self.assertEqual(plan["config_path"], "/etc/himmelblau/himmelblau.conf")
 
     def test_install_plan_rejects_unknown_step_kind(self):
         old_detected = installer.detected_package_selection

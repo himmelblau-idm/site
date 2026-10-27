@@ -1211,6 +1211,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../../troubleshooting/HSM-PIN-and-daemon-startup-failures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting Himmelblau daemon startup and HSM PIN credentials
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/" class="md-nav__link">
         
   
@@ -1529,7 +1552,7 @@ are not implicitly allowed.</p>
 <p>auth        required      pam_env.so
 auth        [default=1 ignore=ignore success=ok] pam_localuser.so
 auth        sufficient    pam_unix.so nullok try_first_pass
-auth        sufficient    pam_himmelblau.so ignore_unknown_user
+auth        [success=done new_authtok_reqd=done abort=die default=ignore]    pam_himmelblau.so ignore_unknown_user
 auth        required      pam_deny.so</p>
 </div>
 <p>Configure <code>/etc/pam.d/common-account</code> in a similar manner.</p>

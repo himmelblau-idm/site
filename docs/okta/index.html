@@ -1228,6 +1228,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../troubleshooting/HSM-PIN-and-daemon-startup-failures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting Himmelblau daemon startup and HSM PIN credentials
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/" class="md-nav__link">
         
   
@@ -1637,7 +1660,7 @@
 <p>See <a href="https://help.okta.com/oie/en-us/content/topics/apps/apps-assign-applications.htm">Assign app integrations</a> for details.</p>
 <p>On the <strong>Sign On</strong> tab, locate <strong>User authentication</strong> and check the assigned authentication policy. Use your existing MFA policy and confirm that the test user is enrolled in a method it permits.</p>
 <p><img alt="User authentication panel showing the Any two factors authentication policy and View policy details link" src="09_authentication_policy.png" /></p>
-<p><em>This example uses the Any two factors policy. Follow </em><em>View policy details</em><em> to check your application's existing policy.</em></p>
+<p><em>This example uses the Any two factors policy. Follow <strong>View policy details</strong> to check your application's existing policy.</em></p>
 <p>Native login can present supported prompts such as verification-code entry or approval of an Okta Verify push. A policy requiring an external browser redirect or an unsupported step must offer a supported native alternative. Configuring new authenticators is outside this guide.</p>
 <h2 id="configure-himmelblau">Configure Himmelblau</h2>
 <p>Edit <code>/etc/himmelblau/himmelblau.conf</code>. Add or update these settings in the existing <code>[global]</code> section, preserving any other host-specific settings:</p>

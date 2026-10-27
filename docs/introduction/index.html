@@ -1229,6 +1229,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../troubleshooting/HSM-PIN-and-daemon-startup-failures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting Himmelblau daemon startup and HSM PIN credentials
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../troubleshooting/OpenSSH-Bug-2876-%E2%80%90--Unable-to-use-MFA-over-SSH-%E2%80%90-Workaround/" class="md-nav__link">
         
   
@@ -1758,7 +1781,7 @@ datengruppe:x:1496389:user01,stka
 <p>Local parameters can also be defined in the configuration file. These are settings that affect behavior on the client. For example, you can specify which local group a user from the domains is a member of.</p>
 <p>The local parameters that affect settings on the local client are located in the [global] section of the configuration; unfortunately, there is no separate section for adjustments that affect settings on the local client.</p>
 <p>To enter users locally in groups on a client, the <em>local_groups</em> variable is extended. The individual local groups are entered separated by commas. If a group is later removed at this point, the users must be manually removed from the group. To do this, edit the <em>/etc/groups</em> file.</p>
-<p>When a user logs in for the first time, a home directory is automatically created. The default directory for this is home<em>. If you want the directory to be created in a different location in the file system,  you can specify this using the variable  </em>home_prefix =*.</p>
+<p>When a user logs in for the first time, a home directory is automatically created. The default directory for this is home*. If you want the directory to be created in a different location in the file system,  you can specify this using the variable  <em>home_prefix =</em>.</p>
 <p>It is also possible to copy certain data from a directory to the user's new home directory. This process is identical to creating a local user via the <em>/etc/skel</em> directory. To transfer data, the variable <em>use_etc_skel = true</em> can be set, then all files and directories from <em>/etc/skel</em> will be transferred.</p>
 <p>Since no shell is specified in the user's profile in the Azure domain, a default shell can be assigned to all users using the variable <em>shell =/bin/bash</em>.</p>
 <p>Note: The attributes from Listing 12 should always be set on Debian and Ubuntu systems. These values are also always entered in the configuration when installing the packages:</p>

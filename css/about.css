@@ -86,7 +86,8 @@ body[data-about="true"] .md-footer { margin-top: 0; }
 }
 
 .hb-about-hero .hb-button { margin-top: 2rem; gap: .7rem; }
-.hb-about-hero__mark { display: grid; place-items: center; }
+.hb-about-hero__mark { display: grid; place-items: center; margin: 0; }
+.hb-about-hero__mark figcaption { margin-top: .8rem; color: var(--hb-muted, #5b6d83); font-size: .76rem; line-height: 1.55; }
 .hb-about-hero__mark img {
   width: min(100%, 34rem);
   height: auto;
@@ -243,7 +244,7 @@ body[data-about="true"] .md-footer { margin-top: 0; }
   .hb-about-hero { min-height: auto; }
   .hb-about-hero__grid { grid-template-columns: 1fr; padding-block: 6rem; }
   .hb-about-hero__copy { position: relative; z-index: 1; }
-  .hb-about-hero__mark { position: absolute; right: -5rem; bottom: -5rem; width: 19rem; opacity: .14; }
+  .hb-about-hero__mark { width: 100%; }
   .hb-timeline::before { left: .4rem; }
   .hb-era { grid-template-columns: 1fr; gap: .8rem; padding-left: 2.2rem; }
   .hb-era::before { left: 0; }

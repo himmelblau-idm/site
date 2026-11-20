@@ -408,7 +408,7 @@ class DdiHostSetupTests(unittest.TestCase):
             self.assertLess(commands.index(["config"]), attach_index)
             self.assertIn(["systemctl", "enable", "--now", "himmelblaud-sysupdate-notify.socket"], commands)
             self.assertIn(["systemd-sysupdate", "enable-component", "himmelblau"], commands)
-            self.assertIn(["systemctl", "enable", "--now", "systemd-sysupdate-update.timer"], commands)
+            self.assertIn(["systemctl", "enable", "--now", "himmelblau-sysupdate.timer"], commands)
             self.assertFalse(any(cmd[0] in ("apt-get", "dnf", "rpm-ostree") for cmd in commands))
 
 

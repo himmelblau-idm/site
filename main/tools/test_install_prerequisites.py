@@ -25,6 +25,7 @@ class InstallPrerequisiteTests(unittest.TestCase):
                 for channel in ("nightly", "stable", "subscription"):
                     with self.subTest(module=module.__name__, target=target, manager=manager, channel=channel), contextlib.ExitStack() as stack:
                         commands = []
+                        stack.enter_context(mock.patch.object(module, "check_ostree_pending"))
                         stack.enter_context(mock.patch.object(module.shutil, "which", return_value=None))
                         stack.enter_context(mock.patch.object(module, "run", side_effect=lambda argv, *args, **kwargs: commands.append(argv)))
                         stack.enter_context(mock.patch.object(module, repo_setup))
@@ -45,7 +46,7 @@ class InstallPrerequisiteTests(unittest.TestCase):
     def test_prerequisite_failure_stops_before_himmelblau_transaction(self):
         worker = load_worker_module()
         for target, manager, repo_setup, expected in MANAGERS:
-            with self.subTest(target=target, manager=manager), mock.patch.object(worker.shutil, "which", return_value=None), mock.patch.object(worker, "run", side_effect=worker.WorkerError("gawk install failed")) as run:
+            with self.subTest(target=target, manager=manager), mock.patch.object(worker.shutil, "which", return_value=None), mock.patch.object(worker, "check_ostree_pending"), mock.patch.object(worker, "run", side_effect=worker.WorkerError("gawk install failed")) as run:
                 with self.assertRaisesRegex(worker.WorkerError, "gawk install failed"):
                     worker.install_packages("nightly", target, object(), ["nss-himmelblau"], [], manager=manager)
                 self.assertEqual(run.call_count, 1)

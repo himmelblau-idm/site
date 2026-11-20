@@ -180,10 +180,24 @@ class NightlyRepositoryTests(unittest.TestCase):
             self.assertFalse(source.exists())
             self.assertFalse(key.exists())
 
+    def test_repair_preserves_paid_backup_and_rolls_back_failed_refresh(self):
+        with self.system() as (w, folder, source, key, commands):
+            backup = pathlib.Path(str(source) + ".himmelblau-disabled")
+            backup.write_text("deb " + PAID + " old main")
+            source.write_text("deb " + NIGHTLY + "/deb/ubuntu noble main")
+            self.setup(w, "ubuntu24.04", folder)
+            current = source.read_text()
+            with mock.patch.object(w, "apt_repo_setup", side_effect=w.WorkerError("refresh failed")):
+                with self.assertRaisesRegex(w.WorkerError, "refresh failed"):
+                    self.setup(w, "ubuntu24.04", folder)
+            self.assertEqual(source.read_text(), current)
+            self.assertIn(PAID, backup.read_text())
+            self.assertFalse(pathlib.Path(str(source) + ".himmelblau-rollback").exists())
+
     def test_backup_collision_keeps_existing_files(self):
         with self.system() as (w, folder, source, key, commands):
             source.write_text("deb " + NIGHTLY + "/deb/ubuntu noble main")
-            backup = pathlib.Path(str(source) + ".himmelblau-disabled")
+            backup = pathlib.Path(str(source) + ".himmelblau-rollback")
             backup.write_text("previous backup")
             with self.assertRaisesRegex(w.WorkerError, "backup already exists"):
                 self.setup(w, "ubuntu24.04", folder)
@@ -253,6 +267,7 @@ class NightlyRepositoryTests(unittest.TestCase):
 
     def test_headless_nightly_needs_no_token(self):
         with mock.patch.object(installer, "read_os_release", return_value={"ID": "ubuntu", "VERSION_ID": "24.04"}), \
+                mock.patch.object(installer, "installation_selection", return_value={"install_method": "packages", "ddi": None, "reason": "test"}), \
                 mock.patch.object(installer, "existing_stable_access", return_value=None), \
                 mock.patch.object(installer, "load_repo_support", return_value=installer.FALLBACK_REPO_SUPPORT), \
                 mock.patch.object(installer, "detected_package_selection", return_value=(["himmelblau"], [])), \

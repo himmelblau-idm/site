@@ -49,6 +49,12 @@ APT_CONFFILE_OPTIONS = [
 
 
 class InstallEndpointTests(unittest.TestCase):
+    def setUp(self):
+        patch = mock.patch.object(installer, "ddi_local_reason", return_value="Package plan test")
+        patch.start()
+        self.addCleanup(patch.stop)
+        installer.DDI_SELECTION_CACHE.clear()
+
     def test_endpoint_is_extensionless_shell_wrapper(self):
         self.assertEqual(INSTALL_PATH.name, "install")
         text = INSTALL_PATH.read_text(encoding="utf-8")
@@ -848,7 +854,7 @@ class InstallEndpointTests(unittest.TestCase):
                     "pam_allow_groups": "",
                     "enable_hello": True,
                     "allow_console_password_only": True,
-                    "apply_policy": True,
+                    "apply_policy": False,
                 },
             )
         finally:
@@ -2023,7 +2029,7 @@ class SelfBuildTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             pathlib.Path(tmp, "Makefile").touch()
             commands.clear()
-            with mock.patch.object(worker, "run", side_effect=lambda argv, log: commands.append(argv)):
+            with mock.patch.object(worker.shutil, "which", return_value="/usr/bin/awk"), mock.patch.object(worker, "run", side_effect=lambda argv, log: commands.append(argv)):
                 worker.execute_step({"kind": "install_self_built"}, "events", dict(plan, source_dir=tmp))
             self.assertEqual(commands, [["make", "-C", tmp, "install"]])
 

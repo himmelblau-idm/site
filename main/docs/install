@@ -38,6 +38,7 @@ import textwrap
 import time
 import urllib.error
 import urllib.parse
+import http.client
 import urllib.request
 
 
@@ -1395,6 +1396,7 @@ def ensure_package_prerequisites(manager, ui):
     elif manager == "dnf":
         command = sudo_prefix() + ["dnf", "install", "-y", "gawk"]
     elif manager == "rpm-ostree":
+        check_ostree_pending()
         # A staged dependency would not be available to package scripts yet.
         command = sudo_prefix() + ["rpm-ostree", "install", "-y", "--apply-live", "gawk"]
     else:
@@ -1511,12 +1513,22 @@ def ddi_architecture():
     return {"x86_64": "x86-64", "amd64": "x86-64", "aarch64": "arm64", "arm64": "arm64"}.get(os.uname().machine)
 
 
+def check_ostree_pending(event_log=None):
+    proc = ddi_capture(["rpm-ostree", "status", "--json"])
+    try:
+        deployments = json.loads(proc.stdout)["deployments"]
+    except (ValueError, KeyError, TypeError):
+        raise DDI_ERROR("Unable to inspect rpm-ostree deployments; check rpm-ostree status before rerunning.")
+    if deployments and not deployments[0].get("booted", False):
+        raise DDI_ERROR("A pending rpm-ostree deployment prevents live gawk installation. Reboot into it and rerun the installer.")
+
+
 def ddi_packages_present(target):
     names = ("himmelblau", "pam-himmelblau", "nss-himmelblau", "libnss_himmelblau2", "himmelblau-broker")
     for name in names:
         if target.startswith(("ubuntu", "debian")):
-            proc = ddi_capture(["dpkg-query", "-W", "-f=${Status}", name], check=False)
-            if "install ok installed" in proc.stdout or "unpacked" in proc.stdout or "half-configured" in proc.stdout:
+            proc = ddi_capture(["dpkg-query", "-W", "-f=${db:Status-Status}", name], check=False)
+            if proc.stdout.strip() in ("installed", "unpacked", "half-installed", "half-configured", "triggers-awaited", "triggers-pending"):
                 return True
         elif ddi_capture(["rpm", "-q", name], check=False).returncode == 0:
             return True
@@ -1708,7 +1720,10 @@ def installation_selection(channel, target):
         if reason and channel == "nightly" and (os.path.exists(DDI_PORTABLE) or os.path.exists(DDI_SYSEXT)):
             raise InstallError("Existing DDI installation cannot fall back to packages: " + reason)
         DDI_SELECTION_CACHE[key] = {"install_method": "ddi" if spec else "packages", "ddi": spec, "reason": reason}
-    return DDI_SELECTION_CACHE[key]
+    selection = DDI_SELECTION_CACHE[key]
+    if selection["install_method"] == "packages" and (os.path.exists(DDI_PORTABLE) or os.path.exists(DDI_SYSEXT)):
+        raise InstallError("Existing DDI installation cannot fall back to packages. Rerun the installer to review DDI selection.")
+    return selection
 
 
 def build_install_plan(channel, target, idp_config, write_idp, options_config=None, entitlement_token=None, stable_source="repository", source_dir=None, manager=None):
@@ -1923,6 +1938,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import http.client
 import urllib.request
 import urllib.parse
 import urllib.error
@@ -2472,6 +2488,7 @@ def ensure_package_prerequisites(manager, event_log):
     elif manager == "dnf":
         command = ["dnf", "install", "-y", "gawk"]
     elif manager == "rpm-ostree":
+        check_ostree_pending()
         # A staged dependency would not be available to package scripts yet.
         command = ["rpm-ostree", "install", "-y", "--apply-live", "gawk"]
     else:
@@ -2615,7 +2632,7 @@ def setup_nightly_repository(step, event_log, manager=None):
         with open(path) as handle:
             text = handle.read()
         if is_himmelblau_repository(text):
-            backup = path + ".himmelblau-disabled"
+            backup = path + (".himmelblau-disabled" if "/himmelblau/v_" in text else ".himmelblau-rollback")
             if os.path.exists(backup):
                 raise WorkerError("A repository backup already exists. Review it before changing package sources.")
             originals.append((path, backup, os.stat(path).st_mode & 0o777))
@@ -2712,6 +2729,11 @@ def complete_postboot(plan_path, event_log):
 
 def execute_step(step, event_log, plan=None):
     kind = step["kind"]
+    if plan and plan.get("channel") == "nightly" and plan.get("install_method") != "ddi":
+        if os.path.exists(DDI_PORTABLE) or os.path.exists(DDI_SYSEXT):
+            raise WorkerError("Existing DDI installation cannot fall back to packages.")
+    if plan and plan.get("manager") == "rpm-ostree" and kind == "dnf_repo" and not shutil.which("awk"):
+        check_ostree_pending(event_log)
     if kind == "install_ddi":
         execute_ddi_plan(plan, event_log)
     elif kind == "stable_repo":
@@ -2837,7 +2859,7 @@ DDI_WORKER_SOURCE = r"""def ddi_download(url, destination, expected):
                     raise WorkerError("DDI image exceeds download limit")
                 digest.update(chunk)
                 output.write(chunk)
-    except (OSError, urllib.error.URLError) as err:
+    except (OSError, urllib.error.URLError, http.client.IncompleteRead) as err:
         raise DdiUnavailable("DDI image unavailable: %s" % err)
     if not size or digest.hexdigest() != expected:
         raise WorkerError("DDI image checksum mismatch")
@@ -2944,22 +2966,40 @@ def ddi_prepare(plan, directory):
     return key
 
 
-def ddi_configure_nss(path="/etc/nsswitch.conf"):
+def ddi_configure_nss(path="/etc/nsswitch.conf", check_only=False):
     with open(path, encoding="utf-8") as handle:
         original = handle.read()
     lines = []
     for line in original.splitlines(True):
         if re.match(r"^\s*(passwd|group|shadow)\s*:", line):
             content, sep, comment = line.rstrip("\n").partition("#")
+            preceding = content.split("himmelblau", 1)[0]
+            for actions in re.findall(r"\[([^]]*)\]", preceding):
+                for negate, status, action in re.findall(r"(!?)(SUCCESS|NOTFOUND|UNAVAIL|TRYAGAIN)\s*=\s*(return|continue|merge)", actions, re.I):
+                    if action.lower() == "return" and ((not negate and status.upper() != "SUCCESS") or negate):
+                        raise WorkerError("NSS rule may prevent Himmelblau lookups; review " + path + " before installing a DDI")
             if "himmelblau" not in content.split():
                 line = content.rstrip() + " himmelblau" + (" #" + comment if sep else "") + "\n"
         lines.append(line)
     updated = "".join(lines)
+    if check_only:
+        return
     if updated != original:
         if not os.path.exists(path + ".himmelblau-before-ddi"):
             shutil.copy2(path, path + ".himmelblau-before-ddi")
-        with open(path, "w", encoding="utf-8") as handle:
-            handle.write(updated)
+        fd, temporary = tempfile.mkstemp(prefix=".himmelblau-nss-", dir=os.path.dirname(os.path.abspath(path)))
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                handle.write(updated)
+                handle.flush()
+                os.fsync(handle.fileno())
+                st = os.stat(path)
+                os.fchown(handle.fileno(), st.st_uid, st.st_gid)
+            shutil.copystat(path, temporary)
+            os.replace(temporary, path)
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
 
 
 DDI_USER_HELPER = r'''#!/bin/sh
@@ -3007,21 +3047,29 @@ def ddi_install_users(event_log):
         bus = ["--user", "--machine=" + uid + "@.host", "--no-ask-password"]
         # portablectl rejects paths combined with --machine. Use the same
         # portabled D-Bus interface as the upstream update notification helper.
-        state = run(["portablectl"] + bus + ["is-attached", "himmelblaud"], event_log).stdout.strip()
-        if state not in ("detached", "attached", "enabled", "running"):
-            raise WorkerError("Unexpected user portable state for UID " + uid)
-        method = "AttachImage" if state == "detached" else "ReattachImage"
-        run(["busctl"] + bus[:-1] + ["--allow-interactive-authorization=no", "call",
-            "org.freedesktop.portable1", "/org/freedesktop/portable1", "org.freedesktop.portable1.Manager",
-            method, "sassbs", DDI_PORTABLE, "2", "himmelblau-broker", "himmelblau-compliance-check", "trusted", "false", ""], event_log)
-        run(["systemctl"] + bus + ["daemon-reload"], event_log)
-        run(["systemctl"] + bus + ["enable", "himmelblau-compliance-check.service", "himmelblau-compliance-check.timer"], event_log)
-        run(["systemctl"] + bus + ["--no-block", "restart", "himmelblau-broker.service", "himmelblau-compliance-check.timer"], event_log)
+        try:
+            state = run(["portablectl"] + bus + ["is-attached", "himmelblaud"], event_log).stdout.strip()
+            if state not in ("detached", "attached", "enabled", "running"):
+                raise WorkerError("Unexpected user portable state for UID " + uid)
+            method = "AttachImage" if state == "detached" else "ReattachImage"
+            run(["busctl"] + bus[:-1] + ["--allow-interactive-authorization=no", "call",
+                "org.freedesktop.portable1", "/org/freedesktop/portable1", "org.freedesktop.portable1.Manager",
+                method, "sassbs", DDI_PORTABLE, "2", "himmelblau-broker", "himmelblau-compliance-check", "trusted", "false", ""], event_log)
+            run(["systemctl"] + bus + ["daemon-reload"], event_log)
+            run(["systemctl"] + bus + ["enable", "himmelblau-compliance-check.service", "himmelblau-compliance-check.timer"], event_log)
+            run(["systemctl"] + bus + ["--no-block", "restart", "himmelblau-broker.service", "himmelblau-compliance-check.timer"], event_log)
+        except WorkerError:
+            if run(["systemctl", "is-active", "--quiet", "user@" + uid + ".service"], event_log, check=False).returncode == 0:
+                raise
+            emit(event_log, {"type": "info", "text": "User " + uid + " logged out; portable setup deferred to next login."})
+
 
 
 def ddi_activate(plan, directory, key, event_log):
     spec, target = plan["ddi"], plan["target"]
     features = ddi_auth_features(target)
+    if target.startswith(("ubuntu", "debian", "sle")) or target == "tumbleweed":
+        ddi_configure_nss(check_only=True)
     for kind, destination in (("portable", DDI_PORTABLE), ("sysext", DDI_SYSEXT)):
         name = spec[kind]["filename"]
         ddi_publish(os.path.join(directory, name), destination, name)
@@ -3075,7 +3123,12 @@ def ddi_activate(plan, directory, key, event_log):
     run(["gpg", "--homedir", os.path.join(directory, "gnupg"), "--batch", "--no-default-keyring",
          "--keyring", keyring, "--import", key], event_log)
     run([ddi_tool("systemd-sysupdate"), "enable-component", "himmelblau"], event_log)
-    run(["systemctl", "enable", "--now", "systemd-sysupdate-update.timer"], event_log)
+    install_text("/etc/systemd/system/himmelblau-sysupdate.service",
+                 "[Unit]\nDescription=Update Himmelblau images\n[Service]\nType=oneshot\nExecStart=" + ddi_tool("systemd-sysupdate") + " --component=himmelblau update\n", "0644", event_log)
+    install_text("/etc/systemd/system/himmelblau-sysupdate.timer",
+                 "[Unit]\nDescription=Daily Himmelblau image updates\n[Timer]\nOnCalendar=daily\nRandomizedDelaySec=1h\nPersistent=true\n[Install]\nWantedBy=timers.target\n", "0644", event_log)
+    run(["systemctl", "daemon-reload"], event_log)
+    run(["systemctl", "enable", "--now", "himmelblau-sysupdate.timer"], event_log)
     for unit in ("himmelblaud.service", "himmelblaud-tasks.service", "himmelblaud-sysupdate-notify.socket"):
         run(["systemctl", "is-active", "--quiet", unit], event_log)
     run(["aad-tool", "--version"], event_log)

@@ -65,7 +65,7 @@ async function render(channel, distro) {
       const text = await render(channel, distro);
       assert.ok(text.includes(`${root}/${destination}`), `${channel} ${distro}: native destination`);
       assert.ok(text.includes(`${root}/gpg.key`), `${channel} ${distro}: channel key`);
-      assert.ok(!text.includes('packages.himmelblau-idm.org'), `${channel} ${distro}: no old server`);
+      assert.ok(![...text.matchAll(/https?:\/\/[^\s'"<>`]+/g)].some(match => new URL(match[0]).hostname === 'packages.himmelblau-idm.org'), `${channel} ${distro}: no old server`);
       assert.ok(!text.includes('${'), `${channel} ${distro}: interpolated commands`);
       if (destination.startsWith('rpm/')) {
         assert.ok(text.includes(`${root}/${destination}/noarch`));

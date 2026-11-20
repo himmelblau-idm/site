@@ -10,7 +10,7 @@
 const REPO_SUPPORT = {
 	stable: {
 		include: [],
-		exclude: [],
+		exclude: ['nixos'],
 	},
 	nightly: {
 		include: [],
@@ -439,7 +439,7 @@ async function provideRepoInstructions() {
 		if (isDeb(distro)) {
 			const sourcePath = '/etc/apt/sources.list.d/himmelblau.list';
 			[
-				`sudo apt install ca-certificates curl gnupg && sudo install -d -m 0755 /etc/apt/keyrings && curl -fsSL ${gpgKeyUrl} | sudo gpg --dearmor -o /etc/apt/keyrings/himmelblau.gpg`,
+				`sudo apt install ca-certificates curl gnupg && sudo install -d -m 0755 /etc/apt/keyrings && sudo sh -c 'set -eu; tmp=$(mktemp /etc/apt/keyrings/.himmelblau.XXXXXX); trap "rm -f $tmp $tmp.asc" EXIT; curl -fsSL ${gpgKeyUrl} -o "$tmp.asc"; gpg --batch --yes --dearmor -o "$tmp" "$tmp.asc"; chmod 0644 "$tmp"; mv -f "$tmp" /etc/apt/keyrings/himmelblau.gpg' `,
 				`echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/himmelblau.gpg] ${repoRoot}/deb/${repoDistro} ${repoVersion} main" | sudo tee ${sourcePath} > /dev/null`,
 				`sudo chmod ${repoMode} ${sourcePath}`,
 				'sudo apt update',

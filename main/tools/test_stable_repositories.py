@@ -184,7 +184,7 @@ class StableRepositoryTests(unittest.TestCase):
             with self.subTest(manager=manager), tempfile.TemporaryDirectory() as tmp:
                 folder = pathlib.Path(tmp)
                 source, key = self.configure_fake_system(manager, folder)
-                source.write_text("baseurl=https://packages.himmelblau-idm.org/stable/latest")
+                source.write_text("deb https://packages.himmelblau-idm.org/stable/latest ./" if manager == "apt" else "baseurl=https://packages.himmelblau-idm.org/stable/latest")
                 key.write_bytes(b"old-key")
                 self.worker.setup_stable_repository(self.plan(target=target), str(folder / "events"))
                 self.assertIn(ROOT, source.read_text())

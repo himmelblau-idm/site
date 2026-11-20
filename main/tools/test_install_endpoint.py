@@ -54,6 +54,12 @@ class InstallEndpointTests(unittest.TestCase):
         patch.start()
         self.addCleanup(patch.stop)
         installer.DDI_SELECTION_CACHE.clear()
+        fixture = tempfile.TemporaryDirectory()
+        self.addCleanup(fixture.cleanup)
+        for name in ("DDI_PORTABLE", "DDI_SYSEXT"):
+            patch = mock.patch.object(installer, name, str(pathlib.Path(fixture.name, name)))
+            patch.start()
+            self.addCleanup(patch.stop)
 
     def test_endpoint_is_extensionless_shell_wrapper(self):
         self.assertEqual(INSTALL_PATH.name, "install")

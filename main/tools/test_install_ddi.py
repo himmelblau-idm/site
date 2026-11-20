@@ -399,7 +399,7 @@ class DdiHostSetupTests(unittest.TestCase):
                     return result("detached", returncode=1)
                 return result()
             with self.subTest(manager=manager), contextlib.ExitStack() as stack:
-                for name in ("ddi_publish", "ddi_configure_nss", "ddi_install_users", "emit"):
+                for name in ("ddi_publish", "ddi_configure_nss", "ddi_install_users", "ddi_check_pending_deployment", "emit"):
                     stack.enter_context(mock.patch.object(worker, name))
                 stack.enter_context(mock.patch.object(worker, "ddi_tool", side_effect=lambda x: x))
                 stack.enter_context(mock.patch.object(worker, "ddi_auth_features", return_value=[]))

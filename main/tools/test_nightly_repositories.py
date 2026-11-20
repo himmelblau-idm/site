@@ -103,7 +103,7 @@ class NightlyRepositoryTests(unittest.TestCase):
     def test_refresh_failure_restores_source_key_and_permissions(self):
         for manager, target in (("apt", "ubuntu24.04"), ("dnf", "fedora44"), ("zypper", "sle16")):
             with self.subTest(manager=manager), self.system(manager) as (w, folder, source, key, commands):
-                previous = "repository=" + NIGHTLY + "/previous\n"
+                previous = ("deb " + NIGHTLY + "/deb/ubuntu noble main\n" if manager == "apt" else "repository=" + NIGHTLY + "/previous\n")
                 source.write_text(previous)
                 source.chmod(0o600)
                 key.write_bytes(b"previous-key")

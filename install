@@ -6,8 +6,8 @@
 #   curl -fsSL https://himmelblau-idm.org/install | sh
 #
 # The shell portion only finds Python 3 and passes control to the Python
-# bootstrapper below. The Python code installs Himmelblau with the native
-# package manager, either from a repository or packages built from stable-4.x.
+# bootstrapper below. Nightly prefers DDIs on compatible systemd 262+ hosts;
+# other installations use native packages or packages built from stable-4.x.
 
 set -u
 
@@ -38,19 +38,20 @@ import textwrap
 import time
 import urllib.error
 import urllib.parse
+import http.client
 import urllib.request
 
 
-VERSION = "2026.10.09"
-PLAN_VERSION = 5
+VERSION = "2026.11.20"
+PLAN_VERSION = 6
 SUPPORT_JS_URL = "https://himmelblau-idm.org/js/install.js"
 STABLE_SUBSCRIPTION_URL = "https://himmelblau-idm.org/stable-repositories/"
 STABLE_SOURCE_URL = "https://github.com/himmelblau-idm/himmelblau.git"
 STABLE_SOURCE_BRANCH = "stable-4.x"
-GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
+GPG_KEY_URL = "https://repo.himmelblau-idm.org/public/himmelblau/nightly/gpg.key"
 APT_KEYRING_DIR = "/etc/apt/keyrings"
 APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
-BASE_NIGHTLY_URL = "https://packages.himmelblau-idm.org/nightly/latest"
+BASE_NIGHTLY_URL = "https://repo.himmelblau-idm.org/public/himmelblau/nightly"
 CONFIG_PATH = "/etc/himmelblau/himmelblau.conf"
 LOG_PATH = os.path.expanduser("~/.cache/himmelblau-installer/install.log")
 CONFIG_BOOLEAN_DEFAULTS = {
@@ -157,7 +158,7 @@ STABLE_RPM_KEYS = {"dnf": "/etc/pki/rpm-gpg/himmelblau-stable.asc", "rpm-ostree"
 
 def redact(value):
     text = str(value)
-    text = re.sub(r"https://repo\.himmelblau-idm\.org/[^/\s\"']+/himmelblau/", "https://repo.himmelblau-idm.org/REDACTED/himmelblau/", text)
+    text = re.sub(r"https://repo\.himmelblau-idm\.org/(?!public/)[^/\s\"']+/himmelblau/", "https://repo.himmelblau-idm.org/REDACTED/himmelblau/", text)
     for secret in sorted(SECRET_VALUES, key=len, reverse=True):
         text = text.replace(secret, "REDACTED")
     return text
@@ -225,9 +226,9 @@ def validate_source_steps(plan):
         raise ValueError("Stable repository setup requires the stable channel.")
 
 
-def native_stable_config(root, distro, version, architecture, manager):
+def native_repository_config(root, distro, version, architecture, manager, channel="stable"):
     if architecture not in ("amd64", "arm64", "x86_64", "aarch64"):
-        raise ValueError("Stable repositories support x86-64 and ARM64 only.")
+        raise ValueError("Repositories support x86-64 and ARM64 only.")
     if manager == "apt":
         if architecture not in ("amd64", "arm64"):
             raise ValueError("Unsupported Debian architecture.")
@@ -236,13 +237,54 @@ def native_stable_config(root, distro, version, architecture, manager):
         return source, metadata
     rpm_arch = {"amd64": "x86_64", "arm64": "aarch64"}.get(architecture, architecture)
     if distro == "el" and version == "8" and rpm_arch == "aarch64":
-        raise ValueError("Stable packages for Enterprise Linux 8 are available for x86-64 only.")
+        raise ValueError("Packages for Enterprise Linux 8 are available for x86-64 only.")
     base = "%s/rpm/%s/%s" % (root, distro, version)
-    key_path = "file://" + STABLE_RPM_KEYS[manager]
+    key_path = "file://" + (STABLE_RPM_KEYS if channel == "stable" else NIGHTLY_RPM_KEYS)[manager]
     config = ""
-    for name, arch in (("himmelblau-stable", rpm_arch), ("himmelblau-stable-noarch", "noarch")):
-        config += "[%s]\nname=Himmelblau Stable\nbaseurl=%s/%s\nenabled=1\npriority=1\ngpgcheck=1\ngpgkey=%s\n\n" % (name, base, arch, key_path)
+    for name, arch in (("himmelblau-" + channel, rpm_arch), ("himmelblau-" + channel + "-noarch", "noarch")):
+        config += "[%s]\nname=Himmelblau %s\nbaseurl=%s/%s\nenabled=1\npriority=1\ngpgcheck=1\ngpgkey=%s\n\n" % (name, channel.title(), base, arch, key_path)
     return config, base + "/" + rpm_arch + "/repodata/repomd.xml"
+
+
+def native_stable_config(root, distro, version, architecture, manager):
+    return native_repository_config(root, distro, version, architecture, manager)
+
+
+NIGHTLY_RPM_KEYS = {
+    "dnf": "/etc/pki/rpm-gpg/himmelblau-nightly.asc",
+    "rpm-ostree": "/etc/pki/rpm-gpg/himmelblau-nightly.asc",
+    "zypper": "/etc/zypp/himmelblau-nightly.asc",
+}
+
+
+def native_nightly_config(target, architecture, manager):
+    if target not in STABLE_DESTINATIONS:
+        raise ValueError("Nightly packages are unavailable for this distribution.")
+    distro, version = STABLE_DESTINATIONS[target]
+    return native_repository_config(BASE_NIGHTLY_URL, distro, version, architecture, manager, "nightly")
+
+
+def fetch_nightly_data(url):
+    try:
+        with urllib.request.urlopen(url, timeout=30) as response:
+            data = response.read()
+        if not data:
+            raise ValueError("The Nightly repository returned empty data.")
+        return data
+    except urllib.error.HTTPError as err:
+        if err.code == 404:
+            raise ValueError("Nightly packages are unavailable for this distribution or architecture.")
+        raise ValueError("Unable to read the public Nightly repository (HTTP %s). Retry later." % err.code)
+    except (OSError, urllib.error.URLError):
+        raise ValueError("Unable to reach the public Nightly repository. Check your connection and retry.")
+
+
+def is_himmelblau_repository(text):
+    return any(marker in text for marker in (
+        "packages.himmelblau-idm.org/", "/himmelblau/v_",
+        "repo.himmelblau-idm.org/public/himmelblau/nightly/",
+        "himmelblau-idm.org/deb",
+    ))
 
 
 def resolve_stable_repository(token, target, architecture, manager):
@@ -1258,7 +1300,7 @@ def package_install_command(manager, channel, target, packages):
     if manager == "zypper":
         if channel == "subscription":
             return sudo_prefix() + ["zypper", "--non-interactive", "install", "-y"] + packages
-        return sudo_prefix() + ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", f"himmelblau-{channel}"] + packages
+        return sudo_prefix() + ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", f"himmelblau-{channel}", "--from", f"himmelblau-{channel}-noarch"] + packages
     if manager == "dnf":
         return sudo_prefix() + ["dnf", "install", "-y"] + packages
     if manager == "rpm-ostree":
@@ -1287,17 +1329,6 @@ def apt_architecture(ui):
     return architecture
 
 
-def apt_source_line(repo_url, architecture):
-    return f"deb [arch={architecture} signed-by={APT_KEYRING_PATH}] {repo_url} ./\n"
-
-
-def nightly_apt_repo_url(channel, target, architecture):
-    if architecture not in ("amd64", "arm64"):
-        raise ValueError("Nightly Debian packages support amd64 and arm64 only.")
-    suffix = "-arm64" if architecture == "arm64" else ""
-    return f"{base_url(channel)}/deb/{target}{suffix}"
-
-
 def dearmor_apt_key(key_data):
     proc = subprocess.run(["gpg", "--dearmor"], input=key_data, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if proc.returncode != 0:
@@ -1306,61 +1337,71 @@ def dearmor_apt_key(key_data):
 
 
 def apt_repo_setup(channel, target, ui):
-    apt_install_prereqs(ui)
-    architecture = apt_architecture(ui)
+    base_url(channel)
     try:
-        repo_url = nightly_apt_repo_url(channel, target, architecture)
+        architecture = apt_architecture(ui)
+        source, _ = native_nightly_config(target, architecture, "apt")
+        key_data = fetch_nightly_data(GPG_KEY_URL)
     except ValueError as err:
         raise InstallError(str(err))
+    apt_install_prereqs(ui)
     run(sudo_prefix() + ["install", "-d", "-m", "0755", APT_KEYRING_DIR], ui)
-    key_proc = subprocess.run(["curl", "-fsSL", GPG_KEY_URL], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-    if key_proc.returncode != 0:
-        raise InstallError("Unable to download the Himmelblau package signing key.")
-    install_bytes(APT_KEYRING_PATH, dearmor_apt_key(key_proc.stdout), "0644", ui)
-    source = apt_source_line(repo_url, architecture)
-    install_text("/etc/apt/sources.list.d/himmelblau.list", source, "0644", ui)
+    install_bytes(APT_KEYRING_PATH, dearmor_apt_key(key_data), "0644", ui)
+    install_text(STABLE_APT_SOURCE_PATH, source, "0644", ui)
     run(apt_get_command("update"), ui)
 
 
+def nightly_rpm_repo_setup(target, manager, ui):
+    try:
+        architecture = run(sudo_prefix() + ["rpm", "--eval", "%{_arch}"], ui).stdout.strip()
+        config, _ = native_nightly_config(target, architecture, manager)
+        key_data = fetch_nightly_data(GPG_KEY_URL)
+    except ValueError as err:
+        raise InstallError(str(err))
+    key_path = NIGHTLY_RPM_KEYS[manager]
+    run(sudo_prefix() + ["install", "-d", "-m", "0755", os.path.dirname(key_path)], ui)
+    install_bytes(key_path, key_data, "0644", ui)
+    if manager != "rpm-ostree":
+        run(sudo_prefix() + ["rpm", "--import", key_path], ui)
+    install_text(STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo", config, "0644", ui)
+    if manager == "dnf":
+        run(sudo_prefix() + ["dnf", "makecache", "--refresh", "-y", "--disablerepo=*", "--enablerepo=himmelblau-nightly", "--enablerepo=himmelblau-nightly-noarch"], ui)
+    elif manager == "zypper":
+        run(sudo_prefix() + ["zypper", "--non-interactive", "--gpg-auto-import-keys", "refresh", "himmelblau-nightly", "himmelblau-nightly-noarch"], ui)
+
+
 def zypper_repo_setup(channel, target, ui):
-    if run(sudo_prefix() + ["rpm", "--eval", "%{_arch}"], ui).stdout.strip() == "aarch64":
-        raise InstallError("Community Nightly RPM packages are unavailable for ARM64. Choose the Stable repository with an entitlement token.")
-    repo_url = f"{base_url(channel)}/rpm/{target}"
-    run(sudo_prefix() + ["rpm", "--import", GPG_KEY_URL], ui)
-    run(sudo_prefix() + ["zypper", "--non-interactive", "addrepo", "--check", "--gpgcheck", repo_url, f"himmelblau-{channel}"], ui, check=False)
-    run(sudo_prefix() + ["zypper", "--non-interactive", "--gpg-auto-import-keys", "refresh", f"himmelblau-{channel}"], ui)
+    base_url(channel)
+    nightly_rpm_repo_setup(target, "zypper", ui)
 
 
 def dnf_repo_setup(channel, target, ui):
-    if run(sudo_prefix() + ["rpm", "--eval", "%{_arch}"], ui).stdout.strip() == "aarch64":
-        raise InstallError("Community Nightly RPM packages are unavailable for ARM64. Choose the Stable repository with an entitlement token.")
-    repo_url = f"{base_url(channel)}/rpm/{target}"
-    name = f"himmelblau-{channel}"
-    repo = f"""[{name}]
-name=Himmelblau {channel}
-baseurl={repo_url}
-enabled=1
-gpgcheck=1
-gpgkey={GPG_KEY_URL}
-"""
-    run(sudo_prefix() + ["rpm", "--import", GPG_KEY_URL], ui)
-    install_text(f"/etc/yum.repos.d/{name}.repo", repo, "0644", ui)
-    run(sudo_prefix() + ["dnf", "makecache", "--refresh", "-y"], ui)
+    base_url(channel)
+    nightly_rpm_repo_setup(target, "dnf", ui)
 
 
 def ostree_repo_setup(channel, target, ui):
-    if run(sudo_prefix() + ["rpm", "--eval", "%{_arch}"], ui).stdout.strip() == "aarch64":
-        raise InstallError("Community Nightly RPM packages are unavailable for ARM64. Choose the Stable repository with an entitlement token.")
-    key_path = "/etc/pki/rpm-gpg/himmelblau-nightly.asc"
-    with urllib.request.urlopen(GPG_KEY_URL, timeout=30) as response:
-        key_data = response.read(128 * 1024)
-    if not key_data:
-        raise InstallError("Unable to download the Himmelblau package signing key.")
-    run(sudo_prefix() + ["install", "-d", "-m", "0755", os.path.dirname(key_path)], ui)
-    install_bytes(key_path, key_data, "0644", ui)
-    name = f"himmelblau-{channel}"
-    repo = f"[{name}]\nname=Himmelblau {channel}\nbaseurl={base_url(channel)}/rpm/{target}\nenabled=1\ngpgcheck=1\ngpgkey=file://{key_path}\n"
-    install_text(f"/etc/yum.repos.d/{name}.repo", repo, "0644", ui)
+    base_url(channel)
+    nightly_rpm_repo_setup(target, "rpm-ostree", ui)
+
+
+def ensure_package_prerequisites(manager, ui):
+    # DEB and RPM NSS post-install scripts both invoke awk.
+    if shutil.which("awk"):
+        return
+    if manager == "apt":
+        command = apt_get_command("install", "-y", "gawk")
+    elif manager == "zypper":
+        command = sudo_prefix() + ["zypper", "--non-interactive", "install", "-y", "gawk"]
+    elif manager == "dnf":
+        command = sudo_prefix() + ["dnf", "install", "-y", "gawk"]
+    elif manager == "rpm-ostree":
+        check_ostree_pending()
+        # A staged dependency would not be available to package scripts yet.
+        command = sudo_prefix() + ["rpm-ostree", "install", "-y", "--apply-live", "gawk"]
+    else:
+        raise InstallError("Unable to install awk with this package manager.")
+    run(command, ui)
 
 
 def install_packages(channel, target, ui, packages=None, best_effort_packages=None, manager=None):
@@ -1378,6 +1419,7 @@ def install_packages(channel, target, ui, packages=None, best_effort_packages=No
     if packages is None or best_effort_packages is None:
         packages, best_effort_packages = detected_package_selection(channel, target)
     if packages:
+        ensure_package_prerequisites(manager, ui)
         run(package_install_command(manager, channel, target, packages), ui)
     for package in best_effort_packages:
         proc = run(package_install_command(manager, channel, target, [package]), ui, check=False)
@@ -1416,6 +1458,280 @@ def require_commands(commands):
     missing = [cmd for cmd in commands if not shutil.which(cmd)]
     if missing:
         raise InstallError("Required commands are missing: " + ", ".join(missing))
+
+
+DDI_SHARED_SOURCE = r'''# Shared verbatim by the bootstrapper and its privileged worker.
+import hashlib
+import glob
+
+DDI_ERROR = globals().get("InstallError", globals().get("WorkerError", RuntimeError))
+DDI_ROOT = "/var/lib/himmelblau-ddi"
+DDI_PORTABLE = DDI_ROOT + "/himmelblaud.v"
+DDI_SYSEXT = "/var/lib/extensions/himmelblau.sysext.raw.v"
+DDI_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
+DDI_FINGERPRINT = "E87FD8D463A5E4814B9CDBA90CC0D4002C425E03"
+DDI_TOOLS = ("systemctl", "systemd-detect-virt", "portablectl", "busctl", "systemd-sysext", "systemd-dissect",
+             "systemd-sysupdate", "systemd-tmpfiles", "gpg", "ldd")
+DDI_VERSION_RE = r"[0-9]{4}-[0-9]{2}-[0-9]{2}\.[0-9]{12,}-[0-9a-f]{12}"
+DDI_LIMITS = "DDI includes core authentication and broker/compliance services. Optional browser SSO, QR greeter, Office shortcuts, and distro security-policy packages are not installed."
+
+
+class DdiUnavailable(DDI_ERROR):
+    """A prerequisite is absent; package fallback is safe before activation."""
+
+
+def ddi_tool(name):
+    found = shutil.which(name)
+    if found:
+        return found
+    for directory in ("/usr/lib/systemd", "/lib/systemd", "/usr/libexec"):
+        path = os.path.join(directory, name)
+        if os.path.isfile(path) and os.access(path, os.X_OK):
+            return path
+    return None
+
+
+def ddi_capture(argv, check=True):
+    argv = [ddi_tool(argv[0]) or argv[0]] + argv[1:]
+    try:
+        proc = subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                              universal_newlines=True, check=False, timeout=60)
+    except (OSError, subprocess.TimeoutExpired) as err:
+        raise DdiUnavailable("DDI prerequisite failed: %s" % err)
+    if check and proc.returncode:
+        raise DDI_ERROR("DDI command failed: %s\n%s" % (" ".join(argv), proc.stderr[-2000:]))
+    return proc
+
+
+def ddi_os_release(path="/etc/os-release"):
+    with open(path, encoding="utf-8") as handle:
+        return dict((k, v.strip().strip('"')) for k, v in
+                    (line.strip().split("=", 1) for line in handle if "=" in line and not line.startswith("#")))
+
+
+def ddi_architecture():
+    return {"x86_64": "x86-64", "amd64": "x86-64", "aarch64": "arm64", "arm64": "arm64"}.get(os.uname().machine)
+
+
+def check_ostree_pending(event_log=None, purpose="live gawk installation"):
+    proc = ddi_capture(["rpm-ostree", "status", "--json"])
+    try:
+        deployments = json.loads(proc.stdout)["deployments"]
+    except (ValueError, KeyError, TypeError):
+        raise DDI_ERROR("Unable to inspect rpm-ostree deployments; check rpm-ostree status before rerunning.")
+    if deployments and not deployments[0].get("booted", False):
+        raise DDI_ERROR("A pending rpm-ostree deployment prevents " + purpose + ". Reboot into it and rerun the installer.")
+
+
+def ddi_check_pending_deployment():
+    if os.path.exists("/run/ostree-booted"):
+        # Refuse all pending deployments, including native packages staged by
+        # another installer; the booted RPM database cannot describe them.
+        check_ostree_pending(purpose="DDI activation")
+
+
+def ddi_packages_present(target):
+    names = ("himmelblau", "pam-himmelblau", "nss-himmelblau", "libnss_himmelblau2", "himmelblau-broker")
+    for name in names:
+        if target.startswith(("ubuntu", "debian")):
+            proc = ddi_capture(["dpkg-query", "-W", "-f=${db:Status-Status}", name], check=False)
+            if proc.stdout.strip() in ("installed", "unpacked", "half-installed", "half-configured", "triggers-awaited", "triggers-pending"):
+                return True
+        elif ddi_capture(["rpm", "-q", name], check=False).returncode == 0:
+            return True
+    return False
+
+
+def ddi_auth_features(target):
+    if target.startswith(("ubuntu", "debian")):
+        if not shutil.which("pam-auth-update"):
+            raise DdiUnavailable("pam-auth-update is missing")
+        # pam-auth-update refuses local changes rather than overwriting them.
+        for name in ("common-auth", "common-account", "common-password", "common-session"):
+            with open("/etc/pam.d/" + name, encoding="utf-8") as handle:
+                if "pam-auth-update" not in handle.read():
+                    raise DdiUnavailable("PAM is not managed by pam-auth-update")
+        return []
+    if target.startswith("sle") or target == "tumbleweed":
+        if not shutil.which("pam-config"):
+            raise DdiUnavailable("pam-config is missing")
+        return []
+    if not shutil.which("authselect"):
+        raise DdiUnavailable("authselect is missing")
+    if ddi_capture(["authselect", "check"], check=False).returncode:
+        raise DdiUnavailable("authselect configuration has local changes")
+    current = ddi_capture(["authselect", "current", "--raw"], check=False)
+    fields = current.stdout.split()
+    if current.returncode or not fields or fields[0] not in ("sssd", "minimal", "winbind", "himmelblau"):
+        raise DdiUnavailable("authselect uses a custom or unsupported profile")
+    return fields[1:]
+
+
+def ddi_local_reason(channel, target):
+    # Keep this gate ahead of all other DDI probes, especially network access.
+    if channel != "nightly":
+        return "DDIs are available only for nightly"
+    try:
+        version = ddi_capture(["systemctl", "--version"], check=False)
+        match = re.match(r"systemd\s+(\d+)(?=\D|$)", version.stdout)
+        if version.returncode or not match or int(match.group(1)) < 262:
+            return "DDIs require systemd 262 or newer"
+        if not os.path.isdir("/run/systemd/system"):
+            return "DDIs require a booted systemd host"
+        manager = ddi_capture(["systemctl", "show", "--property=Version", "--value"], check=False)
+        running_version = re.match(r"(\d+)(?=\D|$)", manager.stdout.strip())
+        if manager.returncode or not running_version or int(running_version.group(1)) < 262:
+            return "DDIs require the running systemd manager to be version 262 or newer"
+        if ddi_capture(["systemd-detect-virt", "--container", "--quiet"], check=False).returncode == 0:
+            return "DDIs require the host, outside a container"
+        if not ddi_architecture():
+            return "DDIs require x86-64 or ARM64"
+        missing = [name for name in DDI_TOOLS if not ddi_tool(name)]
+        if missing:
+            return "Missing DDI tools: " + ", ".join(missing)
+        ddi_check_pending_deployment()
+        if ddi_packages_present(target):
+            return "Existing Himmelblau packages retain the package installation method"
+        if os.path.exists("/usr/bin/aad-tool") and not (os.path.isdir(DDI_PORTABLE) and os.path.isdir(DDI_SYSEXT)):
+            return "Existing unmanaged Himmelblau files retain the package installation method"
+        ddi_auth_features(target)
+    except (DDI_ERROR, OSError) as err:
+        return str(err)
+    return None
+
+
+def ddi_fetch(url, limit=1024 * 1024):
+    try:
+        with urllib.request.urlopen(url, timeout=30) as response:
+            data = response.read(limit + 1)
+    except (OSError, urllib.error.URLError) as err:
+        raise DdiUnavailable("DDI download unavailable: %s" % err)
+    if len(data) > limit or not data:
+        raise DDI_ERROR("Invalid DDI metadata size")
+    return data
+
+
+def ddi_keyring(directory):
+    home = os.path.join(directory, "gnupg")
+    os.mkdir(home, 0o700)
+    key = os.path.join(directory, "himmelblau.asc")
+    with open(key, "wb") as handle:
+        handle.write(ddi_fetch(DDI_KEY_URL))
+    base = ["gpg", "--homedir", home, "--batch", "--no-auto-key-retrieve"]
+    listing = ddi_capture(base + ["--with-colons", "--import-options", "show-only", "--import", key]).stdout
+    fingerprints = []
+    primary = False
+    for line in listing.splitlines():
+        fields = line.split(":")
+        if fields[0] == "pub":
+            primary = True
+        elif fields[0] == "fpr" and primary:
+            fingerprints.append(fields[9])
+            primary = False
+    if fingerprints != [DDI_FINGERPRINT]:
+        raise DDI_ERROR("Himmelblau DDI signing key fingerprint mismatch")
+    ddi_capture(base + ["--import", key])
+    return base, key
+
+
+def ddi_stream(target, arch, kind):
+    name = "portable-" + arch if kind == "portable" else target + "-" + arch + "-sysext"
+    return BASE_NIGHTLY_URL + "/raw/versions/himmelblau-nightly-" + name
+
+
+def ddi_manifest(target, arch, kind, directory, gpg):
+    root = ddi_stream(target, arch, kind)
+    manifest = os.path.join(directory, kind + ".sums")
+    signature = manifest + ".gpg"
+    for path, url in ((manifest, root + "/SHA256SUMS"), (signature, root + "/SHA256SUMS.gpg")):
+        with open(path, "wb") as handle:
+            handle.write(ddi_fetch(url))
+    ddi_capture(gpg + ["--verify", signature, manifest])
+    suffix = "-" + arch + ".raw" if kind == "portable" else "-" + target + "-" + arch + ".sysext.raw"
+    pattern = r"(himmelblaud_|himmelblau_)(" + DDI_VERSION_RE + ")" + re.escape(suffix)
+    result = {}
+    with open(manifest, encoding="ascii") as handle:
+        for line in handle:
+            match = re.fullmatch(r"([0-9a-f]{64}) [ *](\S+)\n?", line)
+            image = re.fullmatch(pattern, match.group(2)) if match else None
+            expected_prefix = "himmelblaud_" if kind == "portable" else "himmelblau_"
+            if not image or image.group(1) != expected_prefix or image.group(2) in result:
+                raise DDI_ERROR("Invalid or duplicate DDI manifest entry")
+            result[image.group(2)] = {"filename": match.group(2), "sha256": match.group(1)}
+    return result
+
+
+def ddi_resolve(target):
+    arch = ddi_architecture()
+    with tempfile.TemporaryDirectory(prefix="himmelblau-ddi-") as directory:
+        gpg, _ = ddi_keyring(directory)
+        portable = ddi_manifest(target, arch, "portable", directory, gpg)
+        sysext = ddi_manifest(target, arch, "sysext", directory, gpg)
+        common = portable.keys() & sysext.keys()
+        if not common:
+            raise DdiUnavailable("No matched nightly portable and sysext images")
+        version = max(common)
+        return {"architecture": arch, "version": version,
+                "portable": portable[version], "sysext": sysext[version]}
+
+
+def validate_ddi_plan(plan):
+    method = plan.get("install_method", "packages")
+    if method not in ("packages", "ddi"):
+        raise DDI_ERROR("Invalid installation method")
+    ddi_steps = [s for s in plan.get("steps", []) if isinstance(s, dict) and s.get("kind") == "install_ddi"]
+    if method != "ddi":
+        if ddi_steps or plan.get("ddi") or plan.get("package_steps"):
+            raise DDI_ERROR("DDI data requires a DDI plan")
+        return
+    if plan.get("channel") != "nightly" or plan.get("phase") or plan.get("steps") != [{"kind": "install_ddi"}]:
+        raise DDI_ERROR("DDI plans require nightly and cannot include package steps")
+    spec = plan.get("ddi", {})
+    arch, version = spec.get("architecture"), spec.get("version", "")
+    if arch not in ("x86-64", "arm64") or not isinstance(version, str) or not re.fullmatch(DDI_VERSION_RE, version):
+        raise DDI_ERROR("Invalid DDI architecture or version")
+    for kind in ("portable", "sysext"):
+        expected = ("himmelblaud_" + version + "-" + arch + ".raw" if kind == "portable" else
+                    "himmelblau_" + version + "-" + plan["target"] + "-" + arch + ".sysext.raw")
+        record = spec.get(kind, {})
+        if record.get("filename") != expected or not re.fullmatch(r"[0-9a-f]{64}", record.get("sha256", "")):
+            raise DDI_ERROR("Invalid matched DDI image")
+    if not isinstance(plan.get("package_steps"), list) or not plan["package_steps"]:
+        raise DDI_ERROR("Missing DDI package fallback")
+
+
+def ddi_package_plan(plan):
+    fallback = dict(plan)
+    fallback["steps"] = fallback.pop("package_steps")
+    fallback.pop("ddi")
+    fallback["install_method"] = "packages"
+    return fallback
+'''
+exec(DDI_SHARED_SOURCE)
+
+
+DDI_SELECTION_CACHE = {}
+
+
+def installation_selection(channel, target):
+    if channel != "nightly" and (os.path.exists(DDI_PORTABLE) or os.path.exists(DDI_SYSEXT)):
+        raise InstallError("Existing DDI installation requires nightly. Automatic migration to packages is not supported.")
+    key = (channel, target)
+    if key not in DDI_SELECTION_CACHE:
+        reason = ddi_local_reason(channel, target)
+        spec = None
+        if reason is None:
+            try:
+                spec = ddi_resolve(target)
+            except DdiUnavailable as err:
+                reason = str(err)
+        if reason and channel == "nightly" and (os.path.exists(DDI_PORTABLE) or os.path.exists(DDI_SYSEXT)):
+            raise InstallError("Existing DDI installation cannot fall back to packages: " + reason)
+        DDI_SELECTION_CACHE[key] = {"install_method": "ddi" if spec else "packages", "ddi": spec, "reason": reason}
+    selection = DDI_SELECTION_CACHE[key]
+    if selection["install_method"] == "packages" and (os.path.exists(DDI_PORTABLE) or os.path.exists(DDI_SYSEXT)):
+        raise InstallError("Existing DDI installation cannot fall back to packages. Rerun the installer to review DDI selection.")
+    return selection
 
 
 def build_install_plan(channel, target, idp_config, write_idp, options_config=None, entitlement_token=None, stable_source="repository", source_dir=None, manager=None):
@@ -1476,7 +1792,7 @@ def build_install_plan(channel, target, idp_config, write_idp, options_config=No
             steps.extend(postboot[-2:])
         else:
             steps.extend(postboot)
-    return {
+    plan = {
         "version": PLAN_VERSION,
         "entitlement_token": entitlement_token if channel == "stable" and stable_source == "repository" else None,
         "stable_source": stable_source if channel == "stable" else None,
@@ -1487,6 +1803,16 @@ def build_install_plan(channel, target, idp_config, write_idp, options_config=No
         "config_path": CONFIG_PATH,
         "steps": steps,
     }
+
+    selection = installation_selection(channel, target)
+    plan["install_method"] = selection["install_method"]
+    if selection["install_method"] == "ddi":
+        plan["ddi"] = selection["ddi"]
+        plan["package_steps"] = steps
+        plan["steps"] = [{"kind": "install_ddi"}]
+    elif channel == "nightly":
+        plan["method_reason"] = selection["reason"]
+    return plan
 
 
 def build_package_only_plan(channel, target, entitlement_token=None, stable_source="repository", source_dir=None, manager=None):
@@ -1531,10 +1857,12 @@ def validate_install_plan(plan):
         except ValueError as err:
             raise InstallError(str(err))
     try:
+        validate_ddi_plan(plan)
         validate_source_steps(plan)
     except ValueError as err:
         raise InstallError(str(err))
     allowed = {
+        "install_ddi",
         "stable_repo",
         "build_prereqs",
         "install_self_built",
@@ -1561,6 +1889,8 @@ def validate_install_plan(plan):
         if step.get("kind") == "stage_postboot":
             if manager != "rpm-ostree" or [s.get("kind") for s in step.get("steps", [])] not in (["write_global_config", "enable_services", "maybe_status"], ["enable_services", "maybe_status"]):
                 raise InstallError("Invalid Silverblue post-boot plan.")
+    if plan.get("install_method") == "ddi":
+        validate_install_plan(ddi_package_plan(plan))
     return True
 
 
@@ -1581,6 +1911,15 @@ def summary_lines(target, manager, channel, idp_config, write_config, options_co
         ])
         if idp_config.get("mode") != "oidc":
             lines.append("Intune policy: " + ("Applied" if options_config.get("apply_policy", True) else "Not applied"))
+    selection = installation_selection(channel, target)
+    lines.append("Installation method: " + ("Portable service + sysext DDI" if selection["install_method"] == "ddi" else "Native packages"))
+    if selection["install_method"] == "ddi":
+        lines.append("Image version: " + selection["ddi"]["version"])
+        lines.append("Updates: Daily signed image updates with systemd-sysupdate")
+        lines.append(DDI_LIMITS)
+        return lines
+    if channel == "nightly":
+        lines.append("Package fallback: " + selection["reason"])
     if channel == "stable" and stable_source == "self-built":
         lines.append("Source checkout: " + self_build_directory())
         lines.append("Updates: Rebuild and install each release; packages are unsigned")
@@ -1607,15 +1946,16 @@ import subprocess
 import sys
 import tempfile
 import time
+import http.client
 import urllib.request
 import urllib.parse
 import urllib.error
 
-PLAN_VERSION = 5
-GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
+PLAN_VERSION = 6
+GPG_KEY_URL = "https://repo.himmelblau-idm.org/public/himmelblau/nightly/gpg.key"
 APT_KEYRING_DIR = "/etc/apt/keyrings"
 APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
-BASE_NIGHTLY_URL = "https://packages.himmelblau-idm.org/nightly/latest"
+BASE_NIGHTLY_URL = "https://repo.himmelblau-idm.org/public/himmelblau/nightly"
 CONFIG_PATH = "/etc/himmelblau/himmelblau.conf"
 CONFIG_BOOLEAN_DEFAULTS = {
     "enable_hello": True,
@@ -1677,7 +2017,7 @@ POSTBOOT_LOG = POSTBOOT_DIR + "/postboot.jsonl"
 
 def redact(value):
     text = str(value)
-    text = re.sub(r"https://repo\.himmelblau-idm\.org/[^/\s\"']+/himmelblau/", "https://repo.himmelblau-idm.org/REDACTED/himmelblau/", text)
+    text = re.sub(r"https://repo\.himmelblau-idm\.org/(?!public/)[^/\s\"']+/himmelblau/", "https://repo.himmelblau-idm.org/REDACTED/himmelblau/", text)
     for secret in sorted(SECRET_VALUES, key=len, reverse=True):
         text = text.replace(secret, "REDACTED")
     return text
@@ -1745,9 +2085,9 @@ def validate_source_steps(plan):
         raise ValueError("Stable repository setup requires the stable channel.")
 
 
-def native_stable_config(root, distro, version, architecture, manager):
+def native_repository_config(root, distro, version, architecture, manager, channel="stable"):
     if architecture not in ("amd64", "arm64", "x86_64", "aarch64"):
-        raise ValueError("Stable repositories support x86-64 and ARM64 only.")
+        raise ValueError("Repositories support x86-64 and ARM64 only.")
     if manager == "apt":
         if architecture not in ("amd64", "arm64"):
             raise ValueError("Unsupported Debian architecture.")
@@ -1756,13 +2096,54 @@ def native_stable_config(root, distro, version, architecture, manager):
         return source, metadata
     rpm_arch = {"amd64": "x86_64", "arm64": "aarch64"}.get(architecture, architecture)
     if distro == "el" and version == "8" and rpm_arch == "aarch64":
-        raise ValueError("Stable packages for Enterprise Linux 8 are available for x86-64 only.")
+        raise ValueError("Packages for Enterprise Linux 8 are available for x86-64 only.")
     base = "%s/rpm/%s/%s" % (root, distro, version)
-    key_path = "file://" + STABLE_RPM_KEYS[manager]
+    key_path = "file://" + (STABLE_RPM_KEYS if channel == "stable" else NIGHTLY_RPM_KEYS)[manager]
     config = ""
-    for name, arch in (("himmelblau-stable", rpm_arch), ("himmelblau-stable-noarch", "noarch")):
-        config += "[%s]\nname=Himmelblau Stable\nbaseurl=%s/%s\nenabled=1\npriority=1\ngpgcheck=1\ngpgkey=%s\n\n" % (name, base, arch, key_path)
+    for name, arch in (("himmelblau-" + channel, rpm_arch), ("himmelblau-" + channel + "-noarch", "noarch")):
+        config += "[%s]\nname=Himmelblau %s\nbaseurl=%s/%s\nenabled=1\npriority=1\ngpgcheck=1\ngpgkey=%s\n\n" % (name, channel.title(), base, arch, key_path)
     return config, base + "/" + rpm_arch + "/repodata/repomd.xml"
+
+
+def native_stable_config(root, distro, version, architecture, manager):
+    return native_repository_config(root, distro, version, architecture, manager)
+
+
+NIGHTLY_RPM_KEYS = {
+    "dnf": "/etc/pki/rpm-gpg/himmelblau-nightly.asc",
+    "rpm-ostree": "/etc/pki/rpm-gpg/himmelblau-nightly.asc",
+    "zypper": "/etc/zypp/himmelblau-nightly.asc",
+}
+
+
+def native_nightly_config(target, architecture, manager):
+    if target not in STABLE_DESTINATIONS:
+        raise ValueError("Nightly packages are unavailable for this distribution.")
+    distro, version = STABLE_DESTINATIONS[target]
+    return native_repository_config(BASE_NIGHTLY_URL, distro, version, architecture, manager, "nightly")
+
+
+def fetch_nightly_data(url):
+    try:
+        with urllib.request.urlopen(url, timeout=30) as response:
+            data = response.read()
+        if not data:
+            raise ValueError("The Nightly repository returned empty data.")
+        return data
+    except urllib.error.HTTPError as err:
+        if err.code == 404:
+            raise ValueError("Nightly packages are unavailable for this distribution or architecture.")
+        raise ValueError("Unable to read the public Nightly repository (HTTP %s). Retry later." % err.code)
+    except (OSError, urllib.error.URLError):
+        raise ValueError("Unable to reach the public Nightly repository. Check your connection and retry.")
+
+
+def is_himmelblau_repository(text):
+    return any(marker in text for marker in (
+        "packages.himmelblau-idm.org/", "/himmelblau/v_",
+        "repo.himmelblau-idm.org/public/himmelblau/nightly/",
+        "himmelblau-idm.org/deb",
+    ))
 
 
 def resolve_stable_repository(token, target, architecture, manager):
@@ -1995,11 +2376,12 @@ def validate_plan(plan):
         except ValueError as err:
             raise WorkerError(str(err))
     try:
+        validate_ddi_plan(plan)
         validate_source_steps(plan)
     except ValueError as err:
         raise WorkerError(str(err))
     allowed = set([
-        "stable_repo", "vendor_repo", "apt_prereqs", "apt_repo", "zypper_repo", "dnf_repo", "install_packages", "build_prereqs", "install_self_built",
+        "install_ddi", "stable_repo", "vendor_repo", "apt_prereqs", "apt_repo", "zypper_repo", "dnf_repo", "install_packages", "build_prereqs", "install_self_built",
         "write_global_config", "write_idp_config", "configure_distro_provided", "enable_services", "maybe_status", "note", "stage_postboot"
     ])
     for step in plan.get("steps", []):
@@ -2012,6 +2394,9 @@ def validate_plan(plan):
             kinds = [s.get("kind") for s in step.get("steps", []) if isinstance(s, dict)]
             if manager != "rpm-ostree" or kinds not in (["write_global_config", "enable_services", "maybe_status"], ["enable_services", "maybe_status"]):
                 raise WorkerError("Invalid Silverblue post-boot steps.")
+
+    if plan.get("install_method") == "ddi":
+        validate_plan(ddi_package_plan(plan))
 
 
 def validate_package_list(packages):
@@ -2030,17 +2415,6 @@ def apt_architecture(event_log):
     return architecture
 
 
-def apt_source_line(repo_url, architecture):
-    return "deb [arch=%s signed-by=%s] %s ./\n" % (architecture, APT_KEYRING_PATH, repo_url)
-
-
-def nightly_apt_repo_url(channel, target, architecture):
-    if architecture not in ("amd64", "arm64"):
-        raise ValueError("Nightly Debian packages support amd64 and arm64 only.")
-    suffix = "-arm64" if architecture == "arm64" else ""
-    return "%s/deb/%s%s" % (base_url(channel), target, suffix)
-
-
 def dearmor_apt_key(key_data):
     proc = subprocess.run(["gpg", "--dearmor"], input=key_data, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if proc.returncode != 0:
@@ -2049,44 +2423,51 @@ def dearmor_apt_key(key_data):
 
 
 def apt_repo_setup(channel, target, event_log):
-    architecture = apt_architecture(event_log)
-    repo_url = nightly_apt_repo_url(channel, target, architecture)
+    base_url(channel)
+    try:
+        architecture = apt_architecture(event_log)
+        source, _ = native_nightly_config(target, architecture, "apt")
+        key_data = fetch_nightly_data(GPG_KEY_URL)
+    except ValueError as err:
+        raise WorkerError(str(err))
     run(["install", "-d", "-m", "0755", APT_KEYRING_DIR], event_log)
-    with urllib.request.urlopen(GPG_KEY_URL, timeout=30) as response:
-        key_data = response.read(128 * 1024)
     install_bytes(APT_KEYRING_PATH, dearmor_apt_key(key_data), "0644", event_log)
-    source = apt_source_line(repo_url, architecture)
-    install_text("/etc/apt/sources.list.d/himmelblau.list", source, "0644", event_log)
+    install_text(STABLE_APT_SOURCE_PATH, repository_with_existing(STABLE_APT_SOURCE_PATH, source), repository_output_mode(STABLE_APT_SOURCE_PATH), event_log)
     run(apt_get_command("update"), event_log)
 
 
+def nightly_rpm_repo_setup(target, manager, event_log):
+    try:
+        architecture = run(["rpm", "--eval", "%{_arch}"], event_log).stdout.strip()
+        config, _ = native_nightly_config(target, architecture, manager)
+        key_data = fetch_nightly_data(GPG_KEY_URL)
+    except ValueError as err:
+        raise WorkerError(str(err))
+    key_path = NIGHTLY_RPM_KEYS[manager]
+    run(["install", "-d", "-m", "0755", os.path.dirname(key_path)], event_log)
+    install_bytes(key_path, key_data, "0644", event_log)
+    if manager != "rpm-ostree":
+        run(["rpm", "--import", key_path], event_log)
+    install_text(STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo", repository_with_existing(STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo", config), repository_output_mode(STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"), event_log)
+    if manager == "dnf":
+        run(["dnf", "makecache", "--refresh", "-y", "--disablerepo=*", "--enablerepo=himmelblau-nightly", "--enablerepo=himmelblau-nightly-noarch"], event_log)
+    elif manager == "zypper":
+        run(["zypper", "--non-interactive", "--gpg-auto-import-keys", "refresh", "himmelblau-nightly", "himmelblau-nightly-noarch"], event_log)
+
+
 def zypper_repo_setup(channel, target, event_log):
-    repo_url = "%s/rpm/%s" % (base_url(channel), target)
-    run(["rpm", "--import", GPG_KEY_URL], event_log)
-    run(["zypper", "--non-interactive", "addrepo", "--check", "--gpgcheck", repo_url, "himmelblau-%s" % channel], event_log, check=False)
-    run(["zypper", "--non-interactive", "--gpg-auto-import-keys", "refresh", "himmelblau-%s" % channel], event_log)
+    base_url(channel)
+    nightly_rpm_repo_setup(target, "zypper", event_log)
 
 
 def dnf_repo_setup(channel, target, event_log):
-    repo_url = "%s/rpm/%s" % (base_url(channel), target)
-    name = "himmelblau-%s" % channel
-    repo = "[%s]\nname=Himmelblau %s\nbaseurl=%s\nenabled=1\npriority=1\ngpgcheck=1\ngpgkey=%s\n" % (name, channel, repo_url, GPG_KEY_URL)
-    run(["rpm", "--import", GPG_KEY_URL], event_log)
-    install_text("/etc/yum.repos.d/%s.repo" % name, repo, "0644", event_log)
-    run(["dnf", "makecache", "--refresh", "-y"], event_log)
+    base_url(channel)
+    nightly_rpm_repo_setup(target, "dnf", event_log)
 
 
 def ostree_repo_setup(channel, target, event_log):
-    key_path = "/etc/pki/rpm-gpg/himmelblau-nightly.asc"
-    with urllib.request.urlopen(GPG_KEY_URL, timeout=30) as response:
-        key_data = response.read(128 * 1024)
-    if not key_data:
-        raise WorkerError("Unable to download the Himmelblau package signing key.")
-    run(["install", "-d", "-m", "0755", os.path.dirname(key_path)], event_log)
-    install_bytes(key_path, key_data, "0644", event_log)
-    name = "himmelblau-%s" % channel
-    repo = "[%s]\nname=Himmelblau %s\nbaseurl=%s/rpm/%s\nenabled=1\ngpgcheck=1\ngpgkey=file://%s\n" % (name, channel, base_url(channel), target, key_path)
-    install_text("/etc/yum.repos.d/%s.repo" % name, repo, "0644", event_log)
+    base_url(channel)
+    nightly_rpm_repo_setup(target, "rpm-ostree", event_log)
 
 
 def package_install_command(manager, channel, target, packages):
@@ -2096,7 +2477,7 @@ def package_install_command(manager, channel, target, packages):
     if manager == "zypper":
         if channel == "subscription":
             return ["zypper", "--non-interactive", "install", "-y"] + packages
-        return ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel] + (["--from", "himmelblau-stable-noarch"] if channel == "stable" else []) + packages
+        return ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel] + ["--from", "himmelblau-%s-noarch" % channel] + packages
     if manager == "dnf":
         return ["dnf", "install", "-y"] + packages
     if manager == "rpm-ostree":
@@ -2104,14 +2485,132 @@ def package_install_command(manager, channel, target, packages):
     raise WorkerError("NixOS is not supported by this bootstrap installer.")
 
 
+def ensure_package_prerequisites(manager, event_log):
+    # DEB and RPM NSS post-install scripts both invoke awk.
+    if shutil.which("awk"):
+        return
+    if manager == "apt":
+        command = apt_get_command("install", "-y", "gawk")
+    elif manager == "zypper":
+        command = ["zypper", "--non-interactive", "install", "-y", "gawk"]
+    elif manager == "dnf":
+        command = ["dnf", "install", "-y", "gawk"]
+    elif manager == "rpm-ostree":
+        check_ostree_pending()
+        # A staged dependency would not be available to package scripts yet.
+        command = ["rpm-ostree", "install", "-y", "--apply-live", "gawk"]
+    else:
+        raise WorkerError("Unable to install awk with this package manager.")
+    run(command, event_log)
+
+
 def install_packages(channel, target, event_log, packages, best_effort_packages, manager=None):
     manager = manager or package_manager(target)
     if packages:
+        ensure_package_prerequisites(manager, event_log)
         run(package_install_command(manager, channel, target, packages), event_log)
     for package in best_effort_packages:
         proc = run(package_install_command(manager, channel, target, [package]), event_log, check=False)
         if proc.returncode != 0:
             emit(event_log, {"type": "warning", "text": "Optional package %s could not be installed; continuing." % package})
+
+
+def repository_candidates(manager):
+    if manager == "apt":
+        directory = os.path.dirname(STABLE_APT_SOURCE_PATH)
+        return sorted(set([STABLE_APT_SOURCE_PATH, STABLE_APT_DEB822_PATH,
+                           os.path.join(os.path.dirname(directory), "sources.list")] +
+                          glob.glob(os.path.join(directory, "*.list")) +
+                          glob.glob(os.path.join(directory, "*.sources"))))
+    return sorted(set(glob.glob(os.path.join(STABLE_RPM_DIRS[manager], "*.repo")) +
+                      [STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo",
+                       STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"]))
+
+
+def deb822_repository_remainder(entry):
+    lines = entry.splitlines(True)
+    uri_lines = []
+    in_uris = False
+    uris = []
+    for index, line in enumerate(lines):
+        if line.lstrip().startswith("#"):
+            continue  # Comments do not terminate a continued field.
+        field = re.match(r"(?i)^URIs:[ \t]*(.*)", line)
+        if field:
+            in_uris = True
+            uri_lines.append(index)
+            uris.extend(field.group(1).split())
+        elif in_uris and line[:1] in (" ", "\t"):
+            uri_lines.append(index)
+            uris.extend(line.split())
+        else:
+            in_uris = False
+    kept_uris = [uri for uri in uris if not is_himmelblau_repository(uri)]
+    if len(kept_uris) == len(uris):
+        return False, entry
+    if not kept_uris:
+        return True, ""
+    lines[uri_lines[0]] = "URIs: " + " ".join(kept_uris) + "\n"
+    for index in uri_lines[1:]:
+        lines[index] = ""
+    return True, "".join(lines)
+
+
+def repository_remainder(path, text):
+    # Match repository URIs rather than comments or unrelated fields.
+    if path.endswith(".list"):
+        entries = text.splitlines(True)
+    elif path.endswith(".sources"):
+        entries = re.findall(r"[\s\S]+?(?:\n[ \t]*\n|\Z)", text)
+    else:
+        entries = re.split(r"(?m)(?=^\s*\[[^]\n]+\]\s*$)", text)
+    kept = []
+    matched = False
+    for entry in entries:
+        if path.endswith(".list"):
+            active = entry.partition("#")[0]
+            source = re.match(r"^\s*deb(?:-src)?\s+(?:\[[^]]*\]\s+)?(\S+)", active)
+            remove = bool(source and is_himmelblau_repository(source.group(1)))
+        elif path.endswith(".sources"):
+            remove, entry = deb822_repository_remainder(entry)
+            matched = matched or remove
+            kept.append(entry)
+            continue
+        else:
+            active = "\n".join(line for line in entry.splitlines() if not line.lstrip().startswith(("#", ";")))
+            remove = is_himmelblau_repository(active)
+        if remove:
+            matched = True
+        else:
+            kept.append(entry)
+    return matched, "".join(kept)
+
+
+def retain_repository_entries(path, backup, mode):
+    with open(backup) as handle:
+        matched, remainder = repository_remainder(path, handle.read())
+    if remainder.strip():
+        shutil.copy2(backup, path)
+        os.chmod(path, mode)
+        with open(path, "w") as handle:
+            handle.write(remainder)
+
+
+def repository_output_mode(path, default="0644"):
+    if os.path.isfile(path):
+        with open(path) as handle:
+            _, remainder = repository_remainder(path, handle.read())
+        if remainder.strip():
+            return format(os.stat(path).st_mode & 0o777, "04o")
+    return default
+
+
+def repository_with_existing(path, config):
+    if os.path.isfile(path):
+        with open(path) as handle:
+            _, remainder = repository_remainder(path, handle.read())
+            return (remainder.rstrip() + "\n\n" if remainder.strip() else "") + config
+    return config
 
 
 def setup_stable_repository(plan, event_log):
@@ -2127,7 +2626,7 @@ def setup_stable_repository(plan, event_log):
     check_stable_major(stream, manager)
     key_path = APT_KEYRING_PATH if manager == "apt" else STABLE_RPM_KEYS[manager]
     path = STABLE_APT_SOURCE_PATH if manager == "apt" else STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo"
-    candidates = [path, STABLE_APT_DEB822_PATH] if manager == "apt" else [path, os.path.dirname(path) + "/himmelblau-nightly.repo"]
+    candidates = repository_candidates(manager)
     # Inspect all conflicting paths before replacing any file.
     originals = []
     for candidate in candidates:
@@ -2135,8 +2634,8 @@ def setup_stable_repository(plan, event_log):
             continue
         with open(candidate) as handle:
             previous = handle.read()
-        if "packages.himmelblau-idm.org/" in previous or "/himmelblau/v_" in previous or "himmelblau-idm.org/deb" in previous:
-            backup = candidate + ".himmelblau-disabled"
+        if repository_remainder(candidate, previous)[0]:
+            backup = candidate + (".himmelblau-disabled" if "/himmelblau/v_" in previous else ".himmelblau-rollback")
             if os.path.exists(backup):
                 raise WorkerError("A repository backup already exists. Review the previous installation before retrying.")
             originals.append((candidate, backup, os.stat(candidate).st_mode & 0o777))
@@ -2167,8 +2666,9 @@ def setup_stable_repository(plan, event_log):
             os.rename(candidate, backup)
             backups.append((candidate, backup, mode))
             os.chmod(backup, 0o600)
+            retain_repository_entries(candidate, backup, mode)
         wrote_source = True
-        install_text(path, config, "0600", event_log)
+        install_text(path, repository_with_existing(path, config), "0600", event_log)
         if manager == "apt":
             preferences_written = True
             install_text(STABLE_APT_PREFERENCES_PATH, "Package: himmelblau* pam-himmelblau nss-himmelblau o365\nPin: origin repo.himmelblau-idm.org\nPin-Priority: 990\n", "0644", event_log)
@@ -2200,7 +2700,7 @@ def setup_stable_repository(plan, event_log):
     for candidate, backup, mode in backups:
         # Keep disabled non-stable sources for recovery. Old credential-bearing sources
         # are removed once the selected stable source successfully refreshes.
-        if candidate == path:
+        if candidate == path or backup.endswith(".himmelblau-rollback"):
             os.unlink(backup)
 
 
@@ -2217,23 +2717,29 @@ def setup_nightly_repository(step, event_log, manager=None):
     target = step["target"]
     manager = manager or package_manager(target)
     if manager == "apt":
-        paths = [STABLE_APT_SOURCE_PATH, STABLE_APT_DEB822_PATH]
+        paths = repository_candidates(manager)
         output_path = STABLE_APT_SOURCE_PATH
         key_path = APT_KEYRING_PATH
     else:
-        if run(["rpm", "--eval", "%{_arch}"], event_log).stdout.strip() == "aarch64":
-            raise WorkerError("Community Nightly RPM packages are unavailable for ARM64. Choose the Stable repository with an entitlement token.")
-        paths = [STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo", STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"]
-        output_path = paths[1]
-        key_path = "/etc/pki/rpm-gpg/himmelblau-nightly.asc" if manager == "rpm-ostree" else None
+        paths = repository_candidates(manager)
+        output_path = STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"
+        key_path = NIGHTLY_RPM_KEYS[manager]
+    try:
+        architecture = apt_architecture(event_log) if manager == "apt" else run(["rpm", "--eval", "%{_arch}"], event_log).stdout.strip()
+        _, metadata = native_nightly_config(target, architecture, manager)
+        fetch_nightly_data(metadata)
+        if manager != "apt":
+            fetch_nightly_data(BASE_NIGHTLY_URL + "/rpm/%s/%s/noarch/repodata/repomd.xml" % STABLE_DESTINATIONS[target])
+    except ValueError as err:
+        raise WorkerError(str(err))
     originals = []
     for path in paths:
         if not os.path.isfile(path):
             continue
         with open(path) as handle:
             text = handle.read()
-        if "/himmelblau/v_" in text or "packages.himmelblau-idm.org/" in text:
-            backup = path + ".himmelblau-disabled"
+        if repository_remainder(path, text)[0]:
+            backup = path + (".himmelblau-disabled" if "/himmelblau/v_" in text else ".himmelblau-rollback")
             if os.path.exists(backup):
                 raise WorkerError("A repository backup already exists. Review it before changing package sources.")
             originals.append((path, backup, os.stat(path).st_mode & 0o777))
@@ -2244,19 +2750,22 @@ def setup_nightly_repository(step, event_log, manager=None):
         with open(key_path, "rb") as handle:
             old_key = handle.read()
     backups = []
+    setup_started = False
     try:
         for path, backup, mode in originals:
             os.rename(path, backup)
             backups.append((path, backup, mode))
             os.chmod(backup, 0o600)
+            retain_repository_entries(path, backup, mode)
+        setup_started = True
         {"apt": apt_repo_setup, "dnf": dnf_repo_setup, "rpm-ostree": ostree_repo_setup, "zypper": zypper_repo_setup}[manager]("nightly", target, event_log)
     except Exception:
-        if os.path.exists(output_path):
+        if setup_started and os.path.exists(output_path):
             os.unlink(output_path)
         for path, backup, mode in backups:
             os.rename(backup, path)
             os.chmod(path, mode)
-        if key_path:
+        if setup_started:
             if old_key is not None:
                 install_bytes(key_path, old_key, "0644", event_log)
             elif os.path.exists(key_path):
@@ -2271,21 +2780,30 @@ def setup_nightly_repository(step, event_log, manager=None):
 
 def setup_vendor_repositories(target, manager=None):
     manager = manager or package_manager(target)
-    paths = [STABLE_APT_SOURCE_PATH, STABLE_APT_DEB822_PATH] if manager == "apt" else [STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo", STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"]
+    paths = repository_candidates(manager)
     originals = []
     for path in paths:
         if not os.path.isfile(path):
             continue
         with open(path) as handle:
             text = handle.read()
-        if "/himmelblau/v_" in text or "packages.himmelblau-idm.org/" in text:
+        if repository_remainder(path, text)[0]:
             backup = path + ".himmelblau-disabled"
             if os.path.exists(backup):
                 raise WorkerError("A repository backup already exists. Review it before choosing vendor packages.")
-            originals.append((path, backup))
-    for path, backup in originals:
-        os.rename(path, backup)
-        os.chmod(backup, 0o600)
+            originals.append((path, backup, os.stat(path).st_mode & 0o777))
+    backups = []
+    try:
+        for path, backup, mode in originals:
+            os.rename(path, backup)
+            backups.append((path, backup, mode))
+            os.chmod(backup, 0o600)
+            retain_repository_entries(path, backup, mode)
+    except Exception:
+        for path, backup, mode in backups:
+            os.rename(backup, path)
+            os.chmod(path, mode)
+        raise
 
 
 def stage_postboot(plan, steps, event_log):
@@ -2328,7 +2846,14 @@ def complete_postboot(plan_path, event_log):
 
 def execute_step(step, event_log, plan=None):
     kind = step["kind"]
-    if kind == "stable_repo":
+    if plan and plan.get("channel") == "nightly" and plan.get("install_method") != "ddi":
+        if os.path.exists(DDI_PORTABLE) or os.path.exists(DDI_SYSEXT):
+            raise WorkerError("Existing DDI installation cannot fall back to packages.")
+    if plan and plan.get("manager") == "rpm-ostree" and kind == "dnf_repo" and not shutil.which("awk"):
+        check_ostree_pending(event_log)
+    if kind == "install_ddi":
+        execute_ddi_plan(plan, event_log)
+    elif kind == "stable_repo":
         setup_stable_repository(plan, event_log)
     elif kind == "build_prereqs":
         manager = plan["manager"]
@@ -2345,6 +2870,7 @@ def execute_step(step, event_log, plan=None):
         source_dir = plan["source_dir"]
         if not os.path.isfile(os.path.join(source_dir, "Makefile")):
             raise WorkerError("Self-built source checkout is missing its Makefile.")
+        ensure_package_prerequisites(plan["manager"], event_log)
         run(["make", "-C", source_dir, "install"], event_log)
     elif kind == "vendor_repo":
         setup_vendor_repositories(step["target"], plan["manager"])
@@ -2410,6 +2936,8 @@ def main():
                     run(["rpm", "-q", package], event_log)
             except WorkerError:
                 raise WorkerError("Layered Himmelblau packages are not active in this boot. Check rpm-ostree status and boot the staged deployment.")
+        if plan.get("channel") == "nightly" and plan.get("method_reason"):
+            emit(event_log, {"type": "info", "text": "Using nightly packages: " + str(plan["method_reason"])})
         steps = plan.get("steps", [])
         emit(event_log, {"type": "started", "total": len(steps)})
         for index, step in enumerate(steps, 1):
@@ -2432,6 +2960,322 @@ def main():
 if __name__ == "__main__":
     sys.exit(main())
 '''
+
+
+DDI_WORKER_SOURCE = r"""def ddi_download(url, destination, expected):
+    digest = hashlib.sha256()
+    try:
+        with urllib.request.urlopen(url, timeout=60) as response, open(destination, "xb") as output:
+            size = 0
+            while True:
+                chunk = response.read(1024 * 1024)
+                if not chunk:
+                    break
+                size += len(chunk)
+                if size > 8 * 1024 ** 3:
+                    raise WorkerError("DDI image exceeds download limit")
+                digest.update(chunk)
+                output.write(chunk)
+    except (OSError, urllib.error.URLError, http.client.IncompleteRead) as err:
+        raise DdiUnavailable("DDI image unavailable: %s" % err)
+    if not size or digest.hexdigest() != expected:
+        raise WorkerError("DDI image checksum mismatch")
+
+
+def ddi_check_payload(directory, target, spec):
+    usr = os.path.join(directory, "usr")
+    image = os.path.join(directory, spec["sysext"]["filename"])
+    result = ddi_capture(["systemd-dissect", "--copy-from", image, "/usr", usr], check=False)
+    if result.returncode:
+        raise DdiUnavailable("Host cannot inspect/mount the sysext DDI: " + result.stderr[-1000:])
+    release = ddi_os_release(os.path.join(usr, "lib/extension-release.d/extension-release.himmelblau"))
+    host = ddi_os_release()
+    if release.get("ID") != host.get("ID") or release.get("ARCHITECTURE") != spec["architecture"]:
+        raise DdiUnavailable("The sysext distribution or architecture does not match this host")
+    if release.get("VERSION_ID"):
+        compatible = release["VERSION_ID"] == host.get("VERSION_ID")
+    else:
+        compatible = bool(release.get("SYSEXT_LEVEL")) and release["SYSEXT_LEVEL"] == host.get("SYSEXT_LEVEL")
+    if not compatible:
+        raise DdiUnavailable("The sysext release does not match this host")
+    if release.get("SYSEXT_VERSION_ID") != spec["version"] + "-" + target:
+        raise WorkerError("Sysext version metadata does not match the signed manifest")
+    libraries = {}
+    for root, dirs, files in os.walk(usr):
+        for name in ("aad-tool", "pam_himmelblau.so", "libnss_himmelblau.so.2"):
+            if name in files:
+                libraries.setdefault(name, []).append(os.path.join(root, name))
+    for name in ("aad-tool", "pam_himmelblau.so", "libnss_himmelblau.so.2"):
+        if len(libraries.get(name, [])) != 1:
+            raise WorkerError("Sysext is missing an unambiguous " + name)
+        proc = ddi_capture(["ldd", libraries[name][0]], check=False)
+        if proc.returncode or "not found" in proc.stdout:
+            raise DdiUnavailable("Host libraries required by %s are missing" % name)
+    if not target.startswith(("ubuntu", "debian", "sle")) and target != "tumbleweed":
+        profile = os.path.join(usr, "share/authselect/vendor/himmelblau")
+        if not os.path.isdir(profile):
+            raise DdiUnavailable("Sysext does not contain the authselect Himmelblau profile")
+        # Features must also be present in the target profile, not just the old one.
+        text = ""
+        for name in ("system-auth", "password-auth", "nsswitch.conf", "postlogin"):
+            path = os.path.join(profile, name)
+            if os.path.isfile(path):
+                with open(path, encoding="utf-8") as handle:
+                    text += handle.read()
+        if any(feature not in text for feature in ddi_auth_features(target)):
+            raise DdiUnavailable("Current authselect features are not supported by the DDI profile")
+    if target.startswith(("ubuntu", "debian")) and not glob.glob(os.path.join(usr, "share/pam-configs/*himmelblau*")):
+        raise DdiUnavailable("Sysext does not contain a Himmelblau PAM profile")
+    portable = os.path.join(directory, spec["portable"]["filename"])
+    proc = ddi_capture(["systemd-dissect", "--copy-from", portable, "/usr/lib/os-release"], check=False)
+    if proc.returncode:
+        raise DdiUnavailable("Host cannot inspect/mount the portable DDI: " + proc.stderr[-1000:])
+    metadata = dict((k, v.strip().strip('"')) for k, v in
+                    (line.split("=", 1) for line in proc.stdout.splitlines() if "=" in line))
+    if metadata.get("IMAGE_VERSION") != spec["version"] or metadata.get("ARCHITECTURE") != spec["architecture"]:
+        raise WorkerError("Portable version metadata does not match the signed manifest")
+    # Package-only/headless installs still need the default configuration that
+    # native packages would normally install on the host.
+    ddi_capture(["systemd-dissect", "--copy-from", portable, "/etc/himmelblau/himmelblau.conf",
+                 os.path.join(directory, "himmelblau.conf")])
+
+
+def ddi_publish(source, directory, name):
+    os.makedirs(directory, mode=0o755, exist_ok=True)
+    destination = os.path.join(directory, name)
+    fd, temporary = tempfile.mkstemp(prefix=".himmelblau-", dir=directory)
+    try:
+        with os.fdopen(fd, "wb") as output, open(source, "rb") as image:
+            shutil.copyfileobj(image, output, 1024 * 1024)
+            output.flush()
+            os.fsync(output.fileno())
+            os.fchmod(output.fileno(), 0o444)
+        os.replace(temporary, destination)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def ddi_prepare(plan, directory):
+    reason = ddi_local_reason(plan["channel"], plan["target"])
+    if reason:
+        raise DdiUnavailable(reason)
+    spec = plan["ddi"]
+    for kind, destination in (("portable", DDI_PORTABLE), ("sysext", DDI_SYSEXT)):
+        for path in glob.glob(os.path.join(destination, "*.raw")):
+            existing = re.match(r"himmelblaud?_(" + DDI_VERSION_RE + r")-", os.path.basename(path))
+            if existing and existing.group(1) > spec["version"]:
+                raise DdiUnavailable("A newer DDI is already installed; refusing to downgrade")
+    if spec["architecture"] != ddi_architecture():
+        raise WorkerError("DDI architecture differs from this host")
+    gpg, key = ddi_keyring(directory)
+    for kind in ("portable", "sysext"):
+        records = ddi_manifest(plan["target"], spec["architecture"], kind, directory, gpg)
+        record = records.get(spec["version"])
+        if record is None:
+            raise DdiUnavailable("Selected DDI version is no longer published")
+        if record != spec[kind]:
+            raise WorkerError("Selected DDI differs from its signed manifest")
+        ddi_download(ddi_stream(plan["target"], spec["architecture"], kind) + "/" + record["filename"],
+                     os.path.join(directory, record["filename"]), record["sha256"])
+    ddi_check_payload(directory, plan["target"], spec)
+    # All package-fallback decisions precede this point.
+    return key
+
+
+def ddi_configure_nss(path="/etc/nsswitch.conf", check_only=False):
+    path = os.path.realpath(path)
+    with open(path, encoding="utf-8") as handle:
+        original = handle.read()
+    lines = []
+    for line in original.splitlines(True):
+        if re.match(r"^\s*(passwd|group|shadow)\s*:", line):
+            content, sep, comment = line.rstrip("\n").partition("#")
+            preceding = content.split("himmelblau", 1)[0]
+            for actions in re.findall(r"\[([^]]*)\]", preceding):
+                for negate, status, action in re.findall(r"(!?)(SUCCESS|NOTFOUND|UNAVAIL|TRYAGAIN)\s*=\s*(return|continue|merge)", actions, re.I):
+                    if action.lower() == "return" and ((not negate and status.upper() != "SUCCESS") or negate):
+                        raise WorkerError("NSS rule may prevent Himmelblau lookups; review " + path + " before installing a DDI")
+            if "himmelblau" not in content.split():
+                line = content.rstrip() + " himmelblau" + (" #" + comment if sep else "") + "\n"
+        lines.append(line)
+    updated = "".join(lines)
+    if check_only:
+        return
+    if updated != original:
+        if not os.path.exists(path + ".himmelblau-before-ddi"):
+            shutil.copy2(path, path + ".himmelblau-before-ddi")
+        fd, temporary = tempfile.mkstemp(prefix=".himmelblau-nss-", dir=os.path.dirname(os.path.abspath(path)))
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                handle.write(updated)
+                handle.flush()
+                os.fsync(handle.fileno())
+                st = os.stat(path)
+                os.fchown(handle.fileno(), st.st_uid, st.st_gid)
+            shutil.copystat(path, temporary)
+            os.replace(temporary, path)
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
+
+
+DDI_USER_HELPER = r'''#!/bin/sh
+set -eu
+image=/var/lib/himmelblau-ddi/himmelblaud.v
+state=$(portablectl --user --no-ask-password is-attached "$image") || [ "$state" = detached ]
+case "$state" in
+    detached) action=attach ;;
+    attached|enabled|running) action=reattach ;;
+    *) echo "Unexpected Himmelblau portable state: $state" >&2; exit 1 ;;
+esac
+portablectl --user --no-ask-password "$action" --enable --profile trusted "$image" himmelblau-broker himmelblau-compliance-check
+systemctl --user daemon-reload
+systemctl --user enable himmelblau-compliance-check.service himmelblau-compliance-check.timer
+systemctl --user --no-block start himmelblau-broker.service himmelblau-compliance-check.timer
+'''
+
+DDI_USER_UNIT = '''[Unit]
+Description=Attach Himmelblau portable user services
+Before=himmelblau-broker.service himmelblau-compliance-check.service himmelblau-compliance-check.timer
+ConditionPathExists=/var/lib/himmelblau-ddi/himmelblaud.v
+
+[Service]
+Type=oneshot
+ExecStart=/var/lib/himmelblau-ddi/attach-user
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target
+'''
+
+
+def ddi_install_users(event_log):
+    os.makedirs("/etc/systemd/user", mode=0o755, exist_ok=True)
+    install_text(DDI_ROOT + "/attach-user", DDI_USER_HELPER, "0755", event_log)
+    install_text("/etc/systemd/user/himmelblau-portable-setup.service", DDI_USER_UNIT, "0644", event_log)
+    run(["systemctl", "--global", "enable", "himmelblau-portable-setup.service"], event_log)
+    units = run(["systemctl", "--no-pager", "--no-legend", "--plain", "list-units", "--type=service",
+                 "--state=running", "user@*.service"], event_log).stdout
+    for line in units.splitlines():
+        match = re.match(r"user@(\d+)\.service\s", line)
+        if not match:
+            continue
+        uid = match.group(1)
+        bus = ["--user", "--machine=" + uid + "@.host", "--no-ask-password"]
+        # portablectl rejects paths combined with --machine. Use the same
+        # portabled D-Bus interface as the upstream update notification helper.
+        try:
+            state = run(["portablectl"] + bus + ["is-attached", "himmelblaud"], event_log, check=False).stdout.strip()
+            if state not in ("detached", "attached", "enabled", "running"):
+                raise WorkerError("Unexpected user portable state for UID " + uid)
+            method = "AttachImage" if state == "detached" else "ReattachImage"
+            run(["busctl"] + bus[:-1] + ["--allow-interactive-authorization=no", "call",
+                "org.freedesktop.portable1", "/org/freedesktop/portable1", "org.freedesktop.portable1.Manager",
+                method, "sassbs", DDI_PORTABLE, "2", "himmelblau-broker", "himmelblau-compliance-check", "trusted", "false", ""], event_log)
+            run(["systemctl"] + bus + ["daemon-reload"], event_log)
+            run(["systemctl"] + bus + ["enable", "himmelblau-compliance-check.service", "himmelblau-compliance-check.timer"], event_log)
+            run(["systemctl"] + bus + ["--no-block", "restart", "himmelblau-broker.service", "himmelblau-compliance-check.timer"], event_log)
+        except WorkerError:
+            if run(["systemctl", "is-active", "--quiet", "user@" + uid + ".service"], event_log, check=False).returncode == 0:
+                raise
+            emit(event_log, {"type": "info", "text": "User " + uid + " logged out; portable setup deferred to next login."})
+
+
+
+def ddi_activate(plan, directory, key, event_log):
+    spec, target = plan["ddi"], plan["target"]
+    ddi_check_pending_deployment()
+    features = ddi_auth_features(target)
+    if target.startswith(("ubuntu", "debian", "sle")) or target == "tumbleweed":
+        ddi_configure_nss(check_only=True)
+    for kind, destination in (("portable", DDI_PORTABLE), ("sysext", DDI_SYSEXT)):
+        name = spec[kind]["filename"]
+        ddi_publish(os.path.join(directory, name), destination, name)
+    config_steps = []
+    for step in plan["package_steps"]:
+        config_steps.extend(step["steps"] if step["kind"] == "stage_postboot" else [step])
+    config = next((s["config"] for s in config_steps if s["kind"] == "write_global_config"), None)
+    if config:
+        write_global_config(config, event_log)
+    elif not os.path.exists(CONFIG_PATH):
+        os.makedirs(os.path.dirname(CONFIG_PATH), mode=0o755, exist_ok=True)
+        with open(os.path.join(directory, "himmelblau.conf"), encoding="utf-8") as handle:
+            install_text(CONFIG_PATH, handle.read(), "0644", event_log)
+    run(["systemctl", "enable", "systemd-sysext.service"], event_log)
+    run(["systemctl", "reload-or-restart", "systemd-sysext.service"], event_log)
+    run(["systemctl", "daemon-reload"], event_log)
+    tmpfiles = sorted(glob.glob("/usr/lib/tmpfiles.d/*himmelblau*.conf"))
+    if tmpfiles:
+        run(["systemd-tmpfiles", "--create"] + tmpfiles, event_log)
+    run(["systemctl", "reload", "dbus.service"], event_log)
+    if target.startswith(("ubuntu", "debian")):
+        profiles = glob.glob("/usr/share/pam-configs/*himmelblau*")
+        if not profiles:
+            raise WorkerError("Merged sysext has no Himmelblau PAM profile")
+        for profile in profiles:
+            run(["env", "DEBIAN_FRONTEND=noninteractive", "pam-auth-update", "--enable", os.path.basename(profile)], event_log)
+        for name in ("common-auth", "common-account", "common-session"):
+            with open("/etc/pam.d/" + name, encoding="utf-8") as handle:
+                if not any("pam_himmelblau.so" in line and not line.lstrip().startswith("#") for line in handle):
+                    raise WorkerError("pam-auth-update did not enable Himmelblau; review local PAM changes")
+        ddi_configure_nss()
+    elif target.startswith("sle") or target == "tumbleweed":
+        run(["pam-config", "--add", "--himmelblau"], event_log)
+        ddi_configure_nss()
+    else:
+        run(["authselect", "select", "himmelblau"] + features, event_log)
+        run(["authselect", "apply-changes"], event_log)
+    state = run(["portablectl", "is-attached", DDI_PORTABLE], event_log, check=False).stdout.strip()
+    if state not in ("detached", "attached", "enabled", "running"):
+        raise WorkerError("Unexpected Himmelblau system portable state")
+    action = "attach" if state == "detached" else "reattach"
+    run(["portablectl", action, "--now", "--enable", "--profile", "trusted", DDI_PORTABLE,
+         "himmelblaud", "himmelblau-hsm-pin-init"], event_log)
+    run(["systemctl", "enable", "--now", "himmelblaud-sysupdate-notify.socket"], event_log)
+    ddi_install_users(event_log)
+    keyring = "/etc/systemd/import-pubring.pgp"
+    if not os.path.exists(keyring):
+        os.makedirs(os.path.dirname(keyring), exist_ok=True)
+        if os.path.exists("/usr/lib/systemd/import-pubring.pgp"):
+            shutil.copyfile("/usr/lib/systemd/import-pubring.pgp", keyring)
+    run(["gpg", "--homedir", os.path.join(directory, "gnupg"), "--batch", "--no-default-keyring",
+         "--keyring", keyring, "--import", key], event_log)
+    run([ddi_tool("systemd-sysupdate"), "enable-component", "himmelblau"], event_log)
+    install_text("/etc/systemd/system/himmelblau-sysupdate.service",
+                 "[Unit]\nDescription=Update Himmelblau images\n[Service]\nType=oneshot\nExecStart=" + ddi_tool("systemd-sysupdate") + " --component=himmelblau update\n", "0644", event_log)
+    install_text("/etc/systemd/system/himmelblau-sysupdate.timer",
+                 "[Unit]\nDescription=Daily Himmelblau image updates\n[Timer]\nOnCalendar=daily\nRandomizedDelaySec=1h\nPersistent=true\n[Install]\nWantedBy=timers.target\n", "0644", event_log)
+    run(["systemctl", "daemon-reload"], event_log)
+    run(["systemctl", "enable", "--now", "himmelblau-sysupdate.timer"], event_log)
+    for unit in ("himmelblaud.service", "himmelblaud-tasks.service", "himmelblaud-sysupdate-notify.socket"):
+        run(["systemctl", "is-active", "--quiet", unit], event_log)
+    run(["aad-tool", "--version"], event_log)
+    run(["aad-tool", "status"], event_log, check=False)
+    emit(event_log, {"type": "info", "text": "Himmelblau DDI installation completed. Daily image updates enabled. " + DDI_LIMITS})
+
+
+def execute_ddi_plan(plan, event_log):
+    emit(event_log, {"type": "info", "text": "Installing nightly DDI version " + plan["ddi"]["version"] + ". " + DDI_LIMITS})
+    with tempfile.TemporaryDirectory(prefix="himmelblau-ddi-") as directory:
+        try:
+            key = ddi_prepare(plan, directory)
+        except DdiUnavailable as err:
+            if os.path.exists(DDI_PORTABLE) or os.path.exists(DDI_SYSEXT):
+                raise WorkerError("Existing DDI installation cannot fall back to packages: " + str(err))
+            emit(event_log, {"type": "method", "install_method": "packages"})
+            emit(event_log, {"type": "warning", "text": "Using nightly packages: " + str(err)})
+            fallback = ddi_package_plan(plan)
+            validate_plan(fallback)
+            for step in fallback["steps"]:
+                execute_step(step, event_log, fallback)
+            if fallback["manager"] == "rpm-ostree":
+                emit(event_log, {"type": "info", "text": "Packages staged. Reboot to complete Himmelblau installation automatically."})
+            return
+        # No fallback after publication, configuration changes, or activation.
+        ddi_activate(plan, directory, key, event_log)
+"""
+ROOT_WORKER_SOURCE = ROOT_WORKER_SOURCE.replace("\ndef main():", "\n" + DDI_SHARED_SOURCE + "\n" + DDI_WORKER_SOURCE + "\ndef main():", 1)
 
 
 def write_root_worker():
@@ -2555,7 +3399,13 @@ def raise_worker_or_elevation_error(event_log, elevation_message):
 
 
 def run_elevated_plan(plan, on_event=None, prefer_gui=True, non_interactive=False):
-    on_event = on_event or (lambda event: None)
+    callback = on_event or (lambda event: None)
+
+    def on_event(event):
+        if event.get("type") == "method" and event.get("install_method") in ("packages", "ddi"):
+            plan["effective_install_method"] = event["install_method"]
+        callback(event)
+
     work_dir = make_work_dir()
     plan_path = write_plan_file_in_dir(plan, work_dir)
     worker_path = write_root_worker_in_dir(work_dir)
@@ -2734,7 +3584,7 @@ def run_cli():
         run_self_build_install(plan, print_headless_event)
     else:
         run_elevated_plan(plan, on_event=print_headless_event, prefer_gui=False)
-    if manager == "rpm-ostree":
+    if manager == "rpm-ostree" and plan.get("effective_install_method", plan.get("install_method")) != "ddi":
         print("Packages staged. Reboot to complete Himmelblau installation automatically.", flush=True)
 
 
@@ -2779,12 +3629,12 @@ def run_headless_install(options=None):
         run_self_build_install(plan, print_headless_event, non_interactive=True)
     else:
         run_elevated_plan(plan, on_event=print_headless_event, prefer_gui=False, non_interactive=True)
-    if manager == "rpm-ostree":
+    if manager == "rpm-ostree" and plan.get("effective_install_method", plan.get("install_method")) != "ddi":
         print("Packages staged. Reboot to complete Himmelblau installation automatically.", flush=True)
 
 
 def parse_install_options(argv):
-    parser = argparse.ArgumentParser(description="Install Himmelblau with your native package manager.")
+    parser = argparse.ArgumentParser(description="Install Himmelblau. Nightly automatically prefers DDIs on compatible systemd 262+ hosts; otherwise uses native packages.")
     parser.add_argument("--channel", choices=("stable", "nightly", "vendor"))
     parser.add_argument("--stable-source", choices=("repository", "self-built"), help="Use an authenticated stable repository or build stable-4.x locally")
     parser.add_argument("--entitlement-token-file", metavar="PATH", help="Private file containing the stable repository entitlement token")
@@ -3738,7 +4588,7 @@ class WizardCursesUi:
         ])
 
     def render_install(self):
-        layout = self._begin_frame("Installing", "Keep this terminal open while packages and services are configured.")
+        layout = self._begin_frame("Installing", "Keep this terminal open while Himmelblau and its services are configured.")
         y = layout["content_y"] + 1
         x = layout["content_x"] + 2
         width = layout["content_w"] - 4
@@ -3854,7 +4704,7 @@ class WizardCursesUi:
             else:
                 run_elevated_plan(plan, on_event=self.on_event, prefer_gui=False, non_interactive=True)
             self.install_ok = True
-            self.final_message = "Packages staged. Reboot to complete Himmelblau installation automatically." if manager == "rpm-ostree" else "Himmelblau installation completed."
+            self.final_message = "Packages staged. Reboot to complete Himmelblau installation automatically." if manager == "rpm-ostree" and plan.get("effective_install_method", plan.get("install_method")) != "ddi" else "Himmelblau installation completed."
         except Exception as err:
             self._enable_mouse()
             self.install_ok = False
@@ -4039,6 +4889,25 @@ class WizardCursesUi:
             self._disable_mouse()
 
 
+def configure_curses_terminal(curses_mod):
+    requested = os.environ.get("TERM", "")
+    candidates = [requested] if requested and requested != "dumb" else []
+    for fallback in ("xterm-256color", "xterm", "vt100"):
+        if fallback not in candidates:
+            candidates.append(fallback)
+    for term in candidates:
+        try:
+            curses_mod.setupterm(term=term, fd=1)
+        except curses_mod.error as err:
+            log("Terminal definition %s unavailable: %s" % (term, err))
+            continue
+        os.environ["TERM"] = term
+        if term != requested:
+            log("Using TERM=%s because TERM=%s is unavailable." % (term, requested or "<unset>"))
+        return
+    raise curses_mod.error("No usable terminal definition found. Install your distribution's terminfo package or set TERM to an installed terminal type.")
+
+
 def run_curses():
     try:
         import curses
@@ -4047,6 +4916,7 @@ def run_curses():
         return CURSES_STARTUP_EXIT
 
     try:
+        configure_curses_terminal(curses)
         return curses.wrapper(lambda stdscr: WizardCursesUi(stdscr, curses).run())
     except curses.error as err:
         log("curses startup failed: " + str(err))
@@ -4099,7 +4969,7 @@ def main(argv=None):
         return
     exit_code = run_curses_terminal_child()
     if exit_code == CURSES_STARTUP_EXIT:
-        raise InstallError("Unable to start the interactive curses installer. Run this command from a terminal.")
+        raise InstallError("Unable to start the interactive curses installer. Check terminal access, Python curses support, and installed terminfo definitions. Details: " + LOG_PATH)
     if exit_code:
         sys.exit(exit_code)
 

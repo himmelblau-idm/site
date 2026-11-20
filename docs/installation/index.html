@@ -1644,7 +1644,7 @@ curl<span class="w"> </span>-fsSL<span class="w"> </span>https://himmelblau-idm.
 <span class="w">  </span>--channel<span class="w"> </span>stable<span class="w"> </span>--entitlement-token-file<span class="w"> </span>/path/to/entitlement-token
 </code></pre></div>
 <p>Use the token issued for 3.x when that stream is required. The token is read from the file rather than supplied as a command-line argument, keeping it out of shell history and process listings. Automated installation installs packages without changing identity provider configuration.</p>
-<p>For a new free development installation, explicitly select Nightly:</p>
+<p>Both Stable and Nightly packages are hosted on Cloudsmith. Nightly repositories are public, free, and require <strong>no entitlement token</strong>. For a new development installation, explicitly select Nightly:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://himmelblau-idm.org/install<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--channel<span class="w"> </span>nightly
 </code></pre></div>
 <p>Use <code>--channel vendor</code> for distribution packages where available. A new noninteractive installation without a selected channel stops with guidance. An existing stable subscription can be reused without supplying its URL again.</p>
@@ -1660,7 +1660,7 @@ curl<span class="w"> </span>-fsSL<span class="w"> </span>https://himmelblau-idm.
 <li>View the correct repository setup commands for your system</li>
 <li>Copy package-manager commands for <code>apt</code>, <code>dnf</code>, or <code>zypper</code></li>
 </ul>
-<p>The downloads page uses the support matrix shared with the bootstrap installer. Stable setup requires the entitlement token for your chosen major stream.</p>
+<p>The downloads page uses the support matrix shared with the bootstrap installer. Stable setup requires the entitlement token for your chosen major stream. Nightly uses the public repository at <code>https://repo.himmelblau-idm.org/public/himmelblau/nightly/</code> and its own signing key. Both channels use signed, distribution-specific APT or RPM repositories, including separate architecture and <code>noarch</code> repositories for RPM packages. Rerun the installer with <code>--channel nightly</code> to migrate an existing Nightly installation from the old package server.</p>
 <hr />
 <h3 id="building-from-source-advanced-developer-use">Building from Source (Advanced / Developer Use)</h3>
 <p>If you prefer to build Himmelblau locally — for testing, development, or packaging validation — use the included <code>Makefile</code>.<br />

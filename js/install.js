@@ -10,7 +10,7 @@
 const REPO_SUPPORT = {
 	stable: {
 		include: [],
-		exclude: [],
+		exclude: ['nixos'],
 	},
 	nightly: {
 		include: [],
@@ -93,7 +93,7 @@ function packageTarget(d) {
 
 function baseUrlFor(channel) {
 	return channel === 'nightly'
-		? 'https://packages.himmelblau-idm.org/nightly/latest'
+		? 'https://repo.himmelblau-idm.org/public/himmelblau/nightly'
 		: '';
 }
 
@@ -211,8 +211,9 @@ async function provideRepoInstructions() {
 		return;
 	}
 
-	const gpgKeyUrl = 'https://packages.himmelblau-idm.org/himmelblau.asc';
-	const baseUrl = baseUrlFor(channel);
+	const repoRoot = channel === 'stable' ? STABLE_REPO_ROOT : baseUrlFor(channel);
+	const gpgKeyUrl = `${repoRoot}/gpg.key`;
+	const repoMode = channel === 'stable' ? '0600' : '0644';
 
 	const title = document.createElement('h2');
 	const intro = document.createElement('p');
@@ -225,7 +226,7 @@ async function provideRepoInstructions() {
 	} else if (channel === 'nightly') {
 		title.textContent = 'Installing Himmelblau (Community Nightly)';
 		intro.textContent =
-			'Nightly builds include the latest changes and may support more distributions.';
+			'Nightly builds include the latest changes. The public Cloudsmith repository is free and requires no entitlement token.';
 	} else {
 		title.textContent = 'Installing Himmelblau (Community Stable)';
 		intro.textContent =
@@ -432,15 +433,15 @@ async function provideRepoInstructions() {
 		'2. Add the Himmelblau repository and import the signing key';
 	linksContainer.appendChild(repoSection);
 
-	if (channel === 'stable') {
+	if (channel === 'stable' || channel === 'nightly') {
 		const [repoDistro, repoVersion] = STABLE_DESTINATIONS[distro];
 
 		if (isDeb(distro)) {
 			const sourcePath = '/etc/apt/sources.list.d/himmelblau.list';
 			[
-				`sudo apt install curl && curl -fsSL ${gpgKeyUrl} | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/himmelblau.gpg`,
-				`echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/trusted.gpg.d/himmelblau.gpg] ${STABLE_REPO_ROOT}/deb/${repoDistro} ${repoVersion} main" | sudo tee ${sourcePath} > /dev/null`,
-				`sudo chmod 600 ${sourcePath}`,
+				`sudo apt install ca-certificates curl gnupg && sudo install -d -m 0755 /etc/apt/keyrings && sudo sh -c 'set -eu; tmp=$(mktemp /etc/apt/keyrings/.himmelblau.XXXXXX); trap "rm -f $tmp $tmp.asc" EXIT; curl -fsSL ${gpgKeyUrl} -o "$tmp.asc"; gpg --batch --yes --dearmor -o "$tmp" "$tmp.asc"; chmod 0644 "$tmp"; mv -f "$tmp" /etc/apt/keyrings/himmelblau.gpg' `,
+				`echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/himmelblau.gpg] ${repoRoot}/deb/${repoDistro} ${repoVersion} main" | sudo tee ${sourcePath} > /dev/null`,
+				`sudo chmod ${repoMode} ${sourcePath}`,
 				'sudo apt update',
 			].forEach((cmd) =>
 				linksContainer.appendChild(
@@ -450,12 +451,12 @@ async function provideRepoInstructions() {
 				),
 			);
 		} else if (distro.startsWith('sle') || distro === 'tumbleweed') {
-			const repoBase = `${STABLE_REPO_ROOT}/rpm/${repoDistro}/${repoVersion}`;
+			const repoBase = `${repoRoot}/rpm/${repoDistro}/${repoVersion}`;
 			[
 				`sudo rpm --import ${gpgKeyUrl}`,
-				`sudo zypper addrepo ${repoBase}/$(rpm --eval '%{_arch}') himmelblau-stable`,
-				`sudo zypper addrepo ${repoBase}/noarch himmelblau-stable-noarch`,
-				'sudo chmod 600 /etc/zypp/repos.d/himmelblau-stable.repo /etc/zypp/repos.d/himmelblau-stable-noarch.repo',
+				`sudo zypper addrepo --gpgcheck ${repoBase}/$(rpm --eval '%{_arch}') himmelblau-${channel}`,
+				`sudo zypper addrepo --gpgcheck ${repoBase}/noarch himmelblau-${channel}-noarch`,
+				`sudo chmod ${repoMode} /etc/zypp/repos.d/himmelblau-${channel}.repo /etc/zypp/repos.d/himmelblau-${channel}-noarch.repo`,
 				'sudo zypper refresh',
 			].forEach((cmd) =>
 				linksContainer.appendChild(
@@ -465,44 +466,44 @@ async function provideRepoInstructions() {
 				),
 			);
 		} else if (isSilverblue(distro)) {
-			const repoBase = `${STABLE_REPO_ROOT}/rpm/${repoDistro}/${repoVersion}`;
-			const keyPath = '/etc/pki/rpm-gpg/himmelblau-stable.asc';
-			const repoPath = '/etc/yum.repos.d/himmelblau-stable.repo';
+			const repoBase = `${repoRoot}/rpm/${repoDistro}/${repoVersion}`;
+			const keyPath = `/etc/pki/rpm-gpg/himmelblau-${channel}.asc`;
+			const repoPath = `/etc/yum.repos.d/himmelblau-${channel}.repo`;
 			[
 				`sudo install -d -m 0755 /etc/pki/rpm-gpg`,
-				`sudo curl -fsSL -o ${keyPath} ${STABLE_REPO_ROOT}/gpg.key`,
+				`sudo curl -fsSL -o ${keyPath} ${repoRoot}/gpg.key`,
 				`sudo chmod 0644 ${keyPath}`,
 				`sudo tee ${repoPath} > /dev/null <<'EOF'
-[himmelblau-stable]
-name=Himmelblau Stable
+[himmelblau-${channel}]
+name=Himmelblau ${channel}
 baseurl=${repoBase}/$basearch
 enabled=1
 gpgcheck=1
 gpgkey=file://${keyPath}
 
-[himmelblau-stable-noarch]
-name=Himmelblau Stable
+[himmelblau-${channel}-noarch]
+name=Himmelblau ${channel}
 baseurl=${repoBase}/noarch
 enabled=1
 gpgcheck=1
 gpgkey=file://${keyPath}
 EOF`,
-				`sudo chmod 0600 ${repoPath}`,
+				`sudo chmod ${repoMode} ${repoPath}`,
 			].forEach((cmd) => linksContainer.appendChild(Object.assign(document.createElement('pre'), { textContent: cmd })));
 		} else {
-			const repoBase = `${STABLE_REPO_ROOT}/rpm/${repoDistro}/${repoVersion}`;
-			const repoPath = '/etc/yum.repos.d/himmelblau-stable.repo';
+			const repoBase = `${repoRoot}/rpm/${repoDistro}/${repoVersion}`;
+			const repoPath = `/etc/yum.repos.d/himmelblau-${channel}.repo`;
 			const repoConfig = `sudo tee ${repoPath} > /dev/null <<'EOF'
-[himmelblau-stable]
-name=Himmelblau Stable
+[himmelblau-${channel}]
+name=Himmelblau ${channel}
 baseurl=${repoBase}/$basearch
 enabled=1
 priority=1
 gpgcheck=1
 gpgkey=${gpgKeyUrl}
 
-[himmelblau-stable-noarch]
-name=Himmelblau Stable
+[himmelblau-${channel}-noarch]
+name=Himmelblau ${channel}
 baseurl=${repoBase}/noarch
 enabled=1
 priority=1
@@ -512,7 +513,7 @@ EOF`;
 			[
 				`sudo rpm --import ${gpgKeyUrl}`,
 				repoConfig,
-				`sudo chmod 600 ${repoPath}`,
+				`sudo chmod ${repoMode} ${repoPath}`,
 				'sudo dnf makecache',
 			].forEach((cmd) =>
 				linksContainer.appendChild(
@@ -522,80 +523,6 @@ EOF`;
 				),
 			);
 		}
-	} else if (isUbuntu(distro) || distro === 'debian12') {
-		[
-			`sudo apt install curl && curl -fsSL ${gpgKeyUrl} | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/himmelblau.gpg`,
-			`arch=$(dpkg --print-architecture); repo_target=${distro}; if [ "$arch" = arm64 ]; then repo_target=${distro}-arm64; fi; sudo add-apt-repository "deb [arch=$arch] ${baseUrl}/deb/$repo_target/ ./"`,
-		].forEach((cmd) =>
-			linksContainer.appendChild(
-				Object.assign(document.createElement('pre'), {
-					textContent: cmd,
-				}),
-			),
-		);
-	} else if (isDeb(distro)) {
-		[
-			`sudo apt install curl && curl -fsSL ${gpgKeyUrl} | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/himmelblau.gpg`,
-			`arch=$(dpkg --print-architecture); repo_target=${distro}; if [ "$arch" = arm64 ]; then repo_target=${distro}-arm64; fi; echo "deb [arch=$arch signed-by=/etc/apt/trusted.gpg.d/himmelblau.gpg] ${baseUrl}/deb/$repo_target ./" | sudo tee /etc/apt/sources.list.d/himmelblau.list`,
-			"sudo apt update",
-		].forEach((cmd) =>
-			linksContainer.appendChild(
-				Object.assign(document.createElement('pre'), {
-					textContent: cmd,
-				}),
-			),
-		);
-	} else if (distro.startsWith('sle') || distro === 'tumbleweed') {
-		[
-			`sudo rpm --import ${gpgKeyUrl}`,
-			`sudo zypper addrepo ${baseUrl}/rpm/${distro} himmelblau-${channel}`,
-			'sudo zypper refresh',
-		].forEach((cmd) =>
-			linksContainer.appendChild(
-				Object.assign(document.createElement('pre'), {
-					textContent: cmd,
-				}),
-			),
-		);
-	} else if (isSilverblue(distro)) {
-		const keyPath = '/etc/pki/rpm-gpg/himmelblau-nightly.asc';
-		const repoPath = '/etc/yum.repos.d/himmelblau-nightly.repo';
-		[
-			'sudo install -d -m 0755 /etc/pki/rpm-gpg',
-			`sudo curl -fsSL -o ${keyPath} ${gpgKeyUrl}`,
-			`sudo chmod 0644 ${keyPath}`,
-			`sudo tee ${repoPath} > /dev/null <<'EOF'
-[himmelblau-nightly]
-name=Himmelblau Nightly
-baseurl=${baseUrl}/rpm/${packageTarget(distro)}
-enabled=1
-gpgcheck=1
-gpgkey=file://${keyPath}
-EOF`,
-		].forEach((cmd) => linksContainer.appendChild(Object.assign(document.createElement('pre'), { textContent: cmd })));
-	} else if (isFedora(distro)) {
-		const repoFileUrl = `${baseUrl}/rpm/${distro}/himmelblau.repo`;
-		[
-			`sudo rpm --import ${gpgKeyUrl}`,
-			`sudo dnf config-manager addrepo --from-repofile=${repoFileUrl}`,
-			'sudo dnf makecache',
-		].forEach((cmd) =>
-			linksContainer.appendChild(
-				Object.assign(document.createElement('pre'), { textContent: cmd }),
-			),
-		);
-	} else {
-		[
-			`sudo rpm --import ${gpgKeyUrl}`,
-			`sudo dnf config-manager --add-repo=${baseUrl}/rpm/${distro}`,
-			'sudo dnf makecache',
-		].forEach((cmd) =>
-			linksContainer.appendChild(
-				Object.assign(document.createElement('pre'), {
-					textContent: cmd,
-				}),
-			),
-		);
 	}
 
 	// 3) Install

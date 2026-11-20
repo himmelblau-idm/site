@@ -93,7 +93,7 @@ curl -fsSL https://himmelblau-idm.org/install | sh -s -- \
 
 Use the token issued for 3.x when that stream is required. The token is read from the file rather than supplied as a command-line argument, keeping it out of shell history and process listings. Automated installation installs packages without changing identity provider configuration.
 
-For a new free development installation, explicitly select Nightly:
+Both Stable and Nightly packages are hosted on Cloudsmith. Nightly repositories are public, free, and require **no entitlement token**. For a new development installation, explicitly select Nightly:
 
 ```sh
 curl -fsSL https://himmelblau-idm.org/install | sh -s -- --channel nightly
@@ -119,7 +119,7 @@ Use the manual repository instructions if you manage repositories with configura
 - View the correct repository setup commands for your system
 - Copy package-manager commands for `apt`, `dnf`, or `zypper`
 
-The downloads page uses the support matrix shared with the bootstrap installer. Stable setup requires the entitlement token for your chosen major stream.
+The downloads page uses the support matrix shared with the bootstrap installer. Stable setup requires the entitlement token for your chosen major stream. Nightly uses the public repository at `https://repo.himmelblau-idm.org/public/himmelblau/nightly/` and its own signing key. Both channels use signed, distribution-specific APT or RPM repositories, including separate architecture and `noarch` repositories for RPM packages. Rerun the installer with `--channel nightly` to migrate an existing Nightly installation from the old package server.
 
 ---
 

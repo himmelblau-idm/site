@@ -371,7 +371,9 @@ class DdiHostSetupTests(unittest.TestCase):
             if "list-units" in argv:
                 return result("user@1000.service loaded active running User Manager\n")
             if "is-attached" in argv:
-                return result("detached\n")
+                if kwargs.get("check", True):
+                    raise worker.WorkerError("detached exit status 1")
+                return result("detached\n", returncode=1)
             return result()
         with mock.patch.object(worker.os, "makedirs"), mock.patch.object(worker, "run", side_effect=run), \
                 mock.patch.object(worker, "install_text", side_effect=lambda path, text, *args: files.update({path: text})):
@@ -391,7 +393,11 @@ class DdiHostSetupTests(unittest.TestCase):
             commands = []
             def run(argv, *args, **kwargs):
                 commands.append(argv)
-                return result("detached" if "is-attached" in argv else "")
+                if "is-attached" in argv:
+                    if kwargs.get("check", True):
+                        raise worker.WorkerError("detached exit status 1")
+                    return result("detached", returncode=1)
+                return result()
             with self.subTest(manager=manager), contextlib.ExitStack() as stack:
                 for name in ("ddi_publish", "ddi_configure_nss", "ddi_install_users", "emit"):
                     stack.enter_context(mock.patch.object(worker, name))

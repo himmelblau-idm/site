@@ -2424,7 +2424,7 @@ def apt_repo_setup(channel, target, event_log):
         raise WorkerError(str(err))
     run(["install", "-d", "-m", "0755", APT_KEYRING_DIR], event_log)
     install_bytes(APT_KEYRING_PATH, dearmor_apt_key(key_data), "0644", event_log)
-    install_text(STABLE_APT_SOURCE_PATH, source, "0644", event_log)
+    install_text(STABLE_APT_SOURCE_PATH, repository_with_existing(STABLE_APT_SOURCE_PATH, source), "0644", event_log)
     run(apt_get_command("update"), event_log)
 
 
@@ -2440,7 +2440,7 @@ def nightly_rpm_repo_setup(target, manager, event_log):
     install_bytes(key_path, key_data, "0644", event_log)
     if manager != "rpm-ostree":
         run(["rpm", "--import", key_path], event_log)
-    install_text(STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo", config, "0644", event_log)
+    install_text(STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo", repository_with_existing(STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo", config), "0644", event_log)
     if manager == "dnf":
         run(["dnf", "makecache", "--refresh", "-y", "--disablerepo=*", "--enablerepo=himmelblau-nightly", "--enablerepo=himmelblau-nightly-noarch"], event_log)
     elif manager == "zypper":
@@ -2507,6 +2507,65 @@ def install_packages(channel, target, event_log, packages, best_effort_packages,
             emit(event_log, {"type": "warning", "text": "Optional package %s could not be installed; continuing." % package})
 
 
+def repository_candidates(manager):
+    if manager == "apt":
+        directory = os.path.dirname(STABLE_APT_SOURCE_PATH)
+        return sorted(set([STABLE_APT_SOURCE_PATH, STABLE_APT_DEB822_PATH,
+                           os.path.join(os.path.dirname(directory), "sources.list")] +
+                          glob.glob(os.path.join(directory, "*.list")) +
+                          glob.glob(os.path.join(directory, "*.sources"))))
+    return sorted(set(glob.glob(os.path.join(STABLE_RPM_DIRS[manager], "*.repo")) +
+                      [STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo",
+                       STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"]))
+
+
+def repository_remainder(path, text):
+    # Match whole APT entries/deb822 paragraphs or RPM sections, never the
+    # complete file: administrators can keep unrelated repositories alongside us.
+    if path.endswith(".list"):
+        entries = text.splitlines(True)
+    elif path.endswith(".sources"):
+        entries = re.findall(r"[\s\S]+?(?:\n[ \t]*\n|\Z)", text)
+    else:
+        entries = re.split(r"(?m)(?=^\s*\[[^]\n]+\]\s*$)", text)
+    kept = []
+    matched = False
+    for entry in entries:
+        active = "\n".join(line for line in entry.splitlines() if not line.lstrip().startswith(("#", ";")))
+        if is_himmelblau_repository(active):
+            # A single deb822 entry may list multiple URIs. Split only its URI
+            # values so unrelated mirrors and all other fields are preserved.
+            if path.endswith(".sources"):
+                def filter_uris(match):
+                    uris = [uri for uri in match.group(2).split() if not is_himmelblau_repository(uri)]
+                    return match.group(1) + " ".join(uris) + "\n" if uris else ""
+                remainder = re.sub(r"(?im)^(URIs:\s*)([^\n]*(?:\n[ \t]+[^\n]*)*)\n?", filter_uris, entry)
+                if re.search(r"(?im)^URIs:", remainder):
+                    kept.append(remainder)
+            matched = True
+        else:
+            kept.append(entry)
+    return matched, "".join(kept)
+
+
+def retain_repository_entries(path, backup, mode):
+    with open(backup) as handle:
+        matched, remainder = repository_remainder(path, handle.read())
+    if remainder.strip():
+        shutil.copy2(backup, path)
+        os.chmod(path, mode)
+        with open(path, "w") as handle:
+            handle.write(remainder)
+
+
+def repository_with_existing(path, config):
+    if os.path.isfile(path):
+        with open(path) as handle:
+            _, remainder = repository_remainder(path, handle.read())
+            return (remainder.rstrip() + "\n\n" if remainder.strip() else "") + config
+    return config
+
+
 def setup_stable_repository(plan, event_log):
     target = plan["target"]
     manager = plan["manager"]
@@ -2520,7 +2579,7 @@ def setup_stable_repository(plan, event_log):
     check_stable_major(stream, manager)
     key_path = APT_KEYRING_PATH if manager == "apt" else STABLE_RPM_KEYS[manager]
     path = STABLE_APT_SOURCE_PATH if manager == "apt" else STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo"
-    candidates = [path, STABLE_APT_DEB822_PATH] if manager == "apt" else [path, os.path.dirname(path) + "/himmelblau-nightly.repo"]
+    candidates = repository_candidates(manager)
     # Inspect all conflicting paths before replacing any file.
     originals = []
     for candidate in candidates:
@@ -2528,7 +2587,7 @@ def setup_stable_repository(plan, event_log):
             continue
         with open(candidate) as handle:
             previous = handle.read()
-        if is_himmelblau_repository(previous):
+        if repository_remainder(candidate, previous)[0]:
             backup = candidate + ".himmelblau-disabled"
             if os.path.exists(backup):
                 raise WorkerError("A repository backup already exists. Review the previous installation before retrying.")
@@ -2560,8 +2619,9 @@ def setup_stable_repository(plan, event_log):
             os.rename(candidate, backup)
             backups.append((candidate, backup, mode))
             os.chmod(backup, 0o600)
+            retain_repository_entries(candidate, backup, mode)
         wrote_source = True
-        install_text(path, config, "0600", event_log)
+        install_text(path, repository_with_existing(path, config), "0600", event_log)
         if manager == "apt":
             preferences_written = True
             install_text(STABLE_APT_PREFERENCES_PATH, "Package: himmelblau* pam-himmelblau nss-himmelblau o365\nPin: origin repo.himmelblau-idm.org\nPin-Priority: 990\n", "0644", event_log)
@@ -2610,12 +2670,12 @@ def setup_nightly_repository(step, event_log, manager=None):
     target = step["target"]
     manager = manager or package_manager(target)
     if manager == "apt":
-        paths = [STABLE_APT_SOURCE_PATH, STABLE_APT_DEB822_PATH]
+        paths = repository_candidates(manager)
         output_path = STABLE_APT_SOURCE_PATH
         key_path = APT_KEYRING_PATH
     else:
-        paths = [STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo", STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"]
-        output_path = paths[1]
+        paths = repository_candidates(manager)
+        output_path = STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"
         key_path = NIGHTLY_RPM_KEYS[manager]
     try:
         architecture = apt_architecture(event_log) if manager == "apt" else run(["rpm", "--eval", "%{_arch}"], event_log).stdout.strip()
@@ -2631,7 +2691,7 @@ def setup_nightly_repository(step, event_log, manager=None):
             continue
         with open(path) as handle:
             text = handle.read()
-        if is_himmelblau_repository(text):
+        if repository_remainder(path, text)[0]:
             backup = path + (".himmelblau-disabled" if "/himmelblau/v_" in text else ".himmelblau-rollback")
             if os.path.exists(backup):
                 raise WorkerError("A repository backup already exists. Review it before changing package sources.")
@@ -2649,6 +2709,7 @@ def setup_nightly_repository(step, event_log, manager=None):
             os.rename(path, backup)
             backups.append((path, backup, mode))
             os.chmod(backup, 0o600)
+            retain_repository_entries(path, backup, mode)
         setup_started = True
         {"apt": apt_repo_setup, "dnf": dnf_repo_setup, "rpm-ostree": ostree_repo_setup, "zypper": zypper_repo_setup}[manager]("nightly", target, event_log)
     except Exception:
@@ -2672,21 +2733,30 @@ def setup_nightly_repository(step, event_log, manager=None):
 
 def setup_vendor_repositories(target, manager=None):
     manager = manager or package_manager(target)
-    paths = [STABLE_APT_SOURCE_PATH, STABLE_APT_DEB822_PATH] if manager == "apt" else [STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo", STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"]
+    paths = repository_candidates(manager)
     originals = []
     for path in paths:
         if not os.path.isfile(path):
             continue
         with open(path) as handle:
             text = handle.read()
-        if is_himmelblau_repository(text):
+        if repository_remainder(path, text)[0]:
             backup = path + ".himmelblau-disabled"
             if os.path.exists(backup):
                 raise WorkerError("A repository backup already exists. Review it before choosing vendor packages.")
-            originals.append((path, backup))
-    for path, backup in originals:
-        os.rename(path, backup)
-        os.chmod(backup, 0o600)
+            originals.append((path, backup, os.stat(path).st_mode & 0o777))
+    backups = []
+    try:
+        for path, backup, mode in originals:
+            os.rename(path, backup)
+            backups.append((path, backup, mode))
+            os.chmod(backup, 0o600)
+            retain_repository_entries(path, backup, mode)
+    except Exception:
+        for path, backup, mode in backups:
+            os.rename(backup, path)
+            os.chmod(path, mode)
+        raise
 
 
 def stage_postboot(plan, steps, event_log):
@@ -3005,7 +3075,7 @@ def ddi_configure_nss(path="/etc/nsswitch.conf", check_only=False):
 DDI_USER_HELPER = r'''#!/bin/sh
 set -eu
 image=/var/lib/himmelblau-ddi/himmelblaud.v
-state=$(portablectl --user --no-ask-password is-attached "$image")
+state=$(portablectl --user --no-ask-password is-attached "$image") || [ "$state" = detached ]
 case "$state" in
     detached) action=attach ;;
     attached|enabled|running) action=reattach ;;
@@ -3048,7 +3118,7 @@ def ddi_install_users(event_log):
         # portablectl rejects paths combined with --machine. Use the same
         # portabled D-Bus interface as the upstream update notification helper.
         try:
-            state = run(["portablectl"] + bus + ["is-attached", "himmelblaud"], event_log).stdout.strip()
+            state = run(["portablectl"] + bus + ["is-attached", "himmelblaud"], event_log, check=False).stdout.strip()
             if state not in ("detached", "attached", "enabled", "running"):
                 raise WorkerError("Unexpected user portable state for UID " + uid)
             method = "AttachImage" if state == "detached" else "ReattachImage"
@@ -3107,7 +3177,7 @@ def ddi_activate(plan, directory, key, event_log):
     else:
         run(["authselect", "select", "himmelblau"] + features, event_log)
         run(["authselect", "apply-changes"], event_log)
-    state = run(["portablectl", "is-attached", DDI_PORTABLE], event_log).stdout.strip()
+    state = run(["portablectl", "is-attached", DDI_PORTABLE], event_log, check=False).stdout.strip()
     if state not in ("detached", "attached", "enabled", "running"):
         raise WorkerError("Unexpected Himmelblau system portable state")
     action = "attach" if state == "detached" else "reattach"

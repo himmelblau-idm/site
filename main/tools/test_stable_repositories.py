@@ -160,6 +160,8 @@ class StableRepositoryTests(unittest.TestCase):
         self.patch(w, "APT_KEYRING_PATH", str(folder / "key.gpg"))
         self.patch(w, "STABLE_RPM_DIRS", {"dnf": str(folder), "rpm-ostree": str(folder), "zypper": str(folder)})
         self.patch(w, "STABLE_RPM_KEYS", {"dnf": str(folder / "key.asc"), "rpm-ostree": str(folder / "key.asc"), "zypper": str(folder / "key.asc")})
+        self.patch(w, "NIGHTLY_RPM_KEYS", {manager: str(folder / "nightly-key.asc") for manager in ("dnf", "rpm-ostree", "zypper")})
+        self.patch(w, "fetch_nightly_data", lambda url: b"nightly-key" if url.endswith("gpg.key") else b"nightly-index")
         self.patch(w, "check_stable_major", lambda *args: None)
         self.patch(w, "dearmor_apt_key", lambda data: b"new-dearmored-key")
         def fetch(url, unavailable_ok=False):
@@ -220,13 +222,14 @@ class StableRepositoryTests(unittest.TestCase):
             self.assertTrue(key.exists())
             self.assertFalse(any(argv[:2] == ["rpm", "--import"] or argv[0] == "dnf" for argv in commands))
 
-    def test_nightly_rpm_arm64_does_not_replace_existing_source(self):
+    def test_nightly_rpm_arm64_preserves_unrelated_source(self):
         for manager, target in (("dnf", "rocky9"), ("zypper", "sle16")):
             with self.subTest(manager=manager), tempfile.TemporaryDirectory() as tmp:
                 folder = pathlib.Path(tmp)
                 source, _ = self.configure_fake_system(manager, folder, "aarch64")
+                source = folder / "himmelblau-nightly.repo"
                 source.write_text("existing repository\n")
-                with self.assertRaisesRegex(self.worker.WorkerError, "Stable repository"):
+                with self.assertRaisesRegex(self.worker.WorkerError, "already used by another source"):
                     self.worker.setup_nightly_repository({"channel": "nightly", "target": target}, str(folder / "events"))
                 self.assertEqual(source.read_text(), "existing repository\n")
 

@@ -340,7 +340,8 @@ class InstallEndpointTests(unittest.TestCase):
                 mock.patch.object(worker, "install_text", side_effect=lambda *args: saved.append(args)):
             worker.ostree_repo_setup("nightly", "fedora44", "events")
         repo = next(value for path, value, mode, log in saved if path.endswith(".repo"))
-        self.assertIn("/rpm/fedora44", repo)
+        self.assertIn("/rpm/fedora/44/x86_64", repo)
+        self.assertIn("/rpm/fedora/44/noarch", repo)
         self.assertIn("gpgkey=file:///etc/pki/rpm-gpg/himmelblau-nightly.asc", repo)
         self.assertFalse(any(argv[0] == "dnf" or argv[:2] == ["rpm", "--import"] for argv in commands))
 
@@ -387,29 +388,18 @@ class InstallEndpointTests(unittest.TestCase):
         finally:
             installer.os.geteuid = old_geteuid
 
-    def test_apt_source_line_uses_detected_arch_and_dearmored_keyring(self):
-        source = installer.apt_source_line("https://packages.example/deb/ubuntu24.04-arm64", "arm64")
-        self.assertEqual(
-            source,
-            "deb [arch=arm64 signed-by=/etc/apt/keyrings/himmelblau.gpg] https://packages.example/deb/ubuntu24.04-arm64 ./\n",
-        )
-        self.assertNotIn("arch=amd64", source)
-        self.assertNotIn("himmelblau.asc", source)
-
     def test_nightly_apt_repository_matches_native_architecture(self):
         for module in (installer, load_worker_module()):
-            for architecture, suffix in (("amd64", ""), ("arm64", "-arm64")):
-                with self.subTest(module=module.__name__, architecture=architecture):
-                    self.assertEqual(
-                        module.nightly_apt_repo_url("nightly", "ubuntu26.04", architecture),
-                        module.BASE_NIGHTLY_URL + "/deb/ubuntu26.04" + suffix,
-                    )
-                    self.assertEqual(
-                        module.nightly_apt_repo_url("nightly", "debian13", architecture),
-                        module.BASE_NIGHTLY_URL + "/deb/debian13" + suffix,
-                    )
-            with self.assertRaisesRegex(ValueError, "amd64 and arm64"):
-                module.nightly_apt_repo_url("nightly", "ubuntu26.04", "i386")
+            for architecture in ("amd64", "arm64"):
+                for target, distro, codename in (("ubuntu26.04", "ubuntu", "resolute"), ("debian13", "debian", "trixie")):
+                    with self.subTest(module=module.__name__, architecture=architecture, target=target):
+                        source, metadata = module.native_nightly_config(target, architecture, "apt")
+                        self.assertEqual(source, "deb [arch=%s signed-by=/etc/apt/keyrings/himmelblau.gpg] https://repo.himmelblau-idm.org/public/himmelblau/nightly/deb/%s %s main\n" % (architecture, distro, codename))
+                        self.assertTrue(metadata.endswith("/dists/%s/main/binary-%s/Packages.gz" % (codename, architecture)))
+            with self.assertRaisesRegex(ValueError, "Unsupported Debian architecture"):
+                module.native_nightly_config("ubuntu26.04", "x86_64", "apt")
+            with self.assertRaisesRegex(ValueError, "x86-64 and ARM64"):
+                module.native_nightly_config("ubuntu26.04", "i386", "apt")
 
     def test_worker_writes_arm64_nightly_apt_source(self):
         worker = load_worker_module()
@@ -430,13 +420,14 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertEqual(commands[0], ["dpkg", "--print-architecture"])
         self.assertEqual(sources, [(
             "/etc/apt/sources.list.d/himmelblau.list",
-            worker.apt_source_line(worker.BASE_NIGHTLY_URL + "/deb/ubuntu26.04-arm64", "arm64"),
+            "deb [arch=arm64 signed-by=/etc/apt/keyrings/himmelblau.gpg] https://repo.himmelblau-idm.org/public/himmelblau/nightly/deb/ubuntu resolute main\n",
         )])
 
     def test_manual_nightly_apt_commands_use_native_architecture(self):
         source = INSTALL_JS_PATH.read_text(encoding="utf-8")
         self.assertNotIn("arch=amd64", source)
-        self.assertIn('if [ "$arch" = arm64 ]; then repo_target=${distro}-arm64; fi', source)
+        self.assertIn('arch=$(dpkg --print-architecture)', source)
+        self.assertNotIn('repo_target', source)
 
     def test_root_worker_apt_setup_uses_detected_arch_and_dearmored_keyring(self):
         source = installer.ROOT_WORKER_SOURCE
@@ -474,9 +465,11 @@ class InstallEndpointTests(unittest.TestCase):
     def test_zypper_community_install_uses_himmelblau_repo_without_refreshing_all_repos(self):
         calls = []
         old_run = installer.run
+        old_repo = installer.zypper_repo_setup
         old_geteuid = installer.os.geteuid
         try:
             installer.os.geteuid = lambda: 0
+            installer.zypper_repo_setup = lambda *args: None
             installer.run = lambda argv, ui, check=True, input_text=None: calls.append(argv) or types.SimpleNamespace(stdout="")
             installer.install_packages("nightly", "tumbleweed", object(), installer.COMMUNITY_PACKAGES, [])
             self.assertIn(
@@ -488,6 +481,8 @@ class InstallEndpointTests(unittest.TestCase):
                     "-y",
                     "--from",
                     "himmelblau-nightly",
+                    "--from",
+                    "himmelblau-nightly-noarch",
                     "himmelblau",
                     "pam-himmelblau",
                     "nss-himmelblau",
@@ -496,6 +491,7 @@ class InstallEndpointTests(unittest.TestCase):
             )
         finally:
             installer.run = old_run
+            installer.zypper_repo_setup = old_repo
             installer.os.geteuid = old_geteuid
 
     def test_zypper_subscription_install_keeps_default_repo_behavior(self):
@@ -520,9 +516,14 @@ class InstallEndpointTests(unittest.TestCase):
             installer.os.geteuid = old_geteuid
 
     def test_root_worker_zypper_community_install_uses_himmelblau_repo_without_refreshing_all_repos(self):
-        source = installer.ROOT_WORKER_SOURCE
-        self.assertIn('["--from", "himmelblau-stable-noarch"] if channel == "stable" else []', source)
-        self.assertIn('["zypper", "--non-interactive", "install", "-y"] + packages', source)
+        worker = load_worker_module()
+        self.assertEqual(worker.package_install_command("zypper", "nightly", "sle16", ["himmelblau"]), [
+            "zypper", "--non-interactive", "--no-refresh", "install", "-y",
+            "--from", "himmelblau-nightly", "--from", "himmelblau-nightly-noarch", "himmelblau",
+        ])
+        self.assertEqual(worker.package_install_command("zypper", "subscription", "sle16", ["himmelblau"]), [
+            "zypper", "--non-interactive", "install", "-y", "himmelblau",
+        ])
 
     def test_detected_package_selection_includes_contextual_packages(self):
         old_package_installed = installer.package_installed
@@ -594,12 +595,14 @@ class InstallEndpointTests(unittest.TestCase):
         warnings = []
         ui = types.SimpleNamespace(warn=warnings.append)
         old_run = installer.run
+        old_repo = installer.dnf_repo_setup
         try:
             def fake_run(argv, ui, check=True, input_text=None):
                 calls.append((argv, check))
                 return types.SimpleNamespace(stdout="", returncode=1 if not check else 0)
 
             installer.run = fake_run
+            installer.dnf_repo_setup = lambda *args: None
             installer.install_packages(
                 "nightly",
                 "fedora43",
@@ -619,6 +622,7 @@ class InstallEndpointTests(unittest.TestCase):
             )
         finally:
             installer.run = old_run
+            installer.dnf_repo_setup = old_repo
 
     def test_worker_failure_status_reads_last_worker_error(self):
         with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:

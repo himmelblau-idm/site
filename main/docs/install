@@ -41,16 +41,16 @@ import urllib.parse
 import urllib.request
 
 
-VERSION = "2026.10.09"
+VERSION = "2026.11.20"
 PLAN_VERSION = 5
 SUPPORT_JS_URL = "https://himmelblau-idm.org/js/install.js"
 STABLE_SUBSCRIPTION_URL = "https://himmelblau-idm.org/stable-repositories/"
 STABLE_SOURCE_URL = "https://github.com/himmelblau-idm/himmelblau.git"
 STABLE_SOURCE_BRANCH = "stable-4.x"
-GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
+GPG_KEY_URL = "https://repo.himmelblau-idm.org/public/himmelblau/nightly/gpg.key"
 APT_KEYRING_DIR = "/etc/apt/keyrings"
 APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
-BASE_NIGHTLY_URL = "https://packages.himmelblau-idm.org/nightly/latest"
+BASE_NIGHTLY_URL = "https://repo.himmelblau-idm.org/public/himmelblau/nightly"
 CONFIG_PATH = "/etc/himmelblau/himmelblau.conf"
 LOG_PATH = os.path.expanduser("~/.cache/himmelblau-installer/install.log")
 CONFIG_BOOLEAN_DEFAULTS = {
@@ -157,7 +157,7 @@ STABLE_RPM_KEYS = {"dnf": "/etc/pki/rpm-gpg/himmelblau-stable.asc", "rpm-ostree"
 
 def redact(value):
     text = str(value)
-    text = re.sub(r"https://repo\.himmelblau-idm\.org/[^/\s\"']+/himmelblau/", "https://repo.himmelblau-idm.org/REDACTED/himmelblau/", text)
+    text = re.sub(r"https://repo\.himmelblau-idm\.org/(?!public/)[^/\s\"']+/himmelblau/", "https://repo.himmelblau-idm.org/REDACTED/himmelblau/", text)
     for secret in sorted(SECRET_VALUES, key=len, reverse=True):
         text = text.replace(secret, "REDACTED")
     return text
@@ -225,9 +225,9 @@ def validate_source_steps(plan):
         raise ValueError("Stable repository setup requires the stable channel.")
 
 
-def native_stable_config(root, distro, version, architecture, manager):
+def native_repository_config(root, distro, version, architecture, manager, channel="stable"):
     if architecture not in ("amd64", "arm64", "x86_64", "aarch64"):
-        raise ValueError("Stable repositories support x86-64 and ARM64 only.")
+        raise ValueError("Repositories support x86-64 and ARM64 only.")
     if manager == "apt":
         if architecture not in ("amd64", "arm64"):
             raise ValueError("Unsupported Debian architecture.")
@@ -236,13 +236,54 @@ def native_stable_config(root, distro, version, architecture, manager):
         return source, metadata
     rpm_arch = {"amd64": "x86_64", "arm64": "aarch64"}.get(architecture, architecture)
     if distro == "el" and version == "8" and rpm_arch == "aarch64":
-        raise ValueError("Stable packages for Enterprise Linux 8 are available for x86-64 only.")
+        raise ValueError("Packages for Enterprise Linux 8 are available for x86-64 only.")
     base = "%s/rpm/%s/%s" % (root, distro, version)
-    key_path = "file://" + STABLE_RPM_KEYS[manager]
+    key_path = "file://" + (STABLE_RPM_KEYS if channel == "stable" else NIGHTLY_RPM_KEYS)[manager]
     config = ""
-    for name, arch in (("himmelblau-stable", rpm_arch), ("himmelblau-stable-noarch", "noarch")):
-        config += "[%s]\nname=Himmelblau Stable\nbaseurl=%s/%s\nenabled=1\npriority=1\ngpgcheck=1\ngpgkey=%s\n\n" % (name, base, arch, key_path)
+    for name, arch in (("himmelblau-" + channel, rpm_arch), ("himmelblau-" + channel + "-noarch", "noarch")):
+        config += "[%s]\nname=Himmelblau %s\nbaseurl=%s/%s\nenabled=1\npriority=1\ngpgcheck=1\ngpgkey=%s\n\n" % (name, channel.title(), base, arch, key_path)
     return config, base + "/" + rpm_arch + "/repodata/repomd.xml"
+
+
+def native_stable_config(root, distro, version, architecture, manager):
+    return native_repository_config(root, distro, version, architecture, manager)
+
+
+NIGHTLY_RPM_KEYS = {
+    "dnf": "/etc/pki/rpm-gpg/himmelblau-nightly.asc",
+    "rpm-ostree": "/etc/pki/rpm-gpg/himmelblau-nightly.asc",
+    "zypper": "/etc/zypp/himmelblau-nightly.asc",
+}
+
+
+def native_nightly_config(target, architecture, manager):
+    if target not in STABLE_DESTINATIONS:
+        raise ValueError("Nightly packages are unavailable for this distribution.")
+    distro, version = STABLE_DESTINATIONS[target]
+    return native_repository_config(BASE_NIGHTLY_URL, distro, version, architecture, manager, "nightly")
+
+
+def fetch_nightly_data(url):
+    try:
+        with urllib.request.urlopen(url, timeout=30) as response:
+            data = response.read()
+        if not data:
+            raise ValueError("The Nightly repository returned empty data.")
+        return data
+    except urllib.error.HTTPError as err:
+        if err.code == 404:
+            raise ValueError("Nightly packages are unavailable for this distribution or architecture.")
+        raise ValueError("Unable to read the public Nightly repository (HTTP %s). Retry later." % err.code)
+    except (OSError, urllib.error.URLError):
+        raise ValueError("Unable to reach the public Nightly repository. Check your connection and retry.")
+
+
+def is_himmelblau_repository(text):
+    return any(marker in text for marker in (
+        "packages.himmelblau-idm.org/", "/himmelblau/v_",
+        "repo.himmelblau-idm.org/public/himmelblau/nightly/",
+        "himmelblau-idm.org/deb",
+    ))
 
 
 def resolve_stable_repository(token, target, architecture, manager):
@@ -1258,7 +1299,7 @@ def package_install_command(manager, channel, target, packages):
     if manager == "zypper":
         if channel == "subscription":
             return sudo_prefix() + ["zypper", "--non-interactive", "install", "-y"] + packages
-        return sudo_prefix() + ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", f"himmelblau-{channel}"] + packages
+        return sudo_prefix() + ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", f"himmelblau-{channel}", "--from", f"himmelblau-{channel}-noarch"] + packages
     if manager == "dnf":
         return sudo_prefix() + ["dnf", "install", "-y"] + packages
     if manager == "rpm-ostree":
@@ -1287,17 +1328,6 @@ def apt_architecture(ui):
     return architecture
 
 
-def apt_source_line(repo_url, architecture):
-    return f"deb [arch={architecture} signed-by={APT_KEYRING_PATH}] {repo_url} ./\n"
-
-
-def nightly_apt_repo_url(channel, target, architecture):
-    if architecture not in ("amd64", "arm64"):
-        raise ValueError("Nightly Debian packages support amd64 and arm64 only.")
-    suffix = "-arm64" if architecture == "arm64" else ""
-    return f"{base_url(channel)}/deb/{target}{suffix}"
-
-
 def dearmor_apt_key(key_data):
     proc = subprocess.run(["gpg", "--dearmor"], input=key_data, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if proc.returncode != 0:
@@ -1306,61 +1336,52 @@ def dearmor_apt_key(key_data):
 
 
 def apt_repo_setup(channel, target, ui):
-    apt_install_prereqs(ui)
-    architecture = apt_architecture(ui)
+    base_url(channel)
     try:
-        repo_url = nightly_apt_repo_url(channel, target, architecture)
+        architecture = apt_architecture(ui)
+        source, _ = native_nightly_config(target, architecture, "apt")
+        key_data = fetch_nightly_data(GPG_KEY_URL)
     except ValueError as err:
         raise InstallError(str(err))
+    apt_install_prereqs(ui)
     run(sudo_prefix() + ["install", "-d", "-m", "0755", APT_KEYRING_DIR], ui)
-    key_proc = subprocess.run(["curl", "-fsSL", GPG_KEY_URL], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-    if key_proc.returncode != 0:
-        raise InstallError("Unable to download the Himmelblau package signing key.")
-    install_bytes(APT_KEYRING_PATH, dearmor_apt_key(key_proc.stdout), "0644", ui)
-    source = apt_source_line(repo_url, architecture)
-    install_text("/etc/apt/sources.list.d/himmelblau.list", source, "0644", ui)
+    install_bytes(APT_KEYRING_PATH, dearmor_apt_key(key_data), "0644", ui)
+    install_text(STABLE_APT_SOURCE_PATH, source, "0644", ui)
     run(apt_get_command("update"), ui)
 
 
+def nightly_rpm_repo_setup(target, manager, ui):
+    try:
+        architecture = run(sudo_prefix() + ["rpm", "--eval", "%{_arch}"], ui).stdout.strip()
+        config, _ = native_nightly_config(target, architecture, manager)
+        key_data = fetch_nightly_data(GPG_KEY_URL)
+    except ValueError as err:
+        raise InstallError(str(err))
+    key_path = NIGHTLY_RPM_KEYS[manager]
+    run(sudo_prefix() + ["install", "-d", "-m", "0755", os.path.dirname(key_path)], ui)
+    install_bytes(key_path, key_data, "0644", ui)
+    if manager != "rpm-ostree":
+        run(sudo_prefix() + ["rpm", "--import", key_path], ui)
+    install_text(STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo", config, "0644", ui)
+    if manager == "dnf":
+        run(sudo_prefix() + ["dnf", "makecache", "--refresh", "-y", "--disablerepo=*", "--enablerepo=himmelblau-nightly", "--enablerepo=himmelblau-nightly-noarch"], ui)
+    elif manager == "zypper":
+        run(sudo_prefix() + ["zypper", "--non-interactive", "--gpg-auto-import-keys", "refresh", "himmelblau-nightly", "himmelblau-nightly-noarch"], ui)
+
+
 def zypper_repo_setup(channel, target, ui):
-    if run(sudo_prefix() + ["rpm", "--eval", "%{_arch}"], ui).stdout.strip() == "aarch64":
-        raise InstallError("Community Nightly RPM packages are unavailable for ARM64. Choose the Stable repository with an entitlement token.")
-    repo_url = f"{base_url(channel)}/rpm/{target}"
-    run(sudo_prefix() + ["rpm", "--import", GPG_KEY_URL], ui)
-    run(sudo_prefix() + ["zypper", "--non-interactive", "addrepo", "--check", "--gpgcheck", repo_url, f"himmelblau-{channel}"], ui, check=False)
-    run(sudo_prefix() + ["zypper", "--non-interactive", "--gpg-auto-import-keys", "refresh", f"himmelblau-{channel}"], ui)
+    base_url(channel)
+    nightly_rpm_repo_setup(target, "zypper", ui)
 
 
 def dnf_repo_setup(channel, target, ui):
-    if run(sudo_prefix() + ["rpm", "--eval", "%{_arch}"], ui).stdout.strip() == "aarch64":
-        raise InstallError("Community Nightly RPM packages are unavailable for ARM64. Choose the Stable repository with an entitlement token.")
-    repo_url = f"{base_url(channel)}/rpm/{target}"
-    name = f"himmelblau-{channel}"
-    repo = f"""[{name}]
-name=Himmelblau {channel}
-baseurl={repo_url}
-enabled=1
-gpgcheck=1
-gpgkey={GPG_KEY_URL}
-"""
-    run(sudo_prefix() + ["rpm", "--import", GPG_KEY_URL], ui)
-    install_text(f"/etc/yum.repos.d/{name}.repo", repo, "0644", ui)
-    run(sudo_prefix() + ["dnf", "makecache", "--refresh", "-y"], ui)
+    base_url(channel)
+    nightly_rpm_repo_setup(target, "dnf", ui)
 
 
 def ostree_repo_setup(channel, target, ui):
-    if run(sudo_prefix() + ["rpm", "--eval", "%{_arch}"], ui).stdout.strip() == "aarch64":
-        raise InstallError("Community Nightly RPM packages are unavailable for ARM64. Choose the Stable repository with an entitlement token.")
-    key_path = "/etc/pki/rpm-gpg/himmelblau-nightly.asc"
-    with urllib.request.urlopen(GPG_KEY_URL, timeout=30) as response:
-        key_data = response.read(128 * 1024)
-    if not key_data:
-        raise InstallError("Unable to download the Himmelblau package signing key.")
-    run(sudo_prefix() + ["install", "-d", "-m", "0755", os.path.dirname(key_path)], ui)
-    install_bytes(key_path, key_data, "0644", ui)
-    name = f"himmelblau-{channel}"
-    repo = f"[{name}]\nname=Himmelblau {channel}\nbaseurl={base_url(channel)}/rpm/{target}\nenabled=1\ngpgcheck=1\ngpgkey=file://{key_path}\n"
-    install_text(f"/etc/yum.repos.d/{name}.repo", repo, "0644", ui)
+    base_url(channel)
+    nightly_rpm_repo_setup(target, "rpm-ostree", ui)
 
 
 def install_packages(channel, target, ui, packages=None, best_effort_packages=None, manager=None):
@@ -1612,10 +1633,10 @@ import urllib.parse
 import urllib.error
 
 PLAN_VERSION = 5
-GPG_KEY_URL = "https://packages.himmelblau-idm.org/himmelblau.asc"
+GPG_KEY_URL = "https://repo.himmelblau-idm.org/public/himmelblau/nightly/gpg.key"
 APT_KEYRING_DIR = "/etc/apt/keyrings"
 APT_KEYRING_PATH = APT_KEYRING_DIR + "/himmelblau.gpg"
-BASE_NIGHTLY_URL = "https://packages.himmelblau-idm.org/nightly/latest"
+BASE_NIGHTLY_URL = "https://repo.himmelblau-idm.org/public/himmelblau/nightly"
 CONFIG_PATH = "/etc/himmelblau/himmelblau.conf"
 CONFIG_BOOLEAN_DEFAULTS = {
     "enable_hello": True,
@@ -1677,7 +1698,7 @@ POSTBOOT_LOG = POSTBOOT_DIR + "/postboot.jsonl"
 
 def redact(value):
     text = str(value)
-    text = re.sub(r"https://repo\.himmelblau-idm\.org/[^/\s\"']+/himmelblau/", "https://repo.himmelblau-idm.org/REDACTED/himmelblau/", text)
+    text = re.sub(r"https://repo\.himmelblau-idm\.org/(?!public/)[^/\s\"']+/himmelblau/", "https://repo.himmelblau-idm.org/REDACTED/himmelblau/", text)
     for secret in sorted(SECRET_VALUES, key=len, reverse=True):
         text = text.replace(secret, "REDACTED")
     return text
@@ -1745,9 +1766,9 @@ def validate_source_steps(plan):
         raise ValueError("Stable repository setup requires the stable channel.")
 
 
-def native_stable_config(root, distro, version, architecture, manager):
+def native_repository_config(root, distro, version, architecture, manager, channel="stable"):
     if architecture not in ("amd64", "arm64", "x86_64", "aarch64"):
-        raise ValueError("Stable repositories support x86-64 and ARM64 only.")
+        raise ValueError("Repositories support x86-64 and ARM64 only.")
     if manager == "apt":
         if architecture not in ("amd64", "arm64"):
             raise ValueError("Unsupported Debian architecture.")
@@ -1756,13 +1777,54 @@ def native_stable_config(root, distro, version, architecture, manager):
         return source, metadata
     rpm_arch = {"amd64": "x86_64", "arm64": "aarch64"}.get(architecture, architecture)
     if distro == "el" and version == "8" and rpm_arch == "aarch64":
-        raise ValueError("Stable packages for Enterprise Linux 8 are available for x86-64 only.")
+        raise ValueError("Packages for Enterprise Linux 8 are available for x86-64 only.")
     base = "%s/rpm/%s/%s" % (root, distro, version)
-    key_path = "file://" + STABLE_RPM_KEYS[manager]
+    key_path = "file://" + (STABLE_RPM_KEYS if channel == "stable" else NIGHTLY_RPM_KEYS)[manager]
     config = ""
-    for name, arch in (("himmelblau-stable", rpm_arch), ("himmelblau-stable-noarch", "noarch")):
-        config += "[%s]\nname=Himmelblau Stable\nbaseurl=%s/%s\nenabled=1\npriority=1\ngpgcheck=1\ngpgkey=%s\n\n" % (name, base, arch, key_path)
+    for name, arch in (("himmelblau-" + channel, rpm_arch), ("himmelblau-" + channel + "-noarch", "noarch")):
+        config += "[%s]\nname=Himmelblau %s\nbaseurl=%s/%s\nenabled=1\npriority=1\ngpgcheck=1\ngpgkey=%s\n\n" % (name, channel.title(), base, arch, key_path)
     return config, base + "/" + rpm_arch + "/repodata/repomd.xml"
+
+
+def native_stable_config(root, distro, version, architecture, manager):
+    return native_repository_config(root, distro, version, architecture, manager)
+
+
+NIGHTLY_RPM_KEYS = {
+    "dnf": "/etc/pki/rpm-gpg/himmelblau-nightly.asc",
+    "rpm-ostree": "/etc/pki/rpm-gpg/himmelblau-nightly.asc",
+    "zypper": "/etc/zypp/himmelblau-nightly.asc",
+}
+
+
+def native_nightly_config(target, architecture, manager):
+    if target not in STABLE_DESTINATIONS:
+        raise ValueError("Nightly packages are unavailable for this distribution.")
+    distro, version = STABLE_DESTINATIONS[target]
+    return native_repository_config(BASE_NIGHTLY_URL, distro, version, architecture, manager, "nightly")
+
+
+def fetch_nightly_data(url):
+    try:
+        with urllib.request.urlopen(url, timeout=30) as response:
+            data = response.read()
+        if not data:
+            raise ValueError("The Nightly repository returned empty data.")
+        return data
+    except urllib.error.HTTPError as err:
+        if err.code == 404:
+            raise ValueError("Nightly packages are unavailable for this distribution or architecture.")
+        raise ValueError("Unable to read the public Nightly repository (HTTP %s). Retry later." % err.code)
+    except (OSError, urllib.error.URLError):
+        raise ValueError("Unable to reach the public Nightly repository. Check your connection and retry.")
+
+
+def is_himmelblau_repository(text):
+    return any(marker in text for marker in (
+        "packages.himmelblau-idm.org/", "/himmelblau/v_",
+        "repo.himmelblau-idm.org/public/himmelblau/nightly/",
+        "himmelblau-idm.org/deb",
+    ))
 
 
 def resolve_stable_repository(token, target, architecture, manager):
@@ -2030,17 +2092,6 @@ def apt_architecture(event_log):
     return architecture
 
 
-def apt_source_line(repo_url, architecture):
-    return "deb [arch=%s signed-by=%s] %s ./\n" % (architecture, APT_KEYRING_PATH, repo_url)
-
-
-def nightly_apt_repo_url(channel, target, architecture):
-    if architecture not in ("amd64", "arm64"):
-        raise ValueError("Nightly Debian packages support amd64 and arm64 only.")
-    suffix = "-arm64" if architecture == "arm64" else ""
-    return "%s/deb/%s%s" % (base_url(channel), target, suffix)
-
-
 def dearmor_apt_key(key_data):
     proc = subprocess.run(["gpg", "--dearmor"], input=key_data, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if proc.returncode != 0:
@@ -2049,44 +2100,51 @@ def dearmor_apt_key(key_data):
 
 
 def apt_repo_setup(channel, target, event_log):
-    architecture = apt_architecture(event_log)
-    repo_url = nightly_apt_repo_url(channel, target, architecture)
+    base_url(channel)
+    try:
+        architecture = apt_architecture(event_log)
+        source, _ = native_nightly_config(target, architecture, "apt")
+        key_data = fetch_nightly_data(GPG_KEY_URL)
+    except ValueError as err:
+        raise WorkerError(str(err))
     run(["install", "-d", "-m", "0755", APT_KEYRING_DIR], event_log)
-    with urllib.request.urlopen(GPG_KEY_URL, timeout=30) as response:
-        key_data = response.read(128 * 1024)
     install_bytes(APT_KEYRING_PATH, dearmor_apt_key(key_data), "0644", event_log)
-    source = apt_source_line(repo_url, architecture)
-    install_text("/etc/apt/sources.list.d/himmelblau.list", source, "0644", event_log)
+    install_text(STABLE_APT_SOURCE_PATH, source, "0644", event_log)
     run(apt_get_command("update"), event_log)
 
 
+def nightly_rpm_repo_setup(target, manager, event_log):
+    try:
+        architecture = run(["rpm", "--eval", "%{_arch}"], event_log).stdout.strip()
+        config, _ = native_nightly_config(target, architecture, manager)
+        key_data = fetch_nightly_data(GPG_KEY_URL)
+    except ValueError as err:
+        raise WorkerError(str(err))
+    key_path = NIGHTLY_RPM_KEYS[manager]
+    run(["install", "-d", "-m", "0755", os.path.dirname(key_path)], event_log)
+    install_bytes(key_path, key_data, "0644", event_log)
+    if manager != "rpm-ostree":
+        run(["rpm", "--import", key_path], event_log)
+    install_text(STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo", config, "0644", event_log)
+    if manager == "dnf":
+        run(["dnf", "makecache", "--refresh", "-y", "--disablerepo=*", "--enablerepo=himmelblau-nightly", "--enablerepo=himmelblau-nightly-noarch"], event_log)
+    elif manager == "zypper":
+        run(["zypper", "--non-interactive", "--gpg-auto-import-keys", "refresh", "himmelblau-nightly", "himmelblau-nightly-noarch"], event_log)
+
+
 def zypper_repo_setup(channel, target, event_log):
-    repo_url = "%s/rpm/%s" % (base_url(channel), target)
-    run(["rpm", "--import", GPG_KEY_URL], event_log)
-    run(["zypper", "--non-interactive", "addrepo", "--check", "--gpgcheck", repo_url, "himmelblau-%s" % channel], event_log, check=False)
-    run(["zypper", "--non-interactive", "--gpg-auto-import-keys", "refresh", "himmelblau-%s" % channel], event_log)
+    base_url(channel)
+    nightly_rpm_repo_setup(target, "zypper", event_log)
 
 
 def dnf_repo_setup(channel, target, event_log):
-    repo_url = "%s/rpm/%s" % (base_url(channel), target)
-    name = "himmelblau-%s" % channel
-    repo = "[%s]\nname=Himmelblau %s\nbaseurl=%s\nenabled=1\npriority=1\ngpgcheck=1\ngpgkey=%s\n" % (name, channel, repo_url, GPG_KEY_URL)
-    run(["rpm", "--import", GPG_KEY_URL], event_log)
-    install_text("/etc/yum.repos.d/%s.repo" % name, repo, "0644", event_log)
-    run(["dnf", "makecache", "--refresh", "-y"], event_log)
+    base_url(channel)
+    nightly_rpm_repo_setup(target, "dnf", event_log)
 
 
 def ostree_repo_setup(channel, target, event_log):
-    key_path = "/etc/pki/rpm-gpg/himmelblau-nightly.asc"
-    with urllib.request.urlopen(GPG_KEY_URL, timeout=30) as response:
-        key_data = response.read(128 * 1024)
-    if not key_data:
-        raise WorkerError("Unable to download the Himmelblau package signing key.")
-    run(["install", "-d", "-m", "0755", os.path.dirname(key_path)], event_log)
-    install_bytes(key_path, key_data, "0644", event_log)
-    name = "himmelblau-%s" % channel
-    repo = "[%s]\nname=Himmelblau %s\nbaseurl=%s/rpm/%s\nenabled=1\ngpgcheck=1\ngpgkey=file://%s\n" % (name, channel, base_url(channel), target, key_path)
-    install_text("/etc/yum.repos.d/%s.repo" % name, repo, "0644", event_log)
+    base_url(channel)
+    nightly_rpm_repo_setup(target, "rpm-ostree", event_log)
 
 
 def package_install_command(manager, channel, target, packages):
@@ -2096,7 +2154,7 @@ def package_install_command(manager, channel, target, packages):
     if manager == "zypper":
         if channel == "subscription":
             return ["zypper", "--non-interactive", "install", "-y"] + packages
-        return ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel] + (["--from", "himmelblau-stable-noarch"] if channel == "stable" else []) + packages
+        return ["zypper", "--non-interactive", "--no-refresh", "install", "-y", "--from", "himmelblau-%s" % channel] + ["--from", "himmelblau-%s-noarch" % channel] + packages
     if manager == "dnf":
         return ["dnf", "install", "-y"] + packages
     if manager == "rpm-ostree":
@@ -2135,7 +2193,7 @@ def setup_stable_repository(plan, event_log):
             continue
         with open(candidate) as handle:
             previous = handle.read()
-        if "packages.himmelblau-idm.org/" in previous or "/himmelblau/v_" in previous or "himmelblau-idm.org/deb" in previous:
+        if is_himmelblau_repository(previous):
             backup = candidate + ".himmelblau-disabled"
             if os.path.exists(backup):
                 raise WorkerError("A repository backup already exists. Review the previous installation before retrying.")
@@ -2221,18 +2279,24 @@ def setup_nightly_repository(step, event_log, manager=None):
         output_path = STABLE_APT_SOURCE_PATH
         key_path = APT_KEYRING_PATH
     else:
-        if run(["rpm", "--eval", "%{_arch}"], event_log).stdout.strip() == "aarch64":
-            raise WorkerError("Community Nightly RPM packages are unavailable for ARM64. Choose the Stable repository with an entitlement token.")
         paths = [STABLE_RPM_DIRS[manager] + "/himmelblau-stable.repo", STABLE_RPM_DIRS[manager] + "/himmelblau-nightly.repo"]
         output_path = paths[1]
-        key_path = "/etc/pki/rpm-gpg/himmelblau-nightly.asc" if manager == "rpm-ostree" else None
+        key_path = NIGHTLY_RPM_KEYS[manager]
+    try:
+        architecture = apt_architecture(event_log) if manager == "apt" else run(["rpm", "--eval", "%{_arch}"], event_log).stdout.strip()
+        _, metadata = native_nightly_config(target, architecture, manager)
+        fetch_nightly_data(metadata)
+        if manager != "apt":
+            fetch_nightly_data(BASE_NIGHTLY_URL + "/rpm/%s/%s/noarch/repodata/repomd.xml" % STABLE_DESTINATIONS[target])
+    except ValueError as err:
+        raise WorkerError(str(err))
     originals = []
     for path in paths:
         if not os.path.isfile(path):
             continue
         with open(path) as handle:
             text = handle.read()
-        if "/himmelblau/v_" in text or "packages.himmelblau-idm.org/" in text:
+        if is_himmelblau_repository(text):
             backup = path + ".himmelblau-disabled"
             if os.path.exists(backup):
                 raise WorkerError("A repository backup already exists. Review it before changing package sources.")
@@ -2244,19 +2308,21 @@ def setup_nightly_repository(step, event_log, manager=None):
         with open(key_path, "rb") as handle:
             old_key = handle.read()
     backups = []
+    setup_started = False
     try:
         for path, backup, mode in originals:
             os.rename(path, backup)
             backups.append((path, backup, mode))
             os.chmod(backup, 0o600)
+        setup_started = True
         {"apt": apt_repo_setup, "dnf": dnf_repo_setup, "rpm-ostree": ostree_repo_setup, "zypper": zypper_repo_setup}[manager]("nightly", target, event_log)
     except Exception:
-        if os.path.exists(output_path):
+        if setup_started and os.path.exists(output_path):
             os.unlink(output_path)
         for path, backup, mode in backups:
             os.rename(backup, path)
             os.chmod(path, mode)
-        if key_path:
+        if setup_started:
             if old_key is not None:
                 install_bytes(key_path, old_key, "0644", event_log)
             elif os.path.exists(key_path):
@@ -2278,7 +2344,7 @@ def setup_vendor_repositories(target, manager=None):
             continue
         with open(path) as handle:
             text = handle.read()
-        if "/himmelblau/v_" in text or "packages.himmelblau-idm.org/" in text:
+        if is_himmelblau_repository(text):
             backup = path + ".himmelblau-disabled"
             if os.path.exists(backup):
                 raise WorkerError("A repository backup already exists. Review it before choosing vendor packages.")

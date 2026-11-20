@@ -2024,7 +2024,7 @@ class SelfBuildTests(unittest.TestCase):
             pathlib.Path(tmp, "Makefile").touch()
             commands.clear()
             with mock.patch.object(worker, "run", side_effect=lambda argv, log: commands.append(argv)):
-                worker.execute_step({"kind": "install_self_built"}, "events", {"source_dir": tmp})
+                worker.execute_step({"kind": "install_self_built"}, "events", dict(plan, source_dir=tmp))
             self.assertEqual(commands, [["make", "-C", tmp, "install"]])
 
     def test_headless_self_build_requires_supported_host_and_no_token(self):

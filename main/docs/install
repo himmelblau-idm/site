@@ -1384,6 +1384,24 @@ def ostree_repo_setup(channel, target, ui):
     nightly_rpm_repo_setup(target, "rpm-ostree", ui)
 
 
+def ensure_package_prerequisites(manager, ui):
+    # DEB and RPM NSS post-install scripts both invoke awk.
+    if shutil.which("awk"):
+        return
+    if manager == "apt":
+        command = apt_get_command("install", "-y", "gawk")
+    elif manager == "zypper":
+        command = sudo_prefix() + ["zypper", "--non-interactive", "install", "-y", "gawk"]
+    elif manager == "dnf":
+        command = sudo_prefix() + ["dnf", "install", "-y", "gawk"]
+    elif manager == "rpm-ostree":
+        # A staged dependency would not be available to package scripts yet.
+        command = sudo_prefix() + ["rpm-ostree", "install", "-y", "--apply-live", "gawk"]
+    else:
+        raise InstallError("Unable to install awk with this package manager.")
+    run(command, ui)
+
+
 def install_packages(channel, target, ui, packages=None, best_effort_packages=None, manager=None):
     manager = manager or package_manager(target)
     if channel != "subscription":
@@ -1399,6 +1417,7 @@ def install_packages(channel, target, ui, packages=None, best_effort_packages=No
     if packages is None or best_effort_packages is None:
         packages, best_effort_packages = detected_package_selection(channel, target)
     if packages:
+        ensure_package_prerequisites(manager, ui)
         run(package_install_command(manager, channel, target, packages), ui)
     for package in best_effort_packages:
         proc = run(package_install_command(manager, channel, target, [package]), ui, check=False)
@@ -2162,9 +2181,28 @@ def package_install_command(manager, channel, target, packages):
     raise WorkerError("NixOS is not supported by this bootstrap installer.")
 
 
+def ensure_package_prerequisites(manager, event_log):
+    # DEB and RPM NSS post-install scripts both invoke awk.
+    if shutil.which("awk"):
+        return
+    if manager == "apt":
+        command = apt_get_command("install", "-y", "gawk")
+    elif manager == "zypper":
+        command = ["zypper", "--non-interactive", "install", "-y", "gawk"]
+    elif manager == "dnf":
+        command = ["dnf", "install", "-y", "gawk"]
+    elif manager == "rpm-ostree":
+        # A staged dependency would not be available to package scripts yet.
+        command = ["rpm-ostree", "install", "-y", "--apply-live", "gawk"]
+    else:
+        raise WorkerError("Unable to install awk with this package manager.")
+    run(command, event_log)
+
+
 def install_packages(channel, target, event_log, packages, best_effort_packages, manager=None):
     manager = manager or package_manager(target)
     if packages:
+        ensure_package_prerequisites(manager, event_log)
         run(package_install_command(manager, channel, target, packages), event_log)
     for package in best_effort_packages:
         proc = run(package_install_command(manager, channel, target, [package]), event_log, check=False)
@@ -2411,6 +2449,7 @@ def execute_step(step, event_log, plan=None):
         source_dir = plan["source_dir"]
         if not os.path.isfile(os.path.join(source_dir, "Makefile")):
             raise WorkerError("Self-built source checkout is missing its Makefile.")
+        ensure_package_prerequisites(plan["manager"], event_log)
         run(["make", "-C", source_dir, "install"], event_log)
     elif kind == "vendor_repo":
         setup_vendor_repositories(step["target"], plan["manager"])
@@ -4105,6 +4144,25 @@ class WizardCursesUi:
             self._disable_mouse()
 
 
+def configure_curses_terminal(curses_mod):
+    requested = os.environ.get("TERM", "")
+    candidates = [requested] if requested and requested != "dumb" else []
+    for fallback in ("xterm-256color", "xterm", "vt100"):
+        if fallback not in candidates:
+            candidates.append(fallback)
+    for term in candidates:
+        try:
+            curses_mod.setupterm(term=term, fd=1)
+        except curses_mod.error as err:
+            log("Terminal definition %s unavailable: %s" % (term, err))
+            continue
+        os.environ["TERM"] = term
+        if term != requested:
+            log("Using TERM=%s because TERM=%s is unavailable." % (term, requested or "<unset>"))
+        return
+    raise curses_mod.error("No usable terminal definition found. Install your distribution's terminfo package or set TERM to an installed terminal type.")
+
+
 def run_curses():
     try:
         import curses
@@ -4113,6 +4171,7 @@ def run_curses():
         return CURSES_STARTUP_EXIT
 
     try:
+        configure_curses_terminal(curses)
         return curses.wrapper(lambda stdscr: WizardCursesUi(stdscr, curses).run())
     except curses.error as err:
         log("curses startup failed: " + str(err))
@@ -4165,7 +4224,7 @@ def main(argv=None):
         return
     exit_code = run_curses_terminal_child()
     if exit_code == CURSES_STARTUP_EXIT:
-        raise InstallError("Unable to start the interactive curses installer. Run this command from a terminal.")
+        raise InstallError("Unable to start the interactive curses installer. Check terminal access, Python curses support, and installed terminfo definitions. Details: " + LOG_PATH)
     if exit_code:
         sys.exit(exit_code)
 

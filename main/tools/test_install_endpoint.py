@@ -2039,6 +2039,14 @@ class SelfBuildTests(unittest.TestCase):
         with mock.patch.object(installer.os, "uname", return_value=types.SimpleNamespace(machine="aarch64")):
             self.assertFalse(installer.self_build_supported({"ID": "ubuntu", "VERSION_ID": "24.04"}, "ubuntu24.04"))
 
+    def test_fedora45_self_build_requires_mutable_x86_64_host(self):
+        info = {"ID": "fedora", "VERSION_ID": "45", "VARIANT_ID": "workstation"}
+        with mock.patch.object(installer.os, "uname", return_value=types.SimpleNamespace(machine="x86_64")):
+            self.assertTrue(installer.self_build_supported(info, "fedora45"))
+            self.assertFalse(installer.self_build_supported(dict(info, VARIANT_ID="silverblue"), "fedora45"))
+        with mock.patch.object(installer.os, "uname", return_value=types.SimpleNamespace(machine="aarch64")):
+            self.assertFalse(installer.self_build_supported(info, "fedora45"))
+
     def test_self_build_plan_uses_local_install_without_token_or_repository(self):
         with mock.patch.object(installer, "detected_package_selection", return_value=(["himmelblau"], [])):
             plan = installer.build_package_only_plan("stable", "ubuntu24.04", stable_source="self-built", source_dir="/home/user/.local/share/himmelblau/stable-4.x")

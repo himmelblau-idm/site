@@ -682,7 +682,7 @@ def self_build_supported(info, target):
         return distro_id == "debian"
     if target.startswith("rocky"):
         return distro_id in {"rocky", "almalinux", "rhel", "ol", "oraclelinux", "centos", "centos_stream", "centos-stream"}
-    if target in ("fedora43", "fedora44", "rawhide"):
+    if target in ("fedora43", "fedora44", "fedora45", "rawhide"):
         return distro_id == "fedora"
     if target == "amzn2023":
         return distro_id == "amzn"

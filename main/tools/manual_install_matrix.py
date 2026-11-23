@@ -40,6 +40,7 @@ TARGETS: tuple[Target, ...] = (
     Target("fedora42", "Fedora 42", "fedora:42", "dnf"),
     Target("fedora43", "Fedora 43", "fedora:43", "dnf"),
     Target("fedora44", "Fedora 44", "fedora:44", "dnf"),
+    Target("fedora45", "Fedora 45", "fedora:45", "dnf"),
     Target("rawhide", "Fedora Rawhide", "fedora:rawhide", "dnf"),
     Target("amzn2023", "Amazon Linux 2023", "amazonlinux:2023", "dnf"),
     Target("debian12", "Debian 12", "debian:12", "apt"),

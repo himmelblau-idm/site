@@ -1511,7 +1511,7 @@
 <li>Permission to manage applications and authorization server policies. Enabling Interaction Code for the organization requires <strong>Super Admin</strong> permission.</li>
 <li>Access to the <strong>default custom authorization server</strong>. Okta includes this in Integrator Free Plan organizations; custom authorization servers require <strong>API Access Management</strong> in production. See <a href="https://developer.okta.com/docs/concepts/auth-servers/">Okta's authorization server guidance</a>.</li>
 <li>A test user with existing MFA enrollment and an authentication policy that permits a supported native method, such as an Okta Verify push or verification code.</li>
-<li>A Linux host with Himmelblau installed, PAM and NSS configured, and HTTPS connectivity to Okta. See <a href="../installation.md">Installation</a> and <a href="../configuration.md">Configuration</a>.</li>
+<li>A Linux host with Himmelblau installed, PAM and NSS configured, and HTTPS connectivity to Okta. See <a href="../installation/">Installation</a> and <a href="../configuration/">Configuration</a>.</li>
 </ul>
 <p>On the <a href="https://himmelblau-idm.org/downloads">Downloads page</a>, expand <strong>Advanced manual package repository instructions</strong>, select <strong>Community Nightly</strong>, and follow the instructions for your distribution.</p>
 <p>The examples use these values. Replace the organization domain and client ID with your own:</p>
@@ -1637,7 +1637,7 @@
 <p>See <a href="https://help.okta.com/oie/en-us/content/topics/apps/apps-assign-applications.htm">Assign app integrations</a> for details.</p>
 <p>On the <strong>Sign On</strong> tab, locate <strong>User authentication</strong> and check the assigned authentication policy. Use your existing MFA policy and confirm that the test user is enrolled in a method it permits.</p>
 <p><img alt="User authentication panel showing the Any two factors authentication policy and View policy details link" src="09_authentication_policy.png" /></p>
-<p><em>This example uses the Any two factors policy. Follow </em><em>View policy details</em><em> to check your application's existing policy.</em></p>
+<p><em>This example uses the Any two factors policy. Follow <strong>View policy details</strong> to check your application's existing policy.</em></p>
 <p>Native login can present supported prompts such as verification-code entry or approval of an Okta Verify push. A policy requiring an external browser redirect or an unsupported step must offer a supported native alternative. Configuring new authenticators is outside this guide.</p>
 <h2 id="configure-himmelblau">Configure Himmelblau</h2>
 <p>Edit <code>/etc/himmelblau/himmelblau.conf</code>. Add or update these settings in the existing <code>[global]</code> section, preserving any other host-specific settings:</p>

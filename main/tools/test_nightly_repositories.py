@@ -52,7 +52,7 @@ class NightlyRepositoryTests(unittest.TestCase):
 
     def test_nightly_rpm_uses_architecture_noarch_and_local_key(self):
         for module in (installer, load_worker_module()):
-            for target, manager, destination in (("rocky9", "dnf", "el/9"), ("sle16", "zypper", "sles/16"), ("fedora44", "rpm-ostree", "fedora/44")):
+            for target, manager, destination in (("rocky9", "dnf", "el/9"), ("sle16", "zypper", "sles/16"), ("fedora44", "rpm-ostree", "fedora/44"), ("fedora45", "dnf", "fedora/45"), ("fedora45", "rpm-ostree", "fedora/45")):
                 for architecture in ("x86_64", "aarch64"):
                     with self.subTest(module=module.__name__, target=target, architecture=architecture):
                         config, metadata = module.native_nightly_config(target, architecture, manager)

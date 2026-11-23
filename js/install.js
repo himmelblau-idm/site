@@ -36,8 +36,10 @@ const STABLE_DESTINATIONS = {
 	fedora42: ['fedora', '42'],
 	fedora43: ['fedora', '43'],
 	fedora44: ['fedora', '44'],
+	fedora45: ['fedora', '45'],
 	silverblue43: ['fedora', '43'],
 	silverblue44: ['fedora', '44'],
+	silverblue45: ['fedora', '45'],
 	rawhide: ['fedora', '46'],
 	amzn2023: ['amzn', '2023'],
 	tumbleweed: ['opensuse', 'tumbleweed'],
@@ -82,10 +84,10 @@ function isNix(d) {
 	return d === 'nixos';
 }
 function isFedora(d) {
-  return d === 'fedora42' || d === 'fedora43' || d === 'fedora44' || d === 'rawhide';
+  return d === 'fedora42' || d === 'fedora43' || d === 'fedora44' || d === 'fedora45' || d === 'rawhide';
 }
 function isSilverblue(d) {
-  return d === 'silverblue43' || d === 'silverblue44';
+  return d === 'silverblue43' || d === 'silverblue44' || d === 'silverblue45';
 }
 function packageTarget(d) {
   return isSilverblue(d) ? `fedora${d.slice('silverblue'.length)}` : d;

@@ -1593,6 +1593,8 @@
     <tr><td>Fedora</td><td>41</td></tr>
     <tr><td>Fedora</td><td>42</td></tr>
     <tr><td>Fedora</td><td>43</td></tr>
+    <tr><td>Fedora</td><td>44</td></tr>
+    <tr><td>Fedora</td><td>45</td></tr>
     <tr><td>Fedora</td><td>Rawhide</td></tr>
     <tr><td>Rocky Linux</td><td>8</td></tr>
     <tr><td>Rocky Linux</td><td>9</td></tr>
@@ -1631,6 +1633,7 @@
 <p>After package installation and configuration, the bootstrapper enables and starts both <code>himmelblaud</code> and <code>himmelblaud-tasks</code>.</p>
 <p>The bootstrapper does <strong>not</strong> download or install Himmelblau binaries directly. It delegates installation to <code>apt</code>, <code>dnf</code>, or <code>zypper</code>, and relies on package repositories and package signatures.</p>
 <p>Choose <strong>Stable Repositories</strong> for maintained, versioned release packages, <strong>Community Nightly</strong> for free development packages, or <strong>Vendor Packages</strong> where available. Stable access does not include technical support.</p>
+<p>Fedora 45 and Fedora Silverblue 45 can use either Stable Repositories or Community Nightly. Fedora 45 uses DNF; Silverblue 45 uses <code>rpm-ostree</code> on the booted host, outside a toolbox or container. After layering packages on Silverblue, reboot into the new deployment; the installer stages a service that completes configuration and starts Himmelblau after reboot. Stable package availability depends on the selected stream and architecture and is checked before repository setup.</p>
 <h3 id="stable-repositories">Stable Repositories</h3>
 <p><a href="https://himmelblau-idm.org/stable-repositories/">Subscribe through Open Collective</a> using Personal or Organization contributions, monthly or yearly. All four choices provide identical access to both 3.x and 4.x, with no per-host limits or feature restrictions. Amounts are shown at checkout and contributions use the honor system.</p>
 <p>You should receive separate entitlement tokens for both streams automatically by email. In the installer, choose Stable Repositories and paste the token for the stream you want. The installer identifies the authorized repository automatically; use the 4.x token for new deployments unless you specifically need 3.x. The token is masked in the terminal and omitted from installer logs. Keep it private.</p>

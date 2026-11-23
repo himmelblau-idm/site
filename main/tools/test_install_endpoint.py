@@ -247,6 +247,36 @@ class InstallEndpointTests(unittest.TestCase):
         self.assertEqual([c["value"] for c in installer.channel_choices(matrix, "rawhide")], ["stable", "nightly"])
         self.assertEqual([c["value"] for c in installer.channel_choices(matrix, "nixos")], ["nightly"])
 
+    def test_fedora45_repository_plans_are_accepted_by_both_validators(self):
+        matrix = installer.extract_repo_support(INSTALL_JS_PATH.read_text(encoding="utf-8"))
+        self.assertEqual([c["value"] for c in installer.channel_choices(matrix, "fedora45")],
+                         ["stable", "nightly"])
+        worker = load_worker_module()
+        for variant, manager in (("workstation", "dnf"), ("silverblue", "rpm-ostree")):
+            info = {"ID": "fedora", "VERSION_ID": "45", "VARIANT_ID": variant,
+                    "PRETTY_NAME": "Fedora Linux 45"}
+            target = installer.distro_target(info)
+            self.assertEqual(target, "fedora45")
+            with mock.patch.object(installer.os.path, "exists", return_value=True):
+                self.assertEqual(installer.host_package_manager(info, target), manager)
+            for channel in ("stable", "nightly"):
+                with self.subTest(variant=variant, channel=channel), mock.patch.object(
+                    installer, "detected_package_selection", return_value=(installer.COMMUNITY_PACKAGES, [])
+                ):
+                    plan = installer.build_install_plan(
+                        channel, target, {"mode": "entra", "domain": "example.com"}, True,
+                        entitlement_token="synthetic-subscriber-credential" if channel == "stable" else None,
+                        manager=manager,
+                    )
+                    self.assertTrue(installer.validate_install_plan(plan))
+                    worker.validate_plan(plan)
+                    self.assertEqual(plan["target"], target)
+                    self.assertEqual(plan["manager"], manager)
+                    repo_kind = "stable_repo" if channel == "stable" else "dnf_repo"
+                    self.assertEqual(plan["steps"][0]["kind"], repo_kind)
+                    if manager == "rpm-ostree":
+                        self.assertEqual(plan["steps"][-1]["kind"], "stage_postboot")
+
     def test_distro_mapping(self):
         cases = [
             ({"ID": "ubuntu", "VERSION_ID": "24.04"}, "ubuntu24.04"),

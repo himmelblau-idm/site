@@ -11,7 +11,7 @@ This guide walks IT administrators through configuring an Okta application and a
 - Permission to manage applications and authorization server policies. Enabling Interaction Code for the organization requires **Super Admin** permission.
 - Access to the **default custom authorization server**. Okta includes this in Integrator Free Plan organizations; custom authorization servers require **API Access Management** in production. See [Okta's authorization server guidance](https://developer.okta.com/docs/concepts/auth-servers/).
 - A test user with existing MFA enrollment and an authentication policy that permits a supported native method, such as an Okta Verify push or verification code.
-- A Linux host with Himmelblau installed, PAM and NSS configured, and HTTPS connectivity to Okta. See [Installation](../installation.md) and [Configuration](../configuration.md).
+- A Linux host with Himmelblau installed, PAM and NSS configured, and HTTPS connectivity to Okta. See [Installation](installation.md) and [Configuration](configuration.md).
 
 On the [Downloads page](https://himmelblau-idm.org/downloads), expand **Advanced manual package repository instructions**, select **Community Nightly**, and follow the instructions for your distribution.
 

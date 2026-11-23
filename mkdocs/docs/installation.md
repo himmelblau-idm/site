@@ -20,6 +20,8 @@ This page covers how to install Himmelblau on Ubuntu, Debian, RHEL, Rocky, SUSE,
     <tr><td>Fedora</td><td>41</td></tr>
     <tr><td>Fedora</td><td>42</td></tr>
     <tr><td>Fedora</td><td>43</td></tr>
+    <tr><td>Fedora</td><td>44</td></tr>
+    <tr><td>Fedora</td><td>45</td></tr>
     <tr><td>Fedora</td><td>Rawhide</td></tr>
     <tr><td>Rocky Linux</td><td>8</td></tr>
     <tr><td>Rocky Linux</td><td>9</td></tr>
@@ -68,6 +70,8 @@ After package installation and configuration, the bootstrapper enables and start
 The bootstrapper does **not** download or install Himmelblau binaries directly. It delegates installation to `apt`, `dnf`, or `zypper`, and relies on package repositories and package signatures.
 
 Choose **Stable Repositories** for maintained, versioned release packages, **Community Nightly** for free development packages, or **Vendor Packages** where available. Stable access does not include technical support.
+
+Fedora 45 and Fedora Silverblue 45 can use either Stable Repositories or Community Nightly. Fedora 45 uses DNF; Silverblue 45 uses `rpm-ostree` on the booted host, outside a toolbox or container. After layering packages on Silverblue, reboot into the new deployment; the installer stages a service that completes configuration and starts Himmelblau after reboot. Stable package availability depends on the selected stream and architecture and is checked before repository setup.
 
 ### Stable Repositories
 

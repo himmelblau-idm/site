@@ -74,6 +74,20 @@ class StableRepositoryTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 module.stable_destination("nixos")
 
+    def test_fedora45_signed_repositories_use_release_architecture_and_noarch(self):
+        for module in (installer, self.worker):
+            for manager in ("dnf", "rpm-ostree"):
+                for architecture in ("x86_64", "aarch64"):
+                    with self.subTest(module=module.__name__, manager=manager, architecture=architecture):
+                        distro, version = module.stable_destination("fedora45")
+                        config, metadata = module.native_stable_config(ROOT, distro, version, architecture, manager)
+                        base = ROOT + "/rpm/fedora/45/"
+                        self.assertIn("baseurl=" + base + architecture + "\n", config)
+                        self.assertIn("baseurl=" + base + "noarch\n", config)
+                        self.assertEqual(config.count("gpgcheck=1"), 2)
+                        self.assertEqual(config.count("gpgkey=file://" + module.STABLE_RPM_KEYS[manager]), 2)
+                        self.assertEqual(metadata, base + architecture + "/repodata/repomd.xml")
+
     def test_documented_targets_use_native_stable_destinations(self):
         expected = {
             "ubuntu22.04": ("ubuntu", "jammy"),
@@ -87,6 +101,7 @@ class StableRepositoryTests(unittest.TestCase):
             "rocky10": ("el", "10"),
             "fedora43": ("fedora", "43"),
             "fedora44": ("fedora", "44"),
+            "fedora45": ("fedora", "45"),
             "rawhide": ("fedora", "46"),
             "amzn2023": ("amzn", "2023"),
             "tumbleweed": ("opensuse", "tumbleweed"),

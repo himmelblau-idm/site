@@ -53,11 +53,11 @@ async function render(channel, distro) {
     ['debian12', 'deb/debian bookworm main'],
     ['debian13', 'deb/debian trixie main'],
     ['rocky8', 'rpm/el/8'], ['rocky9', 'rpm/el/9'], ['rocky10', 'rpm/el/10'],
-    ['fedora42', 'rpm/fedora/42'], ['fedora43', 'rpm/fedora/43'], ['fedora44', 'rpm/fedora/44'],
+    ['fedora42', 'rpm/fedora/42'], ['fedora43', 'rpm/fedora/43'], ['fedora44', 'rpm/fedora/44'], ['fedora45', 'rpm/fedora/45'],
     ['rawhide', 'rpm/fedora/46'], ['amzn2023', 'rpm/amzn/2023'],
     ['sle15sp6', 'rpm/opensuse/15.6'], ['sle15sp7', 'rpm/sles/15'],
     ['sle16', 'rpm/sles/16'], ['tumbleweed', 'rpm/opensuse/tumbleweed'],
-    ['silverblue43', 'rpm/fedora/43'], ['silverblue44', 'rpm/fedora/44'],
+    ['silverblue43', 'rpm/fedora/43'], ['silverblue44', 'rpm/fedora/44'], ['silverblue45', 'rpm/fedora/45'],
   ];
   for (const channel of ['nightly', 'stable']) {
     const root = channel === 'nightly' ? nightly : stable;
@@ -92,5 +92,5 @@ async function render(channel, distro) {
   }
   const output = await render('nightly', 'silverblue44');
   assert.ok(output.includes('baseurl=' + nightly + '/rpm/fedora/44/$basearch'));
-  console.log('Manual repository instructions passed for 40 channel/distribution combinations.');
+  console.log(`Manual repository instructions passed for ${targets.length * 2} channel/distribution combinations.`);
 })().catch(error => { console.error(error); process.exitCode = 1; });

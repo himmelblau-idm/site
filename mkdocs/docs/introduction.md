@@ -58,7 +58,7 @@ Himmelblau is available for almost all major distributions. The current version 
 | **Distribution**      | **Version**   |
 | --------------------- | ------------- |
 | Debian                | 12 + 13       |
-| Fedora                | 42 + 43       |
+| Fedora                | 42 + 43 + 44 + 45 |
 | Fedora                | Rawhide       |
 | Linux Mint            | 21.3 + 22     |
 | openSUSE              | 15.6          |
